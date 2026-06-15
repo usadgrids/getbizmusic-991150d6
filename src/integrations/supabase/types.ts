@@ -14,16 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ad_submissions: {
+        Row: {
+          ad_type: string
+          business_name: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          image_path: string
+          industry: string
+          phone: string
+          reject_reason: string | null
+          status: string
+          tagline: string | null
+          website_url: string | null
+        }
+        Insert: {
+          ad_type: string
+          business_name: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          image_path: string
+          industry: string
+          phone: string
+          reject_reason?: string | null
+          status?: string
+          tagline?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          ad_type?: string
+          business_name?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          image_path?: string
+          industry?: string
+          phone?: string
+          reject_reason?: string | null
+          status?: string
+          tagline?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      ads: {
+        Row: {
+          ad_type: string
+          business_name: string
+          created_at: string
+          duration_seconds: number
+          expires_at: string
+          id: string
+          image_url: string
+          industry: string
+          starts_at: string
+          status: string
+          submission_id: string | null
+          tagline: string | null
+          website_url: string | null
+        }
+        Insert: {
+          ad_type: string
+          business_name: string
+          created_at?: string
+          duration_seconds: number
+          expires_at: string
+          id?: string
+          image_url: string
+          industry: string
+          starts_at?: string
+          status?: string
+          submission_id?: string | null
+          tagline?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          ad_type?: string
+          business_name?: string
+          created_at?: string
+          duration_seconds?: number
+          expires_at?: string
+          id?: string
+          image_url?: string
+          industry?: string
+          starts_at?: string
+          status?: string
+          submission_id?: string | null
+          tagline?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "ad_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +280,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
