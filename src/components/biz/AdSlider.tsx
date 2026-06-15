@@ -11,6 +11,7 @@ import {
   SkipForward,
 } from "lucide-react";
 import type { PublicAd } from "@/lib/ads.functions";
+import { PlaylistMarquee } from "./PlaylistMarquee";
 import {
   MINIPLAYER_PAUSE_EVENT,
   MINIPLAYER_PLAY_EVENT,
