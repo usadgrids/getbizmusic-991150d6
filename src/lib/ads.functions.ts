@@ -19,8 +19,9 @@ async function attachUrls<T extends { image_url: string }>(items: T[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return Promise.all(
     items.map(async (item) => {
-      // image_url can be an absolute http(s) URL (seed data) or a storage path
-      if (/^https?:\/\//i.test(item.image_url)) return item;
+      // image_url is already a URL when it starts with http(s) or "/" (CDN asset).
+      // Otherwise treat it as a storage path inside the ad-uploads bucket.
+      if (/^(https?:)?\//i.test(item.image_url)) return item;
       const { data } = await supabaseAdmin.storage
         .from("ad-uploads")
         .createSignedUrl(item.image_url, SIGNED_URL_TTL);
