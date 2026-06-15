@@ -1,0 +1,63 @@
+import { useEffect, useState } from "react";
+import { Play } from "lucide-react";
+import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
+import {
+  MINIPLAYER_PLAY_INDEX_EVENT,
+  MINIPLAYER_TRACK_EVENT,
+  type MiniPlayerTrack,
+} from "./MiniPlayer";
+
+export function PlaylistMarquee() {
+  const { tracks, isLoading } = usePlaylistTracks();
+  const [currentTitle, setCurrentTitle] = useState<string>("");
+
+  useEffect(() => {
+    const onTrack = (e: Event) => {
+      const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
+      setCurrentTitle(detail?.title ?? "");
+    };
+    window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
+    return () => window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
+  }, []);
+
+  if (isLoading || tracks.length === 0) {
+    return <div className="mt-1 h-7 w-full rounded-full bg-white/40 animate-pulse" />;
+  }
+
+  const handleClick = (index: number) => {
+    window.dispatchEvent(
+      new CustomEvent(MINIPLAYER_PLAY_INDEX_EVENT, { detail: { index } }),
+    );
+  };
+
+  const renderRow = (keyPrefix: string) =>
+    tracks.map((t, i) => {
+      const isCurrent =
+        currentTitle && t.title.trim().toLowerCase() === currentTitle.trim().toLowerCase();
+      return (
+        <button
+          key={`${keyPrefix}-${t.videoId}-${i}`}
+          type="button"
+          onClick={() => handleClick(i)}
+          className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+            isCurrent
+              ? "bg-[#0F2A4A] text-[#D4A24C]"
+              : "bg-white/90 text-[#0F2A4A] hover:bg-white"
+          }`}
+          title={t.title}
+        >
+          <Play size={10} className="shrink-0" fill="currentColor" />
+          <span className="max-w-[200px] truncate">{t.title}</span>
+        </button>
+      );
+    });
+
+  return (
+    <div className="marquee-container mt-1 w-full max-w-full overflow-hidden rounded-full bg-[#0F2A4A]/10 py-1 border border-[#0F2A4A]/15">
+      <div className="marquee-track flex w-max gap-2 px-2">
+        {renderRow("a")}
+        {renderRow("b")}
+      </div>
+    </div>
+  );
+}
