@@ -218,6 +218,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               </button>
             </div>
           </div>
+          {featured && <PlaylistMarquee />}
         </>
       )}
     </section>
