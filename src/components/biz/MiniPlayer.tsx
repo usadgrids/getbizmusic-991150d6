@@ -124,7 +124,7 @@ export function MiniPlayer() {
 
     if (!(iframe instanceof HTMLIFrameElement)) return;
 
-    iframe.className = "h-full w-full opacity-25";
+    iframe.className = "h-full w-full opacity-100";
     iframe.allow = "autoplay; encrypted-media; picture-in-picture";
     iframe.style.border = "0";
   }, []);
