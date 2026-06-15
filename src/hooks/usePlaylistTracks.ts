@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MINIPLAYER_PLAYLIST_EVENT } from "@/components/family/MiniPlayer";
+import { MINIPLAYER_PLAYLIST_EVENT } from "@/components/biz/MiniPlayer";
 
 export type PlaylistTrack = { videoId: string; title: string };
 
