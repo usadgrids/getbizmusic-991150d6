@@ -124,7 +124,7 @@ export function MiniPlayer() {
 
     if (!(iframe instanceof HTMLIFrameElement)) return;
 
-    iframe.className = "h-full w-full opacity-25";
+    iframe.className = "h-full w-full opacity-100";
     iframe.allow = "autoplay; encrypted-media; picture-in-picture";
     iframe.style.border = "0";
   }, []);
@@ -604,7 +604,7 @@ export function MiniPlayer() {
   }, []);
 
   return (
-    <div className="fixed z-40 bottom-3 right-3" style={{ width: size.width }}>
+    <div className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300" style={{ width: size.width }}>
       <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
         <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
           <span>🎵 Now Playing</span>
