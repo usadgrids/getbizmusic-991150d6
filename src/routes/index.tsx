@@ -56,9 +56,6 @@ function Index() {
         <AdSlider ads={imageAds.length ? imageAds : ads} title="Local Business Spotlight" />
         <FeaturedBusinesses ads={ads} />
       </main>
-      <div className="sticky bottom-0 z-30 bg-gradient-to-t from-[#0F2A4A] to-[#0F2A4A]/90 px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
-        <PlaylistMarquee />
-      </div>
       <BizFooter />
       <MiniPlayer />
     </div>
