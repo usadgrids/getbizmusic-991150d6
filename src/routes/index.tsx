@@ -9,7 +9,6 @@ import { AdSlider } from "@/components/biz/AdSlider";
 import { PricingBanner } from "@/components/biz/PricingBanner";
 import { FeaturedBusinesses } from "@/components/biz/FeaturedBusinesses";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
-import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 
 export const Route = createFileRoute("/")({
   head: () => ({
