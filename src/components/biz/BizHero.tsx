@@ -14,7 +14,7 @@ export function BizHero() {
           <Sparkles size={14} /> LOCAL BUSINESS ADVERTISING
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
-          Get Your Business <span className="text-[#D4A24C]">Seen</span>.
+          Novelty Ads Get Your Business <span className="text-[#D4A24C]">Seen</span>.
           <br className="hidden sm:block" /> Every Day. All Year Long.
         </h1>
         <p className="mt-4 text-base sm:text-lg text-white/80 max-w-2xl mx-auto">

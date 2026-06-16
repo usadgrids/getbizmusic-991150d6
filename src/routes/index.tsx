@@ -53,7 +53,6 @@ function Index() {
           featured
         />
         <PricingBanner />
-        <AdSlider ads={imageAds.length ? imageAds : ads} title="Local Business Spotlight" />
         <FeaturedBusinesses ads={ads} />
       </main>
       <BizFooter />
