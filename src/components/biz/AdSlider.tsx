@@ -110,7 +110,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               rel="noopener noreferrer nofollow"
               className="block group"
             >
-              <div className="relative aspect-[1200/628] bg-gray-100">
+              <div className="relative aspect-[345/315] mx-auto w-full max-w-[345px] bg-gray-100">
                 <img
                   src={current.image_url}
                   alt={current.business_name}
