@@ -7,7 +7,7 @@ export function FeaturedBusinesses({ ads }: { ads: PublicAd[] }) {
     <section id="featured" className="my-10">
       <div className="text-center mb-6">
         <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F2A4A]">
-          Featured Local Businesses
+          Featured Businesses
         </h2>
         <p className="text-sm text-gray-600 mt-1">
           Trusted by your neighbors. Tap any business to visit them.
