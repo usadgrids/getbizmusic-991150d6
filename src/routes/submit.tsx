@@ -20,7 +20,7 @@ export const Route = createFileRoute("/submit")({
       { title: "Submit Your Ad — BizSpot Directory" },
       { name: "description", content: "Upload your business ad image. $5 or $10 — one year of exposure. Reviewed within 24 hours." },
       { property: "og:title", content: "Submit Your Ad — BizSpot Directory" },
-      { property: "og:description", content: "Get your business in front of local customers, all year long." },
+      { property: "og:description", content: "Get your business in front of customers nationwide, all year long." },
     ],
   }),
   validateSearch: (search) => searchSchema.parse(search),
@@ -140,7 +140,7 @@ function SubmitPage() {
         </Link>
         <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submit Your Business Ad</h1>
         <p className="text-gray-600 mt-1 text-sm">
-          One year of local exposure, reviewed within 24 hours.
+          One year of nationwide exposure, reviewed within 24 hours.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">

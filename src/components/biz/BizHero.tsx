@@ -18,7 +18,7 @@ export function BizHero() {
           <br className="hidden sm:block" /> Every Day. All Year Long For $ 5 Dollars
         </h1>
         <p className="mt-4 text-base sm:text-lg text-white/80 max-w-2xl mx-auto">
-          Reach local customers with rotating image ads on our high-traffic directory.
+          Reach customers nationwide with rotating image ads on our high-traffic directory.
           From restaurants to lawyers — a full year of exposure for as little as $5.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
