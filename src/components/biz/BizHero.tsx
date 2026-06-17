@@ -11,7 +11,7 @@ export function BizHero() {
       }} />
       <div className="relative max-w-6xl mx-auto px-4 py-14 sm:py-20 text-center">
         <div className="inline-flex items-center gap-2 bg-[#D4A24C]/15 border border-[#D4A24C]/40 text-[#D4A24C] px-3 py-1 rounded-full text-xs font-semibold mb-5">
-          <Sparkles size={14} /> NATIONWIDE BUSINESS ADVERTISING
+          <Sparkles size={14} /> NATIONWIDE USA BUSINESS ADVERTISING
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
           Novelty Ads With Music Streaming Gets Your Business <span className="text-[#D4A24C]">Seen</span>.
