@@ -140,7 +140,7 @@ function SubmitPage() {
         </Link>
         <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submit Your Business Ad</h1>
         <p className="text-gray-600 mt-1 text-sm">
-          One year of local exposure, reviewed within 24 hours.
+          One year of nationwide exposure, reviewed within 24 hours.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
