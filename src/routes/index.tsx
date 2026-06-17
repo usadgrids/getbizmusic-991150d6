@@ -6,8 +6,6 @@ import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
-import { PricingBanner } from "@/components/biz/PricingBanner";
-import { FeaturedBusinesses } from "@/components/biz/FeaturedBusinesses";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
 
 export const Route = createFileRoute("/")({
@@ -40,7 +38,6 @@ function Index() {
   });
 
   const sliderAds = ads.filter((a) => a.ad_type === "slider_10");
-  const imageAds = ads.filter((a) => a.ad_type === "image_5");
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -52,8 +49,6 @@ function Index() {
           title="Featured Business of the Moment"
           featured
         />
-        <PricingBanner />
-        <FeaturedBusinesses ads={ads} />
       </main>
       <BizFooter />
       <MiniPlayer />
