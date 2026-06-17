@@ -1,137 +1,34 @@
-# Business Advertising Site (adapted from Posadas Family Memories)
+## Recommended ad dimensions
 
-A professional business-advertising website that reuses the structure of [Posadas Family Memories](/projects/faa0796e-dbd0-4baa-b320-78d0bfa3337d) but swaps the personal/family theme for a corporate business directory. Local businesses (restaurants, lawyers, etc.) submit image or video ads through a self-serve form; admin approves them; approved ads rotate in the sliders for 1 year.
+For a single hero/slider ad slot that has to work on phone, tablet and desktop, the industry sweet spot is **one master image at 1456 × 816 (16:9)** displayed responsively. This is what YouTube, Vimeo, Stripe, Linear and most modern SaaS landing pages use for hero banners — it reads as a "premium billboard" on desktop and still looks generous (not letterboxed) on mobile.
 
-## Pages
+### Why 16:9 over the other contenders
+- **1200 × 628 (1.91:1, Facebook/OG)** — fine, but a touch too short; loses vertical impact on desktop hero.
+- **970 × 250 (IAB Billboard)** — too thin on mobile, becomes a sliver.
+- **1:1 square** — wastes desktop width, eats too much fold on mobile.
+- **16:9 (1456 × 816)** — fills width edge-to-edge on every device, keeps the headline overlay readable, and matches the OG/Twitter card image so the same asset doubles as the share image.
 
-- **/** — Home. Navbar, hero ("Advertise Your Business — $5/5s or $10/10s for a full year"), Image Ad Slider, Pricing Banner, Video Ad Slider, "Submit Your Ad" CTA, Featured Businesses banner, Footer.
-- **/submit** — Self-serve ad submission form (image upload, business details, plan selection, terms). On submit → status "pending approval" + on-screen confirmation. Static placeholder pricing (no real checkout).
-- **/admin** — Email/password auth. Approval queue: preview ad + business info, Approve / Reject buttons, list of currently-live ads with expiry dates, manual remove.
+### Responsive display rules (applied to the slider container)
 
-## Submission form fields
+| Viewport | Container width | Aspect ratio | Effective rendered size |
+|---|---|---|---|
+| Mobile < 640 px | 100% of viewport, edge-to-edge | 16 / 9 | ~360 × 203 up to ~640 × 360 |
+| Tablet 640–1023 px | 100% inside page padding | 16 / 9 | up to ~960 × 540 |
+| Desktop ≥ 1024 px | capped at 1200 px (current `max-w-6xl`) | 16 / 9 | up to 1152 × 648 |
 
-- Business name, contact name, phone, email, business website URL
-- Industry (restaurant, lawyer, salon, auto, retail, services, other)
-- Ad type: **Image $5 / 5 sec** or **Slider Image $10 / 10 sec** (static pricing — no payment processor)
-- File upload (image, recommended **1200×628 px JPG/PNG, under 2 MB**; helper text shown)
-- Optional short tagline (max 80 chars)
-- Terms checkbox (no adult, illegal, or misleading content)
-- Zod validation client + server
+One ad image, one aspect ratio, one CSS rule — no per-breakpoint crops, no second asset to manage. The text overlay (business name + tagline + Visit pill) stays anchored to the bottom gradient so it reads at every size.
 
-## Admin approval flow
+### Featured-business thumbnail grid (the smaller cards under the hero)
+Keep those at **1:1 square** thumbnails — square grids tile cleanly at 1/2/3/4 columns across breakpoints and don't fight the hero's 16:9 visual rhythm.
 
-- New submissions land in `ad_submissions` with `status = 'pending'`.
-- Admin reviews → Approve creates row in `ads` table with `starts_at = now()`, `expires_at = now() + 1 year`, `status = 'active'`. Reject sets `status = 'rejected'` with optional reason.
-- Home page sliders read only `ads` where `status='active' AND expires_at > now()`, ordered randomly per load.
-- Expired ads auto-hidden by query filter.
+## What I'll change
 
-## Visual theme
+1. **AdSlider.tsx** — switch the hero container from the current `aspect-[345/315]` + `max-w-[345px]` cap back to full-width with `aspect-[16/9]`, so the ad expands to the full content column on every device instead of being pinned to a 345 px box.
+2. **FeaturedBusinesses.tsx** — confirm/lock thumbnails to `aspect-square` with `object-cover`.
+3. **Regenerate the 8 placeholder ad images** at 16:9 (1456 × 816) so they fill the new container cleanly, with composition framed for a bottom-aligned text overlay (key subject in upper-left two-thirds, lower band kept visually quiet for the dark gradient). Replace each existing `.asset.json` pointer in place so no DB rows have to change. Businesses regenerated: Apex Auto, Bella Boutique, Greenleaf Landscaping, Hartwell Law, Roasted (coffee), Summit Fitness, Sunrise Bakery, Tony's Pizzeria.
+4. **OG image** — point `og:image` / `twitter:image` at the current featured ad so the same 16:9 asset doubles as the share card (free SEO win since the dimensions already match).
 
-Professional / corporate, not the family watercolor look:
+## Notes / open question
 
-- Background: clean light gray / white with subtle navy gradient accents (no watercolor PNG)
-- Primary: deep navy `#0F2A4A`
-- Accent: gold `#D4A24C` for pricing and CTAs
-- Typography: Inter for body, a serious serif (e.g. Fraunces) for headlines
-- Cards: white with soft shadow, rounded-2xl, subtle border
-- Pricing pills with gold border and navy text
-
-## Placeholder content
-
-Seeded on first load (or via migration): 6 image ads + 4 video ads using stock-style placeholders for:
-- Tony's Pizzeria (restaurant)
-- Hartwell & Associates Law (lawyer)
-- Bella Hair Studio (salon)
-- Apex Auto Repair (auto)
-- Sunrise Dental (healthcare)
-- GreenLeaf Landscaping (services)
-- (Plus video versions for a subset)
-
-Placeholder images generated via imagegen and uploaded as CDN assets.
-
-## What's reused vs dropped from Posadas
-
-**Reused (adapted):** Navbar, Hero, PhotoSlider→ImageAdSlider, VideoSlider→VideoAdSlider, Footer, AdminLogin, AdminPanel pattern, Supabase auth + RLS, useSiteSettings hook pattern.
-
-**Dropped:** MiniPlayer, PlaylistMarquee, AmazonSlider, BurialBanner, InsuranceBanner, AdSenseZone, Google Drive sync, YouTube import, Amazon products — these are family/personal features that don't fit a B2B ad site.
-
-**Added:** /submit page, ad submission storage bucket, approval queue UI, pricing banner, expiry filtering.
-
----
-
-## Technical details
-
-### Stack
-- TanStack Start (existing template) + Tailwind v4
-- **Lovable Cloud** (must enable) for auth, database, file storage
-
-### Database (Lovable Cloud migration)
-
-```sql
--- ad submissions (raw user input, pending review)
-create table public.ad_submissions (
-  id uuid primary key default gen_random_uuid(),
-  business_name text not null,
-  contact_name text not null,
-  email text not null,
-  phone text not null,
-  website_url text,
-  industry text not null,
-  tagline text,
-  ad_type text not null check (ad_type in ('image_5','slider_10')),
-  image_path text not null,           -- storage path in 'ad-uploads' bucket
-  status text not null default 'pending' check (status in ('pending','approved','rejected')),
-  reject_reason text,
-  created_at timestamptz default now()
-);
-
--- approved live ads
-create table public.ads (
-  id uuid primary key default gen_random_uuid(),
-  submission_id uuid references public.ad_submissions(id) on delete set null,
-  business_name text not null,
-  website_url text,
-  tagline text,
-  industry text not null,
-  ad_type text not null,
-  image_url text not null,            -- public URL
-  duration_seconds int not null,      -- 5 or 10
-  starts_at timestamptz not null default now(),
-  expires_at timestamptz not null,
-  status text not null default 'active' check (status in ('active','removed'))
-);
-
--- user roles (admin) — standard separate-table pattern
-create type public.app_role as enum ('admin');
-create table public.user_roles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  role app_role not null,
-  unique (user_id, role)
-);
-```
-
-Plus required GRANTs, `has_role()` security-definer function, RLS:
-- `ads`: public SELECT where `status='active' AND expires_at > now()`; admin full access.
-- `ad_submissions`: anyone can INSERT; only admin can SELECT/UPDATE.
-- `user_roles`: authenticated SELECT own row; admin manages.
-- Storage bucket `ad-uploads` (public read for approved file URLs).
-
-### Routes
-- `src/routes/index.tsx` — home
-- `src/routes/submit.tsx` — submission form
-- `src/routes/admin.tsx` — auth + approval panel
-
-### Components (`src/components/biz/`)
-Navbar, Hero, ImageAdSlider, VideoAdSlider, PricingBanner, FeaturedBusinesses, Footer, SubmitForm, AdminLogin, AdminPanel (approval queue + live ads list).
-
-### Assets
-- Copy `banner_*.png.asset.json` from Posadas only if relevant (likely not — generate fresh professional banner via imagegen).
-- Generate 6 placeholder business images via imagegen, upload as Lovable assets.
-
-### Out of scope
-- No real Stripe/Paddle checkout (user said static placeholder pricing).
-- No actual ad-display analytics, click tracking, or invoicing.
-- No email notifications on approve/reject (can be added later).
-
-When you approve this plan I'll enable Lovable Cloud and start building.
+- The hydration warning shown in the runtime errors is unrelated to ad sizing — I'll leave it alone in this pass unless you want it folded in.
+- If you'd rather lean even more aggressive on desktop real estate (true "billboard hero" that breaks out of the 1200 px column to span the full viewport), say the word and I'll widen the hero section to `w-screen` while keeping the rest of the page in `max-w-6xl`.
