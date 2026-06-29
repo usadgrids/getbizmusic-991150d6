@@ -32,7 +32,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
-  const [isHovering, setIsHovering] = useState(false);
   const current = ads[idx];
 
   // Auto-advance using the per-ad duration (pauses with the music)
@@ -68,7 +67,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
-  const fullAdVisible = isHovering;
+  
 
   const togglePlayPause = () => {
     if (musicPlaying) {
@@ -110,11 +109,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxWidth: "100%",
             }}
           >
-            <div
-              className="relative w-full h-full bg-gray-100 group"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-            >
+            <div className="relative w-full h-full bg-gray-100">
               {current.website_url ? (
                 <a
                   href={current.website_url}
@@ -127,11 +122,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     src={current.image_url}
                     alt={current.business_name}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-                    style={{
-                      transform: fullAdVisible ? "scale(1)" : "scale(1.52)",
-                      transformOrigin: "top center",
-                    }}
+                    className="absolute inset-0 w-full h-full object-contain"
                   />
                 </a>
               ) : (
@@ -139,11 +130,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   src={current.image_url}
                   alt={current.business_name}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-                  style={{
-                    transform: fullAdVisible ? "scale(1)" : "scale(1.52)",
-                    transformOrigin: "top center",
-                  }}
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
               )}
             </div>
