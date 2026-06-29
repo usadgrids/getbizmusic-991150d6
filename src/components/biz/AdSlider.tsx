@@ -133,6 +133,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setSearchOpen(false);
     setHovered(false);
     clearPeekTimer();
+    clearSearchIdleTimer();
   };
 
   useEffect(() => {
@@ -328,6 +329,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                           onClick={() => {
                             setSearchQuery("");
                             setSearchOpen(false);
+                            clearSearchIdleTimer();
                           }}
                           aria-label="Close search"
                           className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
