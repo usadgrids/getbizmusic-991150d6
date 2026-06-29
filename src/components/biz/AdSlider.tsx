@@ -133,49 +133,30 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white"
             style={{ border: `3px solid ${accent}` }}
           >
-            <div
-              className="relative aspect-[16/9] w-full bg-gray-100 group cursor-pointer"
-              onClick={toggleOverlay}
-            >
-              <img
-                src={current.image_url}
-                alt={current.business_name}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-              />
-              <div
-                className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 text-white transition-opacity duration-300 ${
-                  showOverlay
-                    ? "opacity-100 pointer-events-auto"
-                    : "opacity-0 pointer-events-none"
-                }`}
-              >
-                <div className="flex items-end justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-wider text-white/70">
-                      {current.industry}
-                    </div>
-                    <div className="font-serif text-lg sm:text-xl font-bold truncate">
-                      {current.business_name}
-                    </div>
-                    {current.tagline && (
-                      <div className="text-xs sm:text-sm text-white/85 truncate">
-                        {current.tagline}
-                      </div>
-                    )}
-                  </div>
-                  {current.website_url && (
-                    <a
-                      href={current.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="flex items-center gap-1 text-xs bg-[#D4A24C] text-[#0F2A4A] font-semibold px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-[#e0b266] transition-colors"
-                    >
-                      Visit <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
-              </div>
+            <div className="relative aspect-[16/9] w-full bg-gray-100 group">
+              {current.website_url ? (
+                <a
+                  href={current.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  aria-label={`Visit ${current.business_name}`}
+                  className="absolute inset-0"
+                >
+                  <img
+                    src={current.image_url}
+                    alt={current.business_name}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  />
+                </a>
+              ) : (
+                <img
+                  src={current.image_url}
+                  alt={current.business_name}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                />
+              )}
             </div>
             {ads.length > 1 && (
               <>
