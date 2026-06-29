@@ -67,7 +67,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [timeLeft, setTimeLeft] = useState(0);
   const current = ads[idx];
+  const duration = current?.duration_seconds || 7;
+
+  // Reset the countdown whenever the slide (or its duration) changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration, idx]);
+
+  // Tick the countdown down (pauses with the music)
+  useEffect(() => {
+    if (paused || ads.length <= 1 || !current) return;
+    const id = window.setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - 0.1));
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [paused, ads.length, current, duration]);
 
   // Auto-advance using the per-ad duration (pauses with the music)
   useEffect(() => {
@@ -102,8 +118,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
-  
-
   const togglePlayPause = () => {
     if (musicPlaying) {
       dispatchMusic(MINIPLAYER_PAUSE_EVENT);
@@ -113,6 +127,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       setPaused(false);
     }
   };
+
 
   return (
     <section id="ad-slideshow" className="my-8">
