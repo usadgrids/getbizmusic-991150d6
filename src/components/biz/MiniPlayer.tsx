@@ -644,41 +644,48 @@ export function MiniPlayer() {
   }, []);
 
   return (
-    <div className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300" style={{ width: size.width }}>
-      <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
-        <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
-          <span>🎵 Now Playing</span>
-          <button
-            type="button"
-            onClick={() => setCollapsed((current) => !current)}
-            className="rounded p-1 text-white/70 hover:bg-white/20"
-            aria-label={collapsed ? "Expand player" : "Minimize player"}
-          >
-            {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-        </div>
-
-        <div
-          className="relative bg-transparent"
-          style={{
-            height: collapsed ? 0 : size.height,
-            transition: "height 200ms ease",
-            overflow: "hidden",
-          }}
-        >
-          <div id={PLAYER_ELEMENT_ID} ref={playerHostRef} className="h-full w-full" />
-
-          {showPlayFallback && !collapsed ? (
+    <>
+      <TapToPlayOverlay visible={showPlayFallback} onTap={handleManualPlay} />
+      <div
+        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300"
+        style={{ width: size.width }}
+      >
+        <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
+          <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
+            <span>{showPlayFallback ? "🎵 Tap to Play Music" : "🎵 Now Playing"}</span>
             <button
               type="button"
-              onClick={handleManualPlay}
-              className="absolute inset-0 flex items-center justify-center gap-1 bg-amber-300/95 text-[10px] font-semibold text-black sm:text-xs"
+              onClick={() => setCollapsed((current) => !current)}
+              className="rounded p-1 text-white/70 hover:bg-white/20"
+              aria-label={collapsed ? "Expand player" : "Minimize player"}
             >
-              <Volume2 size={14} /> Tap for Music
+              {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
-          ) : null}
+          </div>
+
+          <div
+            className="relative bg-transparent"
+            style={{
+              height: collapsed ? 0 : size.height,
+              transition: "height 200ms ease",
+              overflow: "hidden",
+            }}
+          >
+            <div id={PLAYER_ELEMENT_ID} ref={playerHostRef} className="h-full w-full" />
+
+            {showPlayFallback ? (
+              <button
+                type="button"
+                onClick={handleManualPlay}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold text-[#D4A24C] sm:text-xs"
+              >
+                <Volume2 size={14} />
+                <span>Tap to Play Music</span>
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
