@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   Sparkles,
   Music,
   Pause,
