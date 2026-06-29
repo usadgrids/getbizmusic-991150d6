@@ -62,6 +62,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     return () => {
       window.removeEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
       window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
+      clearOverlayTimeout();
     };
   }, []);
 
