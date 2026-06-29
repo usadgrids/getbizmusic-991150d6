@@ -271,7 +271,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                               setSearchOpen(false);
                             }
                           }}
-                          placeholder="Type a business name…"
+                          placeholder="Type Business Name or Search For A Business ex. Restaurants, Pizza, etc."
                           className="flex-1 bg-transparent text-sm text-[#0F2A4A] placeholder-gray-400 outline-none py-1"
                         />
                         <button
