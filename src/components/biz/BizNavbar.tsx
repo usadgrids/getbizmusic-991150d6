@@ -5,13 +5,13 @@ import { useState } from "react";
 export function BizNavbar() {
   const [open, setOpen] = useState(false);
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#0F2A4A] text-white shadow-lg border-b border-[#D4A24C]/30">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-serif text-lg">
-          <Building2 size={22} className="text-[#D4A24C]" />
-          <span>BizSpot Directory - National City</span>
+  <nav className="sticky top-0 z-50 w-full bg-[#0F2A4A] text-white shadow-lg border-b border-[#D4A24C]/30">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <Link to="/" className="flex min-w-0 items-center gap-2 font-serif text-base sm:text-lg">
+          <Building2 size={22} className="text-[#D4A24C] shrink-0" />
+          <span className="truncate">BizSpot Directory - National City</span>
         </Link>
-        <div className="hidden sm:flex items-center gap-6 text-sm">
+        <div className="hidden sm:flex items-center gap-6 text-sm shrink-0">
           <Link to="/" className="hover:text-[#D4A24C] transition-colors">Home</Link>
           <a href="#featured" className="hover:text-[#D4A24C] transition-colors">Featured</a>
           <a href="#pricing" className="hover:text-[#D4A24C] transition-colors">Pricing</a>
@@ -22,7 +22,7 @@ export function BizNavbar() {
             Submit Ad
           </Link>
         </div>
-        <button className="sm:hidden" onClick={() => setOpen((v) => !v)} aria-label="Menu">
+        <button className="sm:hidden shrink-0" onClick={() => setOpen((v) => !v)} aria-label="Menu">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
