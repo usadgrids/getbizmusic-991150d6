@@ -43,7 +43,7 @@ function Index() {
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizNavbar />
       <BizHero />
-      <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-32 sm:pb-24">
+      <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16">
         <AdSlider
           ads={sliderAds.length ? sliderAds : ads}
           title="Featured Business of the Moment"
