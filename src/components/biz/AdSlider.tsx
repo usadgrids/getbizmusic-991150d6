@@ -104,7 +104,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   };
 
   return (
-    <section className="my-8">
+    <section id="ad-slideshow" className="my-8">
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2">
           {featured && <Sparkles size={18} className="text-[#D4A24C]" />}
