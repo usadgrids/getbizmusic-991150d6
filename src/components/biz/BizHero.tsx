@@ -9,7 +9,7 @@ export function BizHero() {
           "radial-gradient(circle at 20% 30%, #D4A24C 0px, transparent 2px), radial-gradient(circle at 80% 70%, #D4A24C 0px, transparent 2px)",
         backgroundSize: "50px 50px",
       }} />
-      <div className="relative max-w-6xl mx-auto px-4 py-14 sm:py-20 text-center">
+      <div className="relative max-w-6xl mx-auto px-4 py-6 sm:py-10 lg:py-14 text-center">
         <div className="inline-flex items-center gap-2 bg-[#D4A24C]/15 border border-[#D4A24C]/40 text-[#D4A24C] px-3 py-1 rounded-full text-xs font-semibold mb-4">
           <Sparkles size={14} /> USADGRIDS NOVELTY ADVERTISING - A WINALL MEDIA LLC CREATIVE.
         </div>
