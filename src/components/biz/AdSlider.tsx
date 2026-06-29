@@ -10,6 +10,9 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { INDUSTRIES } from "@/lib/biz-utils";
+
+
 
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
