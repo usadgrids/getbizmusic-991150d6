@@ -104,8 +104,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
-              maxHeight: "calc(100svh - 200px)",
-              maxWidth: "min(100%, calc((100svh - 200px) * 4 / 3))",
+              maxHeight: "calc(100svh - 120px)",
+              maxWidth: "min(100%, 1400px, calc((100svh - 120px) * 4 / 3))",
             }}
           >
             <div className="relative w-full h-full bg-gray-100">
