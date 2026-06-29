@@ -77,6 +77,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const hideTimerRef = useRef<number | null>(null);
   const current = ads[idx];
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
@@ -100,6 +101,22 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       .slice(0, 6);
   }, [searchQuery, ads]);
 
+  const clearPeekTimer = () => {
+    if (hideTimerRef.current) {
+      window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
+  const showSearchPeek = () => {
+    if (searchOpen) return;
+    setHovered(true);
+    clearPeekTimer();
+    hideTimerRef.current = window.setTimeout(() => {
+      setHovered(false);
+      hideTimerRef.current = null;
+    }, 2000);
+  };
 
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
@@ -107,6 +124,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setSearchQuery("");
     setSearchOpen(false);
     setHovered(false);
+    clearPeekTimer();
   };
 
   useEffect(() => {
@@ -114,6 +132,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
   }, [searchOpen]);
+
+  useEffect(() => {
+    return () => clearPeekTimer();
+  }, []);
+
 
 
   // Reset the countdown whenever the slide (or its duration) changes
@@ -202,8 +225,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
               maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
-            onMouseEnter={() => setHovered(true)}
+            onMouseEnter={showSearchPeek}
+            onMouseMove={showSearchPeek}
             onMouseLeave={() => {
+              clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
             }}
