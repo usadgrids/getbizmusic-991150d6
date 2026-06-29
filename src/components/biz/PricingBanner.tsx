@@ -23,8 +23,8 @@ export function PricingBanner() {
             <span className="text-4xl font-bold text-[#0F2A4A]">$12</span>
             <span className="text-gray-500 text-sm">/ year</span>
           </div>
-          <p className="text-xs text-[#D4A24C] font-semibold mt-1">$1/month — intro offer</p>
-          <p className="text-xs text-gray-500 mt-1">5 seconds per rotation</p>
+          <p className="text-xs text-[#D4A24C] font-semibold mt-1">Intro offer</p>
+          <p className="text-xs text-gray-500 mt-1">7 seconds per rotation</p>
           <ul className="mt-4 space-y-2 text-sm text-gray-700">
             <li className="flex gap-2"><Check size={16} className="text-emerald-600 shrink-0 mt-0.5" /> Appears in main image carousel</li>
             <li className="flex gap-2"><Check size={16} className="text-emerald-600 shrink-0 mt-0.5" /> Clickable to your website</li>
