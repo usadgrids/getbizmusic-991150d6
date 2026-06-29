@@ -102,10 +102,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
         <>
           <div
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
-            style={{
-              border: `3px solid ${accent}`,
-              maxWidth: "min(100%, calc((100svh - 360px) * 16 / 9))",
-            }}
+            style={{ border: `3px solid ${accent}` }}
           >
             <div
               className="relative aspect-[16/9] w-full bg-gray-100 group"
