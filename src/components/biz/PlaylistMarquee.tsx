@@ -53,8 +53,8 @@ export function PlaylistMarquee() {
     });
 
   return (
-    <div className="marquee-container mt-1 w-full max-w-full overflow-hidden rounded-full bg-[#0F2A4A]/10 py-1 border border-[#0F2A4A]/15">
-      <div className="marquee-track flex w-max gap-2 px-2">
+    <div className="marquee-container mt-1 w-full max-w-full overflow-hidden rounded-full bg-[#0F2A4A]/10 py-1 border border-[#0F2A4A]/15 min-w-0" style={{ contain: "layout paint" }}>
+      <div className="marquee-track flex w-max gap-2 px-2 min-w-0">
         {renderRow("a")}
         {renderRow("b")}
       </div>

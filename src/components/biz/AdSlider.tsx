@@ -221,15 +221,15 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
 
   return (
-    <section id="ad-slideshow" className="my-8">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center mb-3 gap-2">
+    <section id="ad-slideshow" className="my-8 min-w-0">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center mb-3 gap-2 min-w-0">
         <div />
-        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center">
-          {featured && <Sparkles size={18} className="text-[#D4A24C]" />}
-          {title}
+        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center min-w-0">
+          {featured && <Sparkles size={18} className="text-[#D4A24C] shrink-0" />}
+          <span className="min-w-0 break-words">{title}</span>
         </h2>
         {ads.length > 0 && (
-          <div className="text-xs text-gray-500 justify-self-end">
+          <div className="text-xs text-gray-500 justify-self-end text-right shrink-0">
             {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
           </div>
         )}
@@ -242,7 +242,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       ) : (
         <>
           <div
-            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group"
+            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",

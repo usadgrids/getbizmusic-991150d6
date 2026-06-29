@@ -670,16 +670,16 @@ export function MiniPlayer() {
     <>
       <TapToPlayOverlay visible={showPlayFallback} onTap={handleManualPlay} />
       <div
-        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300"
+        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300 max-w-[calc(100vw-1.5rem)]"
         style={{ width: size.width }}
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
           <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
-            <span>{showPlayFallback ? "🎵 Tap to Play Music" : "🎵 Now Playing"}</span>
+            <span className="truncate pr-2">{showPlayFallback ? "🎵 Tap to Play Music" : "🎵 Now Playing"}</span>
             <button
               type="button"
               onClick={() => setCollapsed((current) => !current)}
-              className="rounded p-1 text-white/70 hover:bg-white/20"
+              className="rounded p-1 text-white/70 hover:bg-white/20 shrink-0"
               aria-label={collapsed ? "Expand player" : "Minimize player"}
             >
               {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
