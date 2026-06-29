@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   Music,
@@ -7,7 +7,10 @@ import {
   SkipBack,
   SkipForward,
   Clock,
+  Search,
+  X,
 } from "lucide-react";
+
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
