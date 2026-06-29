@@ -179,13 +179,19 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       ) : (
         <>
           <div
-            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
+            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group"
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
               maxHeight: "min(90svh, 900px)",
               maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => {
+              setHovered(false);
+              if (!searchQuery) setSearchOpen(false);
+            }}
+
           >
             <div className="relative w-full h-full bg-gray-100">
               {current.website_url ? (
