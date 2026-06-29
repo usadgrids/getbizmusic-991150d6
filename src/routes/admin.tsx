@@ -18,7 +18,7 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — BizSpot Directory" },
+      { title: "Admin — BizSpot Directory - National City" },
       { name: "description", content: "Review and approve business ad submissions." },
     ],
   }),
@@ -229,7 +229,7 @@ function AdminConsole() {
                   <div className="p-4 space-y-2 text-sm">
                     <div className="font-serif text-lg font-bold text-[#0F2A4A]">{s.business_name}</div>
                     <div className="text-xs text-gray-500">
-                      {s.industry} · {s.ad_type === "slider_10" ? "Featured Slider ($10)" : "Standard ($5)"}
+                      {s.industry} · {s.ad_type === "slider_10" ? "Featured Slider ($12)" : "Standard ($12)"}
                     </div>
                     {s.tagline && <div className="italic text-gray-700">"{s.tagline}"</div>}
                     <div className="text-xs text-gray-600 space-y-0.5 pt-2 border-t border-gray-100">
@@ -305,7 +305,7 @@ function AdminConsole() {
                   <tr key={a.id} className="border-t border-gray-100">
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
-                      {a.ad_type === "slider_10" ? "Featured · $10" : "Standard · $5"}
+                      {a.ad_type === "slider_10" ? "Featured · $12" : "Standard · $12"}
                     </td>
                     <td className="px-4 py-2">
                       {a.status === "active" ? (

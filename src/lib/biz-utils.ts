@@ -11,8 +11,8 @@ export const INDUSTRIES = [
 ] as const;
 
 export const AD_PLANS = {
-  image_5: { label: "Standard Image Ad", price: 5, seconds: 5 },
-  slider_10: { label: "Featured Slider Ad", price: 10, seconds: 10 },
+  image_5: { label: "Standard Image Ad", price: 12, seconds: 5 },
+  slider_10: { label: "Featured Slider Ad", price: 12, seconds: 10 },
 } as const;
 
 export type AdPlan = keyof typeof AD_PLANS;
