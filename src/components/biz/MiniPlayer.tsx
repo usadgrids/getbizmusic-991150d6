@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
 const PLAYER_ELEMENT_ID = "family-mini-player-iframe";
@@ -87,11 +88,12 @@ function TapToPlayOverlay({
   visible: boolean;
   onTap: () => void;
 }) {
+  const isMobile = useIsMobile();
   const [inAdSection, setInAdSection] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isMobile) return;
     const target = document.getElementById("ad-slideshow");
     if (!target) return;
     const observer = new IntersectionObserver(
@@ -100,9 +102,9 @@ function TapToPlayOverlay({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [visible]);
+  }, [visible, isMobile]);
 
-  if (!visible || dismissed || !inAdSection) return null;
+  if (!isMobile || !visible || dismissed || !inAdSection) return null;
 
   const handleTap = () => {
     setDismissed(true);
