@@ -32,17 +32,16 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
-  const [showFullAd, setShowFullAd] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const revealTimerRef = useRef<number | null>(null);
   const current = ads[idx];
 
   // Auto-advance using the per-ad duration (pauses with the music)
   useEffect(() => {
     if (paused || ads.length <= 1 || !current) return;
+    const seconds = current.duration_seconds || 7;
     const id = window.setTimeout(() => {
       setIdx((i) => (i + 1) % ads.length);
-    }, current.duration_seconds * 1000);
+    }, seconds * 1000);
     return () => window.clearTimeout(id);
   }, [idx, ads.length, current, paused]);
 
