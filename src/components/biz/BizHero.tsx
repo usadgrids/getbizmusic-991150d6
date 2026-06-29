@@ -18,8 +18,8 @@ export function BizHero() {
         </div>
         <h1 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-snug sm:leading-tight">
           Novelty Buusiness Ads With Music Streaming
-          <br className="hidden sm:block" /> Gets Your Business <span className="text-[#D4A24C]">Seen</span>.
-          <br className="hidden sm:block" /> Every Day. All Year Long for Just $12
+          <br className="hidden md:block" /> Gets Your Business <span className="text-[#D4A24C]">Seen</span>.
+          <br className="hidden md:block" /> Every Day. All Year Long for Just $12
         </h1>
         <p className="mt-2 sm:mt-3 text-xs sm:text-sm lg:text-base text-white/80 max-w-2xl mx-auto">
           Get your business in front of National City visitors as they browse our novelty ads directory — with music keeping them right where you want them.
