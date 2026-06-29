@@ -9,7 +9,7 @@ export function BizNavbar() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-serif text-lg">
           <Building2 size={22} className="text-[#D4A24C]" />
-          <span>BizSpot Directory</span>
+          <span>BizSpot Directory - National City</span>
         </Link>
         <div className="hidden sm:flex items-center gap-6 text-sm">
           <Link to="/" className="hover:text-[#D4A24C] transition-colors">Home</Link>

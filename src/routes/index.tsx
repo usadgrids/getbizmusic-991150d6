@@ -11,14 +11,14 @@ import { MiniPlayer } from "@/components/biz/MiniPlayer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Novelty Ads & Music Streaming — Nationwide Business Advertising From $5/yr" },
+      { title: "BizSpot Directory - National City — $12/yr Intro Offer" },
       {
         name: "description",
         content:
-          "Advertise your business — restaurants, lawyers, salons, auto, and more. $5 for 5-second image ads, $10 for 10-second featured slider ads. Full year of exposure.",
+          "Advertise your National City business — restaurants, lawyers, salons, auto, and more. Limited-time intro: $12/year (about $1/month) for a full year of exposure.",
       },
-      { property: "og:title", content: "Novelty Ads & Music Streaming — Nationwide Business Advertising" },
-      { property: "og:description", content: "Reach customers nationwide all year long for as little as $5." },
+      { property: "og:title", content: "BizSpot Directory - National City — $12/yr Intro Offer" },
+      { property: "og:description", content: "Limited-time intro offer: $12/year, about $1/month. Open to new National City businesses started in 2026." },
     ],
   }),
   loader: async ({ context }) => {

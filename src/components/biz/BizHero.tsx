@@ -10,23 +10,29 @@ export function BizHero() {
         backgroundSize: "50px 50px",
       }} />
       <div className="relative max-w-6xl mx-auto px-4 py-14 sm:py-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#D4A24C]/15 border border-[#D4A24C]/40 text-[#D4A24C] px-3 py-1 rounded-full text-xs font-semibold mb-5">
+        <div className="inline-flex items-center gap-2 bg-[#D4A24C]/15 border border-[#D4A24C]/40 text-[#D4A24C] px-3 py-1 rounded-full text-xs font-semibold mb-4">
           <Sparkles size={14} /> NATIONWIDE USA BUSINESS ADVERTISING
+        </div>
+        <div className="mx-auto max-w-3xl mb-5 bg-[#D4A24C] text-[#0F2A4A] border-2 border-[#D4A24C] rounded-xl px-4 py-3 text-sm sm:text-base font-semibold shadow-lg">
+          NOW OPEN to NEW National City Businesses Only — established between January 1, 2026 and any date within the year 2026.
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
           Novelty Ads With Music Streaming Gets Your Business <span className="text-[#D4A24C]">Seen</span>.
-          <br className="hidden sm:block" /> Every Day. All Year Long For $ 5 Dollars
+          <br className="hidden sm:block" /> Every Day. All Year Long for Just $12
         </h1>
         <p className="mt-4 text-base sm:text-lg text-white/80 max-w-2xl mx-auto">
           Reach customers nationwide with rotating image ads on our high-traffic directory.
-          From restaurants to lawyers — a full year of exposure for as little as $5.
+          <span className="block mt-2 text-[#D4A24C] font-semibold">
+            Really Special Introductory Limited Time Offer — $1/month, billed $12/year.
+          </span>
+          Option to resubscribe at the end of your annual term. Prices may change.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link
             to="/submit"
             className="bg-[#D4A24C] text-[#0F2A4A] font-semibold px-6 py-3 rounded-md hover:bg-[#e0b266] transition-colors shadow-lg"
           >
-            Submit Your Ad — From $5
+            Submit Your Ad — $12/yr
           </Link>
         </div>
       </div>
