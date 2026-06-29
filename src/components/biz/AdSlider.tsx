@@ -101,11 +101,17 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       ) : (
         <>
           <div
-            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
-            style={{ border: `3px solid ${accent}` }}
+            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto"
+            style={{
+              border: `3px solid ${accent}`,
+              height: "min(calc(100svh - 320px), 56.25vw)",
+              aspectRatio: "16 / 9",
+              width: "auto",
+              maxWidth: "100%",
+            }}
           >
             <div
-              className="relative aspect-[16/9] w-full bg-gray-100 group"
+              className="relative w-full h-full bg-gray-100 group"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
