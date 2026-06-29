@@ -183,6 +183,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 />
               )}
             </div>
+            {ads.length > 0 && (
+              <SlideTimer
+                duration={duration}
+                remaining={timeLeft}
+                accent={accent}
+              />
+            )}
           </div>
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
