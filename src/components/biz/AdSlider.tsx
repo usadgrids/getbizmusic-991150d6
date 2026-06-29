@@ -67,7 +67,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
-  const fullAdVisible = isHovering;
+  
 
   const togglePlayPause = () => {
     if (musicPlaying) {
