@@ -6,10 +6,12 @@ export function PricingBanner() {
     <section id="pricing" className="my-10">
       <div className="text-center mb-6">
         <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F2A4A]">
-          Simple, One-Time Pricing
+          Simple, One-Time Annual Pricing
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Pay once. Your ad runs for a <strong>full year</strong>.
+        <p className="text-sm text-gray-700 mt-2 max-w-2xl mx-auto">
+          <strong>Really Special Introductory Limited Time Offer</strong> — $1/month, billed
+          $12/year. Option to resubscribe at the end of your annual payment of $12.
+          <em> (Prices may change.)</em>
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
@@ -19,9 +21,10 @@ export function PricingBanner() {
             <h3 className="font-semibold">Standard Image Ad</h3>
           </div>
           <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-[#0F2A4A]">$5</span>
+            <span className="text-4xl font-bold text-[#0F2A4A]">$12</span>
             <span className="text-gray-500 text-sm">/ year</span>
           </div>
+          <p className="text-xs text-[#D4A24C] font-semibold mt-1">$1/month — intro offer</p>
           <p className="text-xs text-gray-500 mt-1">5 seconds per rotation</p>
           <ul className="mt-4 space-y-2 text-sm text-gray-700">
             <li className="flex gap-2"><Check size={16} className="text-emerald-600 shrink-0 mt-0.5" /> Appears in main image carousel</li>
@@ -33,7 +36,7 @@ export function PricingBanner() {
             search={{ plan: "image_5" }}
             className="mt-5 inline-block w-full text-center bg-[#0F2A4A] text-white font-semibold py-2.5 rounded-md hover:bg-[#163864] transition-colors"
           >
-            Get Started — $5
+            Get Started — $12
           </Link>
         </div>
         <div className="bg-[#0F2A4A] border-2 border-[#D4A24C] rounded-2xl p-6 shadow-lg text-white relative">
