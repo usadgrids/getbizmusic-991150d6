@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, Volume2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
 const PLAYER_ELEMENT_ID = "family-mini-player-iframe";
