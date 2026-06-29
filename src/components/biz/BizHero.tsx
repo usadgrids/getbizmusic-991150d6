@@ -14,7 +14,7 @@ export function BizHero() {
           <Sparkles size={14} /> NATIONWIDE USA BUSINESS ADVERTISING
         </div>
         <div className="mx-auto max-w-3xl mb-5 bg-[#D4A24C] text-[#0F2A4A] border-2 border-[#D4A24C] rounded-xl px-4 py-3 text-sm sm:text-base font-semibold shadow-lg">
-          NOW OPEN to NEW National City Businesses Only — established between January 1, 2026 and any date within the year 2026.
+          NOW OPEN ALL National City Businesses Only.
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
           Novelty Buusiness Ads With Music Streaming
