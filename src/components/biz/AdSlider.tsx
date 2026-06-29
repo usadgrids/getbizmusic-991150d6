@@ -175,13 +175,14 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
   return (
     <section id="ad-slideshow" className="my-8">
-      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center mb-3 gap-2">
+        <div />
+        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center">
           {featured && <Sparkles size={18} className="text-[#D4A24C]" />}
           {title}
         </h2>
         {ads.length > 0 && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 justify-self-end">
             {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
           </div>
         )}
