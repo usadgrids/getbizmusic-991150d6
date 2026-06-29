@@ -30,10 +30,10 @@ export function BizHero() {
         </p>
         <div className="mt-4 sm:mt-5 flex flex-wrap justify-center gap-3">
           <Link
-            to="/submit"
+            to="/pricing"
             className="bg-[#D4A24C] text-[#0F2A4A] font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-md hover:bg-[#e0b266] transition-colors shadow-lg text-sm sm:text-base"
           >
-            Submit Your Ad — $12/yr
+            Get Listed — From $12/yr
           </Link>
         </div>
       </div>
