@@ -34,6 +34,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
+  const overlayTimeoutRef = useRef<number | null>(null);
   const current = ads[idx];
 
   // Auto-advance using the per-ad duration (pauses with the music)
