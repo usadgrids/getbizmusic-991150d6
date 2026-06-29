@@ -50,14 +50,25 @@ const submissionSchema = z.object({
   website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
   industry: z.string().trim().min(1).max(40),
   tagline: z.string().trim().max(80).optional().or(z.literal("")),
-  ad_type: z.enum(["image_5", "slider_10"]),
   image_path: z.string().trim().min(1).max(500),
+  submission_token: z.string().uuid(),
 });
 
 export const createSubmission = createServerFn({ method: "POST" })
   .inputValidator((d) => submissionSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Verify the payment token: must exist, be paid, and not already used.
+    const { data: pay, error: payErr } = await supabaseAdmin
+      .from("ad_payments")
+      .select("id, plan, status, token_used")
+      .eq("submission_token", data.submission_token)
+      .maybeSingle();
+    if (payErr || !pay) throw new Error("Invalid submission token");
+    if (pay.status !== "paid") throw new Error("Payment not confirmed");
+    if (pay.token_used) throw new Error("This submission link has already been used");
+
     const { error } = await supabaseAdmin.from("ad_submissions").insert({
       business_name: data.business_name,
       contact_name: data.contact_name,
@@ -66,11 +77,18 @@ export const createSubmission = createServerFn({ method: "POST" })
       website_url: data.website_url || null,
       industry: data.industry,
       tagline: data.tagline || null,
-      ad_type: data.ad_type,
+      ad_type: pay.plan,
       image_path: data.image_path,
       status: "pending",
+      payment_id: pay.id,
     });
     if (error) throw new Error(error.message);
+
+    await supabaseAdmin
+      .from("ad_payments")
+      .update({ token_used: true })
+      .eq("id", pay.id);
+
     return { ok: true as const };
   });
 
