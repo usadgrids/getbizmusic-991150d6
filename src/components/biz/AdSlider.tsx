@@ -78,6 +78,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hideTimerRef = useRef<number | null>(null);
+  const searchIdleTimerRef = useRef<number | null>(null);
   const current = ads[idx];
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
@@ -108,6 +109,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }
   };
 
+  const clearSearchIdleTimer = () => {
+    if (searchIdleTimerRef.current) {
+      window.clearTimeout(searchIdleTimerRef.current);
+      searchIdleTimerRef.current = null;
+    }
+  };
+
   const showSearchPeek = () => {
     if (searchOpen) return;
     setHovered(true);
@@ -125,6 +133,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setSearchOpen(false);
     setHovered(false);
     clearPeekTimer();
+    clearSearchIdleTimer();
   };
 
   useEffect(() => {
@@ -134,8 +143,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   }, [searchOpen]);
 
   useEffect(() => {
-    return () => clearPeekTimer();
+    return () => {
+      clearPeekTimer();
+      clearSearchIdleTimer();
+    };
   }, []);
+
+  useEffect(() => {
+    clearSearchIdleTimer();
+    if (searchOpen && searchQuery.trim() === "") {
+      searchIdleTimerRef.current = window.setTimeout(() => {
+        setSearchOpen(false);
+        setHovered(false);
+        searchIdleTimerRef.current = null;
+      }, 3000);
+    }
+    return () => clearSearchIdleTimer();
+  }, [searchOpen, searchQuery]);
 
 
 
@@ -305,6 +329,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                           onClick={() => {
                             setSearchQuery("");
                             setSearchOpen(false);
+                            clearSearchIdleTimer();
                           }}
                           aria-label="Close search"
                           className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
