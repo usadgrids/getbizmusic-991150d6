@@ -109,6 +109,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }
   };
 
+  const clearSearchIdleTimer = () => {
+    if (searchIdleTimerRef.current) {
+      window.clearTimeout(searchIdleTimerRef.current);
+      searchIdleTimerRef.current = null;
+    }
+  };
+
   const showSearchPeek = () => {
     if (searchOpen) return;
     setHovered(true);
