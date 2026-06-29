@@ -67,9 +67,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
-  const [timeLeft, setTimeLeft] = useState(0);
   const current = ads[idx];
   const duration = current?.duration_seconds || 7;
+  const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
 
   // Reset the countdown whenever the slide (or its duration) changes
   useEffect(() => {
@@ -85,15 +85,14 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     return () => window.clearInterval(id);
   }, [paused, ads.length, current, duration]);
 
-  // Auto-advance using the per-ad duration (pauses with the music)
+  // Advance the slide when the countdown reaches zero
   useEffect(() => {
-    if (paused || ads.length <= 1 || !current) return;
-    const seconds = current.duration_seconds || 7;
+    if (paused || ads.length <= 1 || !current || timeLeft > 0) return;
     const id = window.setTimeout(() => {
       setIdx((i) => (i + 1) % ads.length);
-    }, seconds * 1000);
+    }, 0);
     return () => window.clearTimeout(id);
-  }, [idx, ads.length, current, paused]);
+  }, [timeLeft, paused, ads.length, current]);
 
   // Listen to music player activity/track
   useEffect(() => {
