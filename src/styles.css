@@ -149,6 +149,25 @@
   }
 }
 
+@keyframes waveform {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+
+.waveform-bar {
+  transform-origin: bottom;
+  animation-name: waveform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transition: opacity 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveform-bar {
+    animation: none;
+  }
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -168,3 +187,4 @@
     animation: none;
   }
 }
+
