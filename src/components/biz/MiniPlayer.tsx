@@ -87,17 +87,37 @@ function TapToPlayOverlay({
   visible: boolean;
   onTap: () => void;
 }) {
-  if (!visible) return null;
+  const [inAdSection, setInAdSection] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const target = document.getElementById("ad-slideshow");
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInAdSection(entry.isIntersecting),
+      { threshold: 0.25 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [visible]);
+
+  if (!visible || dismissed || !inAdSection) return null;
+
+  const handleTap = () => {
+    setDismissed(true);
+    onTap();
+  };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F2A4A]/25 p-4 animate-in fade-in zoom-in-95 duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none animate-in fade-in zoom-in-95 duration-300"
       aria-live="polite"
       role="dialog"
       aria-modal="true"
       aria-label="Tap to play music"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white/90 p-6 shadow-2xl text-center border-2 border-[#D4A24C] backdrop-blur-sm opacity-25">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C] opacity-35 pointer-events-auto">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C]">
           <Music size={28} />
         </div>
@@ -109,7 +129,7 @@ function TapToPlayOverlay({
         </p>
         <button
           type="button"
-          onClick={onTap}
+          onClick={handleTap}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F2A4A] px-6 py-3 text-base font-semibold text-[#D4A24C] shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <Play size={20} fill="currentColor" />
@@ -119,6 +139,7 @@ function TapToPlayOverlay({
     </div>
   );
 }
+
 
 export function MiniPlayer() {
   const [collapsed, setCollapsed] = useState(false);
