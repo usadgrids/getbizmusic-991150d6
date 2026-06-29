@@ -142,8 +142,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   }, [searchOpen]);
 
   useEffect(() => {
-    return () => clearPeekTimer();
+    return () => {
+      clearPeekTimer();
+      clearSearchIdleTimer();
+    };
   }, []);
+
+  useEffect(() => {
+    clearSearchIdleTimer();
+    if (searchOpen && searchQuery.trim() === "") {
+      searchIdleTimerRef.current = window.setTimeout(() => {
+        setSearchOpen(false);
+        setHovered(false);
+        searchIdleTimerRef.current = null;
+      }, 3000);
+    }
+    return () => clearSearchIdleTimer();
+  }, [searchOpen, searchQuery]);
 
 
 
