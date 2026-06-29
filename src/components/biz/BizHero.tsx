@@ -13,8 +13,8 @@ export function BizHero() {
         <div className="inline-flex items-center gap-2 bg-[#D4A24C]/15 border border-[#D4A24C]/40 text-[#D4A24C] px-3 py-1 rounded-full text-xs font-semibold mb-4">
           <Sparkles size={14} /> NATIONWIDE USA BUSINESS ADVERTISING
         </div>
-        <div className="mx-auto max-w-3xl mb-5 bg-[#D4A24C] text-[#0F2A4A] border-2 border-[#D4A24C] rounded-xl px-4 py-3 text-sm sm:text-base font-semibold shadow-lg">
-          NOW OPEN ALL National City Businesses Only.
+        <div className="mx-auto max-w-3xl mb-5 bg-[#D4A24C] text-[#0F2A4A] border-2 border-[#D4A24C] rounded-xl px-4 py-3 text-base sm:text-lg font-semibold shadow-lg">
+          NOW OPEN TO ALL National City Businesses Only.
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
           Novelty Buusiness Ads With Music Streaming
