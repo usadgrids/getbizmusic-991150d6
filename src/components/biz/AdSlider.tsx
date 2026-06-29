@@ -141,41 +141,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 />
               )}
             </div>
-            {ads.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  aria-label="Previous ad"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white text-[#0F2A4A] rounded-full p-2 shadow"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  aria-label="Next ad"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white text-[#0F2A4A] rounded-full p-2 shadow"
-                >
-                  <ChevronRight size={20} />
-                </button>
-                <div className="absolute top-3 right-3 flex gap-1">
-                  {ads.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setIdx(i)}
-                      aria-label={`Show ad ${i + 1}`}
-                      className="w-2 h-2 rounded-full transition-all"
-                      style={{
-                        backgroundColor: i === idx ? accent : "rgba(255,255,255,0.6)",
-                        transform: i === idx ? "scale(1.4)" : "scale(1)",
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
