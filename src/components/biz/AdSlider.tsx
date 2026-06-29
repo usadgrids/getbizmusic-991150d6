@@ -81,13 +81,25 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
 
+  const industryLabel = (value: string) =>
+    INDUSTRIES.find((i) => i.value === value)?.label ?? value;
+
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
     return ads
-      .filter((a) => a.business_name.toLowerCase().includes(q))
+      .filter((a) => {
+        const label = industryLabel(a.industry).toLowerCase();
+        return (
+          a.business_name.toLowerCase().includes(q) ||
+          a.industry.toLowerCase().includes(q) ||
+          label.includes(q) ||
+          (a.tagline ?? "").toLowerCase().includes(q)
+        );
+      })
       .slice(0, 6);
   }, [searchQuery, ads]);
+
 
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
