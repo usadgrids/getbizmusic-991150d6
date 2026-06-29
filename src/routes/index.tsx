@@ -40,10 +40,10 @@ function Index() {
   const sliderAds = ads.filter((a) => a.ad_type === "slider_10");
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizNavbar />
       <BizHero />
-      <main className="max-w-6xl mx-auto px-4">
+      <main className="max-w-6xl mx-auto px-4 pb-32 sm:pb-24">
         <AdSlider
           ads={sliderAds.length ? sliderAds : ads}
           title="Featured Business of the Moment"
