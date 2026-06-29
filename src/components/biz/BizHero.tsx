@@ -22,7 +22,7 @@ export function BizHero() {
           <br className="hidden sm:block" /> Every Day. All Year Long for Just $12
         </h1>
         <p className="mt-4 text-base sm:text-lg text-white/80 max-w-2xl mx-auto">
-          Reach customers nationwide with rotating image ads on our high-traffic directory.
+          Get your business in front of National City visitors as they browse our novelty ads directory — with music keeping them right where you want them.
           <span className="block mt-2 text-[#D4A24C] font-semibold">
             Really Special Introductory Limited Time Offer — $1/month, billed $12/year.
           </span>
