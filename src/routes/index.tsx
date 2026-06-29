@@ -37,15 +37,13 @@ function Index() {
     queryFn: () => fetchAds(),
   });
 
-  const sliderAds = ads.filter((a) => a.ad_type === "slider_10");
-
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizNavbar />
       <BizHero />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <AdSlider
-          ads={sliderAds.length ? sliderAds : ads}
+          ads={ads}
           title="Featured Business of the Moment"
           featured
         />
