@@ -225,8 +225,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
               maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
-            onMouseEnter={() => setHovered(true)}
+            onMouseEnter={showSearchPeek}
+            onMouseMove={showSearchPeek}
             onMouseLeave={() => {
+              clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
             }}
