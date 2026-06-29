@@ -80,6 +80,46 @@ type WindowWithYT = Window & {
 
 const clampVolume = (value: number) => Math.max(0, Math.min(100, value));
 
+function TapToPlayOverlay({
+  visible,
+  onTap,
+}: {
+  visible: boolean;
+  onTap: () => void;
+}) {
+  if (!visible) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F2A4A]/70 p-4 animate-in fade-in zoom-in-95 duration-300"
+      aria-live="polite"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tap to play music"
+    >
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C]">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C]">
+          <Music size={28} />
+        </div>
+        <h2 className="mb-2 font-serif text-2xl font-bold text-[#0F2A4A]">
+          Tap to Play Music
+        </h2>
+        <p className="mb-6 text-sm text-gray-600">
+          Your browser requires a tap before music can start.
+        </p>
+        <button
+          type="button"
+          onClick={onTap}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F2A4A] px-6 py-3 text-base font-semibold text-[#D4A24C] shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <Play size={20} fill="currentColor" />
+          Play Music
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function MiniPlayer() {
   const [collapsed, setCollapsed] = useState(false);
   const [showPlayFallback, setShowPlayFallback] = useState(false);
