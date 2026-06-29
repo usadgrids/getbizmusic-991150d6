@@ -64,31 +64,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   }, []);
 
   const accent = featured ? "#D4A24C" : "#0F2A4A";
-  const revealFullAdTemporarily = () => {
-    setShowFullAd(true);
-    if (revealTimerRef.current) window.clearTimeout(revealTimerRef.current);
-    revealTimerRef.current = window.setTimeout(() => setShowFullAd(false), 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (revealTimerRef.current) window.clearTimeout(revealTimerRef.current);
-    };
-  }, []);
-
-  const goPrev = () => {
-    revealFullAdTemporarily();
-    setIdx((i) => (i === 0 ? Math.max(ads.length - 1, 0) : i - 1));
-  };
-  const goNext = () => {
-    revealFullAdTemporarily();
-    setIdx((i) => (i + 1) % Math.max(ads.length, 1));
-  };
 
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
-  const fullAdVisible = isHovering || showFullAd;
+  const fullAdVisible = isHovering;
 
   const togglePlayPause = () => {
     if (musicPlaying) {
