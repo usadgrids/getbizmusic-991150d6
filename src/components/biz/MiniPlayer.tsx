@@ -91,13 +91,13 @@ function TapToPlayOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F2A4A]/70 p-4 animate-in fade-in zoom-in-95 duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F2A4A]/25 p-4 animate-in fade-in zoom-in-95 duration-300"
       aria-live="polite"
       role="dialog"
       aria-modal="true"
       aria-label="Tap to play music"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C]">
+      <div className="w-full max-w-sm rounded-2xl bg-white/90 p-6 shadow-2xl text-center border-2 border-[#D4A24C] backdrop-blur-sm">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C]">
           <Music size={28} />
         </div>
