@@ -17,7 +17,7 @@ export function BizHero() {
           NOW OPEN to NEW National City Businesses Only — established between January 1, 2026 and any date within the year 2026.
         </div>
         <h1 className="font-serif text-3xl sm:text-5xl font-bold leading-tight">
-          Novelty Ads With Music Streaming Gets
+          Novelty Buusiness Ads With Music Streaming Gets
           <br className="hidden sm:block" /> Your Business <span className="text-[#D4A24C]">Seen</span>.
           <br className="hidden sm:block" /> Every Day. All Year Long for Just $12
         </h1>
