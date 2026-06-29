@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
+import { MusicWaveform } from "./MusicWaveform";
 import {
   MINIPLAYER_PAUSE_EVENT,
   MINIPLAYER_PLAY_EVENT,
