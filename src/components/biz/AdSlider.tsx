@@ -206,8 +206,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             <div className="flex items-center gap-2 min-w-0">
               <Music size={16} className="text-[#D4A24C] shrink-0" />
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-gray-500">
-                  Background music
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-gray-500">
+                  <span>Background music</span>
+                  <MusicWaveform playing={musicPlaying} />
                 </div>
                 <div className="text-xs font-medium text-[#0F2A4A] truncate max-w-[220px] sm:max-w-[360px]">
                   {trackTitle || (musicPlaying ? "Now playing…" : "Paused")}
