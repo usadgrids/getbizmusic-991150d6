@@ -4,28 +4,28 @@ interface MusicWaveformProps {
   className?: string;
 }
 
-export function MusicWaveform({ playing, barCount = 14, className = "" }: MusicWaveformProps) {
+export function MusicWaveform({ playing, barCount = 16, className = "" }: MusicWaveformProps) {
   return (
     <div
-      className={`inline-flex items-end gap-[2px] h-4 ${className}`}
+      className={`inline-flex items-end justify-center gap-[3px] h-6 ${className}`}
       aria-hidden="true"
       role="img"
       aria-label={playing ? "Music waveform playing" : "Music waveform paused"}
     >
       {Array.from({ length: barCount }).map((_, i) => {
-        const delay = (i * 0.09) % 0.7;
-        const duration = 0.55 + (i % 5) * 0.12;
-        const minHeight = 20 + (i % 4) * 10;
+        const delay = (i * 0.07) % 0.8;
+        const duration = 0.5 + (i % 6) * 0.12;
+        const minHeight = 25 + (i % 5) * 12;
         return (
           <span
             key={i}
-            className="w-[3px] rounded-full bg-[#D4A24C] waveform-bar"
+            className="w-[4px] rounded-full waveform-bar"
             style={{
               height: `${minHeight}%`,
+              backgroundColor: playing ? "#D4A24C" : "#9CA3AF",
               animationDelay: `${delay.toFixed(2)}s`,
               animationDuration: `${duration.toFixed(2)}s`,
-              animationPlayState: playing ? "running" : "paused",
-              opacity: playing ? 1 : 0.5,
+              opacity: playing ? 1 : 0.55,
             }}
           />
         );
@@ -33,3 +33,4 @@ export function MusicWaveform({ playing, barCount = 14, className = "" }: MusicW
     </div>
   );
 }
+
