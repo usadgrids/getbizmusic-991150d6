@@ -63,7 +63,7 @@ export function PricingBanner() {
             search={{ plan: "slider_10" }}
             className="mt-5 inline-block w-full text-center bg-[#D4A24C] text-[#0F2A4A] font-semibold py-2.5 rounded-md hover:bg-[#e0b266] transition-colors"
           >
-            Get Featured — $12
+            Get Featured — $24
           </Link>
         </div>
       </div>
