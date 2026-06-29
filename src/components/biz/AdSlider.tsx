@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   Music,
@@ -7,7 +7,10 @@ import {
   SkipBack,
   SkipForward,
   Clock,
+  Search,
+  X,
 } from "lucide-react";
+
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
@@ -67,9 +70,36 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [hovered, setHovered] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const current = ads[idx];
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
+
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return ads
+      .filter((a) => a.business_name.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [searchQuery, ads]);
+
+  const pickAd = (adId: string) => {
+    const i = ads.findIndex((a) => a.id === adId);
+    if (i >= 0) setIdx(i);
+    setSearchQuery("");
+    setSearchOpen(false);
+    setHovered(false);
+  };
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [searchOpen]);
+
 
   // Reset the countdown whenever the slide (or its duration) changes
   useEffect(() => {
@@ -149,13 +179,19 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       ) : (
         <>
           <div
-            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
+            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group"
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
               maxHeight: "min(90svh, 900px)",
               maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => {
+              setHovered(false);
+              if (!searchQuery) setSearchOpen(false);
+            }}
+
           >
             <div className="relative w-full h-full bg-gray-100">
               {current.website_url ? (
@@ -189,7 +225,82 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 accent={accent}
               />
             )}
+
+            {/* Hover-revealed search bar (center) */}
+            {(hovered || searchOpen) && (
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex justify-center px-4 pointer-events-none">
+                <div className="pointer-events-auto w-full max-w-md">
+                  {!searchOpen ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearchOpen(true)}
+                      className="mx-auto flex items-center gap-2 rounded-full bg-white/95 px-5 py-3 text-[#0F2A4A] font-semibold shadow-2xl ring-2 ring-[#D4A24C] hover:bg-white"
+                    >
+                      <Search size={18} />
+                      Search businesses…
+                    </button>
+                  ) : (
+                    <div className="rounded-2xl bg-white/98 shadow-2xl ring-2 ring-[#D4A24C] overflow-hidden">
+                      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+                        <Search size={16} className="text-[#0F2A4A]" />
+                        <input
+                          ref={searchInputRef}
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && suggestions[0]) {
+                              pickAd(suggestions[0].id);
+                            } else if (e.key === "Escape") {
+                              setSearchQuery("");
+                              setSearchOpen(false);
+                            }
+                          }}
+                          placeholder="Type a business name…"
+                          className="flex-1 bg-transparent text-sm text-[#0F2A4A] placeholder-gray-400 outline-none py-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery("");
+                            setSearchOpen(false);
+                          }}
+                          aria-label="Close search"
+                          className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      {searchQuery && (
+                        <div className="max-h-64 overflow-y-auto">
+                          {suggestions.length === 0 ? (
+                            <div className="px-4 py-3 text-sm text-gray-500">
+                              No matching businesses.
+                            </div>
+                          ) : (
+                            suggestions.map((s) => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() => pickAd(s.id)}
+                                className="w-full text-left px-4 py-2 text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10 flex items-center justify-between gap-2"
+                              >
+                                <span className="truncate font-medium">{s.business_name}</span>
+                                <span className="text-xs text-gray-500 shrink-0">
+                                  {s.duration_seconds ?? 7}s
+                                </span>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
