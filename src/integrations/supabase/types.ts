@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          customer_email: string
+          environment: string
+          id: string
+          paid_at: string | null
+          plan: string
+          status: string
+          stripe_session_id: string
+          submission_token: string
+          token_used: boolean
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          customer_email: string
+          environment?: string
+          id?: string
+          paid_at?: string | null
+          plan: string
+          status?: string
+          stripe_session_id: string
+          submission_token?: string
+          token_used?: boolean
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          customer_email?: string
+          environment?: string
+          id?: string
+          paid_at?: string | null
+          plan?: string
+          status?: string
+          stripe_session_id?: string
+          submission_token?: string
+          token_used?: boolean
+        }
+        Relationships: []
+      }
       ad_submissions: {
         Row: {
           ad_type: string
@@ -24,6 +66,7 @@ export type Database = {
           id: string
           image_path: string
           industry: string
+          payment_id: string | null
           phone: string
           reject_reason: string | null
           status: string
@@ -39,6 +82,7 @@ export type Database = {
           id?: string
           image_path: string
           industry: string
+          payment_id?: string | null
           phone: string
           reject_reason?: string | null
           status?: string
@@ -54,13 +98,22 @@ export type Database = {
           id?: string
           image_path?: string
           industry?: string
+          payment_id?: string | null
           phone?: string
           reject_reason?: string | null
           status?: string
           tagline?: string | null
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ad_submissions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "ad_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ads: {
         Row: {
