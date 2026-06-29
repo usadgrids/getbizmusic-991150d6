@@ -70,9 +70,36 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [hovered, setHovered] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const current = ads[idx];
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
+
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return ads
+      .filter((a) => a.business_name.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [searchQuery, ads]);
+
+  const pickAd = (adId: string) => {
+    const i = ads.findIndex((a) => a.id === adId);
+    if (i >= 0) setIdx(i);
+    setSearchQuery("");
+    setSearchOpen(false);
+    setHovered(false);
+  };
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [searchOpen]);
+
 
   // Reset the countdown whenever the slide (or its duration) changes
   useEffect(() => {
