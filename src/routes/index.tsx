@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getActiveAds } from "@/lib/ads.functions";
 import { BizNavbar } from "@/components/biz/BizNavbar";
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.prefetchQuery({
+    await context.queryClient.ensureQueryData({
       queryKey: ["active-ads"],
       queryFn: () => getActiveAds(),
     });
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const fetchAds = useServerFn(getActiveAds);
-  const { data: ads = [] } = useQuery({
+  const { data: ads = [] } = useSuspenseQuery({
     queryKey: ["active-ads"],
     queryFn: () => fetchAds(),
   });
