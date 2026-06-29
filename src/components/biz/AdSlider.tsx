@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
   Music,
@@ -6,6 +6,7 @@ import {
   Play,
   SkipBack,
   SkipForward,
+  Clock,
 } from "lucide-react";
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
@@ -21,6 +22,40 @@ import {
   type MiniPlayerTrack,
 } from "./MiniPlayer";
 
+function SlideTimer({
+  duration,
+  remaining,
+  accent,
+}: {
+  duration: number;
+  remaining: number;
+  accent: string;
+}) {
+  const progress = useMemo(
+    () => (duration > 0 ? (remaining / duration) * 100 : 0),
+    [duration, remaining],
+  );
+  return (
+    <div
+      className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
+      aria-label={`Next ad in ${Math.ceil(remaining)} seconds`}
+    >
+      <Clock size={13} className="text-[#D4A24C]" />
+      <span className="tabular-nums">{Math.ceil(remaining)}s</span>
+      <div
+        className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-white/30"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${progress}%`, backgroundColor: accent }}
+        />
+      </div>
+    </div>
+  );
+}
+
+
 interface Props {
   ads: PublicAd[];
   title: string;
@@ -32,7 +67,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [timeLeft, setTimeLeft] = useState(0);
   const current = ads[idx];
+  const duration = current?.duration_seconds || 7;
+
+  // Reset the countdown whenever the slide (or its duration) changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration, idx]);
+
+  // Tick the countdown down (pauses with the music)
+  useEffect(() => {
+    if (paused || ads.length <= 1 || !current) return;
+    const id = window.setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - 0.1));
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [paused, ads.length, current, duration]);
 
   // Auto-advance using the per-ad duration (pauses with the music)
   useEffect(() => {
@@ -67,8 +118,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
-  
-
   const togglePlayPause = () => {
     if (musicPlaying) {
       dispatchMusic(MINIPLAYER_PAUSE_EVENT);
@@ -78,6 +127,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       setPaused(false);
     }
   };
+
 
   return (
     <section id="ad-slideshow" className="my-8">
@@ -133,6 +183,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 />
               )}
             </div>
+            {ads.length > 0 && (
+              <SlideTimer
+                duration={duration}
+                remaining={timeLeft}
+                accent={accent}
+              />
+            )}
           </div>
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
