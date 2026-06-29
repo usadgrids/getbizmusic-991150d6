@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -33,6 +33,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
+  const [showFullAd, setShowFullAd] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const revealTimerRef = useRef<number | null>(null);
   const current = ads[idx];
 
   // Auto-advance using the per-ad duration (pauses with the music)
@@ -63,13 +66,31 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   }, []);
 
   const accent = featured ? "#D4A24C" : "#0F2A4A";
-  const goPrev = () =>
+  const revealFullAdTemporarily = () => {
+    setShowFullAd(true);
+    if (revealTimerRef.current) window.clearTimeout(revealTimerRef.current);
+    revealTimerRef.current = window.setTimeout(() => setShowFullAd(false), 2500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (revealTimerRef.current) window.clearTimeout(revealTimerRef.current);
+    };
+  }, []);
+
+  const goPrev = () => {
+    revealFullAdTemporarily();
     setIdx((i) => (i === 0 ? Math.max(ads.length - 1, 0) : i - 1));
-  const goNext = () => setIdx((i) => (i + 1) % Math.max(ads.length, 1));
+  };
+  const goNext = () => {
+    revealFullAdTemporarily();
+    setIdx((i) => (i + 1) % Math.max(ads.length, 1));
+  };
 
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
 
+  const fullAdVisible = isHovering || showFullAd;
 
   const togglePlayPause = () => {
     if (musicPlaying) {
@@ -105,7 +126,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white"
             style={{ border: `3px solid ${accent}` }}
           >
-            <div className="relative aspect-[16/9] w-full bg-gray-100 group">
+            <div
+              className="relative aspect-[16/9] w-full bg-gray-100 group"
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+            >
               {current.website_url ? (
                 <a
                   href={current.website_url}
@@ -118,7 +143,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     src={current.image_url}
                     alt={current.business_name}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+                    style={{
+                      transform: fullAdVisible ? "scale(1)" : "scale(1.52)",
+                      transformOrigin: "top center",
+                    }}
                   />
                 </a>
               ) : (
@@ -126,7 +155,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   src={current.image_url}
                   alt={current.business_name}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+                  style={{
+                    transform: fullAdVisible ? "scale(1)" : "scale(1.52)",
+                    transformOrigin: "top center",
+                  }}
                 />
               )}
             </div>
