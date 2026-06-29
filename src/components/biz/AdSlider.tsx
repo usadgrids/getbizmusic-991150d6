@@ -67,11 +67,37 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   }, []);
 
   const accent = featured ? "#D4A24C" : "#0F2A4A";
-  const goPrev = () => setIdx((i) => (i === 0 ? Math.max(ads.length - 1, 0) : i - 1));
-  const goNext = () => setIdx((i) => (i + 1) % Math.max(ads.length, 1));
+  const goPrev = () => {
+    setIdx((i) => (i === 0 ? Math.max(ads.length - 1, 0) : i - 1));
+    revealOverlayTemporarily();
+  };
+  const goNext = () => {
+    setIdx((i) => (i + 1) % Math.max(ads.length, 1));
+    revealOverlayTemporarily();
+  };
 
   const dispatchMusic = (event: string) =>
     window.dispatchEvent(new CustomEvent(event));
+
+  const clearOverlayTimeout = () => {
+    if (overlayTimeoutRef.current) {
+      window.clearTimeout(overlayTimeoutRef.current);
+      overlayTimeoutRef.current = null;
+    }
+  };
+
+  const revealOverlayTemporarily = () => {
+    clearOverlayTimeout();
+    setShowOverlay(true);
+    overlayTimeoutRef.current = window.setTimeout(() => {
+      setShowOverlay(false);
+    }, 2500);
+  };
+
+  const toggleOverlay = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("a[href]")) return;
+    setShowOverlay((prev) => !prev);
+  };
 
   const togglePlayPause = () => {
     if (musicPlaying) {
