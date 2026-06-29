@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
   Music,
@@ -6,6 +6,7 @@ import {
   Play,
   SkipBack,
   SkipForward,
+  Clock,
 } from "lucide-react";
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
@@ -20,6 +21,40 @@ import {
   type MiniPlayerActivity,
   type MiniPlayerTrack,
 } from "./MiniPlayer";
+
+function SlideTimer({
+  duration,
+  remaining,
+  accent,
+}: {
+  duration: number;
+  remaining: number;
+  accent: string;
+}) {
+  const progress = useMemo(
+    () => (duration > 0 ? (remaining / duration) * 100 : 0),
+    [duration, remaining],
+  );
+  return (
+    <div
+      className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
+      aria-label={`Next ad in ${Math.ceil(remaining)} seconds`}
+    >
+      <Clock size={13} className="text-[#D4A24C]" />
+      <span className="tabular-nums">{Math.ceil(remaining)}s</span>
+      <div
+        className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-white/30"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${progress}%`, backgroundColor: accent }}
+        />
+      </div>
+    </div>
+  );
+}
+
 
 interface Props {
   ads: PublicAd[];
