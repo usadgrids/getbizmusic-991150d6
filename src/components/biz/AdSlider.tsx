@@ -104,8 +104,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto"
             style={{
               border: `3px solid ${accent}`,
-              height: "min(calc(100svh - 320px), 56.25vw)",
-              aspectRatio: "16 / 9",
+              height: "min(calc(100svh - 280px), 75vw)",
+              aspectRatio: "4 / 3",
               width: "auto",
               maxWidth: "100%",
             }}
