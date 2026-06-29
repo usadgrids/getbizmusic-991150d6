@@ -9,8 +9,7 @@ export function PricingBanner() {
           Simple, One-Time Annual Pricing
         </h2>
         <p className="text-sm text-gray-700 mt-2 max-w-2xl mx-auto">
-          <strong>Really Special Introductory Limited Time Offer</strong> — $1/month, billed
-          $12/year. Option to resubscribe at the end of your annual payment of $12.
+          <strong>Really Special Introductory Limited Time Offer.</strong>
           <em> (Prices may change.)</em>
         </p>
       </div>
