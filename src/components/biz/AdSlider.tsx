@@ -203,19 +203,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <Music size={16} className="text-[#D4A24C] shrink-0" />
               <div className="min-w-0">
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-gray-500">
-                  <span>Background music</span>
-                  <MusicWaveform playing={musicPlaying} />
+                <div className="text-[10px] uppercase tracking-wider text-gray-500">
+                  Background music
                 </div>
-                <div className="text-xs font-medium text-[#0F2A4A] truncate max-w-[220px] sm:max-w-[360px]">
+                <div className="text-xs font-medium text-[#0F2A4A] truncate max-w-[140px] sm:max-w-[260px]">
                   {trackTitle || (musicPlaying ? "Now playing…" : "Paused")}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center justify-center px-2">
+              <MusicWaveform playing={musicPlaying} />
+            </div>
+
+            <div className="flex items-center justify-end gap-1 flex-1">
               <button
                 type="button"
                 onClick={() => dispatchMusic(MINIPLAYER_PREV_EVENT)}
