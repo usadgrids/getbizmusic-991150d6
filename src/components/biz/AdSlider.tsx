@@ -10,6 +10,9 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { INDUSTRIES } from "@/lib/biz-utils";
+
+
 
 import type { PublicAd } from "@/lib/ads.functions";
 import { PlaylistMarquee } from "./PlaylistMarquee";
@@ -78,13 +81,25 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const duration = current?.duration_seconds || 7;
   const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
 
+  const industryLabel = (value: string) =>
+    INDUSTRIES.find((i) => i.value === value)?.label ?? value;
+
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
     return ads
-      .filter((a) => a.business_name.toLowerCase().includes(q))
+      .filter((a) => {
+        const label = industryLabel(a.industry).toLowerCase();
+        return (
+          a.business_name.toLowerCase().includes(q) ||
+          a.industry.toLowerCase().includes(q) ||
+          label.includes(q) ||
+          (a.tagline ?? "").toLowerCase().includes(q)
+        );
+      })
       .slice(0, 6);
   }, [searchQuery, ads]);
+
 
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
@@ -256,7 +271,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                               setSearchOpen(false);
                             }
                           }}
-                          placeholder="Type a business name…"
+                          placeholder="Type Business Name or Search For A Business ex. Restaurants, Pizza, etc."
                           className="flex-1 bg-transparent text-sm text-[#0F2A4A] placeholder-gray-400 outline-none py-1"
                         />
                         <button
@@ -285,12 +300,18 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                                 onClick={() => pickAd(s.id)}
                                 className="w-full text-left px-4 py-2 text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10 flex items-center justify-between gap-2"
                               >
-                                <span className="truncate font-medium">{s.business_name}</span>
+                                <span className="truncate flex items-baseline gap-2 min-w-0">
+                                  <span className="font-medium truncate">{s.business_name}</span>
+                                  <span className="text-xs text-[#D4A24C] font-semibold shrink-0">
+                                    = {industryLabel(s.industry)}
+                                  </span>
+                                </span>
                                 <span className="text-xs text-gray-500 shrink-0">
                                   {s.duration_seconds ?? 7}s
                                 </span>
                               </button>
                             ))
+
                           )}
                         </div>
                       )}
