@@ -17,10 +17,10 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/submit")({
   head: () => ({
     meta: [
-      { title: "Submit Your Ad — BizSpot Directory" },
-      { name: "description", content: "Upload your business ad image. $5 or $10 — one year of exposure. Reviewed within 24 hours." },
-      { property: "og:title", content: "Submit Your Ad — BizSpot Directory" },
-      { property: "og:description", content: "Get your business in front of customers nationwide, all year long." },
+      { title: "Submit Your Ad — BizSpot Directory - National City" },
+      { name: "description", content: "Upload your business ad image. Intro offer: $12/year (about $1/month). Reviewed within 24 hours." },
+      { property: "og:title", content: "Submit Your Ad — BizSpot Directory - National City" },
+      { property: "og:description", content: "Get your business in front of customers nationwide for $12/year — limited-time intro offer." },
     ],
   }),
   validateSearch: (search) => searchSchema.parse(search),

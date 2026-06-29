@@ -48,9 +48,10 @@ export function PricingBanner() {
             <h3 className="font-semibold">Featured Slider Ad</h3>
           </div>
           <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-white">$10</span>
+            <span className="text-4xl font-bold text-white">$12</span>
             <span className="text-white/70 text-sm">/ year</span>
           </div>
+          <p className="text-xs text-[#D4A24C] font-semibold mt-1">$1/month — intro offer</p>
           <p className="text-xs text-white/70 mt-1">10 seconds per rotation</p>
           <ul className="mt-4 space-y-2 text-sm text-white/90">
             <li className="flex gap-2"><Check size={16} className="text-[#D4A24C] shrink-0 mt-0.5" /> Twice the display time</li>
@@ -63,7 +64,7 @@ export function PricingBanner() {
             search={{ plan: "slider_10" }}
             className="mt-5 inline-block w-full text-center bg-[#D4A24C] text-[#0F2A4A] font-semibold py-2.5 rounded-md hover:bg-[#e0b266] transition-colors"
           >
-            Get Featured — $10
+            Get Featured — $12
           </Link>
         </div>
       </div>
