@@ -88,11 +88,12 @@ function TapToPlayOverlay({
   visible: boolean;
   onTap: () => void;
 }) {
+  const isMobile = useIsMobile();
   const [inAdSection, setInAdSection] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isMobile) return;
     const target = document.getElementById("ad-slideshow");
     if (!target) return;
     const observer = new IntersectionObserver(
@@ -101,9 +102,9 @@ function TapToPlayOverlay({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [visible]);
+  }, [visible, isMobile]);
 
-  if (!visible || dismissed || !inAdSection) return null;
+  if (!isMobile || !visible || dismissed || !inAdSection) return null;
 
   const handleTap = () => {
     setDismissed(true);
