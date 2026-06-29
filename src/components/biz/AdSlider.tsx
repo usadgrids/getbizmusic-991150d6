@@ -147,7 +147,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 text-white transition-opacity duration-300 ${
                   showOverlay
                     ? "opacity-100 pointer-events-auto"
-                    : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                    : "opacity-0 pointer-events-none"
                 }`}
               >
                 <div className="flex items-end justify-between gap-3">
