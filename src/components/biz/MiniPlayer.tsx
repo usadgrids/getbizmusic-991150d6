@@ -117,7 +117,7 @@ function TapToPlayOverlay({
       aria-modal="true"
       aria-label="Tap to play music"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C] opacity-35 pointer-events-auto">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C] opacity-50 pointer-events-auto">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C]">
           <Music size={28} />
         </div>
