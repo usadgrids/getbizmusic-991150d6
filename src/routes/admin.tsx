@@ -103,7 +103,28 @@ function AuthForm() {
           >
             {mode === "signin" ? "First time? Create the admin account →" : "← Back to sign in"}
           </button>
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={async () => {
+                if (!email) return toast.error("Enter your email first.");
+                try {
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + "/reset-password",
+                  });
+                  if (error) throw error;
+                  toast.success("Password reset link sent — check your email.");
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Failed to send reset email");
+                }
+              }}
+              className="w-full text-xs text-[#0F2A4A] hover:underline"
+            >
+              Forgot password?
+            </button>
+          )}
         </form>
+
         <div className="mt-4 text-center">
           <Link to="/" className="text-xs text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1">
             <ArrowLeft size={12} /> Back to home
