@@ -151,7 +151,7 @@ export const listPendingSubmissions = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ad_submissions")
-      .select("*")
+      .select("*, payment:ad_payments(id, stripe_session_id, customer_email, plan, amount_cents, status, environment, paid_at, created_at)")
       .eq("status", "pending")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
