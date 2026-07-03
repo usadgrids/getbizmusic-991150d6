@@ -22,14 +22,38 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Supabase parses the recovery token from the URL hash on load
-    // and fires PASSWORD_RECOVERY when the session is ready.
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
-    supabase.auth.getSession().then(({ data }) => {
+
+    (async () => {
+      const url = new URL(window.location.href);
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+
+      // Flow 1: PKCE ?code=...
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) setReady(true);
+        window.history.replaceState({}, "", url.pathname);
+        return;
+      }
+
+      // Flow 2: token_hash query (magic-link style recovery)
+      const tokenHash = url.searchParams.get("token_hash") || url.searchParams.get("token");
+      const type = (url.searchParams.get("type") || hash.get("type")) as "recovery" | null;
+      if (tokenHash && type === "recovery") {
+        const { error } = await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+        if (!error) setReady(true);
+        window.history.replaceState({}, "", url.pathname);
+        return;
+      }
+
+      // Flow 3: implicit #access_token=... — supabase-js auto-parses
+      const { data } = await supabase.auth.getSession();
       if (data.session) setReady(true);
-    });
+    })();
+
     return () => sub.subscription.unsubscribe();
   }, []);
 
