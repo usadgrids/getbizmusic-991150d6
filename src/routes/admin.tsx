@@ -246,7 +246,7 @@ function AdminConsole() {
               {pending.map((s) => (
                 <PendingCard
                   key={s.id}
-                  s={s}
+                  s={s as unknown as PendingRow}
                   onApprove={async () => {
                     try {
                       await approveFn({ data: { id: s.id } });
