@@ -358,3 +358,331 @@ function AdminConsole() {
     </div>
   );
 }
+
+type PendingRow = {
+  id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  website_url: string | null;
+  industry: string;
+  tagline: string | null;
+  ad_type: "image_5" | "slider_10";
+  preview_url: string;
+  created_at: string;
+  payment?: {
+    id: string;
+    stripe_session_id: string;
+    customer_email: string;
+    plan: string;
+    amount_cents: number;
+    status: string;
+    environment: string;
+    paid_at: string | null;
+    created_at: string;
+  } | null;
+};
+
+function PendingCard({
+  s,
+  onApprove,
+  onReject,
+}: {
+  s: PendingRow;
+  onApprove: () => Promise<void>;
+  onReject: (reason: string) => Promise<void>;
+}) {
+  const [showReject, setShowReject] = useState(false);
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const doReject = async () => {
+    if (reason.trim().length < 5) {
+      toast.error("Please provide a rejection reason (at least 5 characters).");
+      return;
+    }
+    setBusy(true);
+    try {
+      await onReject(reason.trim());
+      setShowReject(false);
+      setReason("");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const pay = s.payment;
+  const amount = pay ? (pay.amount_cents / 100).toFixed(2) : null;
+  const orderNo = pay ? `#${pay.id.slice(0, 8).toUpperCase()}` : null;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+      <div className="aspect-[1200/628] bg-gray-100">
+        {s.preview_url && (
+          <img src={s.preview_url} alt={s.business_name} className="w-full h-full object-cover" />
+        )}
+      </div>
+      <div className="p-4 space-y-2 text-sm flex-1 flex flex-col">
+        <div className="font-serif text-lg font-bold text-[#0F2A4A]">{s.business_name}</div>
+        <div className="text-xs text-gray-500">
+          {s.industry} · {s.ad_type === "slider_10" ? "Featured Slider ($24)" : "Standard ($12)"}
+        </div>
+        {s.tagline && <div className="italic text-gray-700">"{s.tagline}"</div>}
+        <div className="text-xs text-gray-600 space-y-0.5 pt-2 border-t border-gray-100">
+          <div>👤 {s.contact_name}</div>
+          <div>✉️ <a href={`mailto:${s.email}`} className="text-[#0F2A4A] hover:underline">{s.email}</a></div>
+          <div>📞 {s.phone}</div>
+          {s.website_url && (
+            <div>
+              🌐 <a href={s.website_url} target="_blank" rel="noreferrer" className="text-[#0F2A4A] hover:underline inline-flex items-center gap-1">
+                {s.website_url} <ExternalLink size={10} />
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Payment / order info */}
+        <div className="text-xs bg-slate-50 border border-slate-200 rounded-md p-2 mt-2 space-y-1">
+          <div className="flex items-center gap-1.5 font-semibold text-[#0F2A4A]">
+            <CreditCard size={12} /> Payment
+          </div>
+          {pay ? (
+            <>
+              <div><span className="text-gray-500">Order:</span> <span className="font-mono">{orderNo}</span></div>
+              <div><span className="text-gray-500">Amount:</span> ${amount} USD ({pay.environment})</div>
+              <div><span className="text-gray-500">Status:</span> <span className="uppercase font-medium">{pay.status}</span></div>
+              <div><span className="text-gray-500">Paid at:</span> {pay.paid_at ? new Date(pay.paid_at).toLocaleString() : "—"}</div>
+              <div><span className="text-gray-500">Billed email:</span> {pay.customer_email}</div>
+              <div className="truncate"><span className="text-gray-500">Stripe session:</span> <span className="font-mono text-[10px]">{pay.stripe_session_id}</span></div>
+            </>
+          ) : (
+            <div className="italic text-amber-700">Manual submission — no payment on file (admin override)</div>
+          )}
+        </div>
+
+        {!showReject ? (
+          <div className="flex gap-2 pt-3 mt-auto">
+            <button
+              onClick={onApprove}
+              className="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md hover:bg-emerald-700 inline-flex items-center justify-center gap-1"
+            >
+              <Check size={16} /> Approve
+            </button>
+            <button
+              onClick={() => setShowReject(true)}
+              className="flex-1 bg-red-600 text-white font-semibold py-2 rounded-md hover:bg-red-700 inline-flex items-center justify-center gap-1"
+            >
+              <X size={16} /> Reject
+            </button>
+          </div>
+        ) : (
+          <div className="pt-3 mt-auto space-y-2">
+            <label className="text-xs font-semibold text-red-700">
+              Rejection reason (emailed to submitter)
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              maxLength={1000}
+              placeholder="e.g. Image contains prohibited content. Per your agreement, non-approved ads are non-refundable."
+              className="w-full border border-red-300 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+            />
+            <div className="text-[11px] text-gray-500">
+              The submitter will be emailed this reason plus a reminder that non-approved ads are non-refundable per the content agreement.
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={doReject}
+                disabled={busy}
+                className="flex-1 bg-red-600 text-white font-semibold py-1.5 rounded-md hover:bg-red-700 disabled:opacity-60 text-sm"
+              >
+                {busy ? "Sending…" : "Confirm reject & email submitter"}
+              </button>
+              <button
+                onClick={() => { setShowReject(false); setReason(""); }}
+                disabled={busy}
+                className="px-3 py-1.5 border border-gray-300 text-gray-600 rounded-md text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
+  const createFn = useServerFn(createManualSubmission);
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [autoApprove, setAutoApprove] = useState(true);
+  const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
+
+  const onFile = (f: File | null) => {
+    if (!f) { setFile(null); return; }
+    if (f.size > 2 * 1024 * 1024) { toast.error("Image must be under 2 MB"); return; }
+    if (!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)) { toast.error("JPG, PNG, or WebP only"); return; }
+    setFile(f);
+  };
+
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!file) { toast.error("Please choose an image"); return; }
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `admin/${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("ad-uploads")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+
+      await createFn({
+        data: {
+          business_name: String(fd.get("business_name") ?? ""),
+          contact_name: String(fd.get("contact_name") ?? ""),
+          email: String(fd.get("email") ?? ""),
+          phone: String(fd.get("phone") ?? ""),
+          website_url: String(fd.get("website_url") ?? ""),
+          industry: String(fd.get("industry") ?? ""),
+          tagline: String(fd.get("tagline") ?? ""),
+          ad_type: adType,
+          image_path: path,
+          auto_approve: autoApprove,
+        },
+      });
+      toast.success(autoApprove ? "Ad created and now live" : "Ad added to pending queue");
+      (e.target as HTMLFormElement).reset();
+      setFile(null);
+      setOpen(false);
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create ad");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Plus size={18} className="text-[#D4A24C]" />
+          <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">Manual Ad Submission</h2>
+          <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">Admin override — no payment</span>
+        </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="text-sm bg-[#0F2A4A] text-white px-3 py-1.5 rounded-md hover:bg-[#163864] inline-flex items-center gap-1"
+        >
+          <Plus size={14} /> {open ? "Close" : "New manual ad"}
+        </button>
+      </div>
+
+      {open && (
+        <form
+          onSubmit={submit}
+          className="bg-white border border-gray-200 rounded-xl p-5 space-y-4"
+        >
+          <div>
+            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">Ad image</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#D4A24C]">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#0F2A4A] file:text-white hover:file:bg-[#163864] cursor-pointer"
+                required
+              />
+              {file && (
+                <div className="mt-2 text-xs text-emerald-700 inline-flex items-center gap-1">
+                  <Check size={12} /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
+                </div>
+              )}
+              <div className="mt-2 text-xs text-gray-500 inline-flex items-start gap-1">
+                <Upload size={12} className="mt-0.5" />
+                Recommended: 1216×896 (4:3), under 2 MB.
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <AdminField name="business_name" label="Business name" required />
+            <AdminField name="contact_name" label="Contact name" required />
+            <AdminField name="email" type="email" label="Email" required />
+            <AdminField name="phone" label="Phone" required />
+            <AdminField name="website_url" label="Website (optional)" placeholder="https://..." />
+            <div>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+              <select
+                name="industry" required defaultValue=""
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              >
+                <option value="" disabled>Pick one…</option>
+                {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <AdminField name="tagline" label="Tagline (optional, max 120 chars)" maxLength={120} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Ad plan / rotation</label>
+              <select
+                value={adType}
+                onChange={(e) => setAdType(e.target.value as "image_5" | "slider_10")}
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              >
+                <option value="image_5">{AD_PLANS.image_5.label} — {AD_PLANS.image_5.seconds}s rotation</option>
+                <option value="slider_10">{AD_PLANS.slider_10.label} — {AD_PLANS.slider_10.seconds}s rotation</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-700 mt-5">
+              <input
+                type="checkbox"
+                checked={autoApprove}
+                onChange={(e) => setAutoApprove(e.target.checked)}
+              />
+              Auto-approve and publish immediately (1-year run)
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-2.5 rounded-md hover:bg-[#e0b266] disabled:opacity-60"
+          >
+            {busy ? "Creating…" : autoApprove ? "Create & Publish Ad" : "Add to Pending Queue"}
+          </button>
+        </form>
+      )}
+    </section>
+  );
+}
+
+function AdminField({
+  name, label, required, type = "text", placeholder, maxLength,
+}: {
+  name: string; label: string; required?: boolean; type?: string;
+  placeholder?: string; maxLength?: number;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
+        {label}{required && <span className="text-red-500"> *</span>}
+      </label>
+      <input
+        name={name} type={type} required={required} placeholder={placeholder} maxLength={maxLength}
+        className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+      />
+    </div>
+  );
+}
