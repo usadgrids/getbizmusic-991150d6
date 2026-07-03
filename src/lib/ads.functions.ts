@@ -222,17 +222,19 @@ export const approveSubmission = createServerFn({ method: "POST" })
 export const rejectSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ id: z.string().uuid(), reason: z.string().max(280).optional() }).parse(d),
+    z.object({ id: z.string().uuid(), reason: z.string().max(1000).optional() }).parse(d),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { data: updated, error } = await supabaseAdmin
       .from("ad_submissions")
       .update({ status: "rejected", reject_reason: data.reason ?? null })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .select("id, business_name, contact_name, email, ad_type")
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    return { ok: true as const };
+    return { ok: true as const, submission: updated };
   });
 
 export const removeAd = createServerFn({ method: "POST" })
@@ -247,4 +249,68 @@ export const removeAd = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  });
+
+// Admin-only manual submission that bypasses payment. Optionally auto-approves.
+const manualSchema = z.object({
+  business_name: z.string().trim().min(1).max(120),
+  contact_name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().min(1).max(40),
+  website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  industry: z.string().trim().min(1).max(40),
+  tagline: z.string().trim().max(120).optional().or(z.literal("")),
+  ad_type: z.enum(["image_5", "slider_10"]),
+  image_path: z.string().trim().min(1).max(500),
+  auto_approve: z.boolean().optional().default(true),
+});
+
+export const createManualSubmission = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => manualSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const status = data.auto_approve ? "approved" : "pending";
+    const { data: sub, error } = await supabaseAdmin
+      .from("ad_submissions")
+      .insert({
+        business_name: data.business_name,
+        contact_name: data.contact_name,
+        email: data.email,
+        phone: data.phone,
+        website_url: data.website_url || null,
+        industry: data.industry,
+        tagline: data.tagline || null,
+        ad_type: data.ad_type,
+        image_path: data.image_path,
+        status,
+        payment_id: null,
+      })
+      .select("id")
+      .maybeSingle();
+    if (error || !sub) throw new Error(error?.message ?? "Insert failed");
+
+    if (data.auto_approve) {
+      const seconds = data.ad_type === "slider_10" ? 10 : 7;
+      const now = new Date();
+      const expires = new Date(now);
+      expires.setFullYear(expires.getFullYear() + 1);
+      const { error: adErr } = await supabaseAdmin.from("ads").insert({
+        submission_id: sub.id,
+        business_name: data.business_name,
+        website_url: data.website_url || null,
+        tagline: data.tagline || null,
+        industry: data.industry,
+        ad_type: data.ad_type,
+        image_url: data.image_path,
+        duration_seconds: seconds,
+        starts_at: now.toISOString(),
+        expires_at: expires.toISOString(),
+        status: "active",
+      });
+      if (adErr) throw new Error(adErr.message);
+    }
+    return { ok: true as const, id: sub.id, status };
   });
