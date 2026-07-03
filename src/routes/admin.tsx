@@ -244,63 +244,53 @@ function AdminConsole() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {pending.map((s) => (
-                <div key={s.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="aspect-[1200/628] bg-gray-100">
-                    {s.preview_url && (
-                      <img src={s.preview_url} alt={s.business_name} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <div className="p-4 space-y-2 text-sm">
-                    <div className="font-serif text-lg font-bold text-[#0F2A4A]">{s.business_name}</div>
-                    <div className="text-xs text-gray-500">
-                      {s.industry} · {s.ad_type === "slider_10" ? "Featured Slider ($12)" : "Standard ($12)"}
-                    </div>
-                    {s.tagline && <div className="italic text-gray-700">"{s.tagline}"</div>}
-                    <div className="text-xs text-gray-600 space-y-0.5 pt-2 border-t border-gray-100">
-                      <div>👤 {s.contact_name}</div>
-                      <div>✉️ <a href={`mailto:${s.email}`} className="text-[#0F2A4A] hover:underline">{s.email}</a></div>
-                      <div>📞 {s.phone}</div>
-                      {s.website_url && (
-                        <div>
-                          🌐 <a href={s.website_url} target="_blank" rel="noreferrer" className="text-[#0F2A4A] hover:underline inline-flex items-center gap-1">
-                            {s.website_url} <ExternalLink size={10} />
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2 pt-3">
-                      <button
-                        onClick={async () => {
-                          try {
-                            await approveFn({ data: { id: s.id } });
-                            toast.success("Approved — ad is now live for 1 year");
-                            refreshAll();
-                          } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                        }}
-                        className="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md hover:bg-emerald-700 inline-flex items-center justify-center gap-1"
-                      >
-                        <Check size={16} /> Approve
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const reason = window.prompt("Rejection reason (optional)") ?? undefined;
-                          try {
-                            await rejectFn({ data: { id: s.id, reason } });
-                            toast.success("Rejected");
-                            refreshAll();
-                          } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                        }}
-                        className="flex-1 bg-red-600 text-white font-semibold py-2 rounded-md hover:bg-red-700 inline-flex items-center justify-center gap-1"
-                      >
-                        <X size={16} /> Reject
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <PendingCard
+                  key={s.id}
+                  s={s}
+                  onApprove={async () => {
+                    try {
+                      await approveFn({ data: { id: s.id } });
+                      toast.success("Approved — ad is now live for 1 year");
+                      refreshAll();
+                    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+                  }}
+                  onReject={async (reason) => {
+                    try {
+                      const res = await rejectFn({ data: { id: s.id, reason } });
+                      // Fire-and-forget rejection email so the admin isn't blocked
+                      const info = res?.submission;
+                      if (info?.email) {
+                        try {
+                          await sendTransactionalEmail({
+                            templateName: "ad-rejection",
+                            recipientEmail: info.email,
+                            idempotencyKey: `ad-rejection-${s.id}`,
+                            templateData: {
+                              businessName: info.business_name,
+                              contactName: info.contact_name,
+                              reason,
+                              plan: info.ad_type === "slider_10" ? "Featured Slider Ad ($24)" : "Standard Image Ad ($12)",
+                            },
+                          });
+                          toast.success("Rejected — notice emailed to submitter");
+                        } catch (mailErr) {
+                          console.error(mailErr);
+                          toast.warning("Rejected, but rejection email failed to queue");
+                        }
+                      } else {
+                        toast.success("Rejected");
+                      }
+                      refreshAll();
+                    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+                  }}
+                />
               ))}
             </div>
           )}
         </section>
+
+        <ManualSubmitSection onCreated={refreshAll} />
+
 
         {/* Live ads */}
         <section>
