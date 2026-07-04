@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { ArrowLeft, Check, Shield } from "lucide-react";
+import { ArrowLeft, Check, Shield, Info } from "lucide-react";
 import { toast } from "sonner";
 import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createAdCheckout } from "@/lib/payments.functions";
 import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
@@ -23,12 +25,21 @@ export const Route = createFileRoute("/pricing")({
 function PricingPage() {
   const [plan, setPlan] = useState<AdPlan>("image_5");
   const [email, setEmail] = useState("");
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [agreedNoRefund, setAgreedNoRefund] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const emailValid = /^\S+@\S+\.\S+$/.test(email);
+  const canPay = emailValid && agreedTerms && agreedNoRefund && !loading;
+
   const startCheckout = async () => {
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!emailValid) {
       toast.error("Please enter a valid email");
+      return;
+    }
+    if (!agreedTerms || !agreedNoRefund) {
+      toast.error("Please confirm both boxes to continue");
       return;
     }
     setLoading(true);
@@ -39,6 +50,9 @@ function PricingPage() {
           customerEmail: email,
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
+          agreedTerms,
+          agreedNoRefund,
+          disclosureVersion: "v1",
         },
       });
       if ("error" in result) throw new Error(result.error);
@@ -131,13 +145,80 @@ function PricingPage() {
             placeholder="you@example.com"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
+
+          {/* Disclosure block */}
+          <div className="mt-6 rounded-xl border-2 border-[#D4A24C]/60 bg-[#FFF8EC] p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Info size={18} className="text-[#D4A24C]" />
+              <h3 className="font-serif font-bold text-[#0F2A4A] text-base">
+                A FEW THINGS TO KNOW BEFORE YOU GRAB YOUR SPOT! 🎶
+              </h3>
+            </div>
+            <div className="space-y-3 text-sm text-[#3a2f1c] leading-relaxed">
+              <p>
+                <span className="font-semibold text-[#0F2A4A]">What you're getting:</span>{" "}
+                A fun, one-year spot on our National City business ad display! Your ad streams alongside
+                other awesome local businesses, for the number of seconds you chose, all year long.
+              </p>
+              <p>
+                <span className="font-semibold text-[#0F2A4A]">What this is (and isn't):</span>{" "}
+                Think of this as a fun way to get your business seen and heard alongside great local
+                music — not a guaranteed marketing campaign. We can't promise a specific number of
+                views, plays, or impressions, and we can't promise it'll bring in more sales, leads, or
+                foot traffic. It's all about community spirit and good vibes!
+              </p>
+              <p>
+                <span className="font-semibold text-[#0F2A4A]">Our refund policy:</span>{" "}
+                Once you complete your purchase, it's final — we're not able to offer refunds. This is
+                because your spot is reserved just for you for the full year, right when you buy it.
+              </p>
+              <p className="text-xs text-[#5a4a2c]">
+                Heads up, as California law requires (Civil Code § 1723), we're letting you know about
+                this no-refund policy before you purchase, not after. By completing your purchase,
+                you're confirming you saw this note ahead of time and you're all set with these terms.
+                Thanks so much for supporting local business! 🎉
+              </p>
+            </div>
+
+            <div className="mt-5 space-y-3 border-t border-[#D4A24C]/40 pt-4">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="agree-terms"
+                  checked={agreedTerms}
+                  onCheckedChange={(v) => setAgreedTerms(v === true)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="agree-terms" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
+                  Got it — I understand this is a fun novelty ad spot with no guaranteed views,
+                  plays, or business results.
+                </Label>
+              </div>
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="agree-refund"
+                  checked={agreedNoRefund}
+                  onCheckedChange={(v) => setAgreedNoRefund(v === true)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="agree-refund" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
+                  I understand and I'm good with the no-refund policy — once I purchase, it's final.
+                </Label>
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={startCheckout}
-            disabled={loading}
-            className="mt-4 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60"
+            disabled={!canPay}
+            className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D4A24C]"
           >
-            {loading ? "Starting…" : `Pay $${AD_PLANS[plan].price} & Continue`}
+            {loading ? "Starting…" : `Complete Purchase — $${AD_PLANS[plan].price}`}
           </button>
+          {!agreedTerms || !agreedNoRefund ? (
+            <p className="mt-2 text-xs text-center text-gray-500">
+              Please confirm both boxes above to continue.
+            </p>
+          ) : null}
           <p className="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1.5">
             <Shield size={12} /> Secure checkout. You'll get a receipt and unique submission link by email.
           </p>

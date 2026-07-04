@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
@@ -7,20 +8,47 @@ const PLAN_TO_PRICE = {
   slider_10: "ad_10s_annual",
 } as const;
 
+export const DISCLOSURE_VERSION = "v1";
+export const DISCLOSURE_SUMMARY =
+  "Novelty 1-year ad display, no performance guarantee, no refunds per CA Civil Code 1723. Buyer confirmed via checkbox before payment.";
+
 type CheckoutResult = { clientSecret: string } | { error: string };
 
+function getClientIp(): string | null {
+  try {
+    const req = getRequest();
+    const xff = req.headers.get("x-forwarded-for");
+    if (xff) return xff.split(",")[0]?.trim() ?? null;
+    return req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip");
+  } catch {
+    return null;
+  }
+}
+
 export const createAdCheckout = createServerFn({ method: "POST" })
-  .inputValidator((data: { plan: "image_5" | "slider_10"; customerEmail: string; returnUrl: string; environment: StripeEnv }) => {
+  .inputValidator((data: {
+    plan: "image_5" | "slider_10";
+    customerEmail: string;
+    returnUrl: string;
+    environment: StripeEnv;
+    agreedTerms: boolean;
+    agreedNoRefund: boolean;
+    disclosureVersion?: string;
+  }) => {
     const schema = z.object({
       plan: z.enum(["image_5", "slider_10"]),
       customerEmail: z.string().email(),
       returnUrl: z.string().url(),
       environment: z.enum(["sandbox", "live"]),
+      agreedTerms: z.literal(true, { errorMap: () => ({ message: "You must agree to the terms" }) }),
+      agreedNoRefund: z.literal(true, { errorMap: () => ({ message: "You must agree to the no-refund policy" }) }),
+      disclosureVersion: z.string().optional(),
     });
     return schema.parse(data);
   })
   .handler(async ({ data }): Promise<CheckoutResult> => {
     try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const stripe = createStripeClient(data.environment);
       const lookupKey = PLAN_TO_PRICE[data.plan];
       const prices = await stripe.prices.list({ lookup_keys: [lookupKey] });
@@ -30,17 +58,57 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       const productId = typeof stripePrice.product === "string" ? stripePrice.product : stripePrice.product.id;
       const product = await stripe.products.retrieve(productId);
 
+      const agreedAt = new Date().toISOString();
+      const disclosureVersion = data.disclosureVersion ?? DISCLOSURE_VERSION;
+      const ipAddress = getClientIp();
+      const isRecurring = stripePrice.type === "recurring";
+
+      const metadata: Record<string, string> = {
+        plan: data.plan,
+        customer_email: data.customerEmail,
+        agreed_terms: "true",
+        agreed_no_refund: "true",
+        agreed_at: agreedAt,
+        disclosure_version: disclosureVersion,
+        disclosure_text: DISCLOSURE_SUMMARY,
+      };
+
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: 1 }],
-        mode: stripePrice.type === "recurring" ? "subscription" : "payment",
+        mode: isRecurring ? "subscription" : "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer_email: data.customerEmail,
-        metadata: { plan: data.plan, customer_email: data.customerEmail },
-        ...(stripePrice.type === "recurring"
-          ? { subscription_data: { metadata: { plan: data.plan, customer_email: data.customerEmail } } }
-          : { payment_intent_data: { description: product.name } }),
+        metadata,
+        ...(isRecurring
+          ? { subscription_data: { metadata, description: product.name } }
+          : {
+              payment_intent_data: {
+                description: product.name,
+                receipt_email: data.customerEmail,
+                statement_descriptor_suffix: "WINALL MEDIA AD",
+                metadata,
+              },
+            }),
       });
+
+      // Persist consent immediately (pending payment). Webhook flips to paid later.
+      const { error: insertError } = await supabaseAdmin.from("ad_payments").insert({
+        stripe_session_id: session.id,
+        customer_email: data.customerEmail,
+        plan: data.plan,
+        amount_cents: stripePrice.unit_amount ?? 0,
+        status: "pending",
+        environment: data.environment,
+        agreed_terms: true,
+        agreed_no_refund: true,
+        agreed_at: agreedAt,
+        disclosure_version: disclosureVersion,
+        ip_address: ipAddress,
+      });
+      if (insertError) {
+        console.error("ad_payments pre-insert failed:", insertError);
+      }
 
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
@@ -79,7 +147,6 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<{ token?: string; email?: string; status: string }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Try our DB first (webhook may have already run)
     const { data: row } = await supabaseAdmin
       .from("ad_payments")
       .select("submission_token, customer_email, status")
@@ -88,33 +155,18 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
     if (row && row.status === "paid") {
       return { token: row.submission_token as string, email: row.customer_email as string, status: "paid" };
     }
-    // Fall back to Stripe (in case webhook hasn't arrived yet)
     try {
       const stripe = createStripeClient(data.environment);
       const session = await stripe.checkout.sessions.retrieve(data.sessionId);
       if (session.payment_status === "paid") {
-        // Upsert manually so the return page works even before webhook
-        const plan = (session.metadata?.plan as "image_5" | "slider_10") ?? "image_5";
-        const email = session.customer_email ?? session.customer_details?.email ?? session.metadata?.customer_email ?? "";
-        const amount = session.amount_total ?? 0;
-        const { data: upserted } = await supabaseAdmin
+        const { data: updated } = await supabaseAdmin
           .from("ad_payments")
-          .upsert(
-            {
-              stripe_session_id: session.id,
-              customer_email: email,
-              plan,
-              amount_cents: amount,
-              status: "paid",
-              environment: data.environment,
-              paid_at: new Date().toISOString(),
-            },
-            { onConflict: "stripe_session_id" }
-          )
+          .update({ status: "paid", paid_at: new Date().toISOString() })
+          .eq("stripe_session_id", session.id)
           .select("submission_token, customer_email")
           .maybeSingle();
-        if (upserted) {
-          return { token: upserted.submission_token as string, email: upserted.customer_email as string, status: "paid" };
+        if (updated) {
+          return { token: updated.submission_token as string, email: updated.customer_email as string, status: "paid" };
         }
       }
       return { status: session.payment_status ?? "pending" };

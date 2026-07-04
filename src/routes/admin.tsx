@@ -220,6 +220,7 @@ function AdminConsole() {
             <h1 className="font-serif text-lg">Admin Console</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
+            <Link to="/admin/disputes" className="hover:text-[#D4A24C]">Disputes</Link>
             <Link to="/" className="hover:text-[#D4A24C]">View site →</Link>
             <button onClick={() => supabase.auth.signOut()} className="text-white/80 hover:text-white">
               Sign out
