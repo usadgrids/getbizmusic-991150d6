@@ -16,11 +16,16 @@ export type Database = {
     Tables: {
       ad_payments: {
         Row: {
+          agreed_at: string | null
+          agreed_no_refund: boolean
+          agreed_terms: boolean
           amount_cents: number
           created_at: string
           customer_email: string
+          disclosure_version: string | null
           environment: string
           id: string
+          ip_address: string | null
           paid_at: string | null
           plan: string
           status: string
@@ -29,11 +34,16 @@ export type Database = {
           token_used: boolean
         }
         Insert: {
+          agreed_at?: string | null
+          agreed_no_refund?: boolean
+          agreed_terms?: boolean
           amount_cents: number
           created_at?: string
           customer_email: string
+          disclosure_version?: string | null
           environment?: string
           id?: string
+          ip_address?: string | null
           paid_at?: string | null
           plan: string
           status?: string
@@ -42,11 +52,16 @@ export type Database = {
           token_used?: boolean
         }
         Update: {
+          agreed_at?: string | null
+          agreed_no_refund?: boolean
+          agreed_terms?: boolean
           amount_cents?: number
           created_at?: string
           customer_email?: string
+          disclosure_version?: string | null
           environment?: string
           id?: string
+          ip_address?: string | null
           paid_at?: string | null
           plan?: string
           status?: string
@@ -167,6 +182,71 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "ad_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispute_evidence_log: {
+        Row: {
+          ad_payment_id: string | null
+          amount_cents: number | null
+          charge_id: string | null
+          created_at: string
+          currency: string | null
+          dispute_id: string
+          environment: string
+          evidence_json: Json | null
+          evidence_text: string
+          id: string
+          payment_intent_id: string | null
+          reason: string | null
+          status: string
+          stripe_session_id: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          ad_payment_id?: string | null
+          amount_cents?: number | null
+          charge_id?: string | null
+          created_at?: string
+          currency?: string | null
+          dispute_id: string
+          environment?: string
+          evidence_json?: Json | null
+          evidence_text?: string
+          id?: string
+          payment_intent_id?: string | null
+          reason?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ad_payment_id?: string | null
+          amount_cents?: number | null
+          charge_id?: string | null
+          created_at?: string
+          currency?: string | null
+          dispute_id?: string
+          environment?: string
+          evidence_json?: Json | null
+          evidence_text?: string
+          id?: string
+          payment_intent_id?: string | null
+          reason?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_evidence_log_ad_payment_id_fkey"
+            columns: ["ad_payment_id"]
+            isOneToOne: false
+            referencedRelation: "ad_payments"
             referencedColumns: ["id"]
           },
         ]
