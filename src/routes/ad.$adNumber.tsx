@@ -47,10 +47,10 @@ export const Route = createFileRoute("/ad/$adNumber")({
     const ad = loaderData.ad;
     const industry =
       INDUSTRIES.find((i) => i.value === ad.industry)?.label ?? ad.industry;
-    const title = `${ad.business_name} — ${industry} · BizSpot Directory National City`;
+    const title = `${ad.business_name} — ${industry} · Get Biz Music - National City, CA`;
     const description =
       ad.tagline?.trim() ||
-      `See ${ad.business_name} on BizSpot Directory National City. Local ${industry.toLowerCase()} — ad #${n}.`;
+      `See ${ad.business_name} on Get Biz Music - National City, CA. Local ${industry.toLowerCase()} — ad #${n}.`;
     return {
       meta: [
         { title },

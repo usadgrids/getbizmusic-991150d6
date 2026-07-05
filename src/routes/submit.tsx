@@ -18,7 +18,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/submit")({
   head: () => ({
     meta: [
-      { title: "Submit Your Ad — BizSpot Directory - National City" },
+      { title: "Submit Your Ad — Get Biz Music - National City, CA" },
       { name: "description", content: "Upload your business ad image after payment. Reviewed within 24 hours." },
     ],
   }),
