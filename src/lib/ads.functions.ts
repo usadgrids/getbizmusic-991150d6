@@ -6,6 +6,7 @@ const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 days; refreshed per load
 
 export type PublicAd = {
   id: string;
+  ad_number: number | null;
   business_name: string;
   website_url: string | null;
   tagline: string | null;
@@ -34,7 +35,7 @@ export const getActiveAds = createServerFn({ method: "GET" }).handler(async () =
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("ads")
-    .select("id,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds")
+    .select("id,ad_number,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds")
     .eq("status", "active")
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });

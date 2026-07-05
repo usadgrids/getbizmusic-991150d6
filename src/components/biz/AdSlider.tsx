@@ -87,16 +87,20 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     INDUSTRIES.find((i) => i.value === value)?.label ?? value;
 
   const suggestions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const raw = searchQuery.trim();
+    const q = raw.toLowerCase();
     if (!q) return [];
+    const numericQ = raw.replace(/^#/, "").trim();
     return ads
       .filter((a) => {
         const label = industryLabel(a.industry).toLowerCase();
+        const adNum = a.ad_number != null ? String(a.ad_number) : "";
         return (
           a.business_name.toLowerCase().includes(q) ||
           a.industry.toLowerCase().includes(q) ||
           label.includes(q) ||
-          (a.tagline ?? "").toLowerCase().includes(q)
+          (a.tagline ?? "").toLowerCase().includes(q) ||
+          (numericQ.length > 0 && adNum.includes(numericQ))
         );
       })
       .slice(0, 6);
@@ -321,7 +325,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                               setSearchOpen(false);
                             }
                           }}
-                          placeholder="Type Business Name or Search For A Business ex. Restaurants, Pizza, etc."
+                          placeholder="Search by Business Name, Category, or Ad # (e.g. 2911)"
                           className="flex-1 bg-transparent text-sm text-[#0F2A4A] placeholder-gray-400 outline-none py-1"
                         />
                         <button
@@ -352,6 +356,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                                 className="w-full text-left px-4 py-2 text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10 flex items-center justify-between gap-2"
                               >
                                 <span className="truncate flex items-baseline gap-2 min-w-0">
+                                  {s.ad_number != null && (
+                                    <span className="text-xs font-mono text-gray-500 shrink-0">#{s.ad_number}</span>
+                                  )}
                                   <span className="font-medium truncate">{s.business_name}</span>
                                   <span className="text-xs text-[#D4A24C] font-semibold shrink-0">
                                     = {industryLabel(s.industry)}
