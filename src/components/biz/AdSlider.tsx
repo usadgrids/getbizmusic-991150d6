@@ -245,15 +245,20 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           No ads here yet. <span className="text-[#0F2A4A] font-medium">Be the first to advertise!</span>
         </div>
       ) : (
-        <>
           <div
-            className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group max-w-full"
+            className="mx-auto w-full"
+            style={{
+              maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
+            }}
+          >
+          <div
+            className="relative rounded-2xl overflow-hidden shadow-xl bg-white w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
               maxHeight: "min(90svh, 900px)",
-              maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
+
             onMouseEnter={showSearchPeek}
             onMouseMove={showSearchPeek}
             onMouseLeave={() => {
@@ -444,7 +449,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             </div>
           </div>
           {featured && <PlaylistMarquee />}
-        </>
+        </div>
       )}
     </section>
   );
