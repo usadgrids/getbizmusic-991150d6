@@ -15,6 +15,7 @@ import { INDUSTRIES } from "@/lib/biz-utils";
 
 
 import type { PublicAd } from "@/lib/ads.functions";
+import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import {
@@ -294,6 +295,20 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 accent={accent}
               />
             )}
+
+            {/* Share bar — bottom-left overlay, pauses slider on click */}
+            <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1.5 backdrop-blur-sm shadow-md">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90 pl-1">
+                Share
+              </span>
+              <ShareBar
+                adNumber={current.ad_number}
+                businessName={current.business_name}
+                tagline={current.tagline}
+                onOpen={() => setPaused(true)}
+                compact
+              />
+            </div>
 
             {/* Hover-revealed search bar (center) */}
             {(hovered || searchOpen) && (
