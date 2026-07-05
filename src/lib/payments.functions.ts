@@ -163,9 +163,31 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           .from("ad_payments")
           .update({ status: "paid", paid_at: new Date().toISOString() })
           .eq("stripe_session_id", session.id)
-          .select("submission_token, customer_email")
+          .select("submission_token, customer_email, plan, amount_cents")
           .maybeSingle();
         if (updated) {
+          // Fallback: if the webhook hasn't landed yet, send the receipt from here too.
+          // enqueueTransactionalEmailInternal is safe to call twice — the queue idempotency
+          // key derived from sessionId prevents duplicate sends.
+          try {
+            const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+            const planLabels: Record<string, string> = {
+              image_5: "Standard Image Ad",
+              slider_10: "Featured Slider Ad",
+            };
+            await enqueueTransactionalEmailInternal({
+              templateName: "payment-receipt",
+              recipientEmail: updated.customer_email as string,
+              idempotencyKey: `payment-receipt-${session.id}`,
+              templateData: {
+                planLabel: planLabels[updated.plan as string] ?? (updated.plan as string),
+                amountFormatted: `$${(((updated.amount_cents as number) ?? 0) / 100).toFixed(2)}`,
+                submitUrl: `https://bizspotmusicad.lovable.app/submit?token=${updated.submission_token}`,
+              },
+            });
+          } catch (e) {
+            console.error("fallback payment-receipt enqueue failed:", e);
+          }
           return { token: updated.submission_token as string, email: updated.customer_email as string, status: "paid" };
         }
       }

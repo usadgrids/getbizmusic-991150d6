@@ -1,11 +1,59 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
 
+const PLAN_LABELS: Record<string, string> = {
+  image_5: 'Standard Image Ad',
+  slider_10: 'Featured Slider Ad',
+};
+
+const SITE_URL = 'https://bizspotmusicad.lovable.app';
+
+async function sendPaymentReceipt(params: {
+  email: string;
+  plan: string;
+  amountCents: number;
+  submissionToken: string;
+  sessionId: string;
+  receiptUrl?: string | null;
+}) {
+  try {
+    const { enqueueTransactionalEmailInternal } = await import('@/lib/email/enqueue.server');
+    await enqueueTransactionalEmailInternal({
+      templateName: 'payment-receipt',
+      recipientEmail: params.email,
+      idempotencyKey: `payment-receipt-${params.sessionId}`,
+      templateData: {
+        planLabel: PLAN_LABELS[params.plan] ?? params.plan,
+        amountFormatted: `$${(params.amountCents / 100).toFixed(2)}`,
+        submitUrl: `${SITE_URL}/submit?token=${params.submissionToken}`,
+        receiptUrl: params.receiptUrl ?? undefined,
+      },
+    });
+  } catch (e) {
+    console.error('payment-receipt email enqueue failed:', e);
+  }
+}
+
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const email = session.customer_email ?? session.customer_details?.email ?? session.metadata?.customer_email ?? "";
   const plan = (session.metadata?.plan as string) ?? "image_5";
   const amount = session.amount_total ?? 0;
+
+  // Attempt to fetch a Stripe receipt URL for the resulting charge.
+  let receiptUrl: string | null = null;
+  try {
+    if (session.payment_intent) {
+      const { createStripeClient } = await import('@/lib/stripe.server');
+      const stripe = createStripeClient(env);
+      const piId = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent.id;
+      const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
+      const charge: any = pi.latest_charge;
+      if (charge && typeof charge === 'object' && charge.receipt_url) receiptUrl = charge.receipt_url;
+    }
+  } catch (e) {
+    console.error('receipt_url lookup failed:', e);
+  }
 
   // Prefer update (pre-inserted at checkout create), fall back to upsert.
   const { data: existing } = await supabaseAdmin
@@ -14,13 +62,18 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     .eq("stripe_session_id", session.id)
     .maybeSingle();
 
+  let submissionToken: string | null = null;
+  let recipientEmail = email;
+
   if (existing) {
     await supabaseAdmin
       .from("ad_payments")
       .update({ status: "paid", paid_at: new Date().toISOString(), amount_cents: amount, customer_email: email || existing.customer_email })
       .eq("id", existing.id);
+    submissionToken = (existing.submission_token as string) ?? null;
+    recipientEmail = email || (existing.customer_email as string);
   } else {
-    await supabaseAdmin.from("ad_payments").upsert(
+    const { data: upserted } = await supabaseAdmin.from("ad_payments").upsert(
       {
         stripe_session_id: session.id,
         customer_email: email,
@@ -35,7 +88,24 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         disclosure_version: session.metadata?.disclosure_version ?? null,
       },
       { onConflict: "stripe_session_id" }
-    );
+    ).select("submission_token").maybeSingle();
+    submissionToken = (upserted?.submission_token as string) ?? null;
+  }
+
+  if (recipientEmail && submissionToken) {
+    await sendPaymentReceipt({
+      email: recipientEmail,
+      plan,
+      amountCents: amount,
+      submissionToken,
+      sessionId: session.id,
+      receiptUrl,
+    });
+  } else {
+    console.warn('payment-receipt skipped — missing email or submission_token', {
+      hasEmail: !!recipientEmail,
+      hasToken: !!submissionToken,
+    });
   }
 }
 
