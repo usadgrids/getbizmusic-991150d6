@@ -43,6 +43,53 @@ export const getActiveAds = createServerFn({ method: "GET" }).handler(async () =
   return (await attachUrls((data ?? []) as PublicAd[])) as PublicAd[];
 });
 
+// Public: fetch a single ad by its human-friendly ad_number (for share landing pages).
+export const getAdByNumber = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ ad_number: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("ads")
+      .select("id,ad_number,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
+      .eq("ad_number", data.ad_number)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) return null;
+    const [withUrl] = await attachUrls([row as unknown as PublicAd]);
+    return {
+      ...(withUrl as PublicAd),
+      status: (row as { status: string }).status,
+      expires_at: (row as { expires_at: string }).expires_at,
+      created_at: (row as { created_at: string }).created_at,
+    };
+  });
+
+// Ask Facebook (and thereby other consumers of OG) to (re)scrape the share URL.
+// Fire-and-forget: failures never block the caller. No-op when FB creds absent.
+async function warmSocialPreview(adNumber: number | null) {
+  if (adNumber == null) return;
+  const appId = process.env.FB_APP_ID;
+  const appSecret = process.env.FB_APP_SECRET;
+  const shareUrl = `https://bizspotmusicad.lovable.app/ad/${adNumber}`;
+  try {
+    if (appId && appSecret) {
+      const token = `${appId}|${appSecret}`;
+      await fetch(
+        `https://graph.facebook.com/v19.0/?id=${encodeURIComponent(shareUrl)}&scrape=true&access_token=${encodeURIComponent(token)}`,
+        { method: "POST" },
+      );
+    } else {
+      // Fallback: unauthenticated scrape endpoint still nudges the cache.
+      await fetch(
+        `https://graph.facebook.com/?id=${encodeURIComponent(shareUrl)}&scrape=true`,
+        { method: "POST" },
+      );
+    }
+  } catch {
+    // ignore – never block approval on FB call
+  }
+}
+
 const submissionSchema = z.object({
   business_name: z.string().trim().min(1).max(120),
   contact_name: z.string().trim().min(1).max(120),
