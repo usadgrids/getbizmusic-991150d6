@@ -11,13 +11,13 @@ import { MiniPlayer } from "@/components/biz/MiniPlayer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BizSpot Directory - National City — $12/yr Intro Offer" },
+      { title: "Get Biz Music - National City, CA — $12/yr Intro Offer" },
       {
         name: "description",
         content:
           "Advertise your National City business — restaurants, lawyers, salons, auto, and more. Limited-time intro: $12/year (about $1/month) for a full year of exposure.",
       },
-      { property: "og:title", content: "BizSpot Directory - National City — $12/yr Intro Offer" },
+      { property: "og:title", content: "Get Biz Music - National City, CA — $12/yr Intro Offer" },
       { property: "og:description", content: "Limited-time intro offer: $12/year, about $1/month. Open to new National City businesses started in 2026." },
     ],
   }),

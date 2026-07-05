@@ -39,7 +39,7 @@ const AdRejectionEmail = ({ businessName, contactName, reason, plan }: Props) =>
           </Text>
           <Text style={p}>
             Thank you for submitting <strong>{businessName || 'your business ad'}</strong> to
-            BizSpot Directory - National City. Unfortunately, after review, our admin team
+            Get Biz Music - National City, CA. Unfortunately, after review, our admin team
             was unable to approve your submission at this time.
           </Text>
 

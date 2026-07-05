@@ -15,7 +15,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — BizSpot Directory - National City" },
+      { title: "Pricing — Get Biz Music - National City, CA" },
       { name: "description", content: "Choose your annual ad plan: $12/year for 7-second rotation or $24/year for 10-second feature." },
     ],
   }),

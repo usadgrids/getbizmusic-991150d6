@@ -21,7 +21,7 @@ import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — BizSpot Directory - National City" },
+      { title: "Admin — Get Biz Music - National City, CA" },
       { name: "description", content: "Review and approve business ad submissions." },
     ],
   }),

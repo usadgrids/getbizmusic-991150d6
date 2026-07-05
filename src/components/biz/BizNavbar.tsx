@@ -9,7 +9,7 @@ export function BizNavbar() {
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <Link to="/" className="flex min-w-0 items-center gap-2 font-serif text-base sm:text-lg">
           <Building2 size={22} className="text-[#D4A24C] shrink-0" />
-          <span className="truncate">BizSpot Directory - National City</span>
+          <span className="truncate">Get Biz Music - National City, CA</span>
         </Link>
         <div className="hidden sm:flex items-center gap-6 text-sm shrink-0">
           <Link to="/" className="hover:text-[#D4A24C] transition-colors">Home</Link>
