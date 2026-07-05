@@ -296,8 +296,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               />
             )}
 
-            {/* Share bar — bottom-left overlay, pauses slider on click */}
-            <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1.5 backdrop-blur-sm shadow-md">
+            {/* Share bar — bottom-left overlay, pauses slider on click, visible on hover */}
+            <div
+              className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1.5 backdrop-blur-sm shadow-md opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300"
+            >
               <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90 pl-1">
                 Share
               </span>
