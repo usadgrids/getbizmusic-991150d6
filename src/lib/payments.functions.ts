@@ -40,8 +40,8 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       customerEmail: z.string().email(),
       returnUrl: z.string().url(),
       environment: z.enum(["sandbox", "live"]),
-      agreedTerms: z.literal(true, { errorMap: () => ({ message: "You must agree to the terms" }) }),
-      agreedNoRefund: z.literal(true, { errorMap: () => ({ message: "You must agree to the no-refund policy" }) }),
+      agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
+      agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
       disclosureVersion: z.string().optional(),
     });
     return schema.parse(data);
