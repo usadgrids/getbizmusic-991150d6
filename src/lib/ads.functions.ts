@@ -362,6 +362,5 @@ export const createManualSubmission = createServerFn({ method: "POST" })
       if (adErr) throw new Error(adErr.message);
       void warmSocialPreview(adRow?.ad_number ?? null);
     }
-    }
     return { ok: true as const, id: sub.id, status };
   });
