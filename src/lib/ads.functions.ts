@@ -245,7 +245,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
     const expires = new Date(now);
     expires.setFullYear(expires.getFullYear() + 1);
 
-    const { error: insErr } = await supabaseAdmin.from("ads").insert({
+    const { data: inserted, error: insErr } = await supabaseAdmin.from("ads").insert({
       submission_id: sub.id,
       business_name: sub.business_name,
       website_url: sub.website_url,
@@ -257,13 +257,14 @@ export const approveSubmission = createServerFn({ method: "POST" })
       starts_at: now.toISOString(),
       expires_at: expires.toISOString(),
       status: "active",
-    });
+    }).select("ad_number").maybeSingle();
     if (insErr) throw new Error(insErr.message);
 
     await supabaseAdmin
       .from("ad_submissions")
       .update({ status: "approved" })
       .eq("id", sub.id);
+    void warmSocialPreview(inserted?.ad_number ?? null);
     return { ok: true as const };
   });
 
