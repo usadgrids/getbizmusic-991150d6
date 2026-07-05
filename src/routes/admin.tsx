@@ -295,11 +295,20 @@ function AdminConsole() {
 
         {/* Live ads */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Check size={18} className="text-emerald-600" />
-            <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">
-              Currently Running ({liveAds.filter((a) => a.status === "active").length})
-            </h2>
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <Check size={18} className="text-emerald-600" />
+              <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">
+                Currently Running ({liveAds.filter((a) => a.status === "active").length})
+              </h2>
+            </div>
+            <input
+              type="text"
+              value={adsSearch}
+              onChange={(e) => setAdsSearch(e.target.value)}
+              placeholder="Search by Business Name, Industry, or Ad # (e.g. 2911)"
+              className="ml-auto w-full sm:w-96 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F2A4A]/30"
+            />
           </div>
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
@@ -314,10 +323,12 @@ function AdminConsole() {
                 </tr>
               </thead>
               <tbody>
-                {liveAds.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No ads yet.</td></tr>
+                {filteredLiveAds.length === 0 && (
+                  <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                    {liveAds.length === 0 ? "No ads yet." : "No ads match your search."}
+                  </td></tr>
                 )}
-                {liveAds.map((a) => (
+                {filteredLiveAds.map((a) => (
                   <tr key={a.id} className="border-t border-gray-100">
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
