@@ -449,7 +449,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             </div>
           </div>
           {featured && <PlaylistMarquee />}
-        </>
+        </div>
       )}
     </section>
   );
