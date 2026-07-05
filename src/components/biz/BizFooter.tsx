@@ -18,6 +18,13 @@ export function BizFooter() {
             <Link to="/" hash="ai-disclosure" className="hover:text-[#D4A24C]">AI Disclosure</Link>
             <Link to="/" hash="accessibility" className="hover:text-[#D4A24C]">Accessibility</Link>
             <Link to="/" hash="contact" className="hover:text-[#D4A24C]">Contact</Link>
+            <button
+              type="button"
+              onClick={openCookiePreferences}
+              className="hover:text-[#D4A24C] underline-offset-2 hover:underline"
+            >
+              Cookie preferences
+            </button>
           </nav>
         </div>
 
