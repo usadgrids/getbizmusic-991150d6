@@ -87,16 +87,20 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     INDUSTRIES.find((i) => i.value === value)?.label ?? value;
 
   const suggestions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const raw = searchQuery.trim();
+    const q = raw.toLowerCase();
     if (!q) return [];
+    const numericQ = raw.replace(/^#/, "").trim();
     return ads
       .filter((a) => {
         const label = industryLabel(a.industry).toLowerCase();
+        const adNum = a.ad_number != null ? String(a.ad_number) : "";
         return (
           a.business_name.toLowerCase().includes(q) ||
           a.industry.toLowerCase().includes(q) ||
           label.includes(q) ||
-          (a.tagline ?? "").toLowerCase().includes(q)
+          (a.tagline ?? "").toLowerCase().includes(q) ||
+          (numericQ.length > 0 && adNum.includes(numericQ))
         );
       })
       .slice(0, 6);
