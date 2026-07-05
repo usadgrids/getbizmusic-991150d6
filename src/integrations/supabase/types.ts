@@ -132,6 +132,7 @@ export type Database = {
       }
       ads: {
         Row: {
+          ad_number: number
           ad_type: string
           business_name: string
           created_at: string
@@ -147,6 +148,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          ad_number?: number
           ad_type: string
           business_name: string
           created_at?: string
@@ -162,6 +164,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          ad_number?: number
           ad_type?: string
           business_name?: string
           created_at?: string

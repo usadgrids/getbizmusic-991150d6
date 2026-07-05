@@ -306,6 +306,7 @@ function AdminConsole() {
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
                 <tr>
                   <th className="px-4 py-2">Business</th>
+                  <th className="px-4 py-2">Ad Number</th>
                   <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">Status</th>
                   <th className="px-4 py-2">Expires</th>
@@ -314,11 +315,12 @@ function AdminConsole() {
               </thead>
               <tbody>
                 {liveAds.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-500">No ads yet.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No ads yet.</td></tr>
                 )}
                 {liveAds.map((a) => (
                   <tr key={a.id} className="border-t border-gray-100">
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
+                    <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
                       {a.ad_type === "slider_10" ? "Featured · $12" : "Standard · $12"}
                     </td>
