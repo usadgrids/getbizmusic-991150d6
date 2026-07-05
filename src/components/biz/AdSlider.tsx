@@ -245,7 +245,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           No ads here yet. <span className="text-[#0F2A4A] font-medium">Be the first to advertise!</span>
         </div>
       ) : (
-        <>
+          <div
+            className="mx-auto w-full"
+            style={{
+              maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
+            }}
+          >
           <div
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full group max-w-full"
             style={{
