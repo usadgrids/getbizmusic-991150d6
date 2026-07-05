@@ -356,6 +356,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                                 className="w-full text-left px-4 py-2 text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10 flex items-center justify-between gap-2"
                               >
                                 <span className="truncate flex items-baseline gap-2 min-w-0">
+                                  {s.ad_number != null && (
+                                    <span className="text-xs font-mono text-gray-500 shrink-0">#{s.ad_number}</span>
+                                  )}
                                   <span className="font-medium truncate">{s.business_name}</span>
                                   <span className="text-xs text-[#D4A24C] font-semibold shrink-0">
                                     = {industryLabel(s.industry)}
