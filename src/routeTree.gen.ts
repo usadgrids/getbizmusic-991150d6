@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -73,6 +74,11 @@ const AdminDisputesRoute = AdminDisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdAdNumberRoute = AdAdNumberRouteImport.update({
+  id: '/ad/$adNumber',
+  path: '/ad/$adNumber',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   SubmitRoute: typeof SubmitRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AdAdNumberRoute: typeof AdAdNumberRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -347,6 +360,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/disputes'
       preLoaderRoute: typeof AdminDisputesRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/ad/$adNumber': {
+      id: '/ad/$adNumber'
+      path: '/ad/$adNumber'
+      fullPath: '/ad/$adNumber'
+      preLoaderRoute: typeof AdAdNumberRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
@@ -441,6 +461,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AdAdNumberRoute: AdAdNumberRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
