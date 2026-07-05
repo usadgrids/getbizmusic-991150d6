@@ -6,6 +6,7 @@ const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 days; refreshed per load
 
 export type PublicAd = {
   id: string;
+  ad_number: number | null;
   business_name: string;
   website_url: string | null;
   tagline: string | null;
