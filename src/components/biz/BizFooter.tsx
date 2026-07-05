@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { openCookiePreferences } from "./CookieConsent";
 
 export function BizFooter() {
   const year = new Date().getFullYear();
