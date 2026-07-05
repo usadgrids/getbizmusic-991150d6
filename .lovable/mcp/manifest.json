@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "bizspot-mcp",
+      "version": "0.1.0",
+      "title": "BizSpot National City MCP"
+    },
+    "tools": [
+      {
+        "name": "list_active_ads",
+        "title": "List active ads",
+        "description": "Return the currently active business ads shown in the BizSpot National City directory (business name, industry, tagline, website, ad type).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "industry": {
+              "description": "Optional case-insensitive industry filter (exact match).",
+              "type": "string",
+              "minLength": 1
+            },
+            "limit": {
+              "description": "Maximum number of ads to return (default 50).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_pricing",
+        "title": "Get ad pricing",
+        "description": "Return the current BizSpot National City ad plans and their annual pricing in USD.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
