@@ -346,7 +346,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
       const now = new Date();
       const expires = new Date(now);
       expires.setFullYear(expires.getFullYear() + 1);
-      const { error: adErr } = await supabaseAdmin.from("ads").insert({
+      const { data: adRow, error: adErr } = await supabaseAdmin.from("ads").insert({
         submission_id: sub.id,
         business_name: data.business_name,
         website_url: data.website_url || null,
@@ -358,8 +358,10 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         starts_at: now.toISOString(),
         expires_at: expires.toISOString(),
         status: "active",
-      });
+      }).select("ad_number").maybeSingle();
       if (adErr) throw new Error(adErr.message);
+      void warmSocialPreview(adRow?.ad_number ?? null);
+    }
     }
     return { ok: true as const, id: sub.id, status };
   });
