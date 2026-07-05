@@ -165,6 +165,22 @@ function AdminConsole() {
     enabled: isAdmin,
   });
 
+  const [adsSearch, setAdsSearch] = useState("");
+  const filteredLiveAds = (() => {
+    const raw = adsSearch.trim();
+    if (!raw) return liveAds;
+    const q = raw.toLowerCase();
+    const numericQ = raw.replace(/^#/, "").trim();
+    return liveAds.filter((a) => {
+      const adNum = a.ad_number != null ? String(a.ad_number) : "";
+      return (
+        a.business_name.toLowerCase().includes(q) ||
+        (a.industry ?? "").toLowerCase().includes(q) ||
+        (numericQ.length > 0 && adNum.includes(numericQ))
+      );
+    });
+  })();
+
   const refreshAll = () => {
     refetchPending();
     refetchAds();
