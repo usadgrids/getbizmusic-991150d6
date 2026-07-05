@@ -29,7 +29,7 @@ const AdRejectionEmail = ({ businessName, contactName, reason, plan }: Props) =>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>BizSpot Directory — National City</Heading>
+          <Heading style={h1}>Get Biz Music - National City, CA</Heading>
         </Section>
 
         <Section style={content}>
