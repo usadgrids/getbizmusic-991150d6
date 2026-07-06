@@ -681,6 +681,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           </div>
 
           <AdminField name="tagline" label="Tagline (optional, max 120 chars)" maxLength={120} />
+          <AdminField name="youtube_url" label="YouTube video URL (optional)" placeholder="https://www.youtube.com/watch?v=..." maxLength={500} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
