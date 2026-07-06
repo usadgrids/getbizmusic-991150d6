@@ -87,6 +87,7 @@ export type Database = {
           status: string
           tagline: string | null
           website_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           ad_type: string
@@ -103,6 +104,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           ad_type?: string
@@ -119,6 +121,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
@@ -146,6 +149,7 @@ export type Database = {
           submission_id: string | null
           tagline: string | null
           website_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           ad_number?: number
@@ -162,6 +166,7 @@ export type Database = {
           submission_id?: string | null
           tagline?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           ad_number?: number
@@ -178,6 +183,7 @@ export type Database = {
           submission_id?: string | null
           tagline?: string | null
           website_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {

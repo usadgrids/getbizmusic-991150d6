@@ -270,6 +270,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       submission_id: sub.id,
       business_name: sub.business_name,
       website_url: sub.website_url,
+      youtube_url: (sub as { youtube_url?: string | null }).youtube_url ?? null,
       tagline: sub.tagline,
       industry: sub.industry,
       ad_type: sub.ad_type,
@@ -311,6 +312,7 @@ const updateAdSchema = z.object({
   id: z.string().uuid(),
   business_name: z.string().trim().min(1).max(120),
   website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  youtube_url: z.string().trim().url().max(500).optional().or(z.literal("")),
   tagline: z.string().trim().max(120).optional().or(z.literal("")),
   industry: z.string().trim().min(1).max(40),
   ad_type: z.enum(["image_5", "slider_10"]),
@@ -326,6 +328,7 @@ export const updateAd = createServerFn({ method: "POST" })
     const patch: {
       business_name: string;
       website_url: string | null;
+      youtube_url: string | null;
       tagline: string | null;
       industry: string;
       ad_type: "image_5" | "slider_10";
@@ -334,6 +337,7 @@ export const updateAd = createServerFn({ method: "POST" })
     } = {
       business_name: data.business_name,
       website_url: data.website_url || null,
+      youtube_url: data.youtube_url || null,
       tagline: data.tagline || null,
       industry: data.industry,
       ad_type: data.ad_type,
@@ -366,6 +370,7 @@ const manualSchema = z.object({
   email: z.string().trim().email().max(255),
   phone: z.string().trim().min(1).max(40),
   website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  youtube_url: z.string().trim().url().max(500).optional().or(z.literal("")),
   industry: z.string().trim().min(1).max(40),
   tagline: z.string().trim().max(120).optional().or(z.literal("")),
   ad_type: z.enum(["image_5", "slider_10"]),
@@ -389,6 +394,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         email: data.email,
         phone: data.phone,
         website_url: data.website_url || null,
+        youtube_url: data.youtube_url || null,
         industry: data.industry,
         tagline: data.tagline || null,
         ad_type: data.ad_type,
@@ -409,6 +415,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         submission_id: sub.id,
         business_name: data.business_name,
         website_url: data.website_url || null,
+        youtube_url: data.youtube_url || null,
         tagline: data.tagline || null,
         industry: data.industry,
         ad_type: data.ad_type,

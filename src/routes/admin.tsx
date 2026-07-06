@@ -599,6 +599,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           email: String(fd.get("email") ?? ""),
           phone: String(fd.get("phone") ?? ""),
           website_url: String(fd.get("website_url") ?? ""),
+          youtube_url: String(fd.get("youtube_url") ?? ""),
           industry: String(fd.get("industry") ?? ""),
           tagline: String(fd.get("tagline") ?? ""),
           ad_type: adType,
@@ -680,6 +681,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           </div>
 
           <AdminField name="tagline" label="Tagline (optional, max 120 chars)" maxLength={120} />
+          <AdminField name="youtube_url" label="YouTube video URL (optional)" placeholder="https://www.youtube.com/watch?v=..." maxLength={500} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -744,6 +746,7 @@ function EditAdModal({
     id: string;
     business_name: string;
     website_url: string | null;
+    youtube_url: string | null;
     tagline: string | null;
     industry: string;
     ad_type: "image_5" | "slider_10";
@@ -756,6 +759,7 @@ function EditAdModal({
   const updateFn = useServerFn(updateAd);
   const [businessName, setBusinessName] = useState(ad.business_name);
   const [websiteUrl, setWebsiteUrl] = useState(ad.website_url ?? "");
+  const [youtubeUrl, setYoutubeUrl] = useState(ad.youtube_url ?? "");
   const [tagline, setTagline] = useState(ad.tagline ?? "");
   const [industry, setIndustry] = useState(ad.industry);
   const [adType, setAdType] = useState<"image_5" | "slider_10">(ad.ad_type);
@@ -788,6 +792,7 @@ function EditAdModal({
           id: ad.id,
           business_name: businessName,
           website_url: websiteUrl,
+          youtube_url: youtubeUrl,
           tagline,
           industry,
           ad_type: adType,
@@ -893,6 +898,19 @@ function EditAdModal({
             className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
         </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#0F2A4A] mb-1">YouTube video URL (optional)</label>
+          <input
+            type="url"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+            maxLength={500}
+            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+          />
+        </div>
+
 
         <div className="flex gap-2 pt-2">
           <button
