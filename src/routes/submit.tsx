@@ -41,9 +41,16 @@ function SubmitPage() {
   const submit = useServerFn(createSubmission);
   const lookup = useServerFn(getPaymentByToken);
 
-  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string }>(
-    { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
-  );
+  const [verify, setVerify] = useState<{
+    status: "checking" | "ok" | "bad";
+    plan?: AdPlan;
+    email?: string;
+    tokenUsed?: boolean;
+    reason?: string;
+    citySlug?: string | null;
+    cityName?: string | null;
+    cityState?: string | null;
+  }>({ status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" });
   const [file, setFile] = useState<File | null>(null);
   const [agree, setAgree] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -59,7 +66,15 @@ function SubmitPage() {
         if (!res.found) {
           setVerify({ status: "bad", reason: res.reason });
         } else {
-          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed });
+          setVerify({
+            status: "ok",
+            plan: res.plan,
+            email: res.email,
+            tokenUsed: res.tokenUsed,
+            citySlug: res.citySlug,
+            cityName: res.cityName,
+            cityState: res.cityState,
+          });
         }
       } catch (e) {
         if (!cancelled) setVerify({ status: "bad", reason: e instanceof Error ? e.message : "Verification failed" });
