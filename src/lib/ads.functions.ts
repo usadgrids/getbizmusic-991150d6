@@ -337,7 +337,7 @@ export const updateAd = createServerFn({ method: "POST" })
       tagline: data.tagline || null,
       industry: data.industry,
       ad_type: data.ad_type,
-      duration_seconds: data.ad_type === "slider_10" ? 10 : 7,
+      duration_seconds: planSeconds(data.ad_type),
     };
     if (data.image_path) patch.image_url = data.image_path;
     const { error } = await supabaseAdmin.from("ads").update(patch).eq("id", data.id);
