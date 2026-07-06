@@ -93,7 +93,7 @@ function TapToPlayOverlay({
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !isMobile) return;
+    if (typeof window === "undefined") return;
     const target = document.getElementById("ad-slideshow");
     if (!target) return;
     const observer = new IntersectionObserver(
@@ -102,9 +102,12 @@ function TapToPlayOverlay({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [visible, isMobile]);
+  }, [visible]);
 
-  if (!isMobile || !visible || dismissed || !inAdSection) return null;
+  // Silence unused-var lint — isMobile kept for potential future tuning.
+  void isMobile;
+
+  if (!visible || dismissed || !inAdSection) return null;
 
   const handleTap = () => {
     setDismissed(true);
