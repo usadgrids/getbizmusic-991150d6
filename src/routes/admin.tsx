@@ -396,6 +396,13 @@ function AdminConsole() {
           </div>
         </section>
       </main>
+      {editingAd && (
+        <EditAdModal
+          ad={editingAd}
+          onClose={() => setEditingAd(null)}
+          onSaved={() => { setEditingAd(null); refreshAll(); }}
+        />
+      )}
     </div>
   );
 }
