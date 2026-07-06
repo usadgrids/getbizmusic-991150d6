@@ -32,7 +32,6 @@ export function PricingBanner() {
           </ul>
           <Link
             to="/submit"
-            search={{ plan: "image_5" }}
             className="mt-5 inline-block w-full text-center bg-[#0F2A4A] text-white font-semibold py-2.5 rounded-md hover:bg-[#163864] transition-colors"
           >
             Get Started — $12
@@ -60,7 +59,6 @@ export function PricingBanner() {
           </ul>
           <Link
             to="/submit"
-            search={{ plan: "slider_10" }}
             className="mt-5 inline-block w-full text-center bg-[#D4A24C] text-[#0F2A4A] font-semibold py-2.5 rounded-md hover:bg-[#e0b266] transition-colors"
           >
             Get Featured — $24
