@@ -87,17 +87,19 @@ export const getAdByNumber = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at,city:cities(slug,name,state)")
       .eq("ad_number", data.ad_number)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
     const [withUrl] = await attachUrls([row as unknown as PublicAd]);
+    const city = (row as { city?: { slug: string; name: string; state: string } | null }).city ?? null;
     return {
       ...(withUrl as PublicAd),
       status: (row as { status: string }).status,
       expires_at: (row as { expires_at: string }).expires_at,
       created_at: (row as { created_at: string }).created_at,
+      city,
     };
   });
 
@@ -147,7 +149,7 @@ export const createSubmission = createServerFn({ method: "POST" })
     // Verify the payment token: must exist, be paid, and not already used.
     const { data: pay, error: payErr } = await supabaseAdmin
       .from("ad_payments")
-      .select("id, plan, status, token_used")
+      .select("id, plan, status, token_used, city_id")
       .eq("submission_token", data.submission_token)
       .maybeSingle();
     if (payErr || !pay) throw new Error("Invalid submission token");
@@ -166,6 +168,7 @@ export const createSubmission = createServerFn({ method: "POST" })
       image_path: data.image_path,
       status: "pending",
       payment_id: pay.id,
+      city_id: pay.city_id ?? null,
     });
     if (error) throw new Error(error.message);
 
@@ -295,6 +298,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       starts_at: now.toISOString(),
       expires_at: expires.toISOString(),
       status: "active",
+      city_id: (sub as { city_id?: string | null }).city_id ?? null,
     }).select("ad_number").maybeSingle();
     if (insErr) throw new Error(insErr.message);
 
@@ -392,6 +396,7 @@ const manualSchema = z.object({
   ad_type: z.enum(["image_5", "slider_10"]),
   image_path: z.string().trim().min(1).max(500),
   auto_approve: z.boolean().optional().default(true),
+  city_slug: z.string().trim().min(1).max(120).optional(),
 });
 
 export const createManualSubmission = createServerFn({ method: "POST" })
@@ -400,6 +405,12 @@ export const createManualSubmission = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let cityId: string | null = null;
+    if (data.city_slug) {
+      const { data: c } = await supabaseAdmin.from("cities").select("id").eq("slug", data.city_slug).maybeSingle();
+      if (c) cityId = (c as { id: string }).id;
+    }
 
     const status = data.auto_approve ? "approved" : "pending";
     const { data: sub, error } = await supabaseAdmin
@@ -417,6 +428,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         image_path: data.image_path,
         status,
         payment_id: null,
+        city_id: cityId,
       })
       .select("id")
       .maybeSingle();
@@ -440,6 +452,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         starts_at: now.toISOString(),
         expires_at: expires.toISOString(),
         status: "active",
+        city_id: cityId,
       }).select("ad_number").maybeSingle();
       if (adErr) throw new Error(adErr.message);
       void warmSocialPreview(adRow?.ad_number ?? null);
