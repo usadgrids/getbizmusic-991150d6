@@ -897,6 +897,19 @@ function EditAdModal({
           />
         </div>
 
+        <div>
+          <label className="block text-xs font-medium text-[#0F2A4A] mb-1">YouTube video URL (optional)</label>
+          <input
+            type="url"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+            maxLength={500}
+            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+          />
+        </div>
+
+
         <div className="flex gap-2 pt-2">
           <button
             type="submit" disabled={busy}
