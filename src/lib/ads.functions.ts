@@ -31,6 +31,21 @@ async function attachUrls<T extends { image_url: string }>(items: T[]) {
   );
 }
 
+function fairShuffle(ads: PublicAd[]): PublicAd[] {
+  // Weight Featured Slider ($24) ads 2x vs Standard ($12) so paid tier gets
+  // more air time, then Fisher-Yates shuffle for per-load fairness.
+  const weighted: PublicAd[] = [];
+  for (const a of ads) {
+    weighted.push(a);
+    if (a.ad_type === "slider_10") weighted.push(a);
+  }
+  for (let i = weighted.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
+  }
+  return weighted;
+}
+
 export const getActiveAds = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
@@ -40,7 +55,8 @@ export const getActiveAds = createServerFn({ method: "GET" }).handler(async () =
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return (await attachUrls((data ?? []) as PublicAd[])) as PublicAd[];
+  const withUrls = (await attachUrls((data ?? []) as PublicAd[])) as PublicAd[];
+  return fairShuffle(withUrls);
 });
 
 // Public: fetch a single ad by its human-friendly ad_number (for share landing pages).
