@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -14,6 +14,7 @@ import {
   listPendingSubmissions,
   rejectSubmission,
   removeAd,
+  updateAd,
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
@@ -164,6 +165,8 @@ function AdminConsole() {
     queryFn: () => adsFn(),
     enabled: isAdmin,
   });
+  type LiveAd = (typeof liveAds)[number];
+  const [editingAd, setEditingAd] = useState<LiveAd | null>(null);
 
   const [adsSearch, setAdsSearch] = useState("");
   const filteredLiveAds = (() => {
@@ -362,21 +365,29 @@ function AdminConsole() {
                       {new Date(a.expires_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2 text-right">
-                      {a.status === "active" && (
+                      <div className="inline-flex items-center gap-3 justify-end">
                         <button
-                          onClick={async () => {
-                            if (!confirm(`Remove "${a.business_name}" from rotation?`)) return;
-                            try {
-                              await removeFn({ data: { id: a.id } });
-                              toast.success("Removed");
-                              refreshAll();
-                            } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                          }}
-                          className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                          onClick={() => setEditingAd(a)}
+                          className="text-[#0F2A4A] hover:text-[#163864] inline-flex items-center gap-1 text-xs"
                         >
-                          <Trash2 size={12} /> Remove
+                          <Pencil size={12} /> Edit
                         </button>
-                      )}
+                        {a.status === "active" && (
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`Remove "${a.business_name}" from rotation?`)) return;
+                              try {
+                                await removeFn({ data: { id: a.id } });
+                                toast.success("Removed");
+                                refreshAll();
+                              } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+                            }}
+                            className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                          >
+                            <Trash2 size={12} /> Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -385,6 +396,13 @@ function AdminConsole() {
           </div>
         </section>
       </main>
+      {editingAd && (
+        <EditAdModal
+          ad={editingAd as unknown as React.ComponentProps<typeof EditAdModal>["ad"]}
+          onClose={() => setEditingAd(null)}
+          onSaved={() => { setEditingAd(null); refreshAll(); }}
+        />
+      )}
     </div>
   );
 }
@@ -713,6 +731,184 @@ function AdminField({
         name={name} type={type} required={required} placeholder={placeholder} maxLength={maxLength}
         className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
       />
+    </div>
+  );
+}
+
+function EditAdModal({
+  ad,
+  onClose,
+  onSaved,
+}: {
+  ad: {
+    id: string;
+    business_name: string;
+    website_url: string | null;
+    tagline: string | null;
+    industry: string;
+    ad_type: "image_5" | "slider_10";
+    image_url: string;
+    ad_number: number | null;
+  };
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const updateFn = useServerFn(updateAd);
+  const [businessName, setBusinessName] = useState(ad.business_name);
+  const [websiteUrl, setWebsiteUrl] = useState(ad.website_url ?? "");
+  const [tagline, setTagline] = useState(ad.tagline ?? "");
+  const [industry, setIndustry] = useState(ad.industry);
+  const [adType, setAdType] = useState<"image_5" | "slider_10">(ad.ad_type);
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const onFile = (f: File | null) => {
+    if (!f) { setFile(null); return; }
+    if (f.size > 2 * 1024 * 1024) { toast.error("Image must be under 2 MB"); return; }
+    if (!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)) { toast.error("JPG, PNG, or WebP only"); return; }
+    setFile(f);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      let image_path: string | undefined;
+      if (file) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        image_path = `admin/${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("ad-uploads")
+          .upload(image_path, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+      }
+      await updateFn({
+        data: {
+          id: ad.id,
+          business_name: businessName,
+          website_url: websiteUrl,
+          tagline,
+          industry,
+          ad_type: adType,
+          image_path,
+        },
+      });
+      toast.success("Ad updated");
+      onSaved();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
+      <form
+        onSubmit={save}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8 p-6 space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-serif text-xl font-bold text-[#0F2A4A]">Edit Ad</h3>
+            <div className="text-xs text-gray-500">#{ad.ad_number ?? "—"} · {ad.business_name}</div>
+          </div>
+          <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Current image</label>
+          <div className="aspect-[1200/628] bg-gray-100 rounded-md overflow-hidden">
+            {ad.image_url && <img src={ad.image_url} alt={ad.business_name} className="w-full h-full object-cover" />}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Replace image (optional)</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 hover:border-[#D4A24C]">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#0F2A4A] file:text-white hover:file:bg-[#163864] cursor-pointer"
+            />
+            {file && (
+              <div className="mt-2 text-xs text-emerald-700 inline-flex items-center gap-1">
+                <Check size={12} /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
+              </div>
+            )}
+            <div className="mt-2 text-xs text-gray-500 inline-flex items-start gap-1">
+              <Upload size={12} className="mt-0.5" /> Recommended: 1216×896 (4:3), under 2 MB.
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business name *</label>
+            <input
+              value={businessName} onChange={(e) => setBusinessName(e.target.value)} required maxLength={120}
+              className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Website</label>
+            <input
+              value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://..." maxLength={255}
+              className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+            <select
+              value={industry} onChange={(e) => setIndustry(e.target.value)} required
+              className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+            >
+              {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+              {!INDUSTRIES.some((i) => i.value === industry) && (
+                <option value={industry}>{industry}</option>
+              )}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Ad plan / rotation</label>
+            <select
+              value={adType} onChange={(e) => setAdType(e.target.value as "image_5" | "slider_10")}
+              className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+            >
+              <option value="image_5">{AD_PLANS.image_5.label} — {AD_PLANS.image_5.seconds}s rotation</option>
+              <option value="slider_10">{AD_PLANS.slider_10.label} — {AD_PLANS.slider_10.seconds}s rotation</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Tagline</label>
+          <input
+            value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={120}
+            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+          />
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="submit" disabled={busy}
+            className="flex-1 bg-[#D4A24C] text-[#0F2A4A] font-bold py-2.5 rounded-md hover:bg-[#e0b266] disabled:opacity-60"
+          >
+            {busy ? "Saving…" : "Save changes"}
+          </button>
+          <button
+            type="button" onClick={onClose} disabled={busy}
+            className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

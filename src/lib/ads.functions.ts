@@ -286,6 +286,44 @@ export const rejectSubmission = createServerFn({ method: "POST" })
     return { ok: true as const, submission: updated };
   });
 
+const updateAdSchema = z.object({
+  id: z.string().uuid(),
+  business_name: z.string().trim().min(1).max(120),
+  website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  tagline: z.string().trim().max(120).optional().or(z.literal("")),
+  industry: z.string().trim().min(1).max(40),
+  ad_type: z.enum(["image_5", "slider_10"]),
+  image_path: z.string().trim().min(1).max(500).optional(),
+});
+
+export const updateAd = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => updateAdSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: {
+      business_name: string;
+      website_url: string | null;
+      tagline: string | null;
+      industry: string;
+      ad_type: "image_5" | "slider_10";
+      duration_seconds: number;
+      image_url?: string;
+    } = {
+      business_name: data.business_name,
+      website_url: data.website_url || null,
+      tagline: data.tagline || null,
+      industry: data.industry,
+      ad_type: data.ad_type,
+      duration_seconds: data.ad_type === "slider_10" ? 10 : 7,
+    };
+    if (data.image_path) patch.image_url = data.image_path;
+    const { error } = await supabaseAdmin.from("ads").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
 export const removeAd = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
