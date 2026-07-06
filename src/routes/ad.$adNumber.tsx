@@ -125,19 +125,40 @@ function AdLanding() {
             maxHeight: "min(80svh, 800px)",
           }}
         >
-          {ad.website_url ? (
-            <a
-              href={ad.website_url}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              aria-label={`Visit ${ad.business_name}`}
-              className="absolute inset-0 bg-gray-100"
-            >
-              {Img}
-            </a>
-          ) : (
-            <div className="absolute inset-0 bg-gray-100">{Img}</div>
-          )}
+          <div className="absolute inset-0 bg-gray-100">
+            {ad.youtube_url ? (
+              <YoutubeHoverOverlay
+                youtubeUrl={ad.youtube_url}
+                businessName={ad.business_name}
+              >
+                {ad.website_url ? (
+                  <a
+                    href={ad.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    aria-label={`Visit ${ad.business_name}`}
+                    className="absolute inset-0"
+                  >
+                    {Img}
+                  </a>
+                ) : (
+                  Img
+                )}
+              </YoutubeHoverOverlay>
+            ) : ad.website_url ? (
+              <a
+                href={ad.website_url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                aria-label={`Visit ${ad.business_name}`}
+                className="absolute inset-0"
+              >
+                {Img}
+              </a>
+            ) : (
+              Img
+            )}
+          </div>
         </section>
 
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
