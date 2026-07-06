@@ -261,7 +261,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       .maybeSingle();
     if (subErr || !sub) throw new Error("Submission not found");
 
-    const seconds = sub.ad_type === "slider_10" ? 10 : 5;
+    const seconds = planSeconds(sub.ad_type as AdPlan);
     const now = new Date();
     const expires = new Date(now);
     expires.setFullYear(expires.getFullYear() + 1);
