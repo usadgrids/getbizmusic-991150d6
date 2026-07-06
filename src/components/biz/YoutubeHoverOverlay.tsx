@@ -50,6 +50,11 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
   const [active, setActive] = useState(false);
   const [nonce, setNonce] = useState(0); // forces iframe remount to restart video
   const leaveTimerRef = useRef<number | null>(null);
+  const activeRef = useRef(active);
+
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   const clearLeaveTimer = () => {
     if (leaveTimerRef.current) {
@@ -81,7 +86,15 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
     // small delay so pointer flickers between children/iframe don't tear.
     clearLeaveTimer();
     leaveTimerRef.current = window.setTimeout(() => {
-      setActive(false);
+      if (activeRef.current) {
+        setActive(false);
+        // Resume the background music playlist when the hover video is dismissed.
+        try {
+          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
+        } catch {
+          /* noop */
+        }
+      }
       leaveTimerRef.current = null;
     }, 120);
   };
