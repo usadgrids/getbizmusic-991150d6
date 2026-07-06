@@ -14,6 +14,7 @@ export type PublicAd = {
   ad_number: number | null;
   business_name: string;
   website_url: string | null;
+  youtube_url: string | null;
   tagline: string | null;
   industry: string;
   ad_type: "image_5" | "slider_10";
@@ -55,7 +56,7 @@ export const getActiveAds = createServerFn({ method: "GET" }).handler(async () =
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("ads")
-    .select("id,ad_number,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds")
+    .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds")
     .eq("status", "active")
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
@@ -71,7 +72,7 @@ export const getAdByNumber = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .select("id,ad_number,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
       .eq("ad_number", data.ad_number)
       .maybeSingle();
     if (error) throw new Error(error.message);
