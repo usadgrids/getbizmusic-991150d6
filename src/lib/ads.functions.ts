@@ -147,7 +147,7 @@ export const createSubmission = createServerFn({ method: "POST" })
     // Verify the payment token: must exist, be paid, and not already used.
     const { data: pay, error: payErr } = await supabaseAdmin
       .from("ad_payments")
-      .select("id, plan, status, token_used")
+      .select("id, plan, status, token_used, city_id")
       .eq("submission_token", data.submission_token)
       .maybeSingle();
     if (payErr || !pay) throw new Error("Invalid submission token");
@@ -166,6 +166,7 @@ export const createSubmission = createServerFn({ method: "POST" })
       image_path: data.image_path,
       status: "pending",
       payment_id: pay.id,
+      city_id: pay.city_id ?? null,
     });
     if (error) throw new Error(error.message);
 
@@ -295,6 +296,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       starts_at: now.toISOString(),
       expires_at: expires.toISOString(),
       status: "active",
+      city_id: (sub as { city_id?: string | null }).city_id ?? null,
     }).select("ad_number").maybeSingle();
     if (insErr) throw new Error(insErr.message);
 
