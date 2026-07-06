@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+
+// Single source of truth for rotation seconds per plan. All server writes
+// MUST go through this so the slider's countdown always matches the plan.
+const planSeconds = (t: AdPlan): number => AD_PLANS[t].seconds;
 
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 days; refreshed per load
 
@@ -256,7 +261,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       .maybeSingle();
     if (subErr || !sub) throw new Error("Submission not found");
 
-    const seconds = sub.ad_type === "slider_10" ? 10 : 5;
+    const seconds = planSeconds(sub.ad_type as AdPlan);
     const now = new Date();
     const expires = new Date(now);
     expires.setFullYear(expires.getFullYear() + 1);
@@ -332,7 +337,7 @@ export const updateAd = createServerFn({ method: "POST" })
       tagline: data.tagline || null,
       industry: data.industry,
       ad_type: data.ad_type,
-      duration_seconds: data.ad_type === "slider_10" ? 10 : 7,
+      duration_seconds: planSeconds(data.ad_type),
     };
     if (data.image_path) patch.image_url = data.image_path;
     const { error } = await supabaseAdmin.from("ads").update(patch).eq("id", data.id);
@@ -396,7 +401,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     if (error || !sub) throw new Error(error?.message ?? "Insert failed");
 
     if (data.auto_approve) {
-      const seconds = data.ad_type === "slider_10" ? 10 : 7;
+      const seconds = planSeconds(data.ad_type);
       const now = new Date();
       const expires = new Date(now);
       expires.setFullYear(expires.getFullYear() + 1);
