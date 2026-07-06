@@ -148,6 +148,7 @@ function AdminConsole() {
   const approveFn = useServerFn(approveSubmission);
   const rejectFn = useServerFn(rejectSubmission);
   const removeFn = useServerFn(removeAd);
+  const [editingAd, setEditingAd] = useState<LiveAd | null>(null);
 
   const { data: roleData, isLoading: roleLoading } = useQuery({
     queryKey: ["am-i-admin"],
