@@ -352,7 +352,7 @@ function AdminConsole() {
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
-                      {a.ad_type === "slider_10" ? "Featured · $12" : "Standard · $12"}
+                      {a.ad_type === "slider_10" ? "Featured · $24" : "Standard · $12"}
                     </td>
                     <td className="px-4 py-2">
                       {a.status === "active" ? (
