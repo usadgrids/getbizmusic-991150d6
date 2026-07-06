@@ -398,7 +398,7 @@ function AdminConsole() {
       </main>
       {editingAd && (
         <EditAdModal
-          ad={editingAd}
+          ad={editingAd as unknown as React.ComponentProps<typeof EditAdModal>["ad"]}
           onClose={() => setEditingAd(null)}
           onSaved={() => { setEditingAd(null); refreshAll(); }}
         />
