@@ -790,6 +790,7 @@ function EditAdModal({
           id: ad.id,
           business_name: businessName,
           website_url: websiteUrl,
+          youtube_url: youtubeUrl,
           tagline,
           industry,
           ad_type: adType,
