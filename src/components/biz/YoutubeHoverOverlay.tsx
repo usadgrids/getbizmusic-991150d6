@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
+import { MINIPLAYER_PAUSE_EVENT } from "./MiniPlayer";
 
 /** Extract the 11-char YouTube video id from any common URL shape. */
 export function parseYoutubeId(url: string | null | undefined): string | null {
