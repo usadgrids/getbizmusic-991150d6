@@ -79,9 +79,12 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
 
   if (!videoId) return <>{children}</>;
 
+  // Try to autoplay with sound. Browsers may still block audio without a
+  // prior user gesture on the page; when that happens YouTube shows a small
+  // unmute prompt. Loop the same video for continuous playback.
   const src =
     `https://www.youtube-nocookie.com/embed/${videoId}` +
-    `?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${videoId}`;
+    `?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${videoId}`;
 
   return (
     <div
@@ -105,17 +108,28 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
       {active && (
         <div
           key={nonce}
-          className="absolute inset-0 z-20 bg-black"
+          className="pointer-events-none absolute inset-0 z-20"
           onClick={(e) => e.stopPropagation()}
         >
-          <iframe
-            src={src}
-            title={`${businessName} video`}
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-            className="absolute inset-0 h-full w-full border-0"
-          />
+          {/* Floating video card — offset up & right, sized so the ad stays visible behind it */}
+          <div
+            className="pointer-events-auto absolute overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
+            style={{
+              top: "6%",
+              right: "4%",
+              width: "58%",
+              aspectRatio: "16 / 9",
+            }}
+          >
+            <iframe
+              src={src}
+              title={`${businessName} video`}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
         </div>
       )}
     </div>
