@@ -16,6 +16,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CityIndexRouteImport } from './routes/$city.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
@@ -65,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CityIndexRoute = CityIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CityRoute,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -146,7 +152,7 @@ const ApiPublicPaymentsWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$city': typeof CityRoute
+  '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -169,7 +176,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$city': typeof CityRoute
   '/admin': typeof AdminRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -181,6 +187,7 @@ export interface FileRoutesByTo {
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/$city': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -193,7 +200,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$city': typeof CityRoute
+  '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -205,6 +212,7 @@ export interface FileRoutesById {
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -230,6 +238,7 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/$city/'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -241,7 +250,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/$city'
     | '/admin'
     | '/mcp'
     | '/pricing'
@@ -253,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/$city'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/admin/disputes'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/$city/'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -288,7 +298,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CityRoute: typeof CityRoute
+  CityRoute: typeof CityRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
@@ -359,6 +369,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/$city/': {
+      id: '/$city/'
+      path: '/'
+      fullPath: '/$city/'
+      preLoaderRoute: typeof CityIndexRouteImport
+      parentRoute: typeof CityRoute
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -461,6 +478,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CityRouteChildren {
+  CityIndexRoute: typeof CityIndexRoute
+}
+
+const CityRouteChildren: CityRouteChildren = {
+  CityIndexRoute: CityIndexRoute,
+}
+
+const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
+
 interface AdminRouteChildren {
   AdminDisputesRoute: typeof AdminDisputesRoute
 }
@@ -473,7 +500,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CityRoute: CityRoute,
+  CityRoute: CityRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
