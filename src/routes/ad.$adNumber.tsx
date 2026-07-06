@@ -216,10 +216,10 @@ function AdLanding() {
           />
           <div className="mt-4 text-center">
             <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-sm text-[#0F2A4A] font-semibold hover:underline"
+              to="/submit"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-[#D4A24C] px-5 py-2.5 text-sm font-semibold hover:bg-[#0F2A4A]/90"
             >
-              Browse all National City ads →
+              Submit Your Own National City Business Ad →
             </Link>
           </div>
         </div>
