@@ -26,7 +26,7 @@ export function MusicWaveform({ playing, barCount = 22, className = "" }: MusicW
         const delay = (i * 0.07) % 0.8;
         const duration = 0.5 + (i % 6) * 0.12;
         const minHeight = 25 + (i % 5) * 12;
-        const color = playing ? PLAYING_COLORS[i % PLAYING_COLORS.length] : "#9CA3AF";
+        const color = PLAYING_COLORS[i % PLAYING_COLORS.length];
         return (
           <span
             key={i}
@@ -34,10 +34,11 @@ export function MusicWaveform({ playing, barCount = 22, className = "" }: MusicW
             style={{
               height: `${minHeight}%`,
               backgroundColor: color,
-              boxShadow: playing ? `0 0 6px ${color}99` : "none",
+              boxShadow: playing ? `0 0 8px ${color}, 0 0 2px ${color}` : "none",
               animationDelay: `${delay.toFixed(2)}s`,
               animationDuration: `${duration.toFixed(2)}s`,
-              opacity: playing ? 1 : 0.55,
+              opacity: playing ? 1 : 0.45,
+              filter: playing ? "saturate(1.2)" : "saturate(0.6)",
             }}
           />
         );
