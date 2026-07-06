@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -14,6 +14,7 @@ import {
   listPendingSubmissions,
   rejectSubmission,
   removeAd,
+  updateAd,
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
