@@ -270,6 +270,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
       submission_id: sub.id,
       business_name: sub.business_name,
       website_url: sub.website_url,
+      youtube_url: (sub as { youtube_url?: string | null }).youtube_url ?? null,
       tagline: sub.tagline,
       industry: sub.industry,
       ad_type: sub.ad_type,
