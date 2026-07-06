@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+
+// Single source of truth for rotation seconds per plan. All server writes
+// MUST go through this so the slider's countdown always matches the plan.
+const planSeconds = (t: AdPlan): number => AD_PLANS[t].seconds;
 
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 days; refreshed per load
 
