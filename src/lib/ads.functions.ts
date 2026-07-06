@@ -401,7 +401,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     if (error || !sub) throw new Error(error?.message ?? "Insert failed");
 
     if (data.auto_approve) {
-      const seconds = data.ad_type === "slider_10" ? 10 : 7;
+      const seconds = planSeconds(data.ad_type);
       const now = new Date();
       const expires = new Date(now);
       expires.setFullYear(expires.getFullYear() + 1);
