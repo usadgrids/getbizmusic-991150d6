@@ -302,7 +302,15 @@ export const updateAd = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch: {
+      business_name: string;
+      website_url: string | null;
+      tagline: string | null;
+      industry: string;
+      ad_type: "image_5" | "slider_10";
+      duration_seconds: number;
+      image_url?: string;
+    } = {
       business_name: data.business_name,
       website_url: data.website_url || null,
       tagline: data.tagline || null,
