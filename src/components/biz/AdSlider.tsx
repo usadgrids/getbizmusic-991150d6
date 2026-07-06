@@ -179,28 +179,35 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
 
 
-  // Reset the countdown whenever the slide (or its duration) changes
+  // Deadline-based rotation: schedule advance at start + duration*1000. Also
+  // recompute timeLeft from Date.now() each tick so background-tab throttling,
+  // interval jitter, and float drift can NEVER make an ad run longer or
+  // shorter than its contracted duration_seconds.
   useEffect(() => {
+    if (!current || duration <= 0) return;
+    if (paused || ads.length <= 1) {
+      // While paused, keep remaining time visible without advancing.
+      setTimeLeft((prev) => (prev > 0 ? prev : duration));
+      return;
+    }
+    const startedAt = Date.now();
+    const deadline = startedAt + duration * 1000;
     setTimeLeft(duration);
-  }, [duration, idx]);
 
-  // Tick the countdown down (pauses with the music)
-  useEffect(() => {
-    if (paused || ads.length <= 1 || !current) return;
-    const id = window.setInterval(() => {
-      setTimeLeft((prev) => Math.max(0, prev - 0.1));
-    }, 100);
-    return () => window.clearInterval(id);
-  }, [paused, ads.length, current, duration]);
-
-  // Advance the slide when the countdown reaches zero
-  useEffect(() => {
-    if (paused || ads.length <= 1 || !current || timeLeft > 0) return;
-    const id = window.setTimeout(() => {
+    const advanceId = window.setTimeout(() => {
       setIdx((i) => (i + 1) % ads.length);
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [timeLeft, paused, ads.length, current]);
+    }, duration * 1000);
+
+    const tickId = window.setInterval(() => {
+      const remaining = Math.max(0, (deadline - Date.now()) / 1000);
+      setTimeLeft(remaining);
+    }, 100);
+
+    return () => {
+      window.clearTimeout(advanceId);
+      window.clearInterval(tickId);
+    };
+  }, [idx, duration, paused, ads.length, current]);
 
   // Listen to music player activity/track
   useEffect(() => {
