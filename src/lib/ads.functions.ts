@@ -72,7 +72,7 @@ export const getAdByNumber = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .select("id,ad_number,business_name,website_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
       .eq("ad_number", data.ad_number)
       .maybeSingle();
     if (error) throw new Error(error.message);
