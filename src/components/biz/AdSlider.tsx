@@ -69,6 +69,17 @@ interface Props {
   featured?: boolean;
 }
 
+// Resolve the authoritative rotation seconds for an ad. Always prefer the
+// server-supplied duration_seconds; if missing/invalid, fall back to the
+// plan default. Never use a hard-coded generic number here — this is a
+// legal/contractual guarantee to advertisers.
+function resolveDuration(ad: PublicAd | undefined): number {
+  if (!ad) return 0;
+  const raw = Number(ad.duration_seconds);
+  if (Number.isFinite(raw) && raw > 0) return raw;
+  return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
+}
+
 export function AdSlider({ ads, title, featured = false }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -81,8 +92,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const hideTimerRef = useRef<number | null>(null);
   const searchIdleTimerRef = useRef<number | null>(null);
   const current = ads[idx];
-  const duration = current?.duration_seconds || 7;
-  const [timeLeft, setTimeLeft] = useState(() => ads[0]?.duration_seconds || 7);
+  const duration = resolveDuration(current);
+  const [timeLeft, setTimeLeft] = useState(() => resolveDuration(ads[0]));
 
   const industryLabel = (value: string) =>
     INDUSTRIES.find((i) => i.value === value)?.label ?? value;
