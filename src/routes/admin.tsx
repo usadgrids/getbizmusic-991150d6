@@ -599,6 +599,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           email: String(fd.get("email") ?? ""),
           phone: String(fd.get("phone") ?? ""),
           website_url: String(fd.get("website_url") ?? ""),
+          youtube_url: String(fd.get("youtube_url") ?? ""),
           industry: String(fd.get("industry") ?? ""),
           tagline: String(fd.get("tagline") ?? ""),
           ad_type: adType,
