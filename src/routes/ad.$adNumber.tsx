@@ -199,10 +199,6 @@ function AdLanding() {
           </div>
         </div>
 
-        <div className="mt-6">
-          <PlaylistMarquee />
-        </div>
-
         <div className="mt-10">
 
           <div className="flex items-center gap-3 mb-2">
@@ -220,6 +216,9 @@ function AdLanding() {
                 : "More National City Businesses"
             }
           />
+          <div className="mt-6">
+            <PlaylistMarquee />
+          </div>
           <div className="mt-4 text-center">
             <Link
               to="/submit"
