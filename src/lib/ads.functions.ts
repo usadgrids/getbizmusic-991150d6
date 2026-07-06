@@ -311,6 +311,7 @@ const updateAdSchema = z.object({
   id: z.string().uuid(),
   business_name: z.string().trim().min(1).max(120),
   website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  youtube_url: z.string().trim().url().max(500).optional().or(z.literal("")),
   tagline: z.string().trim().max(120).optional().or(z.literal("")),
   industry: z.string().trim().min(1).max(40),
   ad_type: z.enum(["image_5", "slider_10"]),
@@ -326,6 +327,7 @@ export const updateAd = createServerFn({ method: "POST" })
     const patch: {
       business_name: string;
       website_url: string | null;
+      youtube_url: string | null;
       tagline: string | null;
       industry: string;
       ad_type: "image_5" | "slider_10";
@@ -334,6 +336,7 @@ export const updateAd = createServerFn({ method: "POST" })
     } = {
       business_name: data.business_name,
       website_url: data.website_url || null,
+      youtube_url: data.youtube_url || null,
       tagline: data.tagline || null,
       industry: data.industry,
       ad_type: data.ad_type,
