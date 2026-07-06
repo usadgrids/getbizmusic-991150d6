@@ -394,6 +394,7 @@ const manualSchema = z.object({
   ad_type: z.enum(["image_5", "slider_10"]),
   image_path: z.string().trim().min(1).max(500),
   auto_approve: z.boolean().optional().default(true),
+  city_slug: z.string().trim().min(1).max(120).optional(),
 });
 
 export const createManualSubmission = createServerFn({ method: "POST" })
@@ -402,6 +403,12 @@ export const createManualSubmission = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let cityId: string | null = null;
+    if (data.city_slug) {
+      const { data: c } = await supabaseAdmin.from("cities").select("id").eq("slug", data.city_slug).maybeSingle();
+      if (c) cityId = (c as { id: string }).id;
+    }
 
     const status = data.auto_approve ? "approved" : "pending";
     const { data: sub, error } = await supabaseAdmin
@@ -419,6 +426,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         image_path: data.image_path,
         status,
         payment_id: null,
+        city_id: cityId,
       })
       .select("id")
       .maybeSingle();
@@ -442,6 +450,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         starts_at: now.toISOString(),
         expires_at: expires.toISOString(),
         status: "active",
+        city_id: cityId,
       }).select("ad_number").maybeSingle();
       if (adErr) throw new Error(adErr.message);
       void warmSocialPreview(adRow?.ad_number ?? null);
