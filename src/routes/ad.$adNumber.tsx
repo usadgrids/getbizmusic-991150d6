@@ -9,6 +9,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
+import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 
 const SITE = "https://bizspotmusicad.lovable.app";
 
