@@ -199,7 +199,12 @@ function AdLanding() {
           </div>
         </div>
 
+        <div className="mt-6">
+          <PlaylistMarquee />
+        </div>
+
         <div className="mt-10">
+
           <div className="flex items-center gap-3 mb-2">
             <div className="h-px flex-1 bg-gray-300" />
             <span className="text-xs uppercase tracking-wider text-gray-500">
