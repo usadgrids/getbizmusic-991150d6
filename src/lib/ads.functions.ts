@@ -14,6 +14,7 @@ export type PublicAd = {
   ad_number: number | null;
   business_name: string;
   website_url: string | null;
+  youtube_url: string | null;
   tagline: string | null;
   industry: string;
   ad_type: "image_5" | "slider_10";
