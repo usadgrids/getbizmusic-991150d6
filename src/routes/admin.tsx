@@ -744,6 +744,7 @@ function EditAdModal({
     id: string;
     business_name: string;
     website_url: string | null;
+    youtube_url: string | null;
     tagline: string | null;
     industry: string;
     ad_type: "image_5" | "slider_10";
@@ -756,6 +757,7 @@ function EditAdModal({
   const updateFn = useServerFn(updateAd);
   const [businessName, setBusinessName] = useState(ad.business_name);
   const [websiteUrl, setWebsiteUrl] = useState(ad.website_url ?? "");
+  const [youtubeUrl, setYoutubeUrl] = useState(ad.youtube_url ?? "");
   const [tagline, setTagline] = useState(ad.tagline ?? "");
   const [industry, setIndustry] = useState(ad.industry);
   const [adType, setAdType] = useState<"image_5" | "slider_10">(ad.ad_type);
