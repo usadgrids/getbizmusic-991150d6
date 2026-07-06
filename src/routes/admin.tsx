@@ -165,6 +165,8 @@ function AdminConsole() {
     queryFn: () => adsFn(),
     enabled: isAdmin,
   });
+  type LiveAd = (typeof liveAds)[number];
+  const [editingAd, setEditingAd] = useState<LiveAd | null>(null);
 
   const [adsSearch, setAdsSearch] = useState("");
   const filteredLiveAds = (() => {
