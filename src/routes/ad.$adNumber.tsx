@@ -199,9 +199,6 @@ function AdLanding() {
           </div>
         </div>
 
-        <div className="mt-6">
-          <PlaylistMarquee />
-        </div>
 
         <div className="mt-10">
 
