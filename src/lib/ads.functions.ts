@@ -52,18 +52,33 @@ function fairShuffle(ads: PublicAd[]): PublicAd[] {
   return weighted;
 }
 
-export const getActiveAds = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("ads")
-    .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds")
-    .eq("status", "active")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  const withUrls = (await attachUrls((data ?? []) as PublicAd[])) as PublicAd[];
-  return fairShuffle(withUrls);
-});
+export const getActiveAds = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ city_slug: z.string().min(1).max(120).optional() }).optional().parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let cityId: string | null = null;
+    if (data?.city_slug) {
+      const { data: city } = await supabaseAdmin
+        .from("cities")
+        .select("id")
+        .eq("slug", data.city_slug)
+        .maybeSingle();
+      if (!city) return [];
+      cityId = (city as { id: string }).id;
+    }
+    let query = supabaseAdmin
+      .from("ads")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds")
+      .eq("status", "active")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false });
+    if (cityId) query = query.eq("city_id", cityId);
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    const withUrls = (await attachUrls((rows ?? []) as PublicAd[])) as PublicAd[];
+    return fairShuffle(withUrls);
+  });
+
 
 // Public: fetch a single ad by its human-friendly ad_number (for share landing pages).
 export const getAdByNumber = createServerFn({ method: "GET" })
