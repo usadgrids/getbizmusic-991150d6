@@ -34,7 +34,6 @@ export const createAdCheckout = createServerFn({ method: "POST" })
     agreedTerms: boolean;
     agreedNoRefund: boolean;
     disclosureVersion?: string;
-    citySlug?: string;
   }) => {
     const schema = z.object({
       plan: z.enum(["image_5", "slider_10"]),
@@ -44,7 +43,6 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
       agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
       disclosureVersion: z.string().optional(),
-      citySlug: z.string().min(1).max(120).optional(),
     });
     return schema.parse(data);
   })
@@ -60,16 +58,6 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       const productId = typeof stripePrice.product === "string" ? stripePrice.product : stripePrice.product.id;
       const product = await stripe.products.retrieve(productId);
 
-      let cityId: string | null = null;
-      if (data.citySlug) {
-        const { data: city } = await supabaseAdmin
-          .from("cities")
-          .select("id")
-          .eq("slug", data.citySlug)
-          .maybeSingle();
-        if (city) cityId = (city as { id: string }).id;
-      }
-
       const agreedAt = new Date().toISOString();
       const disclosureVersion = data.disclosureVersion ?? DISCLOSURE_VERSION;
       const ipAddress = getClientIp();
@@ -83,7 +71,6 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         disclosure_text: DISCLOSURE_SUMMARY,
-        ...(data.citySlug ? { city_slug: data.citySlug } : {}),
       };
 
       const session = await stripe.checkout.sessions.create({
@@ -105,6 +92,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
             }),
       });
 
+      // Persist consent immediately (pending payment). Webhook flips to paid later.
       const { error: insertError } = await supabaseAdmin.from("ad_payments").insert({
         stripe_session_id: session.id,
         customer_email: data.customerEmail,
@@ -117,7 +105,6 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         ip_address: ipAddress,
-        city_id: cityId,
       });
       if (insertError) {
         console.error("ad_payments pre-insert failed:", insertError);
@@ -131,7 +118,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
   });
 
 type TokenLookupResult =
-  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; citySlug: string | null; cityName: string | null; cityState: string | null }
+  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean }
   | { found: false; reason: string };
 
 export const getPaymentByToken = createServerFn({ method: "POST" })
@@ -140,21 +127,17 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ad_payments")
-      .select("submission_token, plan, customer_email, token_used, status, city:cities(slug,name,state)")
+      .select("submission_token, plan, customer_email, token_used, status")
       .eq("submission_token", data.token)
       .maybeSingle();
     if (error || !row) return { found: false, reason: "Invalid or unknown token" };
     if (row.status !== "paid") return { found: false, reason: "Payment not yet confirmed" };
-    const city = (row as { city?: { slug: string; name: string; state: string } | null }).city ?? null;
     return {
       found: true,
       token: row.submission_token as string,
       plan: row.plan as "image_5" | "slider_10",
       email: row.customer_email as string,
       tokenUsed: row.token_used as boolean,
-      citySlug: city?.slug ?? null,
-      cityName: city?.name ?? null,
-      cityState: city?.state ?? null,
     };
   });
 
@@ -162,16 +145,15 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
   .inputValidator((data: { sessionId: string; environment: StripeEnv }) =>
     z.object({ sessionId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(data)
   )
-  .handler(async ({ data }): Promise<{ token?: string; email?: string; status: string; citySlug?: string | null }> => {
+  .handler(async ({ data }): Promise<{ token?: string; email?: string; status: string }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("ad_payments")
-      .select("submission_token, customer_email, status, city:cities(slug)")
+      .select("submission_token, customer_email, status")
       .eq("stripe_session_id", data.sessionId)
       .maybeSingle();
     if (row && row.status === "paid") {
-      const citySlug = (row as { city?: { slug: string } | null }).city?.slug ?? null;
-      return { token: row.submission_token as string, email: row.customer_email as string, status: "paid", citySlug };
+      return { token: row.submission_token as string, email: row.customer_email as string, status: "paid" };
     }
     try {
       const stripe = createStripeClient(data.environment);
@@ -181,9 +163,12 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           .from("ad_payments")
           .update({ status: "paid", paid_at: new Date().toISOString() })
           .eq("stripe_session_id", session.id)
-          .select("submission_token, customer_email, plan, amount_cents, city:cities(slug)")
+          .select("submission_token, customer_email, plan, amount_cents")
           .maybeSingle();
         if (updated) {
+          // Fallback: if the webhook hasn't landed yet, send the receipt from here too.
+          // enqueueTransactionalEmailInternal is safe to call twice — the queue idempotency
+          // key derived from sessionId prevents duplicate sends.
           try {
             const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
             const planLabels: Record<string, string> = {
@@ -203,8 +188,7 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           } catch (e) {
             console.error("fallback payment-receipt enqueue failed:", e);
           }
-          const citySlug = (updated as { city?: { slug: string } | null }).city?.slug ?? null;
-          return { token: updated.submission_token as string, email: updated.customer_email as string, status: "paid", citySlug };
+          return { token: updated.submission_token as string, email: updated.customer_email as string, status: "paid" };
         }
       }
       return { status: session.payment_status ?? "pending" };

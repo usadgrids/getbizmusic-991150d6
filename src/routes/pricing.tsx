@@ -1,39 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { ArrowLeft, Check, Shield, Info } from "lucide-react";
 import { toast } from "sonner";
-import { z } from "zod";
 import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createAdCheckout } from "@/lib/payments.functions";
-import { getCityBySlug } from "@/lib/cities.functions";
 import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
-const searchSchema = z.object({ city: z.string().min(1).max(120).optional() });
-
 export const Route = createFileRoute("/pricing")({
-  validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Pricing — Get Biz Music" },
+      { title: "Pricing — Get Biz Music - National City, CA" },
       { name: "description", content: "Choose your annual ad plan: $12/year for 7-second rotation or $24/year for 10-second feature." },
     ],
   }),
   component: PricingPage,
 });
 
-type CityInfo = { slug: string; name: string; state: string } | null;
-
 function PricingPage() {
-  const { city: citySlug } = Route.useSearch();
-  const cityFn = useServerFn(getCityBySlug);
-  const [city, setCity] = useState<CityInfo>(null);
   const [plan, setPlan] = useState<AdPlan>("image_5");
   const [email, setEmail] = useState("");
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -41,22 +30,18 @@ function PricingPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!citySlug) { setCity(null); return; }
-    let cancelled = false;
-    cityFn({ data: { slug: citySlug } }).then((c) => {
-      if (cancelled || !c) return;
-      setCity({ slug: c.slug, name: c.name, state: c.state });
-    }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [citySlug, cityFn]);
-
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const canPay = emailValid && agreedTerms && agreedNoRefund && !loading;
 
   const startCheckout = async () => {
-    if (!emailValid) return toast.error("Please enter a valid email");
-    if (!agreedTerms || !agreedNoRefund) return toast.error("Please confirm both boxes to continue");
+    if (!emailValid) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    if (!agreedTerms || !agreedNoRefund) {
+      toast.error("Please confirm both boxes to continue");
+      return;
+    }
     setLoading(true);
     try {
       const result = await createAdCheckout({
@@ -68,7 +53,6 @@ function PricingPage() {
           agreedTerms,
           agreedNoRefund,
           disclosureVersion: "v1",
-          citySlug: city?.slug,
         },
       });
       if ("error" in result) throw new Error(result.error);
@@ -85,7 +69,7 @@ function PricingPage() {
     return (
       <div className="min-h-screen bg-[#f5f6f8]">
         <PaymentTestModeBanner />
-        <BizNavbar citySlug={city?.slug} cityName={city?.name} state={city?.state} />
+        <BizNavbar />
         <main className="max-w-3xl mx-auto px-4 py-8">
           <button
             onClick={() => setClientSecret(null)}
@@ -104,24 +88,16 @@ function PricingPage() {
     );
   }
 
-  const cityLabel = city ? `${city.name}, ${city.state}` : null;
-
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
       <PaymentTestModeBanner />
-      <BizNavbar citySlug={city?.slug} cityName={city?.name} state={city?.state} />
+      <BizNavbar />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        {city ? (
-          <Link to="/$city" params={{ city: city.slug }} className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
-            <ArrowLeft size={14} /> Back to {city.name}
-          </Link>
-        ) : (
-          <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
-            <ArrowLeft size={14} /> Back to cities
-          </Link>
-        )}
+        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+          <ArrowLeft size={14} /> Back to home
+        </Link>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0F2A4A] text-center">
-          {cityLabel ? `Advertise in ${cityLabel}` : "Pick Your Annual Ad Plan"}
+          Pick Your Annual Ad Plan
         </h1>
         <p className="text-center text-gray-600 mt-2 max-w-xl mx-auto">
           Pay first, then submit your ad. We email you a one-time submission link the moment your payment clears.
@@ -150,7 +126,7 @@ function PricingPage() {
                 </div>
                 <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
                   <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> {p.seconds}-second rotation</li>
-                  <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> {cityLabel ? `${cityLabel} audience` : "Nationwide visibility"}, all year</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
                   <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Admin reviewed within 24 hours</li>
                 </ul>
               </button>
@@ -170,6 +146,7 @@ function PricingPage() {
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
 
+          {/* Disclosure block */}
           <div className="mt-6 rounded-xl border-2 border-[#D4A24C]/60 bg-[#FFF8EC] p-5">
             <div className="flex items-center gap-2 mb-3">
               <Info size={18} className="text-[#D4A24C]" />
@@ -180,7 +157,7 @@ function PricingPage() {
             <div className="space-y-3 text-sm text-[#3a2f1c] leading-relaxed">
               <p>
                 <span className="font-semibold text-[#0F2A4A]">What you're getting:</span>{" "}
-                A fun, one-year spot on {cityLabel ? `our ${cityLabel} business ad display` : "our business ad display"}! Your ad streams alongside
+                A fun, one-year spot on our National City business ad display! Your ad streams alongside
                 other awesome local businesses, for the number of seconds you chose, all year long.
               </p>
               <p>

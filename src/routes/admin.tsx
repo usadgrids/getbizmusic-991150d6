@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, MapPin, Inbox } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -16,17 +16,8 @@ import {
   removeAd,
   updateAd,
 } from "@/lib/ads.functions";
-import {
-  listAllCitiesAdmin,
-  upsertCity,
-  toggleCityActive,
-  listCityRequests,
-  updateCityRequestStatus,
-  type City,
-} from "@/lib/cities.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
-
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -318,12 +309,7 @@ function AdminConsole() {
           )}
         </section>
 
-        <CitiesSection />
-        <CityRequestsSection />
-
         <ManualSubmitSection onCreated={refreshAll} />
-
-
 
 
         {/* Live ads */}
@@ -579,15 +565,11 @@ function PendingCard({
 
 function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const createFn = useServerFn(createManualSubmission);
-  const citiesFn = useServerFn(listAllCitiesAdmin);
-  const { data: cities = [] } = useQuery({ queryKey: ["all-cities-admin"], queryFn: () => citiesFn() });
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [autoApprove, setAutoApprove] = useState(true);
   const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
-  const [citySlug, setCitySlug] = useState<string>("");
-
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
@@ -623,7 +605,6 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           ad_type: adType,
           image_path: path,
           auto_approve: autoApprove,
-          city_slug: citySlug || undefined,
         },
       });
       toast.success(autoApprove ? "Ad created and now live" : "Ad added to pending queue");
@@ -702,7 +683,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           <AdminField name="tagline" label="Tagline (optional, max 120 chars)" maxLength={120} />
           <AdminField name="youtube_url" label="YouTube video URL (optional)" placeholder="https://www.youtube.com/watch?v=..." maxLength={500} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Ad plan / rotation</label>
               <select
@@ -712,19 +693,6 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
               >
                 <option value="image_5">{AD_PLANS.image_5.label} — {AD_PLANS.image_5.seconds}s rotation</option>
                 <option value="slider_10">{AD_PLANS.slider_10.label} — {AD_PLANS.slider_10.seconds}s rotation</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">City</label>
-              <select
-                value={citySlug}
-                onChange={(e) => setCitySlug(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
-              >
-                <option value="">— No city —</option>
-                {cities.map((c) => (
-                  <option key={c.id} value={c.slug}>{c.name}, {c.state}{c.is_active ? "" : " (inactive)"}</option>
-                ))}
               </select>
             </div>
             <label className="flex items-center gap-2 text-sm text-gray-700 mt-5">
@@ -960,258 +928,5 @@ function EditAdModal({
         </div>
       </form>
     </div>
-  );
-}
-
-function CitiesSection() {
-  const qc = useQueryClient();
-  const listFn = useServerFn(listAllCitiesAdmin);
-  const upsertFn = useServerFn(upsertCity);
-  const toggleFn = useServerFn(toggleCityActive);
-  const { data: cities = [] } = useQuery({ queryKey: ["all-cities-admin"], queryFn: () => listFn() });
-  const [editing, setEditing] = useState<City | null>(null);
-  const [showNew, setShowNew] = useState(false);
-
-  const refresh = () => {
-    qc.invalidateQueries({ queryKey: ["all-cities-admin"] });
-    qc.invalidateQueries({ queryKey: ["active-cities"] });
-  };
-
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <MapPin size={18} className="text-[#D4A24C]" />
-          <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">Cities ({cities.length})</h2>
-        </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="text-sm bg-[#0F2A4A] text-white px-3 py-1.5 rounded-md hover:bg-[#163864] inline-flex items-center gap-1"
-        >
-          <Plus size={14} /> Add city
-        </button>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
-            <tr>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Slug</th>
-              <th className="px-4 py-2">State</th>
-              <th className="px-4 py-2">Sort</th>
-              <th className="px-4 py-2">Active</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cities.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No cities yet.</td></tr>
-            )}
-            {cities.map((c) => (
-              <tr key={c.id} className="border-t border-gray-100">
-                <td className="px-4 py-2 font-medium text-[#0F2A4A]">{c.name}</td>
-                <td className="px-4 py-2 font-mono text-xs text-gray-600">/{c.slug}</td>
-                <td className="px-4 py-2">{c.state}</td>
-                <td className="px-4 py-2 text-xs text-gray-600">{c.sort_order}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={async () => {
-                      try {
-                        await toggleFn({ data: { id: c.id, is_active: !c.is_active } });
-                        toast.success(c.is_active ? "Hidden" : "Activated");
-                        refresh();
-                      } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                    }}
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"}`}
-                  >
-                    {c.is_active ? "Active" : "Hidden"}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <button
-                    onClick={() => setEditing(c)}
-                    className="text-[#0F2A4A] hover:text-[#163864] inline-flex items-center gap-1 text-xs"
-                  >
-                    <Pencil size={12} /> Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {(showNew || editing) && (
-        <CityEditModal
-          city={editing}
-          onClose={() => { setShowNew(false); setEditing(null); }}
-          onSaved={async (data) => {
-            try {
-              await upsertFn({ data });
-              toast.success(editing ? "City updated" : "City added");
-              setShowNew(false); setEditing(null);
-              refresh();
-            } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-          }}
-        />
-      )}
-    </section>
-  );
-}
-
-function CityEditModal({
-  city, onClose, onSaved,
-}: {
-  city: City | null;
-  onClose: () => void;
-  onSaved: (data: { id?: string; slug?: string; name: string; state: string; is_active: boolean; sort_order: number; hero_tagline?: string | null }) => Promise<void>;
-}) {
-  const [name, setName] = useState(city?.name ?? "");
-  const [slug, setSlug] = useState(city?.slug ?? "");
-  const [state, setState] = useState(city?.state ?? "");
-  const [isActive, setIsActive] = useState(city?.is_active ?? true);
-  const [sortOrder, setSortOrder] = useState(city?.sort_order ?? 0);
-  const [tagline, setTagline] = useState(city?.hero_tagline ?? "");
-  const [busy, setBusy] = useState(false);
-
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      await onSaved({
-        id: city?.id,
-        slug: slug.trim() || undefined,
-        name: name.trim(),
-        state: state.trim(),
-        is_active: isActive,
-        sort_order: Number(sortOrder) || 0,
-        hero_tagline: tagline.trim() || null,
-      });
-    } finally { setBusy(false); }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center p-4 overflow-y-auto" onClick={onClose}>
-      <form onSubmit={save} onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-xl w-full max-w-lg my-8 p-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl font-bold text-[#0F2A4A]">{city ? "Edit city" : "Add city"}</h3>
-          <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={20} /></button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-2">
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">City name *</label>
-            <input required value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">URL slug (optional)</label>
-            <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="auto from name" className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">State *</label>
-            <input required value={state} onChange={(e) => setState(e.target.value)} placeholder="CA" className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Sort order</label>
-            <input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-[#0F2A4A] mt-5">
-            <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-            Active (visible on public homepage)
-          </label>
-          <div className="col-span-2">
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Hero tagline (optional)</label>
-            <input value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
-          </div>
-        </div>
-        <div className="flex gap-2 pt-2">
-          <button type="submit" disabled={busy} className="flex-1 bg-[#D4A24C] text-[#0F2A4A] font-bold py-2 rounded-md hover:bg-[#e0b266] disabled:opacity-60">
-            {busy ? "Saving…" : "Save"}
-          </button>
-          <button type="button" onClick={onClose} disabled={busy} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Cancel</button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function CityRequestsSection() {
-  const qc = useQueryClient();
-  const listFn = useServerFn(listCityRequests);
-  const updateFn = useServerFn(updateCityRequestStatus);
-  const { data: requests = [] } = useQuery({ queryKey: ["city-requests"], queryFn: () => listFn() });
-
-  const refresh = () => qc.invalidateQueries({ queryKey: ["city-requests"] });
-
-  const pending = requests.filter((r) => r.status === "pending");
-
-  return (
-    <section>
-      <div className="flex items-center gap-2 mb-3">
-        <Inbox size={18} className="text-[#D4A24C]" />
-        <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">City Requests ({pending.length} pending)</h2>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
-            <tr>
-              <th className="px-4 py-2">City</th>
-              <th className="px-4 py-2">State</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">When</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No city requests yet.</td></tr>
-            )}
-            {requests.map((r) => (
-              <tr key={r.id} className="border-t border-gray-100">
-                <td className="px-4 py-2 font-medium text-[#0F2A4A]">{r.city_name}</td>
-                <td className="px-4 py-2">{r.state ?? "—"}</td>
-                <td className="px-4 py-2 text-xs">{r.email ?? "—"}</td>
-                <td className="px-4 py-2 text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="px-4 py-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    r.status === "pending" ? "bg-amber-100 text-amber-700"
-                    : r.status === "launched" ? "bg-emerald-100 text-emerald-700"
-                    : "bg-gray-200 text-gray-600"
-                  }`}>{r.status}</span>
-                </td>
-                <td className="px-4 py-2 text-right space-x-2">
-                  {r.status === "pending" && (
-                    <>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await updateFn({ data: { id: r.id, status: "launched" } });
-                            toast.success("Marked as launched");
-                            refresh();
-                          } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                        }}
-                        className="text-emerald-700 text-xs hover:underline"
-                      >
-                        Mark launched
-                      </button>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await updateFn({ data: { id: r.id, status: "dismissed" } });
-                            refresh();
-                          } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                        }}
-                        className="text-gray-500 text-xs hover:underline"
-                      >
-                        Dismiss
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
   );
 }

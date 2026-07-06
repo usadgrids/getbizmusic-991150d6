@@ -4,10 +4,9 @@ import heroFlyer from "@/assets/biz-hero-flyer.jpg.asset.json";
 type Props = {
   cityName?: string;
   state?: string;
-  citySlug?: string;
 };
 
-export function BizHero({ cityName, state, citySlug }: Props) {
+export function BizHero({ cityName, state }: Props) {
   const label = cityName ? `${cityName}${state ? `, ${state}` : ""}` : null;
   return (
     <header className="relative bg-[#0F2A4A]">
@@ -26,7 +25,6 @@ export function BizHero({ cityName, state, citySlug }: Props) {
       <div className="relative mx-auto w-full max-w-[1400px]">
         <Link
           to="/pricing"
-          search={citySlug ? ({ city: citySlug } as never) : (undefined as never)}
           aria-label={label ? `Get Listed in ${label} — From $12/yr` : "Get Listed — From $12/yr"}
           className="block"
         >
@@ -44,4 +42,3 @@ export function BizHero({ cityName, state, citySlug }: Props) {
     </header>
   );
 }
-

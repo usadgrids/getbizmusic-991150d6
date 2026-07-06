@@ -25,7 +25,6 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as CityAdAdNumberRouteImport } from './routes/$city.ad.$adNumber'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -116,11 +115,6 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
-const CityAdAdNumberRoute = CityAdAdNumberRouteImport.update({
-  id: '/ad/$adNumber',
-  path: '/ad/$adNumber',
-  getParentRoute: () => CityRoute,
-} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -171,7 +165,6 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
-  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -195,7 +188,6 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city': typeof CityIndexRoute
-  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -221,7 +213,6 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
-  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -248,7 +239,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/$city/'
-    | '/$city/ad/$adNumber'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -272,7 +262,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/$city'
-    | '/$city/ad/$adNumber'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -297,7 +286,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/$city/'
-    | '/$city/ad/$adNumber'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/payments/webhook'
@@ -445,13 +433,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$city/ad/$adNumber': {
-      id: '/$city/ad/$adNumber'
-      path: '/ad/$adNumber'
-      fullPath: '/$city/ad/$adNumber'
-      preLoaderRoute: typeof CityAdAdNumberRouteImport
-      parentRoute: typeof CityRoute
-    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -499,12 +480,10 @@ declare module '@tanstack/react-router' {
 
 interface CityRouteChildren {
   CityIndexRoute: typeof CityIndexRoute
-  CityAdAdNumberRoute: typeof CityAdAdNumberRoute
 }
 
 const CityRouteChildren: CityRouteChildren = {
   CityIndexRoute: CityIndexRoute,
-  CityAdAdNumberRoute: CityAdAdNumberRoute,
 }
 
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
