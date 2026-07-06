@@ -579,11 +579,15 @@ function PendingCard({
 
 function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const createFn = useServerFn(createManualSubmission);
+  const citiesFn = useServerFn(listAllCitiesAdmin);
+  const { data: cities = [] } = useQuery({ queryKey: ["all-cities-admin"], queryFn: () => citiesFn() });
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [autoApprove, setAutoApprove] = useState(true);
   const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
+  const [citySlug, setCitySlug] = useState<string>("");
+
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
@@ -619,6 +623,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           ad_type: adType,
           image_path: path,
           auto_approve: autoApprove,
+          city_slug: citySlug || undefined,
         },
       });
       toast.success(autoApprove ? "Ad created and now live" : "Ad added to pending queue");
@@ -697,7 +702,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           <AdminField name="tagline" label="Tagline (optional, max 120 chars)" maxLength={120} />
           <AdminField name="youtube_url" label="YouTube video URL (optional)" placeholder="https://www.youtube.com/watch?v=..." maxLength={500} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Ad plan / rotation</label>
               <select
@@ -707,6 +712,19 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
               >
                 <option value="image_5">{AD_PLANS.image_5.label} — {AD_PLANS.image_5.seconds}s rotation</option>
                 <option value="slider_10">{AD_PLANS.slider_10.label} — {AD_PLANS.slider_10.seconds}s rotation</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">City</label>
+              <select
+                value={citySlug}
+                onChange={(e) => setCitySlug(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              >
+                <option value="">— No city —</option>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.slug}>{c.name}, {c.state}{c.is_active ? "" : " (inactive)"}</option>
+                ))}
               </select>
             </div>
             <label className="flex items-center gap-2 text-sm text-gray-700 mt-5">
