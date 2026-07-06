@@ -20,6 +20,7 @@ export type Database = {
           agreed_no_refund: boolean
           agreed_terms: boolean
           amount_cents: number
+          city_id: string | null
           created_at: string
           customer_email: string
           disclosure_version: string | null
@@ -38,6 +39,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents: number
+          city_id?: string | null
           created_at?: string
           customer_email: string
           disclosure_version?: string | null
@@ -56,6 +58,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents?: number
+          city_id?: string | null
           created_at?: string
           customer_email?: string
           disclosure_version?: string | null
@@ -69,12 +72,21 @@ export type Database = {
           submission_token?: string
           token_used?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ad_payments_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ad_submissions: {
         Row: {
           ad_type: string
           business_name: string
+          city_id: string | null
           contact_name: string
           created_at: string
           email: string
@@ -92,6 +104,7 @@ export type Database = {
         Insert: {
           ad_type: string
           business_name: string
+          city_id?: string | null
           contact_name: string
           created_at?: string
           email: string
@@ -109,6 +122,7 @@ export type Database = {
         Update: {
           ad_type?: string
           business_name?: string
+          city_id?: string | null
           contact_name?: string
           created_at?: string
           email?: string
@@ -125,6 +139,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "ad_submissions_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ad_submissions_payment_id_fkey"
             columns: ["payment_id"]
             isOneToOne: false
@@ -138,6 +159,7 @@ export type Database = {
           ad_number: number
           ad_type: string
           business_name: string
+          city_id: string | null
           created_at: string
           duration_seconds: number
           expires_at: string
@@ -155,6 +177,7 @@ export type Database = {
           ad_number?: number
           ad_type: string
           business_name: string
+          city_id?: string | null
           created_at?: string
           duration_seconds: number
           expires_at: string
@@ -172,6 +195,7 @@ export type Database = {
           ad_number?: number
           ad_type?: string
           business_name?: string
+          city_id?: string | null
           created_at?: string
           duration_seconds?: number
           expires_at?: string
@@ -187,6 +211,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "ads_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ads_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
@@ -194,6 +225,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cities: {
+        Row: {
+          created_at: string
+          hero_background_url: string | null
+          hero_tagline: string | null
+          id: string
+          is_active: boolean
+          lat: number | null
+          lng: number | null
+          name: string
+          slug: string
+          sort_order: number
+          state: string
+          timezone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hero_background_url?: string | null
+          hero_tagline?: string | null
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name: string
+          slug: string
+          sort_order?: number
+          state: string
+          timezone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hero_background_url?: string | null
+          hero_tagline?: string | null
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          state?: string
+          timezone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      city_requests: {
+        Row: {
+          city_name: string
+          created_at: string
+          email: string | null
+          id: string
+          state: string | null
+          status: string
+        }
+        Insert: {
+          city_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          state?: string | null
+          status?: string
+        }
+        Update: {
+          city_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          state?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       dispute_evidence_log: {
         Row: {
