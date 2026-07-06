@@ -365,21 +365,29 @@ function AdminConsole() {
                       {new Date(a.expires_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2 text-right">
-                      {a.status === "active" && (
+                      <div className="inline-flex items-center gap-3 justify-end">
                         <button
-                          onClick={async () => {
-                            if (!confirm(`Remove "${a.business_name}" from rotation?`)) return;
-                            try {
-                              await removeFn({ data: { id: a.id } });
-                              toast.success("Removed");
-                              refreshAll();
-                            } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-                          }}
-                          className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                          onClick={() => setEditingAd(a)}
+                          className="text-[#0F2A4A] hover:text-[#163864] inline-flex items-center gap-1 text-xs"
                         >
-                          <Trash2 size={12} /> Remove
+                          <Pencil size={12} /> Edit
                         </button>
-                      )}
+                        {a.status === "active" && (
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`Remove "${a.business_name}" from rotation?`)) return;
+                              try {
+                                await removeFn({ data: { id: a.id } });
+                                toast.success("Removed");
+                                refreshAll();
+                              } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+                            }}
+                            className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                          >
+                            <Trash2 size={12} /> Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
