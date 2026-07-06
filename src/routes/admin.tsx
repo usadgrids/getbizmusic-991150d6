@@ -318,7 +318,12 @@ function AdminConsole() {
           )}
         </section>
 
+        <CitiesSection />
+        <CityRequestsSection />
+
         <ManualSubmitSection onCreated={refreshAll} />
+
+
 
 
         {/* Live ads */}
