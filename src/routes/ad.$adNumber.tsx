@@ -217,6 +217,9 @@ function AdLanding() {
                 : "More National City Businesses"
             }
           />
+          <div className="mt-6">
+            <PlaylistMarquee />
+          </div>
           <div className="mt-4 text-center">
             <Link
               to="/submit"
