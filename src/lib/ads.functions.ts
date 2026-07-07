@@ -167,6 +167,8 @@ async function resolveOrCreateCity(name: string, stateCode: string): Promise<str
     }
   }
   return null;
+}
+
 
 const submissionSchema = z.object({
   business_name: z.string().trim().min(1).max(120),
