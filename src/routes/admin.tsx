@@ -334,6 +334,7 @@ function AdminConsole() {
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
                 <tr>
                   <th className="px-4 py-2">Business</th>
+                  <th className="px-4 py-2">City</th>
                   <th className="px-4 py-2">Ad Number</th>
                   <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">Status</th>
@@ -343,13 +344,17 @@ function AdminConsole() {
               </thead>
               <tbody>
                 {filteredLiveAds.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                  <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">
                     {liveAds.length === 0 ? "No ads yet." : "No ads match your search."}
                   </td></tr>
                 )}
-                {filteredLiveAds.map((a) => (
+                {filteredLiveAds.map((a) => {
+                  const city = (a as unknown as { cities?: { name?: string; state?: string } | null }).cities;
+                  const cityLabel = city?.name ? `${city.name}${city.state ? `, ${city.state}` : ""}` : "—";
+                  return (
                   <tr key={a.id} className="border-t border-gray-100">
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
+                    <td className="px-4 py-2 text-xs text-gray-700">{cityLabel}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
                       {a.ad_type === "slider_10" ? "Featured · $24" : "Standard · $12"}
