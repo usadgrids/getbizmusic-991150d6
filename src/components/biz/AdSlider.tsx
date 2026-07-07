@@ -424,6 +424,22 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           </div>
 
 
+          {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
+          {current && current.ad_number != null && (
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
+              <div className="text-sm font-semibold text-[#0F2A4A]">
+                Share this ad image
+              </div>
+              <ShareBar
+                adNumber={current.ad_number}
+                businessName={current.business_name}
+                tagline={current.tagline}
+                onOpen={handleShareOpen}
+                compact
+              />
+            </div>
+          )}
+
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
             <div className="flex items-center gap-2 min-w-0 flex-1">
