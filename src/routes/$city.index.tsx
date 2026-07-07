@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { Sparkles } from "lucide-react";
 import { getActiveAds } from "@/lib/ads.functions";
 import { getCityBySlug } from "@/lib/cities.functions";
 import { BizNavbar } from "@/components/biz/BizNavbar";
@@ -65,6 +66,26 @@ function CityHome() {
           title={`Featured ${city.name} Business of the Moment`}
           featured
         />
+        <section className="mt-8 sm:mt-12 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-6 py-10 sm:px-10 sm:py-14 text-center text-white shadow-lg">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-4">
+            <Sparkles size={14} />
+            {city.name} Business Spotlight
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-bold mb-3">
+            Submit Your Business Novelty Ad
+          </h2>
+          <p className="text-sm sm:text-base text-white/80 max-w-2xl mx-auto mb-6">
+            Get your {city.name} business featured in the rotation above and reach local
+            listeners for just $12/year. Limited-time intro offer.
+          </p>
+          <Link
+            to="/submit"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-8 py-3 text-sm sm:text-base font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-md"
+          >
+            Submit Your Ad
+            <Sparkles size={16} />
+          </Link>
+        </section>
       </main>
       <BizFooter />
       <MiniPlayer />
