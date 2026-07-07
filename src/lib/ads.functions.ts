@@ -258,7 +258,7 @@ export const listActiveAdsAdmin = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ads")
-      .select("*")
+      .select("*, cities:city_id(name, state, slug)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return await attachUrls(data ?? []);
