@@ -11,7 +11,7 @@ import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 
-const SITE = "https://bizspotmusicad.lovable.app";
+const SITE = "https://www.getbizmusic.com";
 
 const adQueryOptions = (adNumber: number) => ({
   queryKey: ["ad-by-number", adNumber],
