@@ -473,6 +473,9 @@ type PendingRow = {
   preview_url: string;
   created_at: string;
   ad_id?: string | null;
+  city_id?: string | null;
+  requested_city_name?: string | null;
+  requested_state_code?: string | null;
   ad?: { ad_number: number } | { ad_number: number }[] | null;
   payment?: {
     id: string;
