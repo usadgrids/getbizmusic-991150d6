@@ -91,6 +91,24 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hideTimerRef = useRef<number | null>(null);
   const searchIdleTimerRef = useRef<number | null>(null);
+  const shareResumeTimerRef = useRef<number | null>(null);
+
+  const handleShareOpen = () => {
+    setPaused(true);
+    if (typeof window === "undefined") return;
+    if (shareResumeTimerRef.current) window.clearTimeout(shareResumeTimerRef.current);
+    const resume = () => {
+      setPaused(false);
+      window.removeEventListener("focus", onFocus);
+      if (shareResumeTimerRef.current) {
+        window.clearTimeout(shareResumeTimerRef.current);
+        shareResumeTimerRef.current = null;
+      }
+    };
+    const onFocus = () => resume();
+    window.addEventListener("focus", onFocus, { once: true });
+    shareResumeTimerRef.current = window.setTimeout(resume, 30000);
+  };
   const current = ads[idx];
   const duration = resolveDuration(current);
   const [timeLeft, setTimeLeft] = useState(() => resolveDuration(ads[0]));
@@ -319,21 +337,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               />
             )}
 
-            {/* Share bar — bottom-left overlay, pauses slider on click, visible on hover */}
-            <div
-              className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1.5 backdrop-blur-sm shadow-md opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90 pl-1">
-                Share
-              </span>
-              <ShareBar
-                adNumber={current.ad_number}
-                businessName={current.business_name}
-                tagline={current.tagline}
-                onOpen={() => setPaused(true)}
-                compact
-              />
-            </div>
 
             {/* Hover-revealed search bar (center) */}
             {(hovered || searchOpen) && (
@@ -420,6 +423,22 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             )}
           </div>
 
+
+          {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
+          {current && current.ad_number != null && (
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
+              <div className="text-sm font-semibold text-[#0F2A4A]">
+                Share this ad image
+              </div>
+              <ShareBar
+                adNumber={current.ad_number}
+                businessName={current.business_name}
+                tagline={current.tagline}
+                onOpen={handleShareOpen}
+                compact
+              />
+            </div>
+          )}
 
           {/* Music controls — drive the YouTube playlist while the slideshow runs */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
