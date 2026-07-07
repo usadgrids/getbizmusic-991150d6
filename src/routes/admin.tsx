@@ -170,19 +170,51 @@ function AdminConsole() {
   const [editingAd, setEditingAd] = useState<LiveAd | null>(null);
 
   const [adsSearch, setAdsSearch] = useState("");
+  type SortKey = "business" | "city" | "state" | "ad_number" | "type" | "status" | "expires";
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "expires", dir: "desc" });
+  const toggleSort = (key: SortKey) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  const cityOf = (a: LiveAd) =>
+    (a as unknown as { cities?: { name?: string; state?: string } | null }).cities ?? null;
   const filteredLiveAds = (() => {
     const raw = adsSearch.trim();
-    if (!raw) return liveAds;
-    const q = raw.toLowerCase();
-    const numericQ = raw.replace(/^#/, "").trim();
-    return liveAds.filter((a) => {
-      const adNum = a.ad_number != null ? String(a.ad_number) : "";
-      return (
-        a.business_name.toLowerCase().includes(q) ||
-        (a.industry ?? "").toLowerCase().includes(q) ||
-        (numericQ.length > 0 && adNum.includes(numericQ))
-      );
+    const base = !raw
+      ? [...liveAds]
+      : (() => {
+          const q = raw.toLowerCase();
+          const numericQ = raw.replace(/^#/, "").trim();
+          return liveAds.filter((a) => {
+            const adNum = a.ad_number != null ? String(a.ad_number) : "";
+            const c = cityOf(a);
+            return (
+              a.business_name.toLowerCase().includes(q) ||
+              (a.industry ?? "").toLowerCase().includes(q) ||
+              (c?.name ?? "").toLowerCase().includes(q) ||
+              (c?.state ?? "").toLowerCase().includes(q) ||
+              (numericQ.length > 0 && adNum.includes(numericQ))
+            );
+          });
+        })();
+    const dir = sort.dir === "asc" ? 1 : -1;
+    const val = (a: LiveAd): string | number => {
+      const c = cityOf(a);
+      switch (sort.key) {
+        case "business": return a.business_name.toLowerCase();
+        case "city": return (c?.name ?? "").toLowerCase();
+        case "state": return (c?.state ?? "").toLowerCase();
+        case "ad_number": return a.ad_number ?? -1;
+        case "type": return a.ad_type;
+        case "status": return a.status;
+        case "expires": return new Date(a.expires_at).getTime();
+      }
+    };
+    base.sort((a, b) => {
+      const va = val(a), vb = val(b);
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
     });
+    return base;
   })();
 
   const refreshAll = () => {
