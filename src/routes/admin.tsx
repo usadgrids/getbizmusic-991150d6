@@ -17,6 +17,7 @@ import {
   updateAd,
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { getActiveCities } from "@/lib/cities.functions";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
 
 export const Route = createFileRoute("/admin")({
