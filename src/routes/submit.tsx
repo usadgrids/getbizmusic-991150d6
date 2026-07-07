@@ -144,7 +144,13 @@ function SubmitPage() {
       const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
-      await submit({ data: { ...parsed.data, image_path: path, submission_token: token } });
+      await submit({ data: {
+        ...parsed.data,
+        image_path: path,
+        submission_token: token,
+        requested_city_name: city.name,
+        requested_state_code: city.stateCode,
+      } });
       setDone(true);
     } catch (err) {
       console.error(err);
