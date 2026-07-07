@@ -732,6 +732,38 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
             </label>
           </div>
 
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-medium text-[#0F2A4A]">
+                Display in cities * ({selectedCityIds.length} selected)
+              </label>
+              <div className="flex gap-2 text-xs">
+                <button type="button" onClick={selectAllCities} className="text-[#0F2A4A] underline hover:text-[#163864]">
+                  Select all
+                </button>
+                <button type="button" onClick={clearCities} className="text-gray-500 underline hover:text-gray-700">
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1 bg-white">
+              {cities.length === 0 && (
+                <div className="text-xs text-gray-500 col-span-2 px-1 py-2">No active cities.</div>
+              )}
+              {cities.map((c) => (
+                <label key={c.id} className="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 rounded px-1 py-0.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedCityIds.includes(c.id)}
+                    onChange={() => toggleCity(c.id)}
+                  />
+                  <span>{c.name}, {c.state}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-[11px] text-gray-500">The same ad will be published to every selected city in one entry.</p>
+          </div>
+
           <button
             type="submit"
             disabled={busy}
