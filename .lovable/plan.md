@@ -1,47 +1,62 @@
-## Goal
 
-Prepare BizMusic for multi-state expansion where two cities can share a name (e.g., Bonita, CA vs Bonita, TX), and make the admin panel easier to scan/sort by separating City and State.
+## Goals
 
-## What the codebase already supports
+1. Make the image-size spec (**1216 × 896 px, 4:3**) unmissable on the submit page.
+2. Give submitters a "I'm not ready — remind me later" option that emails them a link back to the submit page with their token.
+3. After a successful submission, email the submitter a confirmation containing their unique shareable ad URL (`/ad/{ad_number}`) and ad number.
 
-- `cities` table already has `name`, `state`, and a unique `slug`. Routing uses `/$city` by slug, so same-name cities can already coexist as long as their slugs differ.
-- The real risk is slug collisions and human ambiguity in the admin picker/list where we currently show `"Name, ST"` in one column.
+## 1. Emphasize image size on `/submit`
 
-## Plan
+In `src/routes/submit.tsx`, replace the current small "Recommended" note with a prominent spec callout above the file input:
 
-### 1. Slug convention for same-name cities (data hygiene)
+- Large badge/heading: **"Image must be 1216 × 796 px (4:3)"** — bold, brand color, with icon.
+- Sub-bullets: JPG/PNG/WebP, under 2 MB, include logo + business name + services + phone, avoid tiny text.
+- Add a client-side check on file selection that reads the image dimensions and shows a **warning** (not a hard block) if it isn't 1216×896 or 4:3 ratio, so submitters know before uploading.
 
-- Standardize slugs as `name-state` (lowercased, e.g. `bonita-ca`) going forward.
-- Add a DB uniqueness guarantee on `(lower(name), lower(state))` in `cities` so two rows can't represent the same real city, while `slug` stays globally unique.
-- Existing single-name slugs (e.g. `bonita`) keep working — no URL breakage. New cities in other states get `-state` suffix.
-- Add a small helper used by the admin "Create city" flow (if/when added) that auto-suggests `name-state` slug.
+## 2. "I'm not ready" flow
 
-### 2. Admin panel: split City and State columns
+On `/submit` (verified state), add a secondary button under the form: **"I'm not ready — remind me later"**.
 
-In `src/routes/admin.tsx` Active Ads table:
+- Clicking it calls a new server fn `scheduleSubmissionReminder({ token })` that:
+  - Verifies token is paid + not used.
+  - Enqueues a transactional email using the existing `enqueueTransactionalEmailInternal` (idempotency key `submit-reminder-{token}`).
+- New email template `src/lib/email-templates/submit-reminder.tsx`:
+  - Subject: "Your Get Biz Music ad is ready when you are"
+  - Body reminds them of the 1216×896 spec, tips, and provides a big CTA button linking to `https://bizspotmusicad.lovable.app/submit?token={token}`.
+  - Register in `src/lib/email-templates/registry.ts`.
+- After success, show an on-page confirmation ("We've emailed you a link — submit whenever your image is ready.") and disable the form area.
 
-- Replace the single "City" column with two columns: **City** and **State**.
-- Both column headers become sortable (click to toggle asc/desc). Add sorting for Business, Ad Number, Type, Status, Expires while we're in there — same lightweight client-side sort.
-- Search box also matches state (so "TX" narrows results).
+Note: the token remains valid until used, so the same link works later. No DB schema change needed.
 
-### 3. Admin "Display in cities" picker (manual submission)
+## 3. Submission confirmation email with shareable URL
 
-- Group the city checkboxes by **State**, with the state name as a subheading.
-- Each checkbox label shows `City` with the state implied by its group, plus a small `ST` badge to keep it unambiguous when scanning.
-- Add a quick filter input above the grid.
+The share URL uses `ad_number`, which is assigned only when an admin **approves** the submission (in `approveSubmission`, `src/lib/ads.functions.ts`). Two emails make this clean:
 
-### 4. Public city label consistency
+**a) Immediate "Submission received" email** (sent from `createSubmission`):
+- New template `src/lib/email-templates/submission-received.tsx`.
+- Confirms receipt, states 24-hour review SLA, echoes business name.
+- No share URL yet (ad_number not assigned).
+- Idempotency key: `submission-received-{submission_token}`.
 
-- Where we already render `"Name, ST"` (city hero, picker on `/`), keep as-is. No public URL changes.
+**b) "Your ad is live" email** (sent from `approveSubmission` once `ad_number` is known):
+- New template `src/lib/email-templates/ad-approved.tsx`.
+- Shows the ad number and the shareable URL: `https://bizspotmusicad.lovable.app/ad/{ad_number}`.
+- Copy encourages sharing on social, in email signatures, etc.
+- Idempotency key: `ad-approved-{ad_id}`.
 
-## Technical notes
+Both use `enqueueTransactionalEmailInternal` server-side (like the existing payment-receipt fallback) so no auth is needed.
 
-- Migration: add `CREATE UNIQUE INDEX cities_name_state_uniq ON public.cities (lower(name), lower(state));`. No data backfill needed unless duplicates already exist (we'll check first and only migrate if clean).
-- Admin sort: local `useState` for `{key, dir}`, pure sort over `filteredLiveAds`. No server changes.
-- `getActiveCities` already returns `state`; no server changes needed for the picker grouping.
-- No changes to routes, RLS, or `ads`/`ad_submissions` schemas.
+## Technical details
 
-## Out of scope
+Files to change:
+- `src/routes/submit.tsx` — new size-spec callout, dimension warning, "Not ready" button + handler, post-reminder confirmation state.
+- `src/lib/ads.functions.ts`:
+  - In `createSubmission`, after successful insert, enqueue `submission-received` email.
+  - In `approveSubmission`, after insert (using returned `ad_number`), enqueue `ad-approved` email. Requires selecting `contact_name, email` from the submission (already loaded as `sub`).
+  - New exported `scheduleSubmissionReminder` server fn.
+- `src/lib/email-templates/submit-reminder.tsx` — new.
+- `src/lib/email-templates/submission-received.tsx` — new.
+- `src/lib/email-templates/ad-approved.tsx` — new.
+- `src/lib/email-templates/registry.ts` — register three new templates.
 
-- Renaming existing slugs or redirects.
-- A full "create/edit city" admin UI (can be a follow-up).
+No DB migration, no RLS changes, no new secrets. Uses existing email infrastructure.
