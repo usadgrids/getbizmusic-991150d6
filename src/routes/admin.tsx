@@ -391,7 +391,7 @@ function AdminConsole() {
               </thead>
               <tbody>
                 {filteredLiveAds.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                  <tr><td colSpan={8} className="px-4 py-6 text-center text-gray-500">
                     {liveAds.length === 0 ? "No ads yet." : "No ads match your search."}
                   </td></tr>
                 )}
