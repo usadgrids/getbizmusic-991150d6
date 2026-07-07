@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { Sparkles } from "lucide-react";
 import { getActiveAds } from "@/lib/ads.functions";
 import { getCityBySlug } from "@/lib/cities.functions";
 import { BizNavbar } from "@/components/biz/BizNavbar";
