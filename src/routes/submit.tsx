@@ -39,8 +39,18 @@ function SubmitPage() {
   const { token } = Route.useSearch();
   const submit = useServerFn(createSubmission);
   const lookup = useServerFn(getPaymentByToken);
+  const reminder = useServerFn(scheduleSubmissionReminder);
 
   const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string }>(
+    { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
+  );
+  const [file, setFile] = useState<File | null>(null);
+  const [dimWarning, setDimWarning] = useState<string | null>(null);
+  const [agree, setAgree] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
