@@ -395,7 +395,8 @@ function AdminConsole() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
