@@ -91,6 +91,24 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hideTimerRef = useRef<number | null>(null);
   const searchIdleTimerRef = useRef<number | null>(null);
+  const shareResumeTimerRef = useRef<number | null>(null);
+
+  const handleShareOpen = () => {
+    setPaused(true);
+    if (typeof window === "undefined") return;
+    if (shareResumeTimerRef.current) window.clearTimeout(shareResumeTimerRef.current);
+    const resume = () => {
+      setPaused(false);
+      window.removeEventListener("focus", onFocus);
+      if (shareResumeTimerRef.current) {
+        window.clearTimeout(shareResumeTimerRef.current);
+        shareResumeTimerRef.current = null;
+      }
+    };
+    const onFocus = () => resume();
+    window.addEventListener("focus", onFocus, { once: true });
+    shareResumeTimerRef.current = window.setTimeout(resume, 30000);
+  };
   const current = ads[idx];
   const duration = resolveDuration(current);
   const [timeLeft, setTimeLeft] = useState(() => resolveDuration(ads[0]));
