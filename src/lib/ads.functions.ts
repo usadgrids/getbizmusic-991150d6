@@ -137,6 +137,8 @@ const submissionSchema = z.object({
   tagline: z.string().trim().max(80).optional().or(z.literal("")),
   image_path: z.string().trim().min(1).max(500),
   submission_token: z.string().uuid(),
+  requested_city_name: z.string().trim().min(1).max(120),
+  requested_state_code: z.string().trim().length(2).regex(/^[A-Za-z]{2}$/),
 });
 
 export const createSubmission = createServerFn({ method: "POST" })
