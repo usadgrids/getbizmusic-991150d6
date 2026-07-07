@@ -1,62 +1,49 @@
 
-## Goals
+## Goal
 
-1. Make the image-size spec (**1216 × 896 px, 4:3**) unmissable on the submit page.
-2. Give submitters a "I'm not ready — remind me later" option that emails them a link back to the submit page with their token.
-3. After a successful submission, email the submitter a confirmation containing their unique shareable ad URL (`/ad/{ad_number}`) and ad number.
+After payment, the submit form lets the buyer choose any US city + state via a searchable dropdown. On admin approval, if that city doesn't exist yet, it's created automatically and the ad appears there. Same city+state reuses the existing page.
 
-## 1. Emphasize image size on `/submit`
+## Changes
 
-In `src/routes/submit.tsx`, replace the current small "Recommended" note with a prominent spec callout above the file input:
+### 1. Bundled US cities dataset
+- Add `simple-maps`-style US cities JSON (~30k rows: `city`, `state`, `state_code`) as a lazy-loaded asset under `src/data/us-cities.json`.
+- New helper `src/lib/us-cities.ts`:
+  - `searchCities(query, limit=20)` — case-insensitive prefix/substring match on "City, ST".
+  - `slugifyCity(name, stateCode)` → e.g. `austin-tx`.
+  - `normalizeKey(name, stateCode)` → lowercase key for duplicate matching.
 
-- Large badge/heading: **"Image must be 1216 × 796 px (4:3)"** — bold, brand color, with icon.
-- Sub-bullets: JPG/PNG/WebP, under 2 MB, include logo + business name + services + phone, avoid tiny text.
-- Add a client-side check on file selection that reads the image dimensions and shows a **warning** (not a hard block) if it isn't 1216×896 or 4:3 ratio, so submitters know before uploading.
+### 2. Submit form (`src/routes/submit.tsx`)
+- Replace any current city selector with a **Combobox** (shadcn `Command` + `Popover`) that filters the bundled dataset as the user types.
+- Required field. Stores `{ cityName, stateCode }` on the submission payload.
+- Keep the "I'm not ready" reminder flow untouched.
 
-## 2. "I'm not ready" flow
+### 3. Submission storage (`ad_submissions`)
+- Migration: add nullable `requested_city_name text`, `requested_state_code text` (2-char). No `city_id` requirement at submission time — buyer's chosen city may not exist yet.
+- `submitAd` server fn: validate the pair against the bundled dataset (server re-check) and persist to those columns.
 
-On `/submit` (verified state), add a secondary button under the form: **"I'm not ready — remind me later"**.
+### 4. Admin approval (`approveSubmission` in `src/lib/ads.functions.ts`)
+- On approve, resolve target city:
+  1. Look up `cities` by normalized `(lower(name), state_code)`.
+  2. If found → use its `id`.
+  3. If not → insert a new `cities` row: `name`, `state`, `slug` (from `slugifyCity`; on slug collision append `-2`, `-3`), `is_active=true`, `sort_order=999`, `hero_tagline=null`, `hero_background_url=null`. Grant defaults already cover it.
+- Attach the ad to the resolved `city_id` as today. Edit re-approvals keep their existing `city_id` unless the buyer changed it.
+- Rejections do NOT create a city (matches user's answer).
 
-- Clicking it calls a new server fn `scheduleSubmissionReminder({ token })` that:
-  - Verifies token is paid + not used.
-  - Enqueues a transactional email using the existing `enqueueTransactionalEmailInternal` (idempotency key `submit-reminder-{token}`).
-- New email template `src/lib/email-templates/submit-reminder.tsx`:
-  - Subject: "Your Get Biz Music ad is ready when you are"
-  - Body reminds them of the 1216×896 spec, tips, and provides a big CTA button linking to `https://bizspotmusicad.lovable.app/submit?token={token}`.
-  - Register in `src/lib/email-templates/registry.ts`.
-- After success, show an on-page confirmation ("We've emailed you a link — submit whenever your image is ready.") and disable the form area.
+### 5. City page defaults
+- `src/routes/$city.index.tsx` / hero component: when `hero_tagline` / `hero_background_url` are null, fall back to a default tagline ("Local businesses in {City}, {ST}") and a default hero image already in `src/assets/`. No visual regression for polished cities.
 
-Note: the token remains valid until used, so the same link works later. No DB schema change needed.
+### 6. Admin queue UI (`src/routes/admin.tsx`)
+- Show the buyer's requested "City, ST" on each pending row so admin sees where the ad will land.
+- If the city is brand-new, show a small "Will create new city page" badge.
 
-## 3. Submission confirmation email with shareable URL
+## Technical notes
 
-The share URL uses `ad_number`, which is assigned only when an admin **approves** the submission (in `approveSubmission`, `src/lib/ads.functions.ts`). Two emails make this clean:
+- Dataset: use a public-domain US cities list (e.g. SimpleMaps free tier or `cities.json`), imported dynamically inside the Combobox so it doesn't bloat the initial bundle.
+- Duplicate matching key: `lower(trim(name)) || '|' || upper(state_code)`. Add a partial unique index on `cities(lower(name), state_code)` to prevent races.
+- Slug generation runs server-side in `approveSubmission`; retries on unique-violation with numeric suffix.
+- `getActiveCities` already filters `is_active=true`; new auto-created cities show up on the home city list immediately after approval. If you prefer they stay hidden from the homepage until an admin adds a hero, we can default `is_active=false` — say the word and I'll flip it.
 
-**a) Immediate "Submission received" email** (sent from `createSubmission`):
-- New template `src/lib/email-templates/submission-received.tsx`.
-- Confirms receipt, states 24-hour review SLA, echoes business name.
-- No share URL yet (ad_number not assigned).
-- Idempotency key: `submission-received-{submission_token}`.
+## Out of scope
 
-**b) "Your ad is live" email** (sent from `approveSubmission` once `ad_number` is known):
-- New template `src/lib/email-templates/ad-approved.tsx`.
-- Shows the ad number and the shareable URL: `https://bizspotmusicad.lovable.app/ad/{ad_number}`.
-- Copy encourages sharing on social, in email signatures, etc.
-- Idempotency key: `ad-approved-{ad_id}`.
-
-Both use `enqueueTransactionalEmailInternal` server-side (like the existing payment-receipt fallback) so no auth is needed.
-
-## Technical details
-
-Files to change:
-- `src/routes/submit.tsx` — new size-spec callout, dimension warning, "Not ready" button + handler, post-reminder confirmation state.
-- `src/lib/ads.functions.ts`:
-  - In `createSubmission`, after successful insert, enqueue `submission-received` email.
-  - In `approveSubmission`, after insert (using returned `ad_number`), enqueue `ad-approved` email. Requires selecting `contact_name, email` from the submission (already loaded as `sub`).
-  - New exported `scheduleSubmissionReminder` server fn.
-- `src/lib/email-templates/submit-reminder.tsx` — new.
-- `src/lib/email-templates/submission-received.tsx` — new.
-- `src/lib/email-templates/ad-approved.tsx` — new.
-- `src/lib/email-templates/registry.ts` — register three new templates.
-
-No DB migration, no RLS changes, no new secrets. Uses existing email infrastructure.
+- No changes to payment flow, email templates, or edit-ad flow.
+- No admin UI for editing city hero image in this pass (existing DB fields already support it; can be a follow-up).
