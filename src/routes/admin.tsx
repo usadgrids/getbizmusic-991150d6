@@ -358,7 +358,7 @@ function AdminConsole() {
               type="text"
               value={adsSearch}
               onChange={(e) => setAdsSearch(e.target.value)}
-              placeholder="Search by Business Name, Industry, or Ad # (e.g. 2911)"
+              placeholder="Search by Business, City, State, Industry, or Ad #"
               className="ml-auto w-full sm:w-96 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F2A4A]/30"
             />
           </div>
