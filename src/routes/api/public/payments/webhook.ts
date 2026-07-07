@@ -6,7 +6,7 @@ const PLAN_LABELS: Record<string, string> = {
   slider_10: 'Featured Slider Ad',
 };
 
-const SITE_URL = 'https://bizspotmusicad.lovable.app';
+const SITE_URL = 'https://www.getbizmusic.com';
 
 async function sendPaymentReceipt(params: {
   email: string;

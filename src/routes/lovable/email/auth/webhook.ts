@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "bizspotmusicad"
+const SITE_NAME = "GetBizMusic"
 const SENDER_DOMAIN = "notify.mail.usadgrids.com"
 const ROOT_DOMAIN = "mail.usadgrids.com"
 const FROM_DOMAIN = "notify.mail.usadgrids.com"

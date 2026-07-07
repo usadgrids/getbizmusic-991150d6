@@ -7,7 +7,7 @@ import * as React from 'react'
 import { render } from 'react-email'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
-const SITE_NAME = 'bizspotmusicad'
+const SITE_NAME = 'GetBizMusic'
 const SENDER_DOMAIN = 'notify.mail.usadgrids.com'
 const FROM_DOMAIN = 'notify.mail.usadgrids.com'
 

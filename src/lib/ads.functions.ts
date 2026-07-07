@@ -107,7 +107,7 @@ async function warmSocialPreview(adNumber: number | null) {
   if (adNumber == null) return;
   const appId = process.env.FB_APP_ID;
   const appSecret = process.env.FB_APP_SECRET;
-  const shareUrl = `https://bizspotmusicad.lovable.app/ad/${adNumber}`;
+  const shareUrl = `https://www.getbizmusic.com/ad/${adNumber}`;
   try {
     if (appId && appSecret) {
       const token = `${appId}|${appSecret}`;
@@ -259,7 +259,7 @@ export const scheduleSubmissionReminder = createServerFn({ method: "POST" })
     if (pay.status !== "paid") throw new Error("Payment not confirmed");
     if (pay.token_used) throw new Error("This submission link has already been used");
 
-    const submitUrl = `https://bizspotmusicad.lovable.app/submit?token=${data.token}`;
+    const submitUrl = `https://www.getbizmusic.com/submit?token=${data.token}`;
     const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
     const res = await enqueueTransactionalEmailInternal({
       templateName: "submit-reminder",
@@ -447,8 +447,8 @@ export const approveSubmission = createServerFn({ method: "POST" })
             contactName: sub.contact_name,
             businessName: sub.business_name,
             adNumber,
-            shareUrl: `https://bizspotmusicad.lovable.app/ad/${adNumber}`,
-            editUrl: editToken ? `https://bizspotmusicad.lovable.app/edit-ad?token=${editToken}` : undefined,
+            shareUrl: `https://www.getbizmusic.com/ad/${adNumber}`,
+            editUrl: editToken ? `https://www.getbizmusic.com/edit-ad?token=${editToken}` : undefined,
             isEdit,
           },
         });

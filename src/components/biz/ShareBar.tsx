@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Facebook, Linkedin, MessageCircle, Share2, Link as LinkIcon, Check } from "lucide-react";
 
-const SITE = "https://bizspotmusicad.lovable.app";
+const SITE = "https://www.getbizmusic.com";
 
 interface Props {
   adNumber: number | null;

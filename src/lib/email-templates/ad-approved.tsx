@@ -90,8 +90,8 @@ export const template = {
     contactName: 'Tony',
     businessName: "Tony's Pizzeria",
     adNumber: 42,
-    shareUrl: 'https://bizspotmusicad.lovable.app/ad/42',
-    editUrl: 'https://bizspotmusicad.lovable.app/edit-ad?token=example-edit-token',
+    shareUrl: 'https://www.getbizmusic.com/ad/42',
+    editUrl: 'https://www.getbizmusic.com/edit-ad?token=example-edit-token',
     isEdit: false,
   },
 } satisfies TemplateEntry
