@@ -174,8 +174,49 @@ export const createSubmission = createServerFn({ method: "POST" })
       .update({ token_used: true })
       .eq("id", pay.id);
 
+    // Confirmation email — admins will send the "your ad is live" email later.
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "submission-received",
+        recipientEmail: data.email,
+        idempotencyKey: `submission-received-${data.submission_token}`,
+        templateData: { contactName: data.contact_name, businessName: data.business_name },
+      });
+    } catch (e) {
+      console.error("submission-received enqueue failed:", e);
+    }
+
     return { ok: true as const };
   });
+
+// Submitter isn't ready yet — email them their private submission link so
+// they can come back later. Token stays valid until used.
+export const scheduleSubmissionReminder = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: pay, error } = await supabaseAdmin
+      .from("ad_payments")
+      .select("customer_email, status, token_used")
+      .eq("submission_token", data.token)
+      .maybeSingle();
+    if (error || !pay) throw new Error("Invalid submission token");
+    if (pay.status !== "paid") throw new Error("Payment not confirmed");
+    if (pay.token_used) throw new Error("This submission link has already been used");
+
+    const submitUrl = `https://bizspotmusicad.lovable.app/submit?token=${data.token}`;
+    const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+    const res = await enqueueTransactionalEmailInternal({
+      templateName: "submit-reminder",
+      recipientEmail: pay.customer_email as string,
+      idempotencyKey: `submit-reminder-${data.token}`,
+      templateData: { submitUrl },
+    });
+    if (!res.ok) throw new Error(res.reason ?? "Failed to send reminder");
+    return { ok: true as const, email: pay.customer_email as string };
+  });
+
 
 // ---------- Admin-only ----------
 
