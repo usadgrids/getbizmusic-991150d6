@@ -12,19 +12,42 @@ async function sendPaymentReceipt(params: {
   email: string;
   plan: string;
   amountCents: number;
+  currency?: string | null;
   submissionToken: string;
   sessionId: string;
+  paymentIntentId?: string | null;
   receiptUrl?: string | null;
+  cardholderName?: string | null;
+  cardBrand?: string | null;
+  cardLast4?: string | null;
+  paidAtIso?: string | null;
+  contactName?: string | null;
 }) {
   try {
     const { enqueueTransactionalEmailInternal } = await import('@/lib/email/enqueue.server');
+    const paymentDate = params.paidAtIso
+      ? new Date(params.paidAtIso).toLocaleString('en-US', {
+          dateStyle: 'long',
+          timeStyle: 'short',
+          timeZone: 'America/Los_Angeles',
+        }) + ' PT'
+      : undefined;
     await enqueueTransactionalEmailInternal({
       templateName: 'payment-receipt',
       recipientEmail: params.email,
       idempotencyKey: `payment-receipt-${params.sessionId}`,
       templateData: {
+        contactName: params.contactName ?? undefined,
         planLabel: PLAN_LABELS[params.plan] ?? params.plan,
         amountFormatted: `$${(params.amountCents / 100).toFixed(2)}`,
+        currency: params.currency ?? 'usd',
+        orderNumber: params.sessionId,
+        paymentIntentId: params.paymentIntentId ?? undefined,
+        paymentDate,
+        cardholderName: params.cardholderName ?? undefined,
+        cardBrand: params.cardBrand ?? undefined,
+        cardLast4: params.cardLast4 ?? undefined,
+        billingEmail: params.email,
         submitUrl: `${SITE_URL}/submit?token=${params.submissionToken}`,
         receiptUrl: params.receiptUrl ?? undefined,
       },
@@ -40,20 +63,40 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   const plan = (session.metadata?.plan as string) ?? "image_5";
   const amount = session.amount_total ?? 0;
 
-  // Attempt to fetch a Stripe receipt URL for the resulting charge.
+  const currency: string | null = session.currency ?? null;
+
+  // Extract card + cardholder details from the underlying charge.
   let receiptUrl: string | null = null;
+  let cardholderName: string | null = session.customer_details?.name ?? null;
+  let cardBrand: string | null = null;
+  let cardLast4: string | null = null;
+  let paidAtIso: string | null = null;
+  let paymentIntentId: string | null =
+    typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null;
+
   try {
-    if (session.payment_intent) {
+    if (paymentIntentId) {
       const { createStripeClient } = await import('@/lib/stripe.server');
       const stripe = createStripeClient(env);
-      const piId = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent.id;
-      const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId, { expand: ['latest_charge'] });
       const charge: any = pi.latest_charge;
-      if (charge && typeof charge === 'object' && charge.receipt_url) receiptUrl = charge.receipt_url;
+      if (charge && typeof charge === 'object') {
+        if (charge.receipt_url) receiptUrl = charge.receipt_url;
+        if (charge.billing_details?.name) cardholderName = charge.billing_details.name;
+        const cardDetails = charge.payment_method_details?.card;
+        if (cardDetails) {
+          cardBrand = cardDetails.brand ?? null;
+          cardLast4 = cardDetails.last4 ?? null;
+        }
+        if (typeof charge.created === 'number') {
+          paidAtIso = new Date(charge.created * 1000).toISOString();
+        }
+      }
     }
   } catch (e) {
-    console.error('receipt_url lookup failed:', e);
+    console.error('receipt/card lookup failed:', e);
   }
+  if (!paidAtIso) paidAtIso = new Date().toISOString();
 
   // Prefer update (pre-inserted at checkout create), fall back to upsert.
   const { data: existing } = await supabaseAdmin
@@ -68,7 +111,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   if (existing) {
     await supabaseAdmin
       .from("ad_payments")
-      .update({ status: "paid", paid_at: new Date().toISOString(), amount_cents: amount, customer_email: email || existing.customer_email })
+      .update({ status: "paid", paid_at: paidAtIso, amount_cents: amount, customer_email: email || existing.customer_email })
       .eq("id", existing.id);
     submissionToken = (existing.submission_token as string) ?? null;
     recipientEmail = email || (existing.customer_email as string);
@@ -81,7 +124,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         amount_cents: amount,
         status: "paid",
         environment: env,
-        paid_at: new Date().toISOString(),
+        paid_at: paidAtIso,
         agreed_terms: session.metadata?.agreed_terms === "true",
         agreed_no_refund: session.metadata?.agreed_no_refund === "true",
         agreed_at: session.metadata?.agreed_at ?? null,
@@ -97,9 +140,15 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       email: recipientEmail,
       plan,
       amountCents: amount,
+      currency,
       submissionToken,
       sessionId: session.id,
+      paymentIntentId,
       receiptUrl,
+      cardholderName,
+      cardBrand,
+      cardLast4,
+      paidAtIso,
     });
   } else {
     console.warn('payment-receipt skipped — missing email or submission_token', {
