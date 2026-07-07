@@ -392,6 +392,7 @@ const manualSchema = z.object({
   ad_type: z.enum(["image_5", "slider_10"]),
   image_path: z.string().trim().min(1).max(500),
   auto_approve: z.boolean().optional().default(true),
+  city_ids: z.array(z.string().uuid()).min(1).max(50),
 });
 
 export const createManualSubmission = createServerFn({ method: "POST" })
@@ -402,47 +403,54 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const status = data.auto_approve ? "approved" : "pending";
-    const { data: sub, error } = await supabaseAdmin
-      .from("ad_submissions")
-      .insert({
-        business_name: data.business_name,
-        contact_name: data.contact_name,
-        email: data.email,
-        phone: data.phone,
-        website_url: data.website_url || null,
-        youtube_url: data.youtube_url || null,
-        industry: data.industry,
-        tagline: data.tagline || null,
-        ad_type: data.ad_type,
-        image_path: data.image_path,
-        status,
-        payment_id: null,
-      })
-      .select("id")
-      .maybeSingle();
-    if (error || !sub) throw new Error(error?.message ?? "Insert failed");
+    const seconds = planSeconds(data.ad_type);
+    const now = new Date();
+    const expires = new Date(now);
+    expires.setFullYear(expires.getFullYear() + 1);
 
-    if (data.auto_approve) {
-      const seconds = planSeconds(data.ad_type);
-      const now = new Date();
-      const expires = new Date(now);
-      expires.setFullYear(expires.getFullYear() + 1);
-      const { data: adRow, error: adErr } = await supabaseAdmin.from("ads").insert({
-        submission_id: sub.id,
-        business_name: data.business_name,
-        website_url: data.website_url || null,
-        youtube_url: data.youtube_url || null,
-        tagline: data.tagline || null,
-        industry: data.industry,
-        ad_type: data.ad_type,
-        image_url: data.image_path,
-        duration_seconds: seconds,
-        starts_at: now.toISOString(),
-        expires_at: expires.toISOString(),
-        status: "active",
-      }).select("ad_number").maybeSingle();
-      if (adErr) throw new Error(adErr.message);
-      void warmSocialPreview(adRow?.ad_number ?? null);
+    let created = 0;
+    for (const city_id of data.city_ids) {
+      const { data: sub, error } = await supabaseAdmin
+        .from("ad_submissions")
+        .insert({
+          business_name: data.business_name,
+          contact_name: data.contact_name,
+          email: data.email,
+          phone: data.phone,
+          website_url: data.website_url || null,
+          youtube_url: data.youtube_url || null,
+          industry: data.industry,
+          tagline: data.tagline || null,
+          ad_type: data.ad_type,
+          image_path: data.image_path,
+          status,
+          payment_id: null,
+          city_id,
+        })
+        .select("id")
+        .maybeSingle();
+      if (error || !sub) throw new Error(error?.message ?? "Insert failed");
+
+      if (data.auto_approve) {
+        const { data: adRow, error: adErr } = await supabaseAdmin.from("ads").insert({
+          submission_id: sub.id,
+          business_name: data.business_name,
+          website_url: data.website_url || null,
+          youtube_url: data.youtube_url || null,
+          tagline: data.tagline || null,
+          industry: data.industry,
+          ad_type: data.ad_type,
+          image_url: data.image_path,
+          duration_seconds: seconds,
+          starts_at: now.toISOString(),
+          expires_at: expires.toISOString(),
+          status: "active",
+          city_id,
+        }).select("ad_number").maybeSingle();
+        if (adErr) throw new Error(adErr.message);
+        void warmSocialPreview(adRow?.ad_number ?? null);
+      }
+      created += 1;
     }
-    return { ok: true as const, id: sub.id, status };
+    return { ok: true as const, status, count: created };
   });
