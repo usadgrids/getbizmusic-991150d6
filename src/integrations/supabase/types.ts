@@ -97,6 +97,8 @@ export type Database = {
           payment_id: string | null
           phone: string
           reject_reason: string | null
+          requested_city_name: string | null
+          requested_state_code: string | null
           status: string
           tagline: string | null
           website_url: string | null
@@ -116,6 +118,8 @@ export type Database = {
           payment_id?: string | null
           phone: string
           reject_reason?: string | null
+          requested_city_name?: string | null
+          requested_state_code?: string | null
           status?: string
           tagline?: string | null
           website_url?: string | null
@@ -135,6 +139,8 @@ export type Database = {
           payment_id?: string | null
           phone?: string
           reject_reason?: string | null
+          requested_city_name?: string | null
+          requested_state_code?: string | null
           status?: string
           tagline?: string | null
           website_url?: string | null
