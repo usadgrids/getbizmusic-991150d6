@@ -146,6 +146,13 @@ export const createSubmission = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Server-side validate that requested city+state is a real US pair.
+    const { isValidUsCity } = await import("@/lib/us-cities");
+    const stateCode = data.requested_state_code.toUpperCase();
+    if (!(await isValidUsCity(data.requested_city_name, stateCode))) {
+      throw new Error("Invalid US city / state selection");
+    }
+
     // Verify the payment token: must exist, be paid, and not already used.
     const { data: pay, error: payErr } = await supabaseAdmin
       .from("ad_payments")
@@ -168,6 +175,8 @@ export const createSubmission = createServerFn({ method: "POST" })
       image_path: data.image_path,
       status: "pending",
       payment_id: pay.id,
+      requested_city_name: data.requested_city_name,
+      requested_state_code: stateCode,
     });
     if (error) throw new Error(error.message);
 
