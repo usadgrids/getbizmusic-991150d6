@@ -9,6 +9,8 @@ import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.function
 import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
+import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
   token: z.string().uuid().optional(),
@@ -51,6 +53,7 @@ function SubmitPage() {
   const [done, setDone] = useState(false);
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
+  const [city, setCity] = useState<UsCity | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -117,6 +120,7 @@ function SubmitPage() {
     e.preventDefault();
     if (!token || verify.status !== "ok") return;
     if (!file) { toast.error("Please choose an image to upload"); return; }
+    if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
     const fd = new FormData(e.currentTarget);
@@ -140,7 +144,13 @@ function SubmitPage() {
       const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
-      await submit({ data: { ...parsed.data, image_path: path, submission_token: token } });
+      await submit({ data: {
+        ...parsed.data,
+        image_path: path,
+        submission_token: token,
+        requested_city_name: city.name,
+        requested_state_code: city.stateCode,
+      } });
       setDone(true);
     } catch (err) {
       console.error(err);
@@ -298,6 +308,16 @@ function SubmitPage() {
                 <div>Drop your 1216×896 image here or click to browse.</div>
               </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
+              Where should your ad appear? <span className="text-red-500">*</span>
+            </label>
+            <CityStateCombobox value={city} onChange={setCity} />
+            <p className="mt-1.5 text-xs text-gray-500">
+              Pick any US city + state. If we don't have a page for it yet, we'll create one when your ad is approved.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

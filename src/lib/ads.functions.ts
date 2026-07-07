@@ -127,6 +127,49 @@ async function warmSocialPreview(adNumber: number | null) {
   }
 }
 
+// Resolve target city by (name, stateCode); create it if missing so the
+// buyer's chosen city page exists after admin approval. Reuses existing
+// row on a case-insensitive (name, state) match.
+async function resolveOrCreateCity(name: string, stateCode: string): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { slugifyCity } = await import("@/lib/us-cities");
+  const cleanName = name.trim();
+  const cleanState = stateCode.trim().toUpperCase();
+
+  const { data: existing } = await supabaseAdmin
+    .from("cities")
+    .select("id")
+    .ilike("name", cleanName)
+    .eq("state", cleanState)
+    .maybeSingle();
+  if (existing) return (existing as { id: string }).id;
+
+  const base = slugifyCity(cleanName, cleanState);
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
+    const { data: inserted, error } = await supabaseAdmin
+      .from("cities")
+      .insert({ slug, name: cleanName, state: cleanState, is_active: true, sort_order: 999 })
+      .select("id")
+      .maybeSingle();
+    if (!error && inserted) return (inserted as { id: string }).id;
+    // Retry on unique violation; bail on anything else.
+    if (error && !/duplicate key|unique/i.test(error.message)) {
+      // Name+state uniqueness collision — try to find & reuse.
+      const { data: retry } = await supabaseAdmin
+        .from("cities")
+        .select("id")
+        .ilike("name", cleanName)
+        .eq("state", cleanState)
+        .maybeSingle();
+      if (retry) return (retry as { id: string }).id;
+      throw new Error(error.message);
+    }
+  }
+  return null;
+}
+
+
 const submissionSchema = z.object({
   business_name: z.string().trim().min(1).max(120),
   contact_name: z.string().trim().min(1).max(120),
@@ -137,12 +180,21 @@ const submissionSchema = z.object({
   tagline: z.string().trim().max(80).optional().or(z.literal("")),
   image_path: z.string().trim().min(1).max(500),
   submission_token: z.string().uuid(),
+  requested_city_name: z.string().trim().min(1).max(120),
+  requested_state_code: z.string().trim().length(2).regex(/^[A-Za-z]{2}$/),
 });
 
 export const createSubmission = createServerFn({ method: "POST" })
   .inputValidator((d) => submissionSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Server-side validate that requested city+state is a real US pair.
+    const { isValidUsCity } = await import("@/lib/us-cities");
+    const stateCode = data.requested_state_code.toUpperCase();
+    if (!(await isValidUsCity(data.requested_city_name, stateCode))) {
+      throw new Error("Invalid US city / state selection");
+    }
 
     // Verify the payment token: must exist, be paid, and not already used.
     const { data: pay, error: payErr } = await supabaseAdmin
@@ -166,6 +218,8 @@ export const createSubmission = createServerFn({ method: "POST" })
       image_path: data.image_path,
       status: "pending",
       payment_id: pay.id,
+      requested_city_name: data.requested_city_name,
+      requested_state_code: stateCode,
     });
     if (error) throw new Error(error.message);
 
@@ -344,6 +398,14 @@ export const approveSubmission = createServerFn({ method: "POST" })
       adNumber = (updated.ad_number as number) ?? null;
       editToken = (updated.edit_token as string) ?? null;
     } else {
+      // Resolve target city: use existing (name+state) if present, else auto-create.
+      let cityId: string | null = (sub as { city_id: string | null }).city_id ?? null;
+      const reqCity = (sub as { requested_city_name: string | null }).requested_city_name;
+      const reqState = (sub as { requested_state_code: string | null }).requested_state_code;
+      if (!cityId && reqCity && reqState) {
+        cityId = await resolveOrCreateCity(reqCity, reqState.toUpperCase());
+      }
+
       const now = new Date();
       const expires = new Date(now);
       expires.setFullYear(expires.getFullYear() + 1);
@@ -360,6 +422,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
         starts_at: now.toISOString(),
         expires_at: expires.toISOString(),
         status: "active",
+        city_id: cityId,
       }).select("ad_number, edit_token").maybeSingle();
       if (insErr) throw new Error(insErr.message);
       adNumber = inserted?.ad_number ?? null;
