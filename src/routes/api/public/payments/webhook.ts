@@ -124,7 +124,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         amount_cents: amount,
         status: "paid",
         environment: env,
-        paid_at: new Date().toISOString(),
+        paid_at: paidAtIso,
         agreed_terms: session.metadata?.agreed_terms === "true",
         agreed_no_refund: session.metadata?.agreed_no_refund === "true",
         agreed_at: session.metadata?.agreed_at ?? null,
