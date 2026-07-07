@@ -53,6 +53,7 @@ function SubmitPage() {
   const [done, setDone] = useState(false);
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
+  const [city, setCity] = useState<UsCity | null>(null);
 
   useEffect(() => {
     if (!token) return;
