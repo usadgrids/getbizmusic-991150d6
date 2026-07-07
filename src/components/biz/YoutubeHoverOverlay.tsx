@@ -144,17 +144,19 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
                 aspectRatio: "16 / 9",
               }}
             >
-            <iframe
-              src={src}
-              title={`${businessName} video`}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-              className="absolute inset-0 h-full w-full border-0"
-            />
+              <iframe
+                src={src}
+                title={`${businessName} video`}
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="block h-full w-full border-0"
+              />
+            </div>
           </div>
         </div>
       )}
     </div>
+
   );
 }
