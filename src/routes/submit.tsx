@@ -197,6 +197,25 @@ function SubmitPage() {
     );
   }
 
+  if (reminderSent) {
+    return (
+      <div className="min-h-screen bg-[#f5f6f8]">
+        <main className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-700 mb-4">
+            <Check size={32} />
+          </div>
+          <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Reminder Sent!</h1>
+          <p className="text-gray-600 mt-3">
+            We've emailed your private submission link to <strong>{verify.email}</strong>.
+            Your paid spot is saved — submit whenever your 1216×896 image is ready.
+          </p>
+          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+        </main>
+        <BizFooter />
+      </div>
+    );
+  }
+
   if (done) {
     return (
       <div className="min-h-screen bg-[#f5f6f8]">
@@ -206,8 +225,9 @@ function SubmitPage() {
           </div>
           <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submission Received!</h1>
           <p className="text-gray-600 mt-3">
-            Your ad is in our review queue. Our team checks every submission within 24 hours.
-            You'll be contacted at the email you provided once it goes live.
+            Your ad is in our review queue — we check every submission within 24 hours.
+            We've sent a confirmation email to <strong>{verify.email}</strong>. Once approved,
+            you'll get a second email with your unique ad number and shareable link.
           </p>
           <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
         </main>
@@ -215,6 +235,7 @@ function SubmitPage() {
       </div>
     );
   }
+
 
   // --- Form (verified) ---
   const plan = verify.plan!;
