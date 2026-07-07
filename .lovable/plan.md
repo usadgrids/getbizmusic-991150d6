@@ -1,39 +1,47 @@
-## Answers to your questions
+## Goal
 
-**1. Will it still share the current image ad?** Yes. Sharing works by posting the URL `/ad/{ad_number}` — social networks (Facebook, X, LinkedIn, WhatsApp) then scrape that page's og:image, which is the ad's image. As long as the moved share bar keeps receiving the *currently visible* ad's `ad_number`, it will still share that exact image ad.
+Prepare BizMusic for multi-state expansion where two cities can share a name (e.g., Bonita, CA vs Bonita, TX), and make the admin panel easier to scan/sort by separating City and State.
 
-**2. Can we pause the slider on share click and resume after?** Yes. `ShareBar` already fires `onOpen` when any button is clicked (we use it today to pause on hover). We can wire that to pause the slider, then auto-resume when the user returns to the tab (window `focus` event) — which covers both "shared successfully" and "cancelled the share dialog".
+## What the codebase already supports
+
+- `cities` table already has `name`, `state`, and a unique `slug`. Routing uses `/$city` by slug, so same-name cities can already coexist as long as their slugs differ.
+- The real risk is slug collisions and human ambiguity in the admin picker/list where we currently show `"Name, ST"` in one column.
 
 ## Plan
 
-**1. Add a new share row below the slider**
+### 1. Slug convention for same-name cities (data hygiene)
 
-- In `src/components/biz/AdSlider.tsx`, render a new full-width bar directly below the slider card (still inside the slider component so it always has the current ad in scope).
-- Layout: left side text "Share this ad image", right side the social icons (Facebook, X, LinkedIn, WhatsApp, Copy link, Native share).
-- Styled to match the site (navy `#0F2A4A` text, gold `#D4A24C` accent, rounded card, sits above the MiniPlayer).
-- Passes `adNumber`, `businessName`, `tagline` of the currently displayed ad so sharing always reflects what's on screen.
+- Standardize slugs as `name-state` (lowercased, e.g. `bonita-ca`) going forward.
+- Add a DB uniqueness guarantee on `(lower(name), lower(state))` in `cities` so two rows can't represent the same real city, while `slug` stays globally unique.
+- Existing single-name slugs (e.g. `bonita`) keep working — no URL breakage. New cities in other states get `-state` suffix.
+- Add a small helper used by the admin "Create city" flow (if/when added) that auto-suggests `name-state` slug.
 
-**2. Pause the slider when a share button is clicked, resume after**
+### 2. Admin panel: split City and State columns
 
-- The existing overlay `ShareBar` calls `onOpen` — reuse it: `onOpen={() => setPaused(true)}`.
-- Add a `window` `focus` listener while paused-by-share is active: when the user comes back to the tab (after sharing or cancelling), clear the pause and resume the rotation.
-- Small safety net: also clear pause after ~30s in case the focus event never fires (e.g. native share sheet on some devices).
+In `src/routes/admin.tsx` Active Ads table:
 
-**3. Remove or keep the hover overlay share bar?**
+- Replace the single "City" column with two columns: **City** and **State**.
+- Both column headers become sortable (click to toggle asc/desc). Add sorting for Business, Ad Number, Type, Status, Expires while we're in there — same lightweight client-side sort.
+- Search box also matches state (so "TX" narrows results).
 
-- Recommend removing the hover-overlay share bar on the slide itself, since the new bar underneath is always visible and clearer. (Confirm below.)
+### 3. Admin "Display in cities" picker (manual submission)
 
-**4. Works on desktop, tablet, and mobile**
+- Group the city checkboxes by **State**, with the state name as a subheading.
+- Each checkbox label shows `City` with the state implied by its group, plus a small `ST` badge to keep it unambiguous when scanning.
+- Add a quick filter input above the grid.
 
-- The new bar is responsive: label on the left, icons wrap to a second line under the label on narrow screens if needed.
+### 4. Public city label consistency
+
+- Where we already render `"Name, ST"` (city hero, picker on `/`), keep as-is. No public URL changes.
 
 ## Technical notes
 
-- Files touched: `src/components/biz/AdSlider.tsx` (add row + pause/resume logic), no change needed to `ShareBar.tsx` — it already supports being placed anywhere and calling `onOpen`.
-- Sharing continues to work because it's URL-based (`/ad/{ad_number}`) — the target page owns the og:image, so scrapers pick up the correct ad image regardless of where the share button lives.
+- Migration: add `CREATE UNIQUE INDEX cities_name_state_uniq ON public.cities (lower(name), lower(state));`. No data backfill needed unless duplicates already exist (we'll check first and only migrate if clean).
+- Admin sort: local `useState` for `{key, dir}`, pure sort over `filteredLiveAds`. No server changes.
+- `getActiveCities` already returns `state`; no server changes needed for the picker grouping.
+- No changes to routes, RLS, or `ads`/`ad_submissions` schemas.
 
-## One question before I build
+## Out of scope
 
-Do you want me to **remove the hover-only share overlay** on the slide itself (since a persistent bar under the slider replaces it), or **keep both**?  
-  
-remove the hover only share overlay
+- Renaming existing slugs or redirects.
+- A full "create/edit city" admin UI (can be a follow-up).

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS cities_name_state_uniq ON public.cities (lower(name), lower(state));

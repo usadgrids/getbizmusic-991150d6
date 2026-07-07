@@ -170,19 +170,51 @@ function AdminConsole() {
   const [editingAd, setEditingAd] = useState<LiveAd | null>(null);
 
   const [adsSearch, setAdsSearch] = useState("");
+  type SortKey = "business" | "city" | "state" | "ad_number" | "type" | "status" | "expires";
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "expires", dir: "desc" });
+  const toggleSort = (key: SortKey) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  const cityOf = (a: LiveAd) =>
+    (a as unknown as { cities?: { name?: string; state?: string } | null }).cities ?? null;
   const filteredLiveAds = (() => {
     const raw = adsSearch.trim();
-    if (!raw) return liveAds;
-    const q = raw.toLowerCase();
-    const numericQ = raw.replace(/^#/, "").trim();
-    return liveAds.filter((a) => {
-      const adNum = a.ad_number != null ? String(a.ad_number) : "";
-      return (
-        a.business_name.toLowerCase().includes(q) ||
-        (a.industry ?? "").toLowerCase().includes(q) ||
-        (numericQ.length > 0 && adNum.includes(numericQ))
-      );
+    const base = !raw
+      ? [...liveAds]
+      : (() => {
+          const q = raw.toLowerCase();
+          const numericQ = raw.replace(/^#/, "").trim();
+          return liveAds.filter((a) => {
+            const adNum = a.ad_number != null ? String(a.ad_number) : "";
+            const c = cityOf(a);
+            return (
+              a.business_name.toLowerCase().includes(q) ||
+              (a.industry ?? "").toLowerCase().includes(q) ||
+              (c?.name ?? "").toLowerCase().includes(q) ||
+              (c?.state ?? "").toLowerCase().includes(q) ||
+              (numericQ.length > 0 && adNum.includes(numericQ))
+            );
+          });
+        })();
+    const dir = sort.dir === "asc" ? 1 : -1;
+    const val = (a: LiveAd): string | number => {
+      const c = cityOf(a);
+      switch (sort.key) {
+        case "business": return a.business_name.toLowerCase();
+        case "city": return (c?.name ?? "").toLowerCase();
+        case "state": return (c?.state ?? "").toLowerCase();
+        case "ad_number": return a.ad_number ?? -1;
+        case "type": return a.ad_type;
+        case "status": return a.status;
+        case "expires": return new Date(a.expires_at).getTime();
+      }
+    };
+    base.sort((a, b) => {
+      const va = val(a), vb = val(b);
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
     });
+    return base;
   })();
 
   const refreshAll = () => {
@@ -326,7 +358,7 @@ function AdminConsole() {
               type="text"
               value={adsSearch}
               onChange={(e) => setAdsSearch(e.target.value)}
-              placeholder="Search by Business Name, Industry, or Ad # (e.g. 2911)"
+              placeholder="Search by Business, City, State, Industry, or Ad #"
               className="ml-auto w-full sm:w-96 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F2A4A]/30"
             />
           </div>
@@ -334,28 +366,42 @@ function AdminConsole() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
                 <tr>
-                  <th className="px-4 py-2">Business</th>
-                  <th className="px-4 py-2">City</th>
-                  <th className="px-4 py-2">Ad Number</th>
-                  <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Expires</th>
+                  {([
+                    ["business", "Business"],
+                    ["city", "City"],
+                    ["state", "State"],
+                    ["ad_number", "Ad #"],
+                    ["type", "Type"],
+                    ["status", "Status"],
+                    ["expires", "Expires"],
+                  ] as [SortKey, string][]).map(([key, label]) => (
+                    <th key={key} className="px-4 py-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(key)}
+                        className="inline-flex items-center gap-1 hover:text-[#0F2A4A]"
+                      >
+                        {label}
+                        {sort.key === key && <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>}
+                      </button>
+                    </th>
+                  ))}
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredLiveAds.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                  <tr><td colSpan={8} className="px-4 py-6 text-center text-gray-500">
                     {liveAds.length === 0 ? "No ads yet." : "No ads match your search."}
                   </td></tr>
                 )}
                 {filteredLiveAds.map((a) => {
                   const city = (a as unknown as { cities?: { name?: string; state?: string } | null }).cities;
-                  const cityLabel = city?.name ? `${city.name}${city.state ? `, ${city.state}` : ""}` : "—";
                   return (
                   <tr key={a.id} className="border-t border-gray-100">
                     <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
-                    <td className="px-4 py-2 text-xs text-gray-700">{cityLabel}</td>
+                    <td className="px-4 py-2 text-xs text-gray-700">{city?.name ?? "—"}</td>
+                    <td className="px-4 py-2 text-xs text-gray-700">{city?.state ?? "—"}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
                       {a.ad_type === "slider_10" ? "Featured · $24" : "Standard · $12"}
@@ -746,20 +792,41 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
                 </button>
               </div>
             </div>
-            <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1 bg-white">
+            <div className="border border-gray-300 rounded-md p-2 max-h-56 overflow-y-auto bg-white space-y-2">
               {cities.length === 0 && (
-                <div className="text-xs text-gray-500 col-span-2 px-1 py-2">No active cities.</div>
+                <div className="text-xs text-gray-500 px-1 py-2">No active cities.</div>
               )}
-              {cities.map((c) => (
-                <label key={c.id} className="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 rounded px-1 py-0.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedCityIds.includes(c.id)}
-                    onChange={() => toggleCity(c.id)}
-                  />
-                  <span>{c.name}, {c.state}</span>
-                </label>
-              ))}
+              {Object.entries(
+                cities.reduce<Record<string, typeof cities>>((acc, c) => {
+                  const key = c.state || "—";
+                  (acc[key] ||= []).push(c);
+                  return acc;
+                }, {}),
+              )
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([state, group]) => (
+                  <div key={state}>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 px-1 pb-0.5 border-b border-gray-100 mb-1">
+                      {state}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                      {group
+                        .slice()
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((c) => (
+                          <label key={c.id} className="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 rounded px-1 py-0.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedCityIds.includes(c.id)}
+                              onChange={() => toggleCity(c.id)}
+                            />
+                            <span>{c.name}</span>
+                            <span className="ml-auto text-[10px] font-mono text-gray-400">{c.state}</span>
+                          </label>
+                        ))}
+                    </div>
+                  </div>
+                ))}
             </div>
             <p className="mt-1 text-[11px] text-gray-500">The same ad will be published to every selected city in one entry.</p>
           </div>
