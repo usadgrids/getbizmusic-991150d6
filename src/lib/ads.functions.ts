@@ -127,6 +127,47 @@ async function warmSocialPreview(adNumber: number | null) {
   }
 }
 
+// Resolve target city by (name, stateCode); create it if missing so the
+// buyer's chosen city page exists after admin approval. Reuses existing
+// row on a case-insensitive (name, state) match.
+async function resolveOrCreateCity(name: string, stateCode: string): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { slugifyCity } = await import("@/lib/us-cities");
+  const cleanName = name.trim();
+  const cleanState = stateCode.trim().toUpperCase();
+
+  const { data: existing } = await supabaseAdmin
+    .from("cities")
+    .select("id")
+    .ilike("name", cleanName)
+    .eq("state", cleanState)
+    .maybeSingle();
+  if (existing) return (existing as { id: string }).id;
+
+  const base = slugifyCity(cleanName, cleanState);
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
+    const { data: inserted, error } = await supabaseAdmin
+      .from("cities")
+      .insert({ slug, name: cleanName, state: cleanState, is_active: true, sort_order: 999 })
+      .select("id")
+      .maybeSingle();
+    if (!error && inserted) return (inserted as { id: string }).id;
+    // Retry on unique violation; bail on anything else.
+    if (error && !/duplicate key|unique/i.test(error.message)) {
+      // Name+state uniqueness collision — try to find & reuse.
+      const { data: retry } = await supabaseAdmin
+        .from("cities")
+        .select("id")
+        .ilike("name", cleanName)
+        .eq("state", cleanState)
+        .maybeSingle();
+      if (retry) return (retry as { id: string }).id;
+      throw new Error(error.message);
+    }
+  }
+  return null;
+
 const submissionSchema = z.object({
   business_name: z.string().trim().min(1).max(120),
   contact_name: z.string().trim().min(1).max(120),
