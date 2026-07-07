@@ -372,6 +372,19 @@ export const approveSubmission = createServerFn({ method: "POST" })
       .maybeSingle();
     if (subErr || !sub) throw new Error("Submission not found");
 
+    // Idempotency guard: if this submission was already approved (double-click,
+    // duplicate request), return the existing ad instead of inserting again.
+    if (sub.status === "approved") {
+      const { data: existingAd } = await supabaseAdmin
+        .from("ads")
+        .select("ad_number, edit_token")
+        .eq("submission_id", sub.id)
+        .maybeSingle();
+      if (existingAd) {
+        return { ok: true as const, alreadyApproved: true, adNumber: existingAd.ad_number };
+      }
+    }
+
     const seconds = planSeconds(sub.ad_type as AdPlan);
     let adNumber: number | null = null;
     let editToken: string | null = null;
