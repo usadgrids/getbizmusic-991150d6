@@ -51,12 +51,6 @@ function SubmitPage() {
   const [done, setDone] = useState(false);
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
-    { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
-  );
-  const [file, setFile] = useState<File | null>(null);
-  const [agree, setAgree] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (!token) return;
