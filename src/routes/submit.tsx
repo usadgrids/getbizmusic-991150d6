@@ -310,6 +310,16 @@ function SubmitPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
+              Where should your ad appear? <span className="text-red-500">*</span>
+            </label>
+            <CityStateCombobox value={city} onChange={setCity} />
+            <p className="mt-1.5 text-xs text-gray-500">
+              Pick any US city + state. If we don't have a page for it yet, we'll create one when your ad is approved.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
             <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
