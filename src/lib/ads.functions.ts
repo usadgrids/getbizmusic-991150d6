@@ -277,7 +277,7 @@ export const listPendingSubmissions = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ad_submissions")
-      .select("*, payment:ad_payments(id, stripe_session_id, customer_email, plan, amount_cents, status, environment, paid_at, created_at)")
+      .select("*, payment:ad_payments(id, stripe_session_id, customer_email, plan, amount_cents, status, environment, paid_at, created_at), ad:ads!ad_submissions_ad_id_fkey(ad_number)")
       .eq("status", "pending")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -319,34 +319,60 @@ export const approveSubmission = createServerFn({ method: "POST" })
     if (subErr || !sub) throw new Error("Submission not found");
 
     const seconds = planSeconds(sub.ad_type as AdPlan);
-    const now = new Date();
-    const expires = new Date(now);
-    expires.setFullYear(expires.getFullYear() + 1);
+    let adNumber: number | null = null;
+    let editToken: string | null = null;
+    const isEdit = !!sub.ad_id;
 
-    const { data: inserted, error: insErr } = await supabaseAdmin.from("ads").insert({
-      submission_id: sub.id,
-      business_name: sub.business_name,
-      website_url: sub.website_url,
-      youtube_url: (sub as { youtube_url?: string | null }).youtube_url ?? null,
-      tagline: sub.tagline,
-      industry: sub.industry,
-      ad_type: sub.ad_type,
-      image_url: sub.image_path, // stored as storage path; signed on read
-      duration_seconds: seconds,
-      starts_at: now.toISOString(),
-      expires_at: expires.toISOString(),
-      status: "active",
-    }).select("ad_number").maybeSingle();
-    if (insErr) throw new Error(insErr.message);
+    if (isEdit) {
+      // Edit flow — update the existing live ad in place; keep ad_number & expires_at.
+      const { data: updated, error: updErr } = await supabaseAdmin
+        .from("ads")
+        .update({
+          business_name: sub.business_name,
+          website_url: sub.website_url,
+          youtube_url: (sub as { youtube_url?: string | null }).youtube_url ?? null,
+          tagline: sub.tagline,
+          industry: sub.industry,
+          ad_type: sub.ad_type,
+          image_url: sub.image_path,
+          duration_seconds: seconds,
+        })
+        .eq("id", sub.ad_id as string)
+        .select("ad_number, edit_token")
+        .maybeSingle();
+      if (updErr || !updated) throw new Error(updErr?.message ?? "Ad not found for edit");
+      adNumber = (updated.ad_number as number) ?? null;
+      editToken = (updated.edit_token as string) ?? null;
+    } else {
+      const now = new Date();
+      const expires = new Date(now);
+      expires.setFullYear(expires.getFullYear() + 1);
+      const { data: inserted, error: insErr } = await supabaseAdmin.from("ads").insert({
+        submission_id: sub.id,
+        business_name: sub.business_name,
+        website_url: sub.website_url,
+        youtube_url: (sub as { youtube_url?: string | null }).youtube_url ?? null,
+        tagline: sub.tagline,
+        industry: sub.industry,
+        ad_type: sub.ad_type,
+        image_url: sub.image_path,
+        duration_seconds: seconds,
+        starts_at: now.toISOString(),
+        expires_at: expires.toISOString(),
+        status: "active",
+      }).select("ad_number, edit_token").maybeSingle();
+      if (insErr) throw new Error(insErr.message);
+      adNumber = inserted?.ad_number ?? null;
+      editToken = (inserted?.edit_token as string) ?? null;
+    }
 
     await supabaseAdmin
       .from("ad_submissions")
       .update({ status: "approved" })
       .eq("id", sub.id);
-    const adNumber = inserted?.ad_number ?? null;
     void warmSocialPreview(adNumber);
 
-    // "Your ad is live" email with unique shareable URL.
+    // "Your ad is live" email with unique shareable URL + Edit link.
     if (adNumber != null && sub.email) {
       try {
         const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
@@ -359,6 +385,8 @@ export const approveSubmission = createServerFn({ method: "POST" })
             businessName: sub.business_name,
             adNumber,
             shareUrl: `https://bizspotmusicad.lovable.app/ad/${adNumber}`,
+            editUrl: editToken ? `https://bizspotmusicad.lovable.app/edit-ad?token=${editToken}` : undefined,
+            isEdit,
           },
         });
       } catch (e) {
@@ -517,4 +545,149 @@ export const createManualSubmission = createServerFn({ method: "POST" })
       created += 1;
     }
     return { ok: true as const, status, count: created };
+  });
+
+// ---------- Post-approval edit flow (public, token-gated) ----------
+
+export const getAdForEdit = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ad, error } = await supabaseAdmin
+      .from("ads")
+      .select("id, ad_number, submission_id, business_name, website_url, youtube_url, tagline, industry, ad_type, image_url, status")
+      .eq("edit_token", data.token)
+      .maybeSingle();
+    if (error || !ad) return { found: false as const, reason: "Invalid or unknown edit link" };
+    const adId = (ad as { id: string }).id;
+    const originalSubmissionId = (ad as { submission_id: string | null }).submission_id;
+
+    // Grab latest submission for contact info (phone/contact_name/email).
+    const { data: sub } = await supabaseAdmin
+      .from("ad_submissions")
+      .select("contact_name, email, phone, status")
+      .eq("ad_id", adId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let contact = sub;
+    if (!contact && originalSubmissionId) {
+      const { data: orig } = await supabaseAdmin
+        .from("ad_submissions")
+        .select("contact_name, email, phone, status")
+        .eq("id", originalSubmissionId)
+        .maybeSingle();
+      contact = orig ?? null;
+    }
+
+    // Sign the current image so the editor can preview it.
+    let previewUrl = "";
+    const path = (ad as { image_url: string }).image_url;
+    if (path && !/^(https?:)?\//i.test(path)) {
+      const { data: signed } = await supabaseAdmin.storage
+        .from("ad-uploads")
+        .createSignedUrl(path, SIGNED_URL_TTL);
+      previewUrl = signed?.signedUrl ?? "";
+    } else {
+      previewUrl = path;
+    }
+
+    const pendingEdit = contact?.status === "pending";
+
+    return {
+      found: true as const,
+      ad: {
+        id: adId,
+        ad_number: (ad as { ad_number: number }).ad_number,
+        business_name: (ad as { business_name: string }).business_name,
+        website_url: (ad as { website_url: string | null }).website_url,
+        youtube_url: (ad as { youtube_url: string | null }).youtube_url,
+        tagline: (ad as { tagline: string | null }).tagline,
+        industry: (ad as { industry: string }).industry,
+        ad_type: (ad as { ad_type: "image_5" | "slider_10" }).ad_type,
+        preview_url: previewUrl,
+      },
+      contact: {
+        contact_name: (contact?.contact_name as string) ?? "",
+        email: (contact?.email as string) ?? "",
+        phone: (contact?.phone as string) ?? "",
+      },
+      pendingEdit,
+    };
+  });
+
+const editSchema = z.object({
+  token: z.string().uuid(),
+  business_name: z.string().trim().min(1).max(120),
+  contact_name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().min(7).max(40),
+  website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
+  industry: z.string().trim().min(1).max(40),
+  tagline: z.string().trim().max(80).optional().or(z.literal("")),
+  image_path: z.string().trim().min(1).max(500).optional(),
+});
+
+export const submitAdEdit = createServerFn({ method: "POST" })
+  .inputValidator((d) => editSchema.parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ad, error } = await supabaseAdmin
+      .from("ads")
+      .select("id, ad_type, image_url")
+      .eq("edit_token", data.token)
+      .maybeSingle();
+    if (error || !ad) throw new Error("Invalid edit link");
+
+    const adId = (ad as { id: string }).id;
+    const adType = (ad as { ad_type: "image_5" | "slider_10" }).ad_type;
+
+    // Reject if there's already a pending edit for this ad — avoid queue spam.
+    const { data: existingPending } = await supabaseAdmin
+      .from("ad_submissions")
+      .select("id")
+      .eq("ad_id", adId)
+      .eq("status", "pending")
+      .maybeSingle();
+    if (existingPending) {
+      throw new Error("You already have an edit awaiting review. Please wait for admin approval.");
+    }
+
+    const imagePath = data.image_path ?? (ad as { image_url: string }).image_url;
+
+    const { error: insErr } = await supabaseAdmin.from("ad_submissions").insert({
+      business_name: data.business_name,
+      contact_name: data.contact_name,
+      email: data.email,
+      phone: data.phone,
+      website_url: data.website_url || null,
+      industry: data.industry,
+      tagline: data.tagline || null,
+      ad_type: adType,
+      image_path: imagePath,
+      status: "pending",
+      payment_id: null,
+      ad_id: adId,
+    });
+    if (insErr) throw new Error(insErr.message);
+
+    // Send an "edit received — pending review" confirmation.
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "submission-received",
+        recipientEmail: data.email,
+        idempotencyKey: `edit-received-${adId}-${Date.now()}`,
+        templateData: {
+          contactName: data.contact_name,
+          businessName: data.business_name,
+          isEdit: true,
+        },
+      });
+    } catch (e) {
+      console.error("edit submission-received enqueue failed:", e);
+    }
+
+    return { ok: true as const };
   });

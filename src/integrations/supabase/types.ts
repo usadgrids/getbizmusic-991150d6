@@ -84,6 +84,7 @@ export type Database = {
       }
       ad_submissions: {
         Row: {
+          ad_id: string | null
           ad_type: string
           business_name: string
           city_id: string | null
@@ -102,6 +103,7 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
+          ad_id?: string | null
           ad_type: string
           business_name: string
           city_id?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
+          ad_id?: string | null
           ad_type?: string
           business_name?: string
           city_id?: string | null
@@ -138,6 +141,13 @@ export type Database = {
           youtube_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ad_submissions_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ad_submissions_city_id_fkey"
             columns: ["city_id"]
@@ -162,6 +172,7 @@ export type Database = {
           city_id: string | null
           created_at: string
           duration_seconds: number
+          edit_token: string
           expires_at: string
           id: string
           image_url: string
@@ -180,6 +191,7 @@ export type Database = {
           city_id?: string | null
           created_at?: string
           duration_seconds: number
+          edit_token?: string
           expires_at: string
           id?: string
           image_url: string
@@ -198,6 +210,7 @@ export type Database = {
           city_id?: string | null
           created_at?: string
           duration_seconds?: number
+          edit_token?: string
           expires_at?: string
           id?: string
           image_url?: string

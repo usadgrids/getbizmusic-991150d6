@@ -472,6 +472,8 @@ type PendingRow = {
   ad_type: "image_5" | "slider_10";
   preview_url: string;
   created_at: string;
+  ad_id?: string | null;
+  ad?: { ad_number: number } | { ad_number: number }[] | null;
   payment?: {
     id: string;
     stripe_session_id: string;
@@ -517,8 +519,17 @@ function PendingCard({
   const amount = pay ? (pay.amount_cents / 100).toFixed(2) : null;
   const orderNo = pay ? `#${pay.id.slice(0, 8).toUpperCase()}` : null;
 
+  const isEdit = !!s.ad_id;
+  const linkedAd = Array.isArray(s.ad) ? s.ad[0] : s.ad;
+  const editingAdNumber = linkedAd?.ad_number ?? null;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <div className={`bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col ${isEdit ? "border-[#D4A24C]" : "border-gray-200"}`}>
+      {isEdit && (
+        <div className="bg-[#D4A24C] text-[#0F2A4A] text-xs font-bold px-3 py-1.5 text-center uppercase tracking-wide">
+          Edit request — updating live ad {editingAdNumber ? `#${editingAdNumber}` : ""}
+        </div>
+      )}
       <div className="aspect-[1200/628] bg-gray-100">
         {s.preview_url && (
           <img src={s.preview_url} alt={s.business_name} className="w-full h-full object-cover" />
