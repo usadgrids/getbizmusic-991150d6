@@ -353,11 +353,7 @@ function SubmitPage() {
   );
 }
 
-      </main>
-      <BizFooter />
-    </div>
-  );
-}
+
 
 function Field({
   name, label, required, type = "text", placeholder, maxLength, defaultValue,
