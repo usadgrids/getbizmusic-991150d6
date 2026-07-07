@@ -182,7 +182,7 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
               templateData: {
                 planLabel: planLabels[updated.plan as string] ?? (updated.plan as string),
                 amountFormatted: `$${(((updated.amount_cents as number) ?? 0) / 100).toFixed(2)}`,
-                submitUrl: `https://bizspotmusicad.lovable.app/submit?token=${updated.submission_token}`,
+                submitUrl: `https://www.getbizmusic.com/submit?token=${updated.submission_token}`,
               },
             });
           } catch (e) {

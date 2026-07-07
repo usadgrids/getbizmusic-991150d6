@@ -186,7 +186,7 @@ export const template = {
     cardBrand: 'visa',
     cardLast4: '4242',
     billingEmail: 'tony@example.com',
-    submitUrl: 'https://bizspotmusicad.lovable.app/submit?token=example-token',
+    submitUrl: 'https://www.getbizmusic.com/submit?token=example-token',
     receiptUrl: 'https://pay.stripe.com/receipts/example',
   },
 } satisfies TemplateEntry
