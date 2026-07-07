@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { ExternalLink } from "lucide-react";
 import { getAdByNumber, getActiveAds } from "@/lib/ads.functions";
 import { INDUSTRIES } from "@/lib/biz-utils";
-import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
@@ -110,7 +109,6 @@ function AdLanding() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
-      <BizNavbar />
       <main className="w-full max-w-[1200px] mx-auto px-3 sm:px-5 py-6 sm:py-10">
         <nav className="text-xs text-gray-500 mb-3">
           <Link to="/" className="hover:underline">Home</Link>
@@ -238,7 +236,6 @@ function AdLanding() {
 function AdNotFound() {
   return (
     <div className="min-h-screen bg-[#f5f6f8] flex flex-col">
-      <BizNavbar />
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <h1 className="font-serif text-3xl text-[#0F2A4A] font-bold mb-2">

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { ArrowLeft, Check, Shield, Info } from "lucide-react";
 import { toast } from "sonner";
-import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -69,7 +68,6 @@ function PricingPage() {
     return (
       <div className="min-h-screen bg-[#f5f6f8]">
         <PaymentTestModeBanner />
-        <BizNavbar />
         <main className="max-w-3xl mx-auto px-4 py-8">
           <button
             onClick={() => setClientSecret(null)}
@@ -91,7 +89,6 @@ function PricingPage() {
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
       <PaymentTestModeBanner />
-      <BizNavbar />
       <main className="max-w-4xl mx-auto px-4 py-10">
         <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home

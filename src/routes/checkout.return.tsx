@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Check, Loader2, ArrowRight } from "lucide-react";
 import { z } from "zod";
-import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { lookupCheckoutBySession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -50,7 +49,6 @@ function CheckoutReturn() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
-      <BizNavbar />
       <main className="max-w-2xl mx-auto px-4 py-16 text-center">
         {state.status === "loading" && (
           <>
