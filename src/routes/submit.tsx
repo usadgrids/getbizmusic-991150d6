@@ -120,6 +120,7 @@ function SubmitPage() {
     e.preventDefault();
     if (!token || verify.status !== "ok") return;
     if (!file) { toast.error("Please choose an image to upload"); return; }
+    if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
     const fd = new FormData(e.currentTarget);
