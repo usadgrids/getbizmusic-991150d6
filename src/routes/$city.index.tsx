@@ -66,26 +66,31 @@ function CityHome() {
           title={`Featured ${city.name} Business of the Moment`}
           featured
         />
-        <section className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
-            <Sparkles size={14} />
-            {city.name} Business Spotlight
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold mb-2">
-            Submit Your Business Novelty Ad
-          </h2>
-          <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
-            Get your {city.name} business featured in the rotation above and reach local
-            listeners for just $12/year. Limited-time intro offer.
-          </p>
-          <Link
-            to="/submit"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
-          >
-            Submit Your Ad
-            <Sparkles size={14} />
-          </Link>
-        </section>
+        <div
+          className="mx-auto w-full"
+          style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
+        >
+          <section className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
+              <Sparkles size={14} />
+              {city.name} Business Spotlight
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">
+              Submit Your Business Novelty Ad
+            </h2>
+            <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
+              Get your {city.name} business featured in the rotation above and reach local
+              listeners for just $12/year. Limited-time intro offer.
+            </p>
+            <Link
+              to="/submit"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+            >
+              Submit Your Ad
+              <Sparkles size={14} />
+            </Link>
+          </section>
+        </div>
       </main>
       <BizFooter />
       <MiniPlayer />
