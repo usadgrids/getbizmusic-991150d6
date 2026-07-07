@@ -140,9 +140,15 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       email: recipientEmail,
       plan,
       amountCents: amount,
+      currency,
       submissionToken,
       sessionId: session.id,
+      paymentIntentId,
       receiptUrl,
+      cardholderName,
+      cardBrand,
+      cardLast4,
+      paidAtIso,
     });
   } else {
     console.warn('payment-receipt skipped — missing email or submission_token', {
