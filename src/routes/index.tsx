@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getActiveCities, submitCityRequest } from "@/lib/cities.functions";
-import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 
 export const Route = createFileRoute("/")({
@@ -47,7 +46,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
-      <BizNavbar />
 
       {/* Hero */}
       <section className="bg-[#0F2A4A] text-white">

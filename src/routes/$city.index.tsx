@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { Sparkles } from "lucide-react";
 import { getActiveAds } from "@/lib/ads.functions";
 import { getCityBySlug } from "@/lib/cities.functions";
-import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
@@ -58,7 +57,6 @@ function CityHome() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
-      <BizNavbar />
       <BizHero cityName={city.name} state={city.state} />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <AdSlider
