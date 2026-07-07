@@ -343,9 +343,32 @@ export const approveSubmission = createServerFn({ method: "POST" })
       .from("ad_submissions")
       .update({ status: "approved" })
       .eq("id", sub.id);
-    void warmSocialPreview(inserted?.ad_number ?? null);
+    const adNumber = inserted?.ad_number ?? null;
+    void warmSocialPreview(adNumber);
+
+    // "Your ad is live" email with unique shareable URL.
+    if (adNumber != null && sub.email) {
+      try {
+        const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+        await enqueueTransactionalEmailInternal({
+          templateName: "ad-approved",
+          recipientEmail: sub.email as string,
+          idempotencyKey: `ad-approved-${sub.id}`,
+          templateData: {
+            contactName: sub.contact_name,
+            businessName: sub.business_name,
+            adNumber,
+            shareUrl: `https://bizspotmusicad.lovable.app/ad/${adNumber}`,
+          },
+        });
+      } catch (e) {
+        console.error("ad-approved enqueue failed:", e);
+      }
+    }
+
     return { ok: true as const };
   });
+
 
 export const rejectSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
