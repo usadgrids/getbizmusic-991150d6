@@ -253,6 +253,26 @@ function SubmitPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
+          {/* Prominent size spec */}
+          <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-[#D4A24C] text-[#0F2A4A] font-bold flex items-center justify-center">4:3</div>
+              <div className="flex-1">
+                <div className="text-[#0F2A4A] font-bold text-lg leading-tight">
+                  Image must be 1216 × 896 px (4:3 ratio)
+                </div>
+                <ul className="mt-2 text-sm text-[#0F2A4A]/80 space-y-1 list-disc pl-5">
+                  <li>Format: <strong>JPG, PNG, or WebP</strong>, under <strong>2 MB</strong></li>
+                  <li>Include: <strong>logo, business name, services, and phone number</strong></li>
+                  <li>Avoid tiny text — most viewers see the ad on a phone</li>
+                </ul>
+                <p className="mt-2 text-xs text-[#0F2A4A]/70">
+                  Not sure how? Any editor like Canva, Photoshop, or Figma can export at 1216×896.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">Your ad image</label>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-[#D4A24C] transition-colors">
@@ -267,12 +287,15 @@ function SubmitPage() {
                   <Check size={14} /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
                 </div>
               )}
+              {dimWarning && (
+                <div className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-2">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  <span>{dimWarning}</span>
+                </div>
+              )}
               <div className="mt-3 text-xs text-gray-500 flex items-start gap-2">
                 <Upload size={14} className="mt-0.5 shrink-0" />
-                <div>
-                  <strong>Recommended:</strong> 1216×896 px (4:3), JPG/PNG/WebP, under 2 MB.
-                  Include logo, business name, services, and phone number. Avoid tiny text.
-                </div>
+                <div>Drop your 1216×896 image here or click to browse.</div>
               </div>
             </div>
           </div>
@@ -308,7 +331,28 @@ function SubmitPage() {
           <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
             {submitting ? "Submitting…" : "Submit My Ad"}
           </button>
+
+          {/* Not-ready escape hatch */}
+          <div className="pt-4 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Not ready yet? Your paid spot is saved — we'll email you a link so you can submit later.
+            </p>
+            <button
+              type="button"
+              onClick={handleRemindLater}
+              disabled={reminderSending}
+              className="text-sm font-semibold text-[#0F2A4A] underline hover:text-[#D4A24C] disabled:opacity-60"
+            >
+              {reminderSending ? "Sending reminder…" : "I'm not ready — email me my submission link"}
+            </button>
+          </div>
         </form>
+      </main>
+      <BizFooter />
+    </div>
+  );
+}
+
       </main>
       <BizFooter />
     </div>
