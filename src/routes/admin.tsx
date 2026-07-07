@@ -599,6 +599,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file) { toast.error("Please choose an image"); return; }
+    if (selectedCityIds.length === 0) { toast.error("Select at least one city"); return; }
     const fd = new FormData(e.currentTarget);
     setBusy(true);
     try {
@@ -610,7 +611,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
-      await createFn({
+      const res = await createFn({
         data: {
           business_name: String(fd.get("business_name") ?? ""),
           contact_name: String(fd.get("contact_name") ?? ""),
@@ -623,11 +624,18 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           ad_type: adType,
           image_path: path,
           auto_approve: autoApprove,
+          city_ids: selectedCityIds,
         },
       });
-      toast.success(autoApprove ? "Ad created and now live" : "Ad added to pending queue");
+      const n = res?.count ?? selectedCityIds.length;
+      toast.success(
+        autoApprove
+          ? `Ad published live in ${n} ${n === 1 ? "city" : "cities"}`
+          : `Ad added to pending queue for ${n} ${n === 1 ? "city" : "cities"}`,
+      );
       (e.target as HTMLFormElement).reset();
       setFile(null);
+      setSelectedCityIds([]);
       setOpen(false);
       onCreated();
     } catch (err) {
@@ -636,6 +644,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
       setBusy(false);
     }
   };
+
 
   return (
     <section>
