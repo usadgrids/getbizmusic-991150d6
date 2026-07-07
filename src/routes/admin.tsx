@@ -572,11 +572,22 @@ function PendingCard({
 
 function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const createFn = useServerFn(createManualSubmission);
+  const citiesFn = useServerFn(getActiveCities);
+  const { data: cities = [] } = useQuery({
+    queryKey: ["active-cities-admin"],
+    queryFn: () => citiesFn(),
+  });
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [autoApprove, setAutoApprove] = useState(true);
   const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
+  const [selectedCityIds, setSelectedCityIds] = useState<string[]>([]);
+
+  const toggleCity = (id: string) =>
+    setSelectedCityIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const selectAllCities = () => setSelectedCityIds(cities.map((c) => c.id));
+  const clearCities = () => setSelectedCityIds([]);
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
