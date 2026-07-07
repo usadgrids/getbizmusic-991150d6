@@ -9,6 +9,8 @@ import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.function
 import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
+import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
   token: z.string().uuid().optional(),
