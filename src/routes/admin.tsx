@@ -366,12 +366,26 @@ function AdminConsole() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
                 <tr>
-                  <th className="px-4 py-2">Business</th>
-                  <th className="px-4 py-2">City</th>
-                  <th className="px-4 py-2">Ad Number</th>
-                  <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Expires</th>
+                  {([
+                    ["business", "Business"],
+                    ["city", "City"],
+                    ["state", "State"],
+                    ["ad_number", "Ad #"],
+                    ["type", "Type"],
+                    ["status", "Status"],
+                    ["expires", "Expires"],
+                  ] as [SortKey, string][]).map(([key, label]) => (
+                    <th key={key} className="px-4 py-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(key)}
+                        className="inline-flex items-center gap-1 hover:text-[#0F2A4A]"
+                      >
+                        {label}
+                        {sort.key === key && <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>}
+                      </button>
+                    </th>
+                  ))}
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
