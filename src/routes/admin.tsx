@@ -543,6 +543,12 @@ function PendingCard({
         <div className="text-xs text-gray-500">
           {s.industry} · {s.ad_type === "slider_10" ? "Featured Slider ($24)" : "Standard ($12)"}
         </div>
+        {!isEdit && s.requested_city_name && s.requested_state_code && (
+          <div className="text-xs inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-800 rounded-md px-2 py-1 w-fit">
+            📍 <span className="font-semibold">{s.requested_city_name}, {s.requested_state_code}</span>
+            {!s.city_id && <span className="ml-1 text-[10px] uppercase tracking-wide bg-blue-600 text-white rounded px-1.5 py-0.5">will create page</span>}
+          </div>
+        )}
         {s.tagline && <div className="italic text-gray-700">"{s.tagline}"</div>}
         <div className="text-xs text-gray-600 space-y-0.5 pt-2 border-t border-gray-100">
           <div>👤 {s.contact_name}</div>
