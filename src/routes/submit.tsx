@@ -5,7 +5,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, Check, AlertCircle, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { createSubmission } from "@/lib/ads.functions";
+import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.functions";
 import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
@@ -39,14 +39,18 @@ function SubmitPage() {
   const { token } = Route.useSearch();
   const submit = useServerFn(createSubmission);
   const lookup = useServerFn(getPaymentByToken);
+  const reminder = useServerFn(scheduleSubmissionReminder);
 
   const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string }>(
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
+  const [dimWarning, setDimWarning] = useState<string | null>(null);
   const [agree, setAgree] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -68,11 +72,46 @@ function SubmitPage() {
   }, [token, lookup]);
 
   const onFile = (f: File | null) => {
+    setDimWarning(null);
     if (!f) { setFile(null); return; }
     if (f.size > 2 * 1024 * 1024) { toast.error("Image must be under 2 MB"); return; }
     if (!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)) { toast.error("Only JPG, PNG, or WebP images are allowed"); return; }
     setFile(f);
+    // Check dimensions client-side; warn (don't block) if not 1216×896 / 4:3.
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      const { naturalWidth: w, naturalHeight: h } = img;
+      const ratio = w / h;
+      const isTarget = w === 1216 && h === 896;
+      const isFourThree = Math.abs(ratio - 4 / 3) < 0.02;
+      if (!isTarget) {
+        setDimWarning(
+          isFourThree
+            ? `Your image is ${w}×${h}. Recommended is 1216×896 for best quality — it'll still work, but may look softer.`
+            : `Your image is ${w}×${h} (ratio ${ratio.toFixed(2)}:1). We recommend 1216×896 px (4:3 ratio). It'll be cropped or letterboxed.`
+        );
+      }
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
   };
+
+  const handleRemindLater = async () => {
+    if (!token) return;
+    setReminderSending(true);
+    try {
+      await reminder({ data: { token } });
+      setReminderSent(true);
+      toast.success("Reminder email sent — check your inbox!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to send reminder");
+    } finally {
+      setReminderSending(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -158,6 +197,25 @@ function SubmitPage() {
     );
   }
 
+  if (reminderSent) {
+    return (
+      <div className="min-h-screen bg-[#f5f6f8]">
+        <main className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-700 mb-4">
+            <Check size={32} />
+          </div>
+          <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Reminder Sent!</h1>
+          <p className="text-gray-600 mt-3">
+            We've emailed your private submission link to <strong>{verify.email}</strong>.
+            Your paid spot is saved — submit whenever your 1216×896 image is ready.
+          </p>
+          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+        </main>
+        <BizFooter />
+      </div>
+    );
+  }
+
   if (done) {
     return (
       <div className="min-h-screen bg-[#f5f6f8]">
@@ -167,8 +225,9 @@ function SubmitPage() {
           </div>
           <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submission Received!</h1>
           <p className="text-gray-600 mt-3">
-            Your ad is in our review queue. Our team checks every submission within 24 hours.
-            You'll be contacted at the email you provided once it goes live.
+            Your ad is in our review queue — we check every submission within 24 hours.
+            We've sent a confirmation email to <strong>{verify.email}</strong>. Once approved,
+            you'll get a second email with your unique ad number and shareable link.
           </p>
           <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
         </main>
@@ -176,6 +235,7 @@ function SubmitPage() {
       </div>
     );
   }
+
 
   // --- Form (verified) ---
   const plan = verify.plan!;
@@ -193,6 +253,26 @@ function SubmitPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
+          {/* Prominent size spec */}
+          <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-[#D4A24C] text-[#0F2A4A] font-bold flex items-center justify-center">4:3</div>
+              <div className="flex-1">
+                <div className="text-[#0F2A4A] font-bold text-lg leading-tight">
+                  Image must be 1216 × 896 px (4:3 ratio)
+                </div>
+                <ul className="mt-2 text-sm text-[#0F2A4A]/80 space-y-1 list-disc pl-5">
+                  <li>Format: <strong>JPG, PNG, or WebP</strong>, under <strong>2 MB</strong></li>
+                  <li>Include: <strong>logo, business name, services, and phone number</strong></li>
+                  <li>Avoid tiny text — most viewers see the ad on a phone</li>
+                </ul>
+                <p className="mt-2 text-xs text-[#0F2A4A]/70">
+                  Not sure how? Any editor like Canva, Photoshop, or Figma can export at 1216×896.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">Your ad image</label>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-[#D4A24C] transition-colors">
@@ -207,12 +287,15 @@ function SubmitPage() {
                   <Check size={14} /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
                 </div>
               )}
+              {dimWarning && (
+                <div className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-2">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  <span>{dimWarning}</span>
+                </div>
+              )}
               <div className="mt-3 text-xs text-gray-500 flex items-start gap-2">
                 <Upload size={14} className="mt-0.5 shrink-0" />
-                <div>
-                  <strong>Recommended:</strong> 1216×896 px (4:3), JPG/PNG/WebP, under 2 MB.
-                  Include logo, business name, services, and phone number. Avoid tiny text.
-                </div>
+                <div>Drop your 1216×896 image here or click to browse.</div>
               </div>
             </div>
           </div>
@@ -248,12 +331,29 @@ function SubmitPage() {
           <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
             {submitting ? "Submitting…" : "Submit My Ad"}
           </button>
+
+          {/* Not-ready escape hatch */}
+          <div className="pt-4 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Not ready yet? Your paid spot is saved — we'll email you a link so you can submit later.
+            </p>
+            <button
+              type="button"
+              onClick={handleRemindLater}
+              disabled={reminderSending}
+              className="text-sm font-semibold text-[#0F2A4A] underline hover:text-[#D4A24C] disabled:opacity-60"
+            >
+              {reminderSending ? "Sending reminder…" : "I'm not ready — email me my submission link"}
+            </button>
+          </div>
         </form>
       </main>
       <BizFooter />
     </div>
   );
 }
+
+
 
 function Field({
   name, label, required, type = "text", placeholder, maxLength, defaultValue,
