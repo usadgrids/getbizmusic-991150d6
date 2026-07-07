@@ -355,6 +355,14 @@ export const approveSubmission = createServerFn({ method: "POST" })
       adNumber = (updated.ad_number as number) ?? null;
       editToken = (updated.edit_token as string) ?? null;
     } else {
+      // Resolve target city: use existing (name+state) if present, else auto-create.
+      let cityId: string | null = (sub as { city_id: string | null }).city_id ?? null;
+      const reqCity = (sub as { requested_city_name: string | null }).requested_city_name;
+      const reqState = (sub as { requested_state_code: string | null }).requested_state_code;
+      if (!cityId && reqCity && reqState) {
+        cityId = await resolveOrCreateCity(reqCity, reqState.toUpperCase());
+      }
+
       const now = new Date();
       const expires = new Date(now);
       expires.setFullYear(expires.getFullYear() + 1);
@@ -371,6 +379,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
         starts_at: now.toISOString(),
         expires_at: expires.toISOString(),
         status: "active",
+        city_id: cityId,
       }).select("ad_number, edit_token").maybeSingle();
       if (insErr) throw new Error(insErr.message);
       adNumber = inserted?.ad_number ?? null;
