@@ -5,30 +5,41 @@ import type { TemplateEntry } from './registry'
 interface Props {
   contactName?: string
   businessName?: string
+  isEdit?: boolean
 }
 
 const NAVY = '#0F2A4A'
 const GOLD = '#D4A24C'
 
-const SubmissionReceivedEmail = ({ contactName, businessName }: Props) => (
+const SubmissionReceivedEmail = ({ contactName, businessName, isEdit }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>We received your ad submission — review within 24 hours</Preview>
+    <Preview>
+      {isEdit
+        ? 'We received your ad edits — review within 24 hours'
+        : 'We received your ad submission — review within 24 hours'}
+    </Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>Get Biz Music - National City, CA</Heading>
+          <Heading style={h1}>Get Biz Music</Heading>
         </Section>
         <Section style={content}>
-          <Heading as="h2" style={h2}>Submission received!</Heading>
+          <Heading as="h2" style={h2}>
+            {isEdit ? 'Edits received — pending review' : 'Submission received!'}
+          </Heading>
           <Text style={p}>Hi {contactName || 'there'},</Text>
           <Text style={p}>
-            Thanks for submitting your ad{businessName ? <> for <strong>{businessName}</strong></> : null}.
-            Our team reviews every submission within <strong>24 hours</strong>.
+            {isEdit ? (
+              <>Thanks for updating your ad{businessName ? <> for <strong>{businessName}</strong></> : null}. Our team reviews every change within <strong>24 hours</strong>. Your current ad stays live during review.</>
+            ) : (
+              <>Thanks for submitting your ad{businessName ? <> for <strong>{businessName}</strong></> : null}. Our team reviews every submission within <strong>24 hours</strong>.</>
+            )}
           </Text>
           <Text style={p}>
-            Once approved, you'll get a follow-up email with your unique ad number and shareable link
-            you can post anywhere — social media, your website, email signatures, and more.
+            {isEdit
+              ? "Once approved, you'll get a follow-up email confirming your edits are live. Your ad number and expiration date stay the same."
+              : "Once approved, you'll get a follow-up email with your unique ad number and shareable link you can post anywhere — social media, your website, email signatures, and more."}
           </Text>
           <Hr style={hr} />
           <Text style={footer}>Questions? Just reply to this email.</Text>

@@ -7,26 +7,33 @@ interface Props {
   businessName?: string
   adNumber?: number | string
   shareUrl?: string
+  editUrl?: string
+  isEdit?: boolean
 }
 
 const NAVY = '#0F2A4A'
 const GOLD = '#D4A24C'
 
-const AdApprovedEmail = ({ contactName, businessName, adNumber, shareUrl }: Props) => (
+const AdApprovedEmail = ({ contactName, businessName, adNumber, shareUrl, editUrl, isEdit }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your ad is live — share your unique link anywhere</Preview>
+    <Preview>{isEdit ? 'Your ad edits are live' : 'Your ad is live — share your unique link anywhere'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>Get Biz Music - National City, CA</Heading>
+          <Heading style={h1}>Get Biz Music</Heading>
         </Section>
         <Section style={content}>
-          <Heading as="h2" style={h2}>Your ad is live! 🎉</Heading>
+          <Heading as="h2" style={h2}>
+            {isEdit ? 'Your ad edits are live! ✅' : 'Your ad is live! 🎉'}
+          </Heading>
           <Text style={p}>Hi {contactName || 'there'},</Text>
           <Text style={p}>
-            Great news — your ad{businessName ? <> for <strong>{businessName}</strong></> : null} has been approved
-            and is now rotating on Get Biz Music.
+            {isEdit ? (
+              <>Your recent edits{businessName ? <> to <strong>{businessName}</strong></> : null} have been reviewed and approved. Your ad is updated on Get Biz Music — the ad number and remaining runtime stay the same.</>
+            ) : (
+              <>Great news — your ad{businessName ? <> for <strong>{businessName}</strong></> : null} has been approved and is now rotating on Get Biz Music.</>
+            )}
           </Text>
 
           <Section style={ctaBox}>
@@ -43,10 +50,26 @@ const AdApprovedEmail = ({ contactName, businessName, adNumber, shareUrl }: Prop
             ) : null}
           </Section>
 
+          {editUrl ? (
+            <Section style={editBox}>
+              <Text style={ctaLabel}>Need to change something?</Text>
+              <Text style={p}>
+                You can update your image, phone number, tagline, website, or contact info at
+                any time using your private edit link. Any changes go through admin review
+                before going live — you'll get another confirmation email once approved.
+              </Text>
+              <Button href={editUrl} style={editButton}>Edit My Ad</Button>
+              <Text style={smallLink}>
+                Bookmark this link — it's your permanent editor:<br />
+                <span style={{ wordBreak: 'break-all' }}>{editUrl}</span>
+              </Text>
+            </Section>
+          ) : null}
+
           <Heading as="h3" style={h3}>Share it anywhere</Heading>
           <Text style={p}>
-            Post this link on Facebook, Instagram, X, LinkedIn, your website, email signatures,
-            business cards — anywhere your customers can find you.
+            Post your shareable link on Facebook, Instagram, X, LinkedIn, your website, email
+            signatures, business cards — anywhere your customers can find you.
           </Text>
 
           <Hr style={hr} />
@@ -60,13 +83,16 @@ const AdApprovedEmail = ({ contactName, businessName, adNumber, shareUrl }: Prop
 
 export const template = {
   component: AdApprovedEmail,
-  subject: 'Your ad is live — share your unique link',
+  subject: (data: Record<string, any>) =>
+    data?.isEdit ? 'Your ad edits are live' : 'Your ad is live — share your unique link',
   displayName: 'Ad Approved & Shareable Link',
   previewData: {
     contactName: 'Tony',
     businessName: "Tony's Pizzeria",
     adNumber: 42,
     shareUrl: 'https://bizspotmusicad.lovable.app/ad/42',
+    editUrl: 'https://bizspotmusicad.lovable.app/edit-ad?token=example-edit-token',
+    isEdit: false,
   },
 } satisfies TemplateEntry
 
@@ -82,6 +108,10 @@ const ctaBox: React.CSSProperties = {
   backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px',
   padding: '18px', margin: '18px 0', textAlign: 'center' as const,
 }
+const editBox: React.CSSProperties = {
+  backgroundColor: '#FFF8E9', border: `1px solid ${GOLD}`, borderRadius: '8px',
+  padding: '18px', margin: '18px 0', textAlign: 'center' as const,
+}
 const ctaLabel: React.CSSProperties = {
   fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em',
   color: NAVY, fontWeight: 700, margin: '0 0 6px 0',
@@ -90,6 +120,10 @@ const adNumberStyle: React.CSSProperties = { fontSize: '32px', fontWeight: 700, 
 const ctaButton: React.CSSProperties = {
   backgroundColor: GOLD, color: NAVY, fontWeight: 700, padding: '12px 22px',
   borderRadius: '6px', textDecoration: 'none', fontSize: '15px', display: 'inline-block', margin: '10px 0',
+}
+const editButton: React.CSSProperties = {
+  backgroundColor: NAVY, color: '#ffffff', fontWeight: 700, padding: '10px 20px',
+  borderRadius: '6px', textDecoration: 'none', fontSize: '14px', display: 'inline-block', margin: '10px 0',
 }
 const smallLink: React.CSSProperties = { fontSize: '12px', color: '#6b7280', margin: '8px 0 0 0' }
 const hr: React.CSSProperties = { borderColor: '#e5e7eb', margin: '22px 0' }
