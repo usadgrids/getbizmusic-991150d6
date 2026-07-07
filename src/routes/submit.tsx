@@ -72,11 +72,46 @@ function SubmitPage() {
   }, [token, lookup]);
 
   const onFile = (f: File | null) => {
+    setDimWarning(null);
     if (!f) { setFile(null); return; }
     if (f.size > 2 * 1024 * 1024) { toast.error("Image must be under 2 MB"); return; }
     if (!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)) { toast.error("Only JPG, PNG, or WebP images are allowed"); return; }
     setFile(f);
+    // Check dimensions client-side; warn (don't block) if not 1216×896 / 4:3.
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      const { naturalWidth: w, naturalHeight: h } = img;
+      const ratio = w / h;
+      const isTarget = w === 1216 && h === 896;
+      const isFourThree = Math.abs(ratio - 4 / 3) < 0.02;
+      if (!isTarget) {
+        setDimWarning(
+          isFourThree
+            ? `Your image is ${w}×${h}. Recommended is 1216×896 for best quality — it'll still work, but may look softer.`
+            : `Your image is ${w}×${h} (ratio ${ratio.toFixed(2)}:1). We recommend 1216×896 px (4:3 ratio). It'll be cropped or letterboxed.`
+        );
+      }
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
   };
+
+  const handleRemindLater = async () => {
+    if (!token) return;
+    setReminderSending(true);
+    try {
+      await reminder({ data: { token } });
+      setReminderSent(true);
+      toast.success("Reminder email sent — check your inbox!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to send reminder");
+    } finally {
+      setReminderSending(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
