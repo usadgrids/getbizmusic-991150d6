@@ -12,19 +12,42 @@ async function sendPaymentReceipt(params: {
   email: string;
   plan: string;
   amountCents: number;
+  currency?: string | null;
   submissionToken: string;
   sessionId: string;
+  paymentIntentId?: string | null;
   receiptUrl?: string | null;
+  cardholderName?: string | null;
+  cardBrand?: string | null;
+  cardLast4?: string | null;
+  paidAtIso?: string | null;
+  contactName?: string | null;
 }) {
   try {
     const { enqueueTransactionalEmailInternal } = await import('@/lib/email/enqueue.server');
+    const paymentDate = params.paidAtIso
+      ? new Date(params.paidAtIso).toLocaleString('en-US', {
+          dateStyle: 'long',
+          timeStyle: 'short',
+          timeZone: 'America/Los_Angeles',
+        }) + ' PT'
+      : undefined;
     await enqueueTransactionalEmailInternal({
       templateName: 'payment-receipt',
       recipientEmail: params.email,
       idempotencyKey: `payment-receipt-${params.sessionId}`,
       templateData: {
+        contactName: params.contactName ?? undefined,
         planLabel: PLAN_LABELS[params.plan] ?? params.plan,
         amountFormatted: `$${(params.amountCents / 100).toFixed(2)}`,
+        currency: params.currency ?? 'usd',
+        orderNumber: params.sessionId,
+        paymentIntentId: params.paymentIntentId ?? undefined,
+        paymentDate,
+        cardholderName: params.cardholderName ?? undefined,
+        cardBrand: params.cardBrand ?? undefined,
+        cardLast4: params.cardLast4 ?? undefined,
+        billingEmail: params.email,
         submitUrl: `${SITE_URL}/submit?token=${params.submissionToken}`,
         receiptUrl: params.receiptUrl ?? undefined,
       },
