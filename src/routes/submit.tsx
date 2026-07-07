@@ -5,7 +5,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, Check, AlertCircle, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { createSubmission } from "@/lib/ads.functions";
+import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.functions";
 import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
