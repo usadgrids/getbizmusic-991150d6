@@ -81,7 +81,7 @@ function CityHome() {
               listeners for just $12/year. Limited-time intro offer.
             </p>
             <Link
-              to="/submit"
+              to="/pricing"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
             >
               Submit Your Ad
