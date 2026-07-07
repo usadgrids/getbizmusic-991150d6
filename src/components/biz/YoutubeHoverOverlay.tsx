@@ -133,27 +133,30 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
           className="pointer-events-none absolute inset-0 z-20"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Floating video card — offset up & right, sized so the ad stays visible behind it */}
-          <div
-            className="pointer-events-auto absolute overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
-            style={{
-              top: "6%",
-              right: "4%",
-              width: "58%",
-              aspectRatio: "16 / 9",
-            }}
-          >
-            <iframe
-              src={src}
-              title={`${businessName} video`}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-              className="absolute inset-0 h-full w-full border-0"
-            />
+          {/* Centered video card with breathing room around it */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-[6%]">
+            <div
+              className="pointer-events-auto overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
+              style={{
+                width: "min(100%, calc((100% - 0px) * 1))",
+                maxWidth: "100%",
+                maxHeight: "100%",
+                aspectRatio: "16 / 9",
+              }}
+            >
+              <iframe
+                src={src}
+                title={`${businessName} video`}
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="block h-full w-full border-0"
+              />
+            </div>
           </div>
         </div>
       )}
     </div>
+
   );
 }
