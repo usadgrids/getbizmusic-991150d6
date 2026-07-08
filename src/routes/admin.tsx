@@ -1232,7 +1232,7 @@ function AdRepsSection() {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
