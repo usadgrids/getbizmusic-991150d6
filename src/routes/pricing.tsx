@@ -1,21 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { ArrowLeft, Check, Shield, Info } from "lucide-react";
+import { ArrowLeft, Check, Shield, Info, Tag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createAdCheckout } from "@/lib/payments.functions";
+import { validateRepCode } from "@/lib/reps.functions";
 import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Get Biz Music - National City, CA" },
-      { name: "description", content: "Choose your annual ad plan: $12/year for 7-second rotation or $24/year for 10-second feature." },
+      { title: "Pricing — Get Biz Music" },
+      { name: "description", content: "Choose your annual ad plan: $24/year for 7-second rotation or $48/year for 10-second feature. Rep codes give 50% off." },
     ],
   }),
   component: PricingPage,
@@ -28,19 +29,41 @@ function PricingPage() {
   const [agreedNoRefund, setAgreedNoRefund] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [repInput, setRepInput] = useState("");
+  const [repState, setRepState] = useState<
+    | { status: "idle" }
+    | { status: "checking" }
+    | { status: "valid"; code: string; discountPercent: number }
+    | { status: "invalid" }
+  >({ status: "idle" });
+  const repDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (repDebounce.current) clearTimeout(repDebounce.current);
+    const raw = repInput.trim();
+    if (!raw) { setRepState({ status: "idle" }); return; }
+    setRepState({ status: "checking" });
+    repDebounce.current = setTimeout(async () => {
+      try {
+        const res = await validateRepCode({ data: { code: raw } });
+        if (res.valid) setRepState({ status: "valid", code: res.code!, discountPercent: res.discountPercent! });
+        else setRepState({ status: "invalid" });
+      } catch {
+        setRepState({ status: "invalid" });
+      }
+    }, 350);
+    return () => { if (repDebounce.current) clearTimeout(repDebounce.current); };
+  }, [repInput]);
+
+  const basePrice = AD_PLANS[plan].price;
+  const discounted = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const canPay = emailValid && agreedTerms && agreedNoRefund && !loading;
 
   const startCheckout = async () => {
-    if (!emailValid) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-    if (!agreedTerms || !agreedNoRefund) {
-      toast.error("Please confirm both boxes to continue");
-      return;
-    }
+    if (!emailValid) { toast.error("Please enter a valid email"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
     setLoading(true);
     try {
       const result = await createAdCheckout({
@@ -52,6 +75,7 @@ function PricingPage() {
           agreedTerms,
           agreedNoRefund,
           disclosureVersion: "v1",
+          ...(repState.status === "valid" ? { repCode: repState.code } : {}),
         },
       });
       if ("error" in result) throw new Error(result.error);
@@ -63,6 +87,7 @@ function PricingPage() {
       setLoading(false);
     }
   };
+
 
   if (clientSecret) {
     return (
