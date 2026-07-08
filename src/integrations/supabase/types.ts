@@ -21,14 +21,19 @@ export type Database = {
           agreed_terms: boolean
           amount_cents: number
           city_id: string | null
+          commission_cents: number
+          commission_percent: number | null
           created_at: string
           customer_email: string
           disclosure_version: string | null
+          discount_cents: number
           environment: string
           id: string
           ip_address: string | null
           paid_at: string | null
           plan: string
+          rep_code: string | null
+          rep_id: string | null
           status: string
           stripe_session_id: string
           submission_token: string
@@ -40,14 +45,19 @@ export type Database = {
           agreed_terms?: boolean
           amount_cents: number
           city_id?: string | null
+          commission_cents?: number
+          commission_percent?: number | null
           created_at?: string
           customer_email: string
           disclosure_version?: string | null
+          discount_cents?: number
           environment?: string
           id?: string
           ip_address?: string | null
           paid_at?: string | null
           plan: string
+          rep_code?: string | null
+          rep_id?: string | null
           status?: string
           stripe_session_id: string
           submission_token?: string
@@ -59,14 +69,19 @@ export type Database = {
           agreed_terms?: boolean
           amount_cents?: number
           city_id?: string | null
+          commission_cents?: number
+          commission_percent?: number | null
           created_at?: string
           customer_email?: string
           disclosure_version?: string | null
+          discount_cents?: number
           environment?: string
           id?: string
           ip_address?: string | null
           paid_at?: string | null
           plan?: string
+          rep_code?: string | null
+          rep_id?: string | null
           status?: string
           stripe_session_id?: string
           submission_token?: string
@@ -80,7 +95,56 @@ export type Database = {
             referencedRelation: "cities"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ad_payments_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "ad_reps"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      ad_reps: {
+        Row: {
+          active: boolean
+          code: string
+          commission_percent: number
+          created_at: string
+          created_by: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          commission_percent?: number
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          commission_percent?: number
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       ad_submissions: {
         Row: {
