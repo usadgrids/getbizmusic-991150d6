@@ -211,8 +211,8 @@ function AdLanding() {
             ads={sliderAds.length > 0 ? sliderAds : ads}
             title={
               relatedAds.length > 0
-                ? `More ${industry} in National City`
-                : "More National City Businesses"
+                ? `More ${industry} in ${ad.city_name ?? "your area"}`
+                : `More ${ad.city_name ?? "Local"} Businesses`
             }
           />
           <div className="mt-6">
