@@ -545,11 +545,12 @@ export const removeAd = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("ads")
-      .update({ status: "removed" })
+      .delete()
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
 
 // Admin-only manual submission that bypasses payment. Optionally auto-approves.
 const manualSchema = z.object({
