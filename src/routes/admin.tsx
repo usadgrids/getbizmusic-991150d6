@@ -344,6 +344,10 @@ function AdminConsole() {
 
         <ManualSubmitSection onCreated={refreshAll} />
 
+        <AdRepsSection />
+
+
+
 
         {/* Live ads */}
         <section>
