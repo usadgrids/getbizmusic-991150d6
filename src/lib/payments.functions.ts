@@ -34,6 +34,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
     agreedTerms: boolean;
     agreedNoRefund: boolean;
     disclosureVersion?: string;
+    repCode?: string;
   }) => {
     const schema = z.object({
       plan: z.enum(["image_5", "slider_10"]),
@@ -43,6 +44,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
       agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
       disclosureVersion: z.string().optional(),
+      repCode: z.string().trim().max(24).optional(),
     });
     return schema.parse(data);
   })
@@ -62,6 +64,32 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       const disclosureVersion = data.disclosureVersion ?? DISCLOSURE_VERSION;
       const ipAddress = getClientIp();
       const isRecurring = stripePrice.type === "recurring";
+      const baseAmount = stripePrice.unit_amount ?? 0;
+
+      // Validate rep code server-side
+      let repId: string | null = null;
+      let repCode: string | null = null;
+      let commissionPercent: number | null = null;
+      let discountCents = 0;
+      let chargeAmount = baseAmount;
+      if (data.repCode && data.repCode.trim().length > 0) {
+        const codeNorm = data.repCode.toUpperCase().replace(/\s+/g, "");
+        const { data: rep } = await supabaseAdmin
+          .from("ad_reps")
+          .select("id, code, commission_percent, active")
+          .eq("code", codeNorm)
+          .maybeSingle();
+        if (rep && rep.active) {
+          repId = rep.id;
+          repCode = rep.code;
+          commissionPercent = Number(rep.commission_percent);
+          chargeAmount = Math.round(baseAmount * 0.5);
+          discountCents = baseAmount - chargeAmount;
+        }
+      }
+      const commissionCents = commissionPercent != null
+        ? Math.round(chargeAmount * (commissionPercent / 100))
+        : 0;
 
       const metadata: Record<string, string> = {
         plan: data.plan,
@@ -71,22 +99,36 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         disclosure_text: DISCLOSURE_SUMMARY,
+        ...(repCode ? { rep_code: repCode, rep_id: repId ?? "", commission_percent: String(commissionPercent ?? 0), commission_cents: String(commissionCents), discount_cents: String(discountCents) } : {}),
       };
 
+      // If a rep discount applies, use price_data so the discounted amount
+      // shows on the Stripe checkout page too. Otherwise use the fixed price.
+      const lineItem = discountCents > 0
+        ? {
+            price_data: {
+              currency: stripePrice.currency,
+              product_data: { name: product.name },
+              unit_amount: chargeAmount,
+            },
+            quantity: 1,
+          }
+        : { price: stripePrice.id, quantity: 1 };
+
       const session = await stripe.checkout.sessions.create({
-        line_items: [{ price: stripePrice.id, quantity: 1 }],
-        mode: isRecurring ? "subscription" : "payment",
+        line_items: [lineItem],
+        mode: isRecurring && discountCents === 0 ? "subscription" : "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer_email: data.customerEmail,
         metadata,
-        ...(isRecurring
+        ...(isRecurring && discountCents === 0
           ? { subscription_data: { metadata, description: product.name } }
           : {
               payment_intent_data: {
                 description: product.name,
                 receipt_email: data.customerEmail,
-                statement_descriptor_suffix: "WINALL MEDIA AD",
+                statement_descriptor_suffix: "GETBIZMUSIC AD",
                 metadata,
               },
             }),
@@ -97,7 +139,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         stripe_session_id: session.id,
         customer_email: data.customerEmail,
         plan: data.plan,
-        amount_cents: stripePrice.unit_amount ?? 0,
+        amount_cents: chargeAmount,
         status: "pending",
         environment: data.environment,
         agreed_terms: true,
@@ -105,6 +147,11 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         ip_address: ipAddress,
+        rep_id: repId,
+        rep_code: repCode,
+        discount_cents: discountCents,
+        commission_cents: commissionCents,
+        commission_percent: commissionPercent,
       });
       if (insertError) {
         console.error("ad_payments pre-insert failed:", insertError);
