@@ -427,10 +427,10 @@ function AdminConsole() {
                         {a.status === "active" && (
                           <button
                             onClick={async () => {
-                              if (!confirm(`Remove "${a.business_name}" from rotation?`)) return;
+                              if (!confirm(`Are you sure you want to delete "${a.business_name}"? This will permanently remove the ad and cannot be undone.`)) return;
                               try {
                                 await removeFn({ data: { id: a.id } });
-                                toast.success("Removed");
+                                toast.success("Deleted");
                                 refreshAll();
                               } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
                             }}
