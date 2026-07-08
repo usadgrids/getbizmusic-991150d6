@@ -87,17 +87,21 @@ export const getAdByNumber = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ads")
-      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds,status,expires_at,created_at,cities:city_id(name,state,slug)")
       .eq("ad_number", data.ad_number)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
     const [withUrl] = await attachUrls([row as unknown as PublicAd]);
+    const city = (row as { cities: { name: string; state: string; slug: string } | null }).cities ?? null;
     return {
       ...(withUrl as PublicAd),
       status: (row as { status: string }).status,
       expires_at: (row as { expires_at: string }).expires_at,
       created_at: (row as { created_at: string }).created_at,
+      city_name: city?.name ?? null,
+      city_state: city?.state ?? null,
+      city_slug: city?.slug ?? null,
     };
   });
 

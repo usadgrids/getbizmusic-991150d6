@@ -18,20 +18,19 @@ const adQueryOptions = (adNumber: number) => ({
   queryFn: () => getAdByNumber({ data: { ad_number: adNumber } }),
 });
 
-const activeAdsQueryOptions = {
-  queryKey: ["active-ads"],
-  queryFn: () => getActiveAds(),
-};
+const activeAdsQueryOptions = (citySlug: string | null) => ({
+  queryKey: ["active-ads", citySlug ?? "__all__"],
+  queryFn: () =>
+    citySlug ? getActiveAds({ data: { city_slug: citySlug } }) : getActiveAds(),
+});
 
 export const Route = createFileRoute("/ad/$adNumber")({
   loader: async ({ params, context }) => {
     const n = Number(params.adNumber);
     if (!Number.isFinite(n) || n <= 0) throw notFound();
-    const [ad] = await Promise.all([
-      context.queryClient.ensureQueryData(adQueryOptions(n)),
-      context.queryClient.ensureQueryData(activeAdsQueryOptions),
-    ]);
+    const ad = await context.queryClient.ensureQueryData(adQueryOptions(n));
     if (!ad) throw notFound();
+    await context.queryClient.ensureQueryData(activeAdsQueryOptions(ad.city_slug));
     return { ad };
   },
   head: ({ params, loaderData }) => {
@@ -87,9 +86,11 @@ function AdLanding() {
     queryKey: ["ad-by-number", n],
     queryFn: () => fetchAd({ data: { ad_number: n } }),
   });
+  const citySlug = ad?.city_slug ?? null;
   const { data: ads = [] } = useSuspenseQuery({
-    queryKey: ["active-ads"],
-    queryFn: () => fetchAds(),
+    queryKey: ["active-ads", citySlug ?? "__all__"],
+    queryFn: () =>
+      citySlug ? fetchAds({ data: { city_slug: citySlug } }) : fetchAds(),
   });
 
   if (!ad) return <AdNotFound />;
@@ -210,8 +211,8 @@ function AdLanding() {
             ads={sliderAds.length > 0 ? sliderAds : ads}
             title={
               relatedAds.length > 0
-                ? `More ${industry} in National City`
-                : "More National City Businesses"
+                ? `More ${industry} in ${ad.city_name ?? "your area"}`
+                : `More ${ad.city_name ?? "Local"} Businesses`
             }
           />
           <div className="mt-6">
