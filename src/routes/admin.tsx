@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, Users, Percent, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -19,6 +19,7 @@ import {
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { getActiveCities } from "@/lib/cities.functions";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
+import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -343,6 +344,10 @@ function AdminConsole() {
         </section>
 
         <ManualSubmitSection onCreated={refreshAll} />
+
+        <AdRepsSection />
+
+
 
 
         {/* Live ads */}
@@ -1073,6 +1078,290 @@ function EditAdModal({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/* ================= Ad Reps ================= */
+
+
+
+function AdRepsSection() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listReps);
+  const createFn = useServerFn(createRep);
+  const updateFn = useServerFn(updateRep);
+  const deleteFn = useServerFn(deleteRep);
+  const ordersFn = useServerFn(listRepOrders);
+
+  const { data: reps = [] } = useQuery({ queryKey: ["ad-reps"], queryFn: () => listFn() });
+  const [editing, setEditing] = useState<RepRow | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  type OrderRow = Awaited<ReturnType<typeof ordersFn>>[number];
+  const [orders, setOrders] = useState<Record<string, OrderRow[]>>({});
+
+  const toggleExpand = async (rep: RepRow) => {
+    if (expandedId === rep.id) { setExpandedId(null); return; }
+    setExpandedId(rep.id);
+    if (!orders[rep.id]) {
+      try {
+        const rows = await ordersFn({ data: { repId: rep.id } });
+        setOrders((o) => ({ ...o, [rep.id]: rows }));
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Failed to load orders");
+      }
+    }
+  };
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["ad-reps"] });
+
+  const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Users size={18} className="text-[#D4A24C]" />
+        <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">Ad Reps ({reps.length})</h2>
+        <button
+          onClick={() => setCreating(true)}
+          className="ml-auto inline-flex items-center gap-1 bg-[#0F2A4A] text-white text-xs font-semibold px-3 py-1.5 rounded-md hover:bg-[#163864]"
+        >
+          <Plus size={12} /> Add Rep
+        </button>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
+            <tr>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Code</th>
+              <th className="px-4 py-2">Commission</th>
+              <th className="px-4 py-2">Sales</th>
+              <th className="px-4 py-2">Discounts</th>
+              <th className="px-4 py-2">Earned</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {reps.length === 0 && (
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-gray-500">No reps yet. Add one to start tracking commissions.</td></tr>
+            )}
+            {reps.map((r) => (
+              <React.Fragment key={r.id}>
+                <tr className="border-t border-gray-100">
+
+                  <td className="px-4 py-2 font-medium text-[#0F2A4A]">
+                    <button onClick={() => toggleExpand(r)} className="hover:underline">
+                      {r.first_name} {r.last_name}
+                    </button>
+                    <div className="text-xs text-gray-500 font-normal">{r.email ?? "—"}{r.phone ? ` · ${r.phone}` : ""}</div>
+                  </td>
+                  <td className="px-4 py-2 font-mono text-xs bg-gray-50">{r.code}</td>
+                  <td className="px-4 py-2 text-xs"><Percent size={10} className="inline" /> {r.commission_percent}%</td>
+                  <td className="px-4 py-2 text-xs">{r.sales_count}</td>
+                  <td className="px-4 py-2 text-xs text-gray-700">{fmt(r.discount_cents)}</td>
+                  <td className="px-4 py-2 text-xs font-semibold text-emerald-700">{fmt(r.commission_cents)}</td>
+                  <td className="px-4 py-2">
+                    {r.active ? (
+                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Active</span>
+                    ) : (
+                      <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Inactive</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <div className="inline-flex items-center gap-3 justify-end">
+                      <button onClick={() => setEditing(r)} className="text-[#0F2A4A] hover:text-[#163864] inline-flex items-center gap-1 text-xs">
+                        <Pencil size={12} /> Edit
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Delete rep "${r.first_name} ${r.last_name}"? Historical attributions will remain but the code will stop working.`)) return;
+                          try {
+                            await deleteFn({ data: { id: r.id } });
+                            toast.success("Rep deleted");
+                            refresh();
+                          } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+                        }}
+                        className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                      >
+                        <Trash2 size={12} /> Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {expandedId === r.id && (
+                  <tr className="bg-gray-50">
+                    <td colSpan={8} className="px-4 py-3">
+                      <div className="text-xs font-semibold text-[#0F2A4A] mb-2 flex items-center gap-1.5">
+                        <DollarSign size={12} /> Attributed orders
+                      </div>
+                      {(orders[r.id] ?? []).length === 0 ? (
+                        <div className="text-xs text-gray-500">No paid orders yet.</div>
+                      ) : (
+                        <table className="w-full text-xs">
+                          <thead className="text-gray-500">
+                            <tr>
+                              <th className="text-left py-1">Date</th>
+                              <th className="text-left py-1">Email</th>
+                              <th className="text-left py-1">Plan</th>
+                              <th className="text-left py-1">Status</th>
+                              <th className="text-right py-1">Charged</th>
+                              <th className="text-right py-1">Discount</th>
+                              <th className="text-right py-1">Commission</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(orders[r.id] ?? []).map((o) => (
+                              <tr key={o.id} className="border-t border-gray-200">
+                                <td className="py-1">{new Date(o.paid_at ?? o.created_at).toLocaleDateString()}</td>
+                                <td className="py-1">{o.customer_email}</td>
+                                <td className="py-1">{o.plan}</td>
+                                <td className="py-1">{o.status}</td>
+                                <td className="py-1 text-right">{fmt(o.amount_cents)}</td>
+                                <td className="py-1 text-right text-gray-600">{fmt(o.discount_cents ?? 0)}</td>
+                                <td className="py-1 text-right font-semibold text-emerald-700">{fmt(o.commission_cents ?? 0)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {(creating || editing) && (
+        <RepFormModal
+          rep={editing}
+          onClose={() => { setCreating(false); setEditing(null); }}
+          onSave={async (values) => {
+            try {
+              if (editing) {
+                await updateFn({ data: { ...values, id: editing.id } });
+                toast.success("Rep updated");
+              } else {
+                await createFn({ data: values });
+                toast.success("Rep created");
+              }
+              setCreating(false); setEditing(null);
+              refresh();
+            } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+function RepFormModal({
+  rep,
+  onClose,
+  onSave,
+}: {
+  rep: RepRow | null;
+  onClose: () => void;
+  onSave: (v: {
+    first_name: string; last_name: string; phone: string; email: string;
+    code: string; commission_percent: number; active: boolean;
+  }) => Promise<void>;
+}) {
+  const [first_name, setFirst] = useState(rep?.first_name ?? "");
+  const [last_name, setLast] = useState(rep?.last_name ?? "");
+  const [phone, setPhone] = useState(rep?.phone ?? "");
+  const [email, setEmail] = useState(rep?.email ?? "");
+  const [code, setCode] = useState(rep?.code ?? "");
+  const [commission, setCommission] = useState(rep?.commission_percent ?? 20);
+  const [active, setActive] = useState(rep?.active ?? true);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (rep) return;
+    if (!code && (first_name || last_name)) {
+      setCode((first_name + last_name).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20));
+    }
+     
+  }, [first_name, last_name]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await onSave({ first_name, last_name, phone, email, code, commission_percent: Number(commission), active });
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-lg font-bold text-[#0F2A4A]">{rep ? "Edit Rep" : "Add Ad Rep"}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+        </div>
+        <form onSubmit={submit} className="space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">First Name *</label>
+              <input required value={first_name} onChange={(e) => setFirst(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">Last Name *</label>
+              <input required value={last_name} onChange={(e) => setLast(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">Phone</label>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">Rep Code *</label>
+            <input
+              required value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ""))}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 font-mono uppercase"
+              placeholder="JOHNSMITH"
+              minLength={3} maxLength={24}
+            />
+            <p className="text-xs text-gray-500 mt-1">Uppercase letters, numbers, - and _ only. Buyers enter this at checkout.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-[#0F2A4A] mb-1">Commission %</label>
+              <input
+                type="number" min={0} max={100} step="0.01"
+                value={commission}
+                onChange={(e) => setCommission(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+              />
+            </div>
+            <div className="flex items-end">
+              <label className="inline-flex items-center gap-2 pb-2">
+                <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
+                <span className="text-sm">Active</span>
+              </label>
+            </div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" disabled={busy} className="flex-1 bg-[#D4A24C] text-[#0F2A4A] font-bold py-2.5 rounded-md hover:bg-[#e0b266] disabled:opacity-60">
+              {busy ? "Saving…" : rep ? "Save changes" : "Create Rep"}
+            </button>
+            <button type="button" onClick={onClose} disabled={busy} className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
