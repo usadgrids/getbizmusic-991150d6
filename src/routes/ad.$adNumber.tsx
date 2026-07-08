@@ -18,20 +18,19 @@ const adQueryOptions = (adNumber: number) => ({
   queryFn: () => getAdByNumber({ data: { ad_number: adNumber } }),
 });
 
-const activeAdsQueryOptions = {
-  queryKey: ["active-ads"],
-  queryFn: () => getActiveAds(),
-};
+const activeAdsQueryOptions = (citySlug: string | null) => ({
+  queryKey: ["active-ads", citySlug ?? "__all__"],
+  queryFn: () =>
+    citySlug ? getActiveAds({ data: { city_slug: citySlug } }) : getActiveAds(),
+});
 
 export const Route = createFileRoute("/ad/$adNumber")({
   loader: async ({ params, context }) => {
     const n = Number(params.adNumber);
     if (!Number.isFinite(n) || n <= 0) throw notFound();
-    const [ad] = await Promise.all([
-      context.queryClient.ensureQueryData(adQueryOptions(n)),
-      context.queryClient.ensureQueryData(activeAdsQueryOptions),
-    ]);
+    const ad = await context.queryClient.ensureQueryData(adQueryOptions(n));
     if (!ad) throw notFound();
+    await context.queryClient.ensureQueryData(activeAdsQueryOptions(ad.city_slug));
     return { ad };
   },
   head: ({ params, loaderData }) => {
