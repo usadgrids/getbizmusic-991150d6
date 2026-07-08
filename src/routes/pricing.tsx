@@ -165,6 +165,12 @@ function PricingPage() {
         </div>
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="mb-5 rounded-lg border border-[#D4A24C]/80 bg-[#FFF8EC] px-4 py-3 text-center">
+            <p className="text-sm sm:text-base font-bold tracking-wide text-[#0F2A4A] uppercase">
+              Use Rep Code in Flyer to Get 50% Off
+            </p>
+          </div>
+
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
             Email for receipt &amp; submission link
           </label>
