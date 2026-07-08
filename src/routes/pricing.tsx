@@ -169,6 +169,9 @@ function PricingPage() {
             <p className="text-sm sm:text-base font-bold tracking-wide text-[#0F2A4A] uppercase">
               Use Rep Code in Flyer to Get 50% Off
             </p>
+            <p className="mt-1 text-xs sm:text-sm font-semibold text-[#0F2A4A]">
+              DON'T HAVE A REPCODE? TEXT 619-707-0467 to get one.
+            </p>
           </div>
 
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
