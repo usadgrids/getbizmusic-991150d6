@@ -86,9 +86,11 @@ function AdLanding() {
     queryKey: ["ad-by-number", n],
     queryFn: () => fetchAd({ data: { ad_number: n } }),
   });
+  const citySlug = ad?.city_slug ?? null;
   const { data: ads = [] } = useSuspenseQuery({
-    queryKey: ["active-ads"],
-    queryFn: () => fetchAds(),
+    queryKey: ["active-ads", citySlug ?? "__all__"],
+    queryFn: () =>
+      citySlug ? fetchAds({ data: { city_slug: citySlug } }) : fetchAds(),
   });
 
   if (!ad) return <AdNotFound />;
