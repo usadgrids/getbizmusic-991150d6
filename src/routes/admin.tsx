@@ -1151,8 +1151,9 @@ function AdRepsSection() {
               <tr><td colSpan={8} className="px-4 py-6 text-center text-gray-500">No reps yet. Add one to start tracking commissions.</td></tr>
             )}
             {reps.map((r) => (
-              <>
-                <tr key={r.id} className="border-t border-gray-100">
+              <React.Fragment key={r.id}>
+                <tr className="border-t border-gray-100">
+
                   <td className="px-4 py-2 font-medium text-[#0F2A4A]">
                     <button onClick={() => toggleExpand(r)} className="hover:underline">
                       {r.first_name} {r.last_name}
