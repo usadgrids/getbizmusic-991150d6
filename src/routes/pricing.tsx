@@ -143,9 +143,17 @@ function PricingPage() {
                 </div>
                 <div className="font-semibold text-[#0F2A4A] text-lg mt-1">{p.label}</div>
                 <div className="text-4xl font-bold text-[#0F2A4A] mt-2">
-                  ${p.price}
+                  {sel && repState.status === "valid" ? (
+                    <>
+                      <span className="text-gray-400 line-through text-2xl mr-2">${p.price}</span>
+                      ${Math.round(p.price * 0.5)}
+                    </>
+                  ) : (
+                    <>${p.price}</>
+                  )}
                   <span className="text-sm font-normal text-gray-500"> / year</span>
                 </div>
+
                 <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
                   <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> {p.seconds}-second rotation</li>
                   <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
@@ -167,6 +175,33 @@ function PricingPage() {
             placeholder="you@example.com"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
+
+          <label className="block text-sm font-semibold text-[#0F2A4A] mt-4 mb-2 flex items-center gap-1.5">
+            <Tag size={14} className="text-[#D4A24C]" /> Have a rep code? <span className="font-normal text-gray-500">(optional)</span>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={repInput}
+              onChange={(e) => setRepInput(e.target.value.toUpperCase())}
+              placeholder="e.g. JOHNSMITH"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {repState.status === "checking" && <Loader2 size={14} className="animate-spin text-gray-400" />}
+              {repState.status === "valid" && <Check size={16} className="text-emerald-600" />}
+            </div>
+          </div>
+          {repState.status === "valid" && (
+            <p className="mt-1.5 text-xs text-emerald-700 font-semibold">
+              ✓ Code {repState.code} applied — {repState.discountPercent}% off
+            </p>
+          )}
+          {repState.status === "invalid" && repInput.trim().length > 0 && (
+            <p className="mt-1.5 text-xs text-red-600">Code not recognized</p>
+          )}
+
+
 
           {/* Disclosure block */}
           <div className="mt-6 rounded-xl border-2 border-[#D4A24C]/60 bg-[#FFF8EC] p-5">
@@ -234,7 +269,7 @@ function PricingPage() {
             disabled={!canPay}
             className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D4A24C]"
           >
-            {loading ? "Starting…" : `Complete Purchase — $${AD_PLANS[plan].price}`}
+            {loading ? "Starting…" : `Complete Purchase — $${discounted}`}
           </button>
           {!agreedTerms || !agreedNoRefund ? (
             <p className="mt-2 text-xs text-center text-gray-500">
