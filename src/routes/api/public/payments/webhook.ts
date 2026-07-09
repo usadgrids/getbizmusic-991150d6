@@ -44,6 +44,7 @@ async function sendPaymentReceipt(params: {
       templateData: {
         contactName: params.contactName ?? undefined,
         planLabel: PLAN_LABELS[params.plan] ?? params.plan,
+        rotationSeconds: PLAN_SECONDS[params.plan] ?? undefined,
         amountFormatted: `$${(params.amountCents / 100).toFixed(2)}`,
         currency: params.currency ?? 'usd',
         orderNumber: params.sessionId,
