@@ -63,6 +63,9 @@ function Index() {
     return c.name.toLowerCase().includes(s) || c.state.toLowerCase().includes(s);
   });
 
+  const zipHasNoActiveCity =
+    zipMatch !== null && filtered.length === 0 && /^\d{5}$/.test(q.trim());
+
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
 
