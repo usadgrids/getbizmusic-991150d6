@@ -195,13 +195,32 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
             }
 
             // Guard: skip if another worker already sent this message (VT expired race)
-            if (payload.message_id) {
-              const { data: alreadySent } = await supabase
-                .from('email_send_log')
-                .select('id')
-                .eq('message_id', payload.message_id)
-                .eq('status', 'sent')
-                .maybeSingle()
+            // or if the same idempotent email was already sent by a different path
+            // (for example checkout-return fallback and webhook firing close together).
+            if (payload.message_id || payload.idempotency_key) {
+              let alreadySent: { id: string } | null = null
+              if (payload.message_id) {
+                const { data } = await supabase
+                  .from('email_send_log')
+                  .select('id')
+                  .eq('message_id', payload.message_id)
+                  .eq('status', 'sent')
+                  .maybeSingle()
+                alreadySent = data
+              }
+
+              if (!alreadySent && payload.idempotency_key) {
+                const deterministicMessageId = await messageIdFromIdempotencyKey(
+                  String(payload.idempotency_key)
+                )
+                const { data } = await supabase
+                  .from('email_send_log')
+                  .select('id')
+                  .eq('message_id', deterministicMessageId)
+                  .eq('status', 'sent')
+                  .maybeSingle()
+                alreadySent = data
+              }
 
               if (alreadySent) {
                 console.warn('Skipping duplicate send (already sent)', {
