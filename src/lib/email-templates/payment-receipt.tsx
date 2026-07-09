@@ -16,6 +16,7 @@ import type { TemplateEntry } from './registry'
 interface Props {
   contactName?: string
   planLabel?: string
+  rotationSeconds?: number
   amountFormatted?: string
   submitUrl?: string
   receiptUrl?: string
@@ -36,6 +37,7 @@ const GOLD = '#D4A24C'
 const PaymentReceiptEmail = ({
   contactName,
   planLabel,
+  rotationSeconds,
   amountFormatted,
   submitUrl,
   receiptUrl,
@@ -87,6 +89,9 @@ const PaymentReceiptEmail = ({
                   ) : null}
                   {planLabel ? (
                     <tr><td style={tdLabel}>Item</td><td style={tdValue}>{planLabel} (1-year novelty ad spot)</td></tr>
+                  ) : null}
+                  {rotationSeconds ? (
+                    <tr><td style={tdLabel}>Rotation Time</td><td style={tdValue}><strong>{rotationSeconds} seconds</strong> per rotation</td></tr>
                   ) : null}
                   {amountFormatted ? (
                     <tr><td style={tdLabel}>Amount Charged</td><td style={tdValue}><strong>{amountFormatted}{currency ? ` ${currency.toUpperCase()}` : ''}</strong></td></tr>
@@ -177,6 +182,7 @@ export const template = {
   previewData: {
     contactName: 'Tony',
     planLabel: 'Featured Slider Ad',
+    rotationSeconds: 10,
     amountFormatted: '$24.00',
     currency: 'usd',
     orderNumber: 'cs_test_a1B2c3D4e5F6g7',

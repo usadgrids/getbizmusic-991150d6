@@ -353,15 +353,15 @@ function SubmitPage() {
           </button>
 
           {/* Not-ready escape hatch */}
-          <div className="pt-4 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-600 mb-2">
+          <div className="mt-4 rounded-xl bg-emerald-50 border-2 border-emerald-200 p-5 text-center">
+            <p className="text-sm text-emerald-900 mb-3">
               Not ready yet? Your paid spot is saved — we'll email you a link so you can submit later.
             </p>
             <button
               type="button"
               onClick={handleRemindLater}
               disabled={reminderSending}
-              className="text-sm font-semibold text-[#0F2A4A] underline hover:text-[#D4A24C] disabled:opacity-60"
+              className="inline-block bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-60"
             >
               {reminderSending ? "Sending reminder…" : "I'm not ready — email me my submission link"}
             </button>

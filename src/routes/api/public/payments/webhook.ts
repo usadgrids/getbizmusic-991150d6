@@ -6,6 +6,11 @@ const PLAN_LABELS: Record<string, string> = {
   slider_10: 'Featured Slider Ad',
 };
 
+const PLAN_SECONDS: Record<string, number> = {
+  image_5: 7,
+  slider_10: 10,
+};
+
 const SITE_URL = 'https://www.getbizmusic.com';
 
 async function sendPaymentReceipt(params: {
@@ -39,6 +44,7 @@ async function sendPaymentReceipt(params: {
       templateData: {
         contactName: params.contactName ?? undefined,
         planLabel: PLAN_LABELS[params.plan] ?? params.plan,
+        rotationSeconds: PLAN_SECONDS[params.plan] ?? undefined,
         amountFormatted: `$${(params.amountCents / 100).toFixed(2)}`,
         currency: params.currency ?? 'usd',
         orderNumber: params.sessionId,
