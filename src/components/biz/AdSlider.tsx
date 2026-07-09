@@ -300,8 +300,22 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           <span className="min-w-0 break-words">{title}</span>
         </h2>
         {ads.length > 0 && (
-          <div className="text-xs text-gray-500 justify-self-end text-right shrink-0">
-            {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
+          <div className="flex items-center justify-end gap-2 text-xs text-gray-500 justify-self-end text-right shrink-0">
+            <span>
+              {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
+            </span>
+            {current?.website_url && (
+              <a
+                href={current.website_url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                aria-label={`Visit ${current.business_name} website`}
+                title="Visit Ad Website"
+                className="inline-flex items-center justify-center rounded-full bg-[#0F2A4A] p-1.5 text-[#D4A24C] shadow-sm hover:bg-[#0F2A4A]/90 transition-colors"
+              >
+                <Globe size={14} />
+              </a>
+            )}
           </div>
         )}
       </div>
@@ -351,19 +365,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-contain"
               />
-              {current.website_url && (
-                <a
-                  href={current.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  aria-label={`Visit ${current.business_name}`}
-                  className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm shadow-md hover:bg-[#0F2A4A]/90 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Globe size={13} className="text-[#D4A24C]" />
-                  Visit site
-                </a>
-              )}
             </div>
             {ads.length > 0 && (
               <SlideTimer
