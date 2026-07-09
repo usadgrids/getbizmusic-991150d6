@@ -29,6 +29,24 @@ function generateToken(): string {
     .join('')
 }
 
+function bytesToUuid(bytes: Uint8Array): string {
+  const b = bytes.slice(0, 16)
+  b[6] = (b[6] & 0x0f) | 0x50
+  b[8] = (b[8] & 0x3f) | 0x80
+  const hex = Array.from(b)
+    .map((value) => value.toString(16).padStart(2, '0'))
+    .join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
+async function messageIdFromIdempotencyKey(idempotencyKey: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(idempotencyKey)
+  )
+  return bytesToUuid(new Uint8Array(digest))
+}
+
 export const Route = createFileRoute("/lovable/email/transactional/send")({
   server: {
     handlers: {
@@ -69,8 +87,8 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           const body = await request.json()
           templateName = body.templateName || body.template_name
           recipientEmail = body.recipientEmail || body.recipient_email
-          messageId = crypto.randomUUID()
           idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
+          messageId = await messageIdFromIdempotencyKey(idempotencyKey)
           if (body.templateData && typeof body.templateData === 'object') {
             templateData = body.templateData
           }
