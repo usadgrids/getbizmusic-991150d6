@@ -162,15 +162,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }, 2000);
   };
 
-  const showTooltip = (e: React.MouseEvent<HTMLDivElement>) => {
-    setTooltip({ visible: true, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
-  };
-  const moveTooltip = (e: React.MouseEvent<HTMLDivElement>) => {
-    setTooltip((t) => ({ ...t, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }));
-  };
-  const hideTooltip = () => {
-    setTooltip((t) => ({ ...t, visible: false }));
-  };
 
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
