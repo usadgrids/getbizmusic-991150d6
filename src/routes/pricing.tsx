@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { ArrowLeft, Check, Shield, Info, Tag, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
