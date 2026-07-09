@@ -303,16 +303,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             <span className="whitespace-nowrap">
               {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
             </span>
-            {current?.website_url && (
-              <a
-                href={current.website_url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="mt-0.5 font-semibold text-[#0F2A4A] underline hover:text-[#D4A24C]"
-              >
-                Website
-              </a>
-            )}
           </div>
         )}
       </div>
