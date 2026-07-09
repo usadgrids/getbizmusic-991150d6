@@ -107,7 +107,9 @@ function Index() {
           {filtered.length} active {filtered.length === 1 ? "city" : "cities"}
         </h2>
 
-        {filtered.length === 0 ? (
+        {zipHasNoActiveCity && zipMatch ? (
+          <RequestCityForm city={zipMatch.city} stateCode={zipMatch.stateCode} zip={q.trim()} />
+        ) : filtered.length === 0 ? (
           <p className="text-gray-600">No cities match "{q}".</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
