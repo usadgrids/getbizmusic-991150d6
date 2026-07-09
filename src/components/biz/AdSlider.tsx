@@ -443,6 +443,21 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 </div>
               </div>
             )}
+
+            {/* Tooltip following cursor inside the slider */}
+            {tooltip.visible && (
+              <div
+                className="absolute z-40 pointer-events-none px-2.5 py-1 rounded-md bg-[#0F2A4A] text-white text-[11px] font-semibold shadow-md whitespace-nowrap"
+                style={{
+                  left: tooltip.x,
+                  top: tooltip.y - 36,
+                  transform: "translateX(-50%)",
+                }}
+              >
+                Click or Tap to Pause/Un Pause
+                <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0F2A4A]" />
+              </div>
+            )}
           </div>
 
 
