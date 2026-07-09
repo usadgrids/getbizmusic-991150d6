@@ -363,24 +363,30 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          message: string | null
           state: string | null
           status: string
+          zip: string | null
         }
         Insert: {
           city_name: string
           created_at?: string
           email?: string | null
           id?: string
+          message?: string | null
           state?: string | null
           status?: string
+          zip?: string | null
         }
         Update: {
           city_name?: string
           created_at?: string
           email?: string | null
           id?: string
+          message?: string | null
           state?: string | null
           status?: string
+          zip?: string | null
         }
         Relationships: []
       }
