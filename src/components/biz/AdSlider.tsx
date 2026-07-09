@@ -98,7 +98,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const hideTimerRef = useRef<number | null>(null);
   const searchIdleTimerRef = useRef<number | null>(null);
   const shareResumeTimerRef = useRef<number | null>(null);
-  const remainingRef = useRef<number>(duration);
+  const remainingRef = useRef<number>(0);
   const resumeRemainingRef = useRef<number | null>(null);
 
   const handleShareOpen = () => {
