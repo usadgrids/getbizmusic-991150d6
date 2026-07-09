@@ -85,12 +85,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
-  const [hovered, setHovered] = useState(false);
-  const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number }>({
-    visible: false,
-    x: 0,
-    y: 0,
-  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
