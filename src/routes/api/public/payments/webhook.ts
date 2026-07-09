@@ -6,6 +6,11 @@ const PLAN_LABELS: Record<string, string> = {
   slider_10: 'Featured Slider Ad',
 };
 
+const PLAN_SECONDS: Record<string, number> = {
+  image_5: 7,
+  slider_10: 10,
+};
+
 const SITE_URL = 'https://www.getbizmusic.com';
 
 async function sendPaymentReceipt(params: {
