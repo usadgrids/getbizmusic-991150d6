@@ -106,36 +106,31 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         ...(repCode ? { rep_code: repCode, rep_id: repId ?? "", commission_percent: String(commissionPercent ?? 0), commission_cents: String(commissionCents), discount_cents: String(discountCents) } : {}),
       };
 
-      // If a rep discount applies, use price_data so the discounted amount
-      // shows on the Stripe checkout page too. Otherwise use the fixed price.
-      const lineItem = discountCents > 0
-        ? {
-            price_data: {
-              currency: stripePrice.currency,
-              product_data: { name: product.name },
-              unit_amount: chargeAmount,
-            },
-            quantity: 1,
-          }
-        : { price: stripePrice.id, quantity: 1 };
+      // Always use price_data with our authoritative AD_PLANS amount so the
+      // Stripe checkout total matches the app's current pricing (and any rep
+      // discount) regardless of legacy Stripe price values.
+      const lineItem = {
+        price_data: {
+          currency: stripePrice.currency,
+          product_data: { name: product.name },
+          unit_amount: chargeAmount,
+        },
+        quantity: 1,
+      };
 
       const session = await stripe.checkout.sessions.create({
         line_items: [lineItem],
-        mode: isRecurring && discountCents === 0 ? "subscription" : "payment",
+        mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer_email: data.customerEmail,
         metadata,
-        ...(isRecurring && discountCents === 0
-          ? { subscription_data: { metadata, description: product.name } }
-          : {
-              payment_intent_data: {
-                description: product.name,
-                receipt_email: data.customerEmail,
-                statement_descriptor_suffix: "GETBIZMUSIC AD",
-                metadata,
-              },
-            }),
+        payment_intent_data: {
+          description: product.name,
+          receipt_email: data.customerEmail,
+          statement_descriptor_suffix: "GETBIZMUSIC AD",
+          metadata,
+        },
       });
 
       // Persist consent immediately (pending payment). Webhook flips to paid later.
