@@ -90,7 +90,7 @@ const PaymentReceiptEmail = ({
                   {planLabel ? (
                     <tr><td style={tdLabel}>Item</td><td style={tdValue}>{planLabel} (1-year novelty ad spot)</td></tr>
                   ) : null}
-                  {rotationSeconds ? (
+                  {typeof rotationSeconds === 'number' ? (
                     <tr><td style={tdLabel}>Rotation Time</td><td style={tdValue}><strong>{rotationSeconds} seconds</strong> per rotation</td></tr>
                   ) : null}
                   {amountFormatted ? (
