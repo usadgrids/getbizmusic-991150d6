@@ -87,7 +87,7 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           const body = await request.json()
           templateName = body.templateName || body.template_name
           recipientEmail = body.recipientEmail || body.recipient_email
-          idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
+          idempotencyKey = body.idempotencyKey || body.idempotency_key || crypto.randomUUID()
           messageId = await messageIdFromIdempotencyKey(idempotencyKey)
           if (body.templateData && typeof body.templateData === 'object') {
             templateData = body.templateData
