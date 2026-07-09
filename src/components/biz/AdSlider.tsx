@@ -311,12 +311,19 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
             }}
 
-            onMouseEnter={showSearchPeek}
-            onMouseMove={showSearchPeek}
+            onMouseEnter={(e) => {
+              showSearchPeek();
+              showTooltip(e);
+            }}
+            onMouseMove={(e) => {
+              showSearchPeek();
+              moveTooltip(e);
+            }}
             onMouseLeave={() => {
               clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
+              hideTooltip();
             }}
 
           >
