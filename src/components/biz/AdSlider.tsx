@@ -44,7 +44,7 @@ function SlideTimer({
   );
   return (
     <div
-      className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
+      className="flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
       aria-label={`Next ad in ${Math.ceil(remaining)} seconds`}
     >
       <Clock size={13} className="text-[#D4A24C]" />
