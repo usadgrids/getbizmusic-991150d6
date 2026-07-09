@@ -203,7 +203,9 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
     }
     try {
       const stripe = createStripeClient(data.environment);
-      const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId, {
+        expand: ["payment_intent", "payment_intent.latest_charge"],
+      });
       if (session.payment_status === "paid") {
         const { data: updated } = await supabaseAdmin
           .from("ad_payments")
@@ -217,18 +219,50 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           // key derived from sessionId prevents duplicate sends.
           try {
             const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+            const plan = updated.plan as string;
             const planLabels: Record<string, string> = {
               image_5: "Standard Image Ad",
               slider_10: "Featured Slider Ad",
             };
+            const planSeconds: Record<string, number> = {
+              image_5: 7,
+              slider_10: 10,
+            };
+
+            const paymentIntent: any =
+              typeof session.payment_intent === "string" ? null : session.payment_intent;
+            const charge: any =
+              paymentIntent?.latest_charge && typeof paymentIntent.latest_charge === "object"
+                ? paymentIntent.latest_charge
+                : null;
+            const paidAtIso = typeof charge?.created === "number"
+              ? new Date(charge.created * 1000).toISOString()
+              : new Date().toISOString();
+            const paymentDate = new Date(paidAtIso).toLocaleString("en-US", {
+              dateStyle: "long",
+              timeStyle: "short",
+              timeZone: "America/Los_Angeles",
+            }) + " PT";
+            const cardDetails = charge?.payment_method_details?.card;
+            const customerEmail = (updated.customer_email as string) || session.customer_email || session.customer_details?.email;
             await enqueueTransactionalEmailInternal({
               templateName: "payment-receipt",
-              recipientEmail: updated.customer_email as string,
+              recipientEmail: customerEmail as string,
               idempotencyKey: `payment-receipt-${session.id}`,
               templateData: {
-                planLabel: planLabels[updated.plan as string] ?? (updated.plan as string),
+                planLabel: planLabels[plan] ?? plan,
+                rotationSeconds: planSeconds[plan] ?? undefined,
                 amountFormatted: `$${(((updated.amount_cents as number) ?? 0) / 100).toFixed(2)}`,
+                currency: session.currency ?? "usd",
+                orderNumber: session.id,
+                paymentIntentId: paymentIntent?.id ?? (typeof session.payment_intent === "string" ? session.payment_intent : undefined),
+                paymentDate,
+                cardholderName: charge?.billing_details?.name ?? session.customer_details?.name ?? undefined,
+                cardBrand: cardDetails?.brand ?? undefined,
+                cardLast4: cardDetails?.last4 ?? undefined,
+                billingEmail: customerEmail,
                 submitUrl: `https://www.getbizmusic.com/submit?token=${updated.submission_token}`,
+                receiptUrl: charge?.receipt_url ?? undefined,
               },
             });
           } catch (e) {
