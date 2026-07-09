@@ -41,7 +41,7 @@ function PricingPage() {
 
   useEffect(() => {
     if (prevRepStatus.current !== "valid" && repState.status === "valid") {
-      toast.success(`Code ${repState.code} applied ${repState.discountPercent}% off`);
+      toast.success("Code applied 50% off");
       const pricingSection = document.getElementById("pricing");
       if (pricingSection) {
         pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
