@@ -312,25 +312,21 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
             }}
 
-            onMouseEnter={(e) => {
+            onMouseEnter={() => {
               showSearchPeek();
-              showTooltip(e);
             }}
-            onMouseMove={(e) => {
+            onMouseMove={() => {
               showSearchPeek();
-              moveTooltip(e);
             }}
             onMouseLeave={() => {
               clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
-              hideTooltip();
             }}
 
           >
             <div
-              className="relative w-full h-full bg-gray-100 cursor-pointer"
-              onClick={() => setPaused((p) => !p)}
+              className="relative w-full h-full bg-gray-100"
             >
               <img
                 src={current.image_url}
@@ -443,23 +439,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 </div>
               </div>
             )}
-
-            {/* Tooltip following cursor inside the slider */}
-            {tooltip.visible && (
-              <div
-                className="absolute z-40 pointer-events-none px-2.5 py-1 rounded-md bg-[#0F2A4A] text-white text-[11px] font-semibold shadow-md whitespace-nowrap"
-                style={{
-                  left: tooltip.x,
-                  top: tooltip.y - 36,
-                  transform: "translateX(-50%)",
-                }}
-              >
-                Click or Tap to Pause/Un Pause
-                <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0F2A4A]" />
-              </div>
-            )}
           </div>
 
+          {/* Pause / Play ad controls — below the slider, above the share bar */}
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
+            <div className="text-sm font-semibold text-[#0F2A4A]">
+              {paused ? "Ad is paused" : "Ad is playing"}
+            </div>
+            <button
+              type="button"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={paused ? "Play ad" : "Pause ad"}
+              className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+            >
+              {paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
+              {paused ? "Play Ad" : "Pause Ad"}
+            </button>
+          </div>
 
           {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
           {current && current.ad_number != null && (
