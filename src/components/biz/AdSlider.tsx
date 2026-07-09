@@ -354,11 +354,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               />
             </div>
             {ads.length > 0 && (
-              <SlideTimer
-                duration={duration}
-                remaining={timeLeft}
-                accent={accent}
-              />
+              <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+                {current?.website_url && (
+                  <a
+                    href={current.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md hover:text-[#D4A24C]"
+                  >
+                    Website
+                  </a>
+                )}
+                <SlideTimer
+                  duration={duration}
+                  remaining={timeLeft}
+                  accent={accent}
+                />
+              </div>
             )}
 
 
