@@ -300,7 +300,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
         </h2>
         {ads.length > 0 && (
           <div className="flex flex-col items-end justify-center text-xs text-gray-500 justify-self-end text-right shrink-0">
-            <span>
+            <span className="whitespace-nowrap">
               {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
             </span>
             {current?.website_url && (
