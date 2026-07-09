@@ -16,6 +16,7 @@ import type { TemplateEntry } from './registry'
 interface Props {
   contactName?: string
   planLabel?: string
+  rotationSeconds?: number
   amountFormatted?: string
   submitUrl?: string
   receiptUrl?: string
