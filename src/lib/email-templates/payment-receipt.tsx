@@ -182,6 +182,7 @@ export const template = {
   previewData: {
     contactName: 'Tony',
     planLabel: 'Featured Slider Ad',
+    rotationSeconds: 10,
     amountFormatted: '$24.00',
     currency: 'usd',
     orderNumber: 'cs_test_a1B2c3D4e5F6g7',
