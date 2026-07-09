@@ -44,7 +44,7 @@ function SlideTimer({
   );
   return (
     <div
-      className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
+      className="flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md"
       aria-label={`Next ad in ${Math.ceil(remaining)} seconds`}
     >
       <Clock size={13} className="text-[#D4A24C]" />
@@ -303,16 +303,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             <span className="whitespace-nowrap">
               {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
             </span>
-            {current?.website_url && (
-              <a
-                href={current.website_url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="mt-0.5 font-semibold text-[#0F2A4A] underline hover:text-[#D4A24C]"
-              >
-                Website
-              </a>
-            )}
           </div>
         )}
       </div>
@@ -364,11 +354,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               />
             </div>
             {ads.length > 0 && (
-              <SlideTimer
-                duration={duration}
-                remaining={timeLeft}
-                accent={accent}
-              />
+              <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+                {current?.website_url && (
+                  <a
+                    href={current.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md hover:text-[#D4A24C]"
+                  >
+                    Website
+                  </a>
+                )}
+                <SlideTimer
+                  duration={duration}
+                  remaining={timeLeft}
+                  accent={accent}
+                />
+              </div>
             )}
 
 
