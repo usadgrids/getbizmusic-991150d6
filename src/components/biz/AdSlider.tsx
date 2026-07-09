@@ -212,8 +212,15 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }
     return () => clearSearchIdleTimer();
   }, [searchOpen, searchQuery]);
+  // Track the latest displayed remaining time so pausing can resume from it.
+  useEffect(() => {
+    remainingRef.current = timeLeft;
+  }, [timeLeft]);
 
-
+  // When the ad changes, clear any saved resume time so the new ad starts fresh.
+  useEffect(() => {
+    resumeRemainingRef.current = null;
+  }, [idx]);
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
   // recompute timeLeft from Date.now() each tick so background-tab throttling,
@@ -223,16 +230,21 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     if (!current || duration <= 0) return;
     if (paused || ads.length <= 1) {
       // While paused, keep remaining time visible without advancing.
+      resumeRemainingRef.current = remainingRef.current > 0 ? remainingRef.current : duration;
       setTimeLeft((prev) => (prev > 0 ? prev : duration));
       return;
     }
+    const initialRemaining = resumeRemainingRef.current != null && resumeRemainingRef.current > 0
+      ? resumeRemainingRef.current
+      : duration;
+    resumeRemainingRef.current = null;
     const startedAt = Date.now();
-    const deadline = startedAt + duration * 1000;
-    setTimeLeft(duration);
+    const deadline = startedAt + initialRemaining * 1000;
+    setTimeLeft(initialRemaining);
 
     const advanceId = window.setTimeout(() => {
       setIdx((i) => (i + 1) % ads.length);
-    }, duration * 1000);
+    }, initialRemaining * 1000);
 
     const tickId = window.setInterval(() => {
       const remaining = Math.max(0, (deadline - Date.now()) / 1000);
