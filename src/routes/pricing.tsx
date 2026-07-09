@@ -37,6 +37,18 @@ function PricingPage() {
     | { status: "invalid" }
   >({ status: "idle" });
   const repDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevRepStatus = useRef<typeof repState.status>("idle");
+
+  useEffect(() => {
+    if (prevRepStatus.current !== "valid" && repState.status === "valid") {
+      toast.success("Code applied 50% off");
+      const pricingSection = document.getElementById("pricing");
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    prevRepStatus.current = repState.status;
+  }, [repState]);
 
   useEffect(() => {
     if (repDebounce.current) clearTimeout(repDebounce.current);
@@ -125,7 +137,7 @@ function PricingPage() {
           Pay first, then submit your ad. We email you a one-time submission link the moment your payment clears.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+        <div id="pricing" className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
           {(Object.keys(AD_PLANS) as AdPlan[]).map((key) => {
             const p = AD_PLANS[key];
             const sel = plan === key;
