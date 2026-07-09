@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getActiveCities, submitCityRequest } from "@/lib/cities.functions";
+import { getActiveCities } from "@/lib/cities.functions";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { lookupZip, zipsForCity } from "@/lib/us-zips";
 
 export const Route = createFileRoute("/")({
   head: () => ({
