@@ -54,17 +54,21 @@ export const getCityBySlug = createServerFn({ method: "GET" })
 export const submitCityRequest = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z.object({
-      city_name: z.string().min(2).max(120),
-      state: z.string().min(1).max(60).optional(),
-      email: z.string().email().max(200).optional(),
+      city_name: z.string().trim().min(2).max(120),
+      state: z.string().trim().min(1).max(60),
+      email: z.string().trim().email().max(200),
+      zip: z.string().trim().regex(/^\d{5}$/).optional(),
+      message: z.string().trim().max(500).optional(),
     }).parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("city_requests").insert({
       city_name: data.city_name,
-      state: data.state ?? null,
-      email: data.email ?? null,
+      state: data.state,
+      email: data.email,
+      zip: data.zip ?? null,
+      message: data.message ?? null,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
