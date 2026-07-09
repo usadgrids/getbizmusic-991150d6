@@ -37,6 +37,18 @@ function PricingPage() {
     | { status: "invalid" }
   >({ status: "idle" });
   const repDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevRepStatus = useRef<typeof repState.status>("idle");
+
+  useEffect(() => {
+    if (prevRepStatus.current !== "valid" && repState.status === "valid") {
+      toast.success(`Code ${repState.code} applied ${repState.discountPercent}% off`);
+      const pricingSection = document.getElementById("pricing");
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    prevRepStatus.current = repState.status;
+  }, [repState]);
 
   useEffect(() => {
     if (repDebounce.current) clearTimeout(repDebounce.current);
