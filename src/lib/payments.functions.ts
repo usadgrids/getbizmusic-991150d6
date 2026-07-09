@@ -64,7 +64,11 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       const disclosureVersion = data.disclosureVersion ?? DISCLOSURE_VERSION;
       const ipAddress = getClientIp();
       const isRecurring = stripePrice.type === "recurring";
-      const baseAmount = stripePrice.unit_amount ?? 0;
+      // Authoritative base price comes from AD_PLANS (Stripe price may still
+      // reflect legacy $12/$24 lookup keys). This ensures rep-code 50% off
+      // is applied to the current $24/$48 base, not the stale Stripe amount.
+      const { AD_PLANS } = await import("@/lib/biz-utils");
+      const baseAmount = AD_PLANS[data.plan].price * 100;
 
       // Validate rep code server-side
       let repId: string | null = null;
