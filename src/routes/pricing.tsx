@@ -232,12 +232,24 @@ function PricingPage() {
                 A FEW THINGS TO KNOW BEFORE YOU GRAB YOUR SPOT! 🎶
               </h3>
             </div>
-            <div className="space-y-3 text-sm text-[#3a2f1c] leading-relaxed">
+          <div className="space-y-4 text-sm text-[#3a2f1c] leading-relaxed">
+            <div className="flex items-start gap-2">
+              <Sparkles size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
               <p>
                 <span className="font-semibold text-[#0F2A4A]">What you're getting:</span>{" "}
                 A fun, one-year spot on our National City business ad display! Your ad streams alongside
                 other awesome local businesses, for the number of seconds you chose, all year long.
               </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Music size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
+              <p>
+                <span className="font-semibold text-[#0F2A4A]">Community love:</span>{" "}
+                I love supporting the local business community—powered by a fantastic online music streaming playlist.
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <BadgeCheck size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
               <p>
                 <span className="font-semibold text-[#0F2A4A]">What this is (and isn't):</span>{" "}
                 Think of this as a fun way to get your business seen and heard alongside great local
@@ -245,11 +257,17 @@ function PricingPage() {
                 views, plays, or impressions, and we can't promise it'll bring in more sales, leads, or
                 foot traffic. It's all about community spirit and good vibes!
               </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Ban size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
               <p>
                 <span className="font-semibold text-[#0F2A4A]">Our refund policy:</span>{" "}
                 Once you complete your purchase, it's final — we're not able to offer refunds. This is
                 because your spot is reserved just for you for the full year, right when you buy it.
               </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <FileText size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
               <p className="text-xs text-[#5a4a2c]">
                 Heads up, as California law requires (Civil Code § 1723), we're letting you know about
                 this no-refund policy before you purchase, not after. By completing your purchase,
@@ -257,6 +275,7 @@ function PricingPage() {
                 Thanks so much for supporting local business! 🎉
               </p>
             </div>
+          </div>
 
             <div className="mt-5 space-y-3 border-t border-[#D4A24C]/40 pt-4">
               <div className="flex items-start gap-3">
