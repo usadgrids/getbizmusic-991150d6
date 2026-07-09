@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getActiveCities } from "@/lib/cities.functions";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { lookupZip, zipsForCity } from "@/lib/us-zips";
+import { RequestCityForm } from "@/components/biz/RequestCityForm";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -62,6 +63,9 @@ function Index() {
     return c.name.toLowerCase().includes(s) || c.state.toLowerCase().includes(s);
   });
 
+  const zipHasNoActiveCity =
+    zipMatch !== null && filtered.length === 0 && /^\d{5}$/.test(q.trim());
+
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
 
@@ -103,7 +107,9 @@ function Index() {
           {filtered.length} active {filtered.length === 1 ? "city" : "cities"}
         </h2>
 
-        {filtered.length === 0 ? (
+        {zipHasNoActiveCity && zipMatch ? (
+          <RequestCityForm city={zipMatch.city} stateCode={zipMatch.stateCode} zip={q.trim()} />
+        ) : filtered.length === 0 ? (
           <p className="text-gray-600">No cities match "{q}".</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

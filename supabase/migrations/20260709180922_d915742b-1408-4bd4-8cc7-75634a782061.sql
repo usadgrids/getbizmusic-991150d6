@@ -1,0 +1,1 @@
+ALTER TABLE public.city_requests ADD COLUMN IF NOT EXISTS zip text, ADD COLUMN IF NOT EXISTS message text;
