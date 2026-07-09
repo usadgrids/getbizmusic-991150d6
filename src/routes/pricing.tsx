@@ -137,7 +137,7 @@ function PricingPage() {
           Pay first, then submit your ad. We email you a one-time submission link the moment your payment clears.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+        <div id="pricing" className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
           {(Object.keys(AD_PLANS) as AdPlan[]).map((key) => {
             const p = AD_PLANS[key];
             const sel = plan === key;
