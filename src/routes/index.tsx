@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getActiveCities, submitCityRequest } from "@/lib/cities.functions";
+import { getActiveCities } from "@/lib/cities.functions";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { lookupZip, zipsForCity } from "@/lib/us-zips";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,9 +39,26 @@ function Index() {
   });
 
   const [q, setQ] = useState("");
+  const [zipMatch, setZipMatch] = useState<{ city: string; stateCode: string } | null>(null);
+
+  useEffect(() => {
+    const digits = q.trim();
+    if (/^\d{5}$/.test(digits)) {
+      let cancelled = false;
+      lookupZip(digits).then((r) => { if (!cancelled) setZipMatch(r); });
+      return () => { cancelled = true; };
+    }
+    setZipMatch(null);
+  }, [q]);
+
   const filtered = cities.filter((c) => {
     const s = q.trim().toLowerCase();
     if (!s) return true;
+    if (zipMatch) {
+      return c.name.toLowerCase() === zipMatch.city.toLowerCase() &&
+             c.state.toUpperCase() === zipMatch.stateCode.toUpperCase();
+    }
+    if (/^\d+$/.test(s)) return false; // partial zip, no match yet
     return c.name.toLowerCase().includes(s) || c.state.toLowerCase().includes(s);
   });
 
@@ -63,12 +81,18 @@ function Index() {
           <div className="mt-8 max-w-xl mx-auto">
             <input
               type="search"
+              inputMode="numeric"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search your city…"
+              placeholder="Enter Your Zip Code"
               className="w-full rounded-full border border-white/20 bg-white/10 backdrop-blur px-5 py-3 text-base sm:text-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              aria-label="Search cities"
+              aria-label="Search cities by ZIP code"
             />
+            {zipMatch && (
+              <p className="mt-2 text-sm text-white/70">
+                ZIP {q.trim()} → {zipMatch.city}, {zipMatch.stateCode}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -80,7 +104,7 @@ function Index() {
         </h2>
 
         {filtered.length === 0 ? (
-          <p className="text-gray-600">No cities match "{q}". Try the request form below.</p>
+          <p className="text-gray-600">No cities match "{q}".</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((c) => (
@@ -91,13 +115,14 @@ function Index() {
                 className="group block rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                       {c.state}
                     </div>
                     <div className="mt-1 text-xl font-bold text-[#0F2A4A] group-hover:text-blue-600">
                       {c.name}
                     </div>
+                    <CityZips city={c.name} state={c.state} />
                   </div>
                   <span className="text-[#FFB300] group-hover:translate-x-1 transition-transform text-xl">→</span>
                 </div>
@@ -108,9 +133,6 @@ function Index() {
             ))}
           </div>
         )}
-
-        {/* Request city */}
-        <RequestCity />
       </main>
 
       <BizFooter />
@@ -118,88 +140,20 @@ function Index() {
   );
 }
 
-function RequestCity() {
-  const submit = useServerFn(submitCityRequest);
-  const [cityName, setCityName] = useState("");
-  const [state, setState] = useState("");
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [err, setErr] = useState<string | null>(null);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!cityName.trim()) return;
-    setStatus("sending");
-    setErr(null);
-    try {
-      await submit({
-        data: {
-          city_name: cityName.trim(),
-          state: state.trim() || undefined,
-          email: email.trim() || undefined,
-        },
-      });
-      setStatus("sent");
-      setCityName("");
-      setState("");
-      setEmail("");
-    } catch (e2) {
-      setStatus("error");
-      setErr(e2 instanceof Error ? e2.message : "Failed to send");
-    }
-  }
-
+function CityZips({ city, state }: { city: string; state: string }) {
+  const [zips, setZips] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    zipsForCity(city, state).then((r) => { if (!cancelled) setZips(r); });
+    return () => { cancelled = true; };
+  }, [city, state]);
+  if (zips.length === 0) return null;
+  const shown = zips.slice(0, 4);
+  const extra = zips.length - shown.length;
   return (
-    <section className="mt-16 rounded-3xl bg-gradient-to-br from-[#0F2A4A] to-[#1a3a6b] text-white p-8 sm:p-12">
-      <div className="max-w-2xl mx-auto text-center">
-        <h3 className="text-2xl sm:text-3xl font-bold">Don't see your city?</h3>
-        <p className="mt-2 text-white/80">
-          Tell us where you are — we're launching new cities every week.
-        </p>
-        {status === "sent" ? (
-          <div className="mt-6 rounded-xl bg-green-500/20 border border-green-400 p-4 text-green-100">
-            Thanks! We'll let you know when your city goes live.
-          </div>
-        ) : (
-          <form onSubmit={onSubmit} className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input
-              type="text"
-              required
-              value={cityName}
-              onChange={(e) => setCityName(e.target.value)}
-              placeholder="City name"
-              className="rounded-xl bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              aria-label="City name"
-            />
-            <input
-              type="text"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              placeholder="State (e.g. CA)"
-              className="rounded-xl bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              aria-label="State"
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email (optional)"
-              className="rounded-xl bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              aria-label="Email"
-            />
-            <div className="sm:col-span-3">
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-[#FFD700] px-8 py-3 font-bold text-[#0F2A4A] hover:bg-[#FFC300] disabled:opacity-60"
-              >
-                {status === "sending" ? "Sending…" : "Request my city"}
-              </button>
-              {err && <div className="mt-3 text-red-200 text-sm">{err}</div>}
-            </div>
-          </form>
-        )}
-      </div>
-    </section>
+    <div className="mt-1 text-xs text-gray-500 font-mono">
+      {shown.join(", ")}{extra > 0 ? ` +${extra} more` : ""}
+    </div>
   );
 }
+
