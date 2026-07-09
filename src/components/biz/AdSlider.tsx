@@ -351,19 +351,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-contain"
               />
-              {current.website_url && (
-                <a
-                  href={current.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  aria-label={`Visit ${current.business_name}`}
-                  className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm shadow-md hover:bg-[#0F2A4A]/90 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Globe size={13} className="text-[#D4A24C]" />
-                  Visit site
-                </a>
-              )}
             </div>
             {ads.length > 0 && (
               <SlideTimer
