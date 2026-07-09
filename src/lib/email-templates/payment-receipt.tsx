@@ -90,6 +90,9 @@ const PaymentReceiptEmail = ({
                   {planLabel ? (
                     <tr><td style={tdLabel}>Item</td><td style={tdValue}>{planLabel} (1-year novelty ad spot)</td></tr>
                   ) : null}
+                  {rotationSeconds ? (
+                    <tr><td style={tdLabel}>Rotation Time</td><td style={tdValue}><strong>{rotationSeconds} seconds</strong> per rotation</td></tr>
+                  ) : null}
                   {amountFormatted ? (
                     <tr><td style={tdLabel}>Amount Charged</td><td style={tdValue}><strong>{amountFormatted}{currency ? ` ${currency.toUpperCase()}` : ''}</strong></td></tr>
                   ) : null}
