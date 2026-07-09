@@ -37,6 +37,7 @@ const GOLD = '#D4A24C'
 const PaymentReceiptEmail = ({
   contactName,
   planLabel,
+  rotationSeconds,
   amountFormatted,
   submitUrl,
   receiptUrl,
