@@ -9,6 +9,7 @@ import {
   Clock,
   Search,
   X,
+  Globe,
 } from "lucide-react";
 import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 
@@ -86,12 +87,19 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
   const [hovered, setHovered] = useState(false);
+  const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number }>({
+    visible: false,
+    x: 0,
+    y: 0,
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hideTimerRef = useRef<number | null>(null);
   const searchIdleTimerRef = useRef<number | null>(null);
   const shareResumeTimerRef = useRef<number | null>(null);
+  const remainingRef = useRef<number>(0);
+  const resumeRemainingRef = useRef<number | null>(null);
 
   const handleShareOpen = () => {
     setPaused(true);
@@ -160,6 +168,16 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }, 2000);
   };
 
+  const showTooltip = (e: React.MouseEvent<HTMLDivElement>) => {
+    setTooltip({ visible: true, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
+  };
+  const moveTooltip = (e: React.MouseEvent<HTMLDivElement>) => {
+    setTooltip((t) => ({ ...t, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }));
+  };
+  const hideTooltip = () => {
+    setTooltip((t) => ({ ...t, visible: false }));
+  };
+
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
     if (i >= 0) setIdx(i);
@@ -194,8 +212,15 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }
     return () => clearSearchIdleTimer();
   }, [searchOpen, searchQuery]);
+  // Track the latest displayed remaining time so pausing can resume from it.
+  useEffect(() => {
+    remainingRef.current = timeLeft;
+  }, [timeLeft]);
 
-
+  // When the ad changes, clear any saved resume time so the new ad starts fresh.
+  useEffect(() => {
+    resumeRemainingRef.current = null;
+  }, [idx]);
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
   // recompute timeLeft from Date.now() each tick so background-tab throttling,
@@ -205,16 +230,21 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     if (!current || duration <= 0) return;
     if (paused || ads.length <= 1) {
       // While paused, keep remaining time visible without advancing.
+      resumeRemainingRef.current = remainingRef.current > 0 ? remainingRef.current : duration;
       setTimeLeft((prev) => (prev > 0 ? prev : duration));
       return;
     }
+    const initialRemaining = resumeRemainingRef.current != null && resumeRemainingRef.current > 0
+      ? resumeRemainingRef.current
+      : duration;
+    resumeRemainingRef.current = null;
     const startedAt = Date.now();
-    const deadline = startedAt + duration * 1000;
-    setTimeLeft(duration);
+    const deadline = startedAt + initialRemaining * 1000;
+    setTimeLeft(initialRemaining);
 
     const advanceId = window.setTimeout(() => {
       setIdx((i) => (i + 1) % ads.length);
-    }, duration * 1000);
+    }, initialRemaining * 1000);
 
     const tickId = window.setInterval(() => {
       const remaining = Math.max(0, (deadline - Date.now()) / 1000);
@@ -295,38 +325,44 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
             }}
 
-            onMouseEnter={showSearchPeek}
-            onMouseMove={showSearchPeek}
+            onMouseEnter={(e) => {
+              showSearchPeek();
+              showTooltip(e);
+            }}
+            onMouseMove={(e) => {
+              showSearchPeek();
+              moveTooltip(e);
+            }}
             onMouseLeave={() => {
               clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
+              hideTooltip();
             }}
 
           >
-            <div className="relative w-full h-full bg-gray-100">
-              {current.website_url ? (
+            <div
+              className="relative w-full h-full bg-gray-100 cursor-pointer"
+              onClick={() => setPaused((p) => !p)}
+            >
+              <img
+                src={current.image_url}
+                alt={current.business_name}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-contain"
+              />
+              {current.website_url && (
                 <a
                   href={current.website_url}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
                   aria-label={`Visit ${current.business_name}`}
-                  className="absolute inset-0"
+                  className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm shadow-md hover:bg-[#0F2A4A]/90 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <img
-                    src={current.image_url}
-                    alt={current.business_name}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-contain"
-                  />
+                  <Globe size={13} className="text-[#D4A24C]" />
+                  Visit site
                 </a>
-              ) : (
-                <img
-                  src={current.image_url}
-                  alt={current.business_name}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
               )}
             </div>
             {ads.length > 0 && (
@@ -419,6 +455,21 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Tooltip following cursor inside the slider */}
+            {tooltip.visible && (
+              <div
+                className="absolute z-40 pointer-events-none px-2.5 py-1 rounded-md bg-[#0F2A4A] text-white text-[11px] font-semibold shadow-md whitespace-nowrap"
+                style={{
+                  left: tooltip.x,
+                  top: tooltip.y - 36,
+                  transform: "translateX(-50%)",
+                }}
+              >
+                Click or Tap to Pause/Un Pause
+                <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0F2A4A]" />
               </div>
             )}
           </div>
