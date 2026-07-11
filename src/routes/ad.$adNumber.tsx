@@ -51,6 +51,12 @@ export const Route = createFileRoute("/ad/$adNumber")({
     const description =
       ad.tagline?.trim() ||
       `See ${ad.business_name} on Get Biz Music - National City, CA. Local ${industry.toLowerCase()} — ad #${n}.`;
+    // Social crawlers require absolute URLs for og:image / twitter:image.
+    // ad.image_url can be an absolute https URL (signed storage) or a relative
+    // CDN path like "/__l5e/..." — prepend the site origin when relative.
+    const imageUrl = /^https?:\/\//i.test(ad.image_url)
+      ? ad.image_url
+      : `${SITE}${ad.image_url.startsWith("/") ? "" : "/"}${ad.image_url}`;
     return {
       meta: [
         { title },
@@ -59,7 +65,8 @@ export const Route = createFileRoute("/ad/$adNumber")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:url", content: url },
-        { property: "og:image", content: ad.image_url },
+        { property: "og:image", content: imageUrl },
+        { property: "og:image:secure_url", content: imageUrl },
         { property: "og:image:alt", content: ad.business_name },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "900" },
@@ -67,11 +74,12 @@ export const Route = createFileRoute("/ad/$adNumber")({
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
-        { name: "twitter:image", content: ad.image_url },
+        { name: "twitter:image", content: imageUrl },
       ],
       links: [{ rel: "canonical", href: url }],
     };
   },
+
   component: AdLanding,
   notFoundComponent: AdNotFound,
 });
