@@ -60,6 +60,24 @@ export function RequestCityForm({ city, stateCode, zip }: Props) {
           We'll email <span className="font-semibold">{form.email}</span> as soon as Get Biz Music launches in{" "}
           <span className="font-semibold">{form.city_name}, {form.state}</span>.
         </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/"
+            className="rounded-full bg-[#FFB300] hover:bg-[#FFC533] text-[#0F2A4A] font-bold px-6 py-3 transition-colors"
+          >
+            Return to main page
+          </a>
+          <button
+            type="button"
+            onClick={() => {
+              setDone(false);
+              setForm({ city_name: city, state: stateCode, zip, email: "", message: "" });
+            }}
+            className="rounded-full border border-gray-300 hover:border-gray-400 text-[#0F2A4A] font-semibold px-6 py-3 transition-colors"
+          >
+            Submit another request
+          </button>
+        </div>
       </div>
     );
   }
