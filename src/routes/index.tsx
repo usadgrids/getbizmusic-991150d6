@@ -105,6 +105,9 @@ function Index() {
       <main className="w-full max-w-[1400px] mx-auto px-4 py-10 sm:py-14">
         <h2 className="text-xl sm:text-2xl font-bold mb-6">
           {filtered.length} active {filtered.length === 1 ? "city" : "cities"}
+          <span className="ml-2 text-gray-500 font-normal text-base sm:text-lg">
+            — Select A City To View Ads & Listen To Music
+          </span>
         </h2>
 
         {zipHasNoActiveCity && zipMatch ? (
