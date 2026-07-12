@@ -43,7 +43,7 @@ function SubmitPage() {
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
 
-  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string }>(
+  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean }>(
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
@@ -54,6 +54,18 @@ function SubmitPage() {
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [city, setCity] = useState<UsCity | null>(null);
+
+  // Ministry-only state (used when verify.freeReligious is true)
+  const [ministryIndustry, setMinistryIndustry] = useState<string>("church");
+  const [churchName, setChurchName] = useState("");
+  const [churchAddress, setChurchAddress] = useState("");
+  const [pastorName, setPastorName] = useState("");
+  const [ministryPhone, setMinistryPhone] = useState("");
+  const [is501c3, setIs501c3] = useState(false);
+  const [irsChoice, setIrsChoice] = useState<"have" | "dont" | "">("");
+  const [irsNumber, setIrsNumber] = useState("");
+  const [attestIndependent, setAttestIndependent] = useState(false);
+  const [attestNovelty, setAttestNovelty] = useState(false);
 
   useEffect(() => {
     if (!token) return;
