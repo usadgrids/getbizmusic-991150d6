@@ -20,7 +20,7 @@ export const Route = createFileRoute("/design")({
       {
         name: "description",
         content:
-          "Have our team professionally design your BizSpot Music–compliant ad for just $49.95. Delivered within 72 hours, guaranteed to meet spec. One free revision included.",
+          "Have our team professionally design your BizSpot Music–compliant ad for just $49.95. Delivered within 72 hours, guaranteed to meet spec. Unlimited revisions until final approval.",
       },
       { property: "og:title", content: "Pro Ad Design — $49.95 Done-For-You" },
       {
