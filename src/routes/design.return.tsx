@@ -178,8 +178,10 @@ function DesignReturn() {
             <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
-                <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
-                <Field name="phone" label="Phone" required placeholder="555-555-1234" />
+                <Field name="owner_name" label="Owner / contact name" required placeholder="Tony Romano" />
+                <Field name="owner_email" label="Owner email" required type="email" placeholder="tony@example.com" />
+                <Field name="business_email" label="Business email (optional)" type="email" placeholder="hello@tonyspizza.com" />
+                <Field name="phone" label="Business phone" required placeholder="555-555-1234" />
                 <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
               </div>
 
@@ -208,7 +210,49 @@ function DesignReturn() {
                 </div>
               </div>
 
-              <TextArea name="notes" label="Anything else we should know? (optional)" placeholder="Fonts you like, competitor examples, must-include phone number…" rows={3} />
+              <div>
+                <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
+                  Reference images (up to 3, optional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Upload your main product, spokesmodel/team photo, or any image you'd like us to feature.
+                  PNG or JPG, each under 5 MB.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="border-2 border-dashed border-gray-300 rounded-xl p-3 hover:border-[#D4A24C] transition-colors">
+                      <div className="text-xs font-semibold text-[#0F2A4A] mb-1">
+                        {i === 0 ? "Main product" : i === 1 ? "Spokesmodel / person" : "Additional image"}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const next = [...imageFiles];
+                          next[i] = e.target.files?.[0] ?? null;
+                          setImageFiles(next);
+                        }}
+                        className="block w-full text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#0F2A4A] file:text-white hover:file:bg-[#163864] cursor-pointer"
+                      />
+                      {imageFiles[i] && (
+                        <div className="mt-1 text-xs text-emerald-700 flex items-center gap-1 truncate">
+                          <Check size={12} /> <span className="truncate">{imageFiles[i]!.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <TextArea
+                name="design_brief"
+                label="Describe your design vision"
+                placeholder="Tell us what you'd like the ad to look and feel like — mood, key message, must-include text or elements, competitor examples, inspiration links, etc."
+                rows={5}
+              />
+
+              <TextArea name="notes" label="Anything else we should know? (optional)" placeholder="Fonts you like, must-include phone number, hours…" rows={2} />
+
 
               <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
                 {submitting ? "Sending…" : "Send my info to the design team"}
