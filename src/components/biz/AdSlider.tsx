@@ -18,6 +18,7 @@ import type { PublicAd } from "@/lib/ads.functions";
 import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
+import { parseYoutubeId } from "./YoutubeHoverOverlay";
 import {
   MINIPLAYER_PAUSE_EVENT,
   MINIPLAYER_PLAY_EVENT,
@@ -94,6 +95,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const shareResumeTimerRef = useRef<number | null>(null);
   const remainingRef = useRef<number>(0);
   const resumeRemainingRef = useRef<number | null>(null);
+  const [videoActive, setVideoActive] = useState(false);
+  const [videoNonce, setVideoNonce] = useState(0);
+  const videoLeaveTimerRef = useRef<number | null>(null);
+  const wasMusicPlayingRef = useRef(false);
 
   const handleShareOpen = () => {
     setPaused(true);
@@ -205,7 +210,58 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   // When the ad changes, clear any saved resume time so the new ad starts fresh.
   useEffect(() => {
     resumeRemainingRef.current = null;
+    // Also dismiss any active hover-video on slide change.
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    setVideoActive(false);
   }, [idx]);
+
+  useEffect(() => {
+    return () => {
+      if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+    };
+  }, []);
+
+  const currentVideoId = parseYoutubeId(current?.youtube_url);
+
+  const activateVideo = () => {
+    if (!currentVideoId) return;
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    setVideoActive((prev) => {
+      if (!prev) {
+        setVideoNonce((n) => n + 1);
+        wasMusicPlayingRef.current = musicPlaying;
+        setPaused(true);
+        try {
+          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
+        } catch {
+          /* noop */
+        }
+      }
+      return true;
+    });
+  };
+
+  const deactivateVideo = () => {
+    if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+    videoLeaveTimerRef.current = window.setTimeout(() => {
+      setVideoActive(false);
+      setPaused(false);
+      if (wasMusicPlayingRef.current) {
+        try {
+          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
+        } catch {
+          /* noop */
+        }
+      }
+      videoLeaveTimerRef.current = null;
+    }, 150);
+  };
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
   // recompute timeLeft from Date.now() each tick so background-tab throttling,
@@ -334,9 +390,52 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-contain"
               />
+              {videoActive && currentVideoId && (
+                <div
+                  key={videoNonce}
+                  className="absolute inset-0 z-10 flex items-center justify-center p-[6%]"
+                  onMouseEnter={activateVideo}
+                  onMouseLeave={deactivateVideo}
+                >
+                  <div
+                    className="overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
+                    style={{
+                      width: "100%",
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      aspectRatio: "16 / 9",
+                    }}
+                  >
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${currentVideoId}`}
+                      title={`${current.business_name} video`}
+                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      className="block h-full w-full border-0"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+                {currentVideoId && (
+                  <button
+                    type="button"
+                    onMouseEnter={activateVideo}
+                    onMouseLeave={deactivateVideo}
+                    onFocus={activateVideo}
+                    onBlur={deactivateVideo}
+                    onTouchStart={activateVideo}
+                    onClick={() => (videoActive ? deactivateVideo() : activateVideo())}
+                    aria-label={videoActive ? "Pause video" : "Play video"}
+                    className="flex items-center gap-1 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md hover:text-[#D4A24C]"
+                  >
+                    {videoActive ? <Pause size={12} /> : <Play size={12} fill="currentColor" />}
+                    {videoActive ? "Pause Video" : "Play Video"}
+                  </button>
+                )}
                 {current?.website_url && (
                   <a
                     href={current.website_url}
