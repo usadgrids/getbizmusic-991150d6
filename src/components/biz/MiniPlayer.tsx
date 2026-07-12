@@ -684,6 +684,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       const wasPaused = pauseRequestedRef.current;
       try {
         randomIndexRef.current = Math.floor(Math.random() * 12) + 1;
+        currentMoodRef.current = mood;
         player.loadPlaylist({
           listType: "playlist",
           list: listId,
@@ -697,12 +698,11 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
             player.setVolume(clampVolume(volumeRef.current));
           } catch { /* noop */ }
         }
-        publishPlaylist(player);
+        window.setTimeout(() => publishPlaylist(player), 400);
         scheduleTrackRefresh();
       } catch {
         // ignore swap failures
       }
-      currentMoodRef.current = mood;
     };
 
     window.addEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
