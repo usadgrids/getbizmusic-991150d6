@@ -6,22 +6,10 @@ import {
   type MiniPlayerMood,
   type MiniPlayerPlaylist,
 } from "@/components/biz/MiniPlayer";
+import { onMiniPlayerEvent } from "@/hooks/useMiniPlayerController";
 import { getYouTubePlaylistTracks } from "@/lib/playlists.functions";
 
 export type PlaylistTrack = { videoId: string; title: string };
-
-async function fetchTitle(videoId: string): Promise<PlaylistTrack> {
-  try {
-    const res = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-    );
-    if (!res.ok) return { videoId, title: "Untitled" };
-    const json = (await res.json()) as { title?: string };
-    return { videoId, title: json.title ?? "Untitled" };
-  } catch {
-    return { videoId, title: "Untitled" };
-  }
-}
 
 export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
   const fetchPlaylistTracks = useServerFn(getYouTubePlaylistTracks);
@@ -29,8 +17,7 @@ export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
   const [currentMood, setCurrentMood] = useState<MiniPlayerMood>(preferredMood ?? "secular");
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerPlaylist>).detail;
+    return onMiniPlayerEvent<MiniPlayerPlaylist>(MINIPLAYER_PLAYLIST_EVENT, (detail) => {
       if (!Array.isArray(detail?.videoIds) || detail.videoIds.length === 0) return;
       const mood = detail.mood === "religious" ? "religious" : "secular";
       setCurrentMood(mood);
@@ -44,13 +31,11 @@ export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
         }
         return { ...prev, [mood]: detail.videoIds };
       });
-    };
-    window.addEventListener(MINIPLAYER_PLAYLIST_EVENT, handler);
-    return () => window.removeEventListener(MINIPLAYER_PLAYLIST_EVENT, handler);
+    });
   }, []);
 
-  const videoIds = playlists[preferredMood ?? currentMood] ?? [];
   const mood = preferredMood ?? currentMood;
+  const videoIds = playlists[mood] ?? [];
 
   const playlistQuery = useQuery({
     queryKey: ["yt-playlist-feed", mood],
@@ -59,19 +44,11 @@ export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
     queryFn: () => fetchPlaylistTracks({ data: { mood } }),
   });
 
-  const query = useQuery({
-    queryKey: ["yt-playlist-titles", videoIds.join(",")],
-    enabled: playlistQuery.data == null && videoIds.length > 0,
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 7 * 24 * 60 * 60 * 1000,
-    queryFn: async () => Promise.all(videoIds.map(fetchTitle)),
-  });
-
   const tracks: PlaylistTrack[] =
-    playlistQuery.data ?? query.data ?? videoIds.map((id) => ({ videoId: id, title: "Loading…" }));
+    playlistQuery.data ?? videoIds.map((id) => ({ videoId: id, title: "Loading…" }));
 
   return {
     tracks,
-    isLoading: playlistQuery.isLoading || (tracks.length === 0 && query.isLoading),
+    isLoading: playlistQuery.isLoading && tracks.length === 0,
   };
 }
