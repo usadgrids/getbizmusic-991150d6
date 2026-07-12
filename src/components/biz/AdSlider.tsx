@@ -235,7 +235,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setVideoActive((prev) => {
       if (!prev) {
         setVideoNonce((n) => n + 1);
-        wasMusicPlayingRef.current = musicPlaying;
+        wasMusicPlayingRef.current = true;
         setPaused(true);
         try {
           window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
@@ -247,9 +247,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     });
   };
 
-  const deactivateVideo = () => {
-    if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
-    videoLeaveTimerRef.current = window.setTimeout(() => {
+  const deactivateVideo = (immediate = false) => {
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    const run = () => {
       setVideoActive(false);
       setPaused(false);
       if (wasMusicPlayingRef.current) {
@@ -259,8 +262,14 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           /* noop */
         }
       }
+      wasMusicPlayingRef.current = false;
       videoLeaveTimerRef.current = null;
-    }, 150);
+    };
+    if (immediate) {
+      run();
+    } else {
+      videoLeaveTimerRef.current = window.setTimeout(run, 150);
+    }
   };
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
@@ -378,6 +387,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
+              if (videoActive) deactivateVideo(true);
             }}
 
           >
@@ -395,7 +405,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   key={videoNonce}
                   className="absolute inset-0 z-10 flex items-center justify-center p-[6%]"
                   onMouseEnter={activateVideo}
-                  onMouseLeave={deactivateVideo}
+                  onMouseLeave={() => deactivateVideo()}
                 >
                   <div
                     className="overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
@@ -424,9 +434,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   <button
                     type="button"
                     onMouseEnter={activateVideo}
-                    onMouseLeave={deactivateVideo}
+                    onMouseLeave={() => deactivateVideo()}
                     onFocus={activateVideo}
-                    onBlur={deactivateVideo}
+                    onBlur={() => deactivateVideo()}
                     onTouchStart={activateVideo}
                     onClick={() => (videoActive ? deactivateVideo() : activateVideo())}
                     aria-label={videoActive ? "Pause video" : "Play video"}
