@@ -104,6 +104,30 @@ function PricingPage() {
     }
   };
 
+  const startFreeReligious = async () => {
+    if (!isReligious) return;
+    if (!emailValid) { toast.error("Please enter a valid email"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
+    setFreeLoading(true);
+    try {
+      const res = await createFreeReligiousSubmission({
+        data: {
+          industry,
+          customerEmail: email,
+          agreedTerms: true,
+          agreedNovelty: true,
+        },
+      });
+      if ("error" in res) throw new Error(res.error);
+      if (!res.token) throw new Error("No token returned");
+      navigate({ to: "/submit", search: { token: res.token } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not reserve your free ministry spot");
+    } finally {
+      setFreeLoading(false);
+    }
+  };
+
 
   if (clientSecret) {
     return (
