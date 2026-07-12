@@ -387,6 +387,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               clearPeekTimer();
               setHovered(false);
               if (!searchQuery) setSearchOpen(false);
+              if (videoActive) deactivateVideo(true);
             }}
 
           >
