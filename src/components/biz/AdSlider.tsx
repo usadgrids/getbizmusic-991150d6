@@ -399,20 +399,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
             }}
 
-            onMouseEnter={() => {
-              showSearchPeek();
-            }}
-            onMouseMove={() => {
-              showSearchPeek();
-            }}
             onMouseLeave={() => {
-              clearPeekTimer();
-              setHovered(false);
-              if (!searchQuery) setSearchOpen(false);
               if (videoActive) deactivateVideo(true);
             }}
 
           >
+
             <div
               className="relative w-full h-full bg-gray-100"
             >
