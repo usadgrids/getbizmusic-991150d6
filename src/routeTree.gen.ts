@@ -20,6 +20,7 @@ import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
@@ -88,6 +89,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DesignReturnRoute = DesignReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => DesignRoute,
 } as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
@@ -166,7 +172,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
-  '/design': typeof DesignRoute
+  '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -191,7 +198,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/design': typeof DesignRoute
+  '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -218,7 +226,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
-  '/design': typeof DesignRoute
+  '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
+    | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
     | '/.mcp/invoke-tool/$tool'
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
+    | '/design/return'
     | '/email/unsubscribe'
     | '/$city'
     | '/.mcp/invoke-tool/$tool'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/disputes'
     | '/checkout/return'
+    | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
     | '/.mcp/invoke-tool/$tool'
@@ -324,7 +336,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
-  DesignRoute: typeof DesignRoute
+  DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
@@ -423,6 +435,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/design/return': {
+      id: '/design/return'
+      path: '/return'
+      fullPath: '/design/return'
+      preLoaderRoute: typeof DesignReturnRouteImport
+      parentRoute: typeof DesignRoute
     }
     '/checkout/return': {
       id: '/checkout/return'
@@ -538,11 +557,22 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface DesignRouteChildren {
+  DesignReturnRoute: typeof DesignReturnRoute
+}
+
+const DesignRouteChildren: DesignRouteChildren = {
+  DesignReturnRoute: DesignReturnRoute,
+}
+
+const DesignRouteWithChildren =
+  DesignRoute._addFileChildren(DesignRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
-  DesignRoute: DesignRoute,
+  DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
