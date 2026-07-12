@@ -107,8 +107,8 @@ function DesignPage() {
           </h1>
           <p className="text-gray-600 mt-3 max-w-xl mx-auto">
             Our team will professionally design your BizSpot Music–compliant ad for just{" "}
-            <strong>$49.95</strong>. Delivered within <strong>72 hours</strong>, one free
-            revision included.
+            <strong>$49.95</strong>. Delivered within <strong>72 hours</strong>, with unlimited
+            revisions until final approval.
           </p>
         </div>
 
