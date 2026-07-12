@@ -70,6 +70,7 @@ interface Props {
   ads: PublicAd[];
   title: string;
   featured?: boolean;
+  musicMood?: MiniPlayerMood;
 }
 
 // Resolve the authoritative rotation seconds for an ad. Always prefer the
@@ -83,7 +84,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false }: Props) {
+export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
@@ -276,9 +277,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
-  const currentMood: MiniPlayerMood = current && isReligiousIndustry(current.industry)
+  const currentMood: MiniPlayerMood = musicMood ?? (current && isReligiousIndustry(current.industry)
     ? "religious"
-    : "secular";
+    : "secular");
 
   const ensureCurrentPlaylist = () => {
     window.dispatchEvent(
