@@ -19,19 +19,8 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import {
-  MINIPLAYER_PAUSE_EVENT,
-  MINIPLAYER_PLAY_EVENT,
-  MINIPLAYER_PREV_EVENT,
-  MINIPLAYER_NEXT_EVENT,
-  MINIPLAYER_ACTIVITY_EVENT,
-  MINIPLAYER_TRACK_EVENT,
-  MINIPLAYER_SET_PLAYLIST_EVENT,
-  MINIPLAYER_PLAY_MOOD_EVENT,
-  type MiniPlayerMood,
-  type MiniPlayerActivity,
-  type MiniPlayerTrack,
-} from "./MiniPlayer";
+import { type MiniPlayerMood } from "./MiniPlayer";
+import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 function SlideTimer({
   duration,
