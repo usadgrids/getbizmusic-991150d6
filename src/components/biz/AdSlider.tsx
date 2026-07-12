@@ -404,7 +404,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   key={videoNonce}
                   className="absolute inset-0 z-10 flex items-center justify-center p-[6%]"
                   onMouseEnter={activateVideo}
-                  onMouseLeave={deactivateVideo}
+                  onMouseLeave={() => deactivateVideo()}
                 >
                   <div
                     className="overflow-hidden rounded-xl bg-black shadow-2xl ring-2 ring-[#D4A24C]"
