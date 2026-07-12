@@ -77,9 +77,10 @@ function resolveDuration(ad: PublicAd | undefined): number {
 export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const [activeMusicMood, setActiveMusicMood] = useState<MiniPlayerMood>("secular");
-  const [trackTitle, setTrackTitle] = useState("");
+  const player = useMiniPlayerController();
+  const musicPlaying = player.playing;
+  const activeMusicMood = player.activeMood;
+  const trackTitle = player.track?.title ?? "";
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
