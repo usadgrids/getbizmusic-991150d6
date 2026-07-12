@@ -30,10 +30,11 @@ export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
 export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
 export const MINIPLAYER_PLAY_MOOD_EVENT = "miniplayer:play-mood";
 
-export type MiniPlayerTrack = { title: string; author: string };
+export type MiniPlayerTrack = { title: string; author: string; mood?: MiniPlayerMood };
 export type MiniPlayerPlaylist = { mood: MiniPlayerMood; videoIds: string[] };
 export type MiniPlayerActivity = {
   playing: boolean;
+  mood?: MiniPlayerMood;
   ready?: boolean;
   source?: "player" | "user" | "fallback";
 };
@@ -214,7 +215,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
     (playing: boolean, source: MiniPlayerActivity["source"] = "player") => {
       window.dispatchEvent(
         new CustomEvent<MiniPlayerActivity>(MINIPLAYER_ACTIVITY_EVENT, {
-          detail: { playing, ready: startedRef.current || playing, source },
+          detail: { playing, mood: currentMoodRef.current, ready: startedRef.current || playing, source },
         }),
       );
     },
@@ -240,6 +241,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
             detail: {
               title: videoData.title || "",
               author: videoData.author || "",
+              mood: currentMoodRef.current,
             },
           }),
         );
