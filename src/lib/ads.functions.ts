@@ -299,7 +299,7 @@ export const scheduleSubmissionReminder = createServerFn({ method: "POST" })
       templateName: "submit-reminder",
       recipientEmail: pay.customer_email as string,
       idempotencyKey: `submit-reminder-${data.token}`,
-      templateData: { submitUrl },
+      templateData: { submitUrl, designUrl: "https://www.getbizmusic.com/design" },
     });
     if (!res.ok) throw new Error(res.reason ?? "Failed to send reminder");
     return { ok: true as const, email: pay.customer_email as string };

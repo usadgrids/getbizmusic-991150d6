@@ -390,6 +390,63 @@ export type Database = {
         }
         Relationships: []
       }
+      design_orders: {
+        Row: {
+          agreed_at: string | null
+          agreed_no_refund: boolean
+          agreed_terms: boolean
+          amount_cents: number
+          created_at: string
+          customer_email: string
+          disclosure_version: string | null
+          environment: string
+          id: string
+          intake: Json | null
+          intake_submitted_at: string | null
+          ip_address: string | null
+          paid_at: string | null
+          status: string
+          stripe_session_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_at?: string | null
+          agreed_no_refund?: boolean
+          agreed_terms?: boolean
+          amount_cents: number
+          created_at?: string
+          customer_email: string
+          disclosure_version?: string | null
+          environment: string
+          id?: string
+          intake?: Json | null
+          intake_submitted_at?: string | null
+          ip_address?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_session_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_at?: string | null
+          agreed_no_refund?: boolean
+          agreed_terms?: boolean
+          amount_cents?: number
+          created_at?: string
+          customer_email?: string
+          disclosure_version?: string | null
+          environment?: string
+          id?: string
+          intake?: Json | null
+          intake_submitted_at?: string | null
+          ip_address?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dispute_evidence_log: {
         Row: {
           ad_payment_id: string | null

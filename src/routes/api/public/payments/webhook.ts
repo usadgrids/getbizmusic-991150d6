@@ -276,13 +276,69 @@ AD CONTENT
   if (error) console.error("dispute_evidence_log upsert failed:", error);
 }
 
+async function handleDesignCheckoutCompleted(session: any, env: StripeEnv) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const email =
+    session.customer_email ??
+    session.customer_details?.email ??
+    session.metadata?.customer_email ??
+    "";
+  const amount = session.amount_total ?? 4995;
+
+  await supabaseAdmin
+    .from("design_orders")
+    .upsert(
+      {
+        stripe_session_id: session.id,
+        customer_email: email,
+        amount_cents: amount,
+        status: "paid",
+        environment: env,
+        paid_at: new Date().toISOString(),
+        agreed_terms: session.metadata?.agreed_terms === "true",
+        agreed_no_refund: session.metadata?.agreed_no_refund === "true",
+        agreed_at: session.metadata?.agreed_at ?? null,
+        disclosure_version: session.metadata?.disclosure_version ?? null,
+      },
+      { onConflict: "stripe_session_id" }
+    );
+
+  if (!email) {
+    console.warn("design-receipt skipped — no recipient email on session", session.id);
+    return;
+  }
+
+  try {
+    const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+    await enqueueTransactionalEmailInternal({
+      templateName: "design-receipt",
+      recipientEmail: email,
+      idempotencyKey: `design-receipt-${session.id}`,
+      templateData: {
+        amountFormatted: `$${(amount / 100).toFixed(2)}`,
+        orderNumber: session.id,
+        billingEmail: email,
+        intakeUrl: `https://www.getbizmusic.com/design/return?session_id=${session.id}`,
+      },
+    });
+  } catch (e) {
+    console.error("design-receipt enqueue failed:", e);
+  }
+}
+
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
   switch (event.type) {
     case "checkout.session.completed":
-    case "checkout.session.async_payment_succeeded":
-      await handleCheckoutCompleted(event.data.object, env);
+    case "checkout.session.async_payment_succeeded": {
+      const session = event.data.object;
+      if (session?.metadata?.order_type === "design") {
+        await handleDesignCheckoutCompleted(session, env);
+      } else {
+        await handleCheckoutCompleted(session, env);
+      }
       break;
+    }
     case "charge.dispute.created":
       await handleDisputeCreated(event.data.object, env);
       break;
