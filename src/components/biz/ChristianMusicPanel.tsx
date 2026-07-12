@@ -75,7 +75,7 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
     try {
       window.dispatchEvent(
         new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, {
-          detail: { mood: "religious" },
+          detail: { mood: "religious", force: true },
         }),
       );
     } catch {

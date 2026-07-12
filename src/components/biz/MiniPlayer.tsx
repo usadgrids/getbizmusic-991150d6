@@ -88,6 +88,8 @@ type WindowWithYT = Window & {
 };
 
 const clampVolume = (value: number) => Math.max(0, Math.min(100, value));
+const startIndexForMood = (mood: MiniPlayerMood, randomIndex: number) =>
+  mood === "religious" ? 0 : randomIndex;
 
 function TapToPlayOverlay({
   visible,
@@ -303,7 +305,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
           player.loadPlaylist({
             listType: "playlist",
             list: PLAYLIST_BY_MOOD[currentMoodRef.current],
-            index: randomIndexRef.current,
+            index: startIndexForMood(currentMoodRef.current, randomIndexRef.current),
           });
         }
 
@@ -379,7 +381,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
         player.loadPlaylist({
           listType: "playlist",
           list: PLAYLIST_BY_MOOD[currentMoodRef.current],
-          index: randomIndexRef.current,
+          index: startIndexForMood(currentMoodRef.current, randomIndexRef.current),
         });
       }
 
@@ -683,12 +685,12 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       }
       const wasPaused = pauseRequestedRef.current;
       try {
-        randomIndexRef.current = Math.floor(Math.random() * 12) + 1;
+        randomIndexRef.current = mood === "religious" ? 0 : Math.floor(Math.random() * 12) + 1;
         currentMoodRef.current = mood;
         player.loadPlaylist({
           listType: "playlist",
           list: listId,
-          index: randomIndexRef.current,
+          index: startIndexForMood(mood, randomIndexRef.current),
         });
         if (wasPaused) {
           try { player.pauseVideo(); } catch { /* noop */ }
