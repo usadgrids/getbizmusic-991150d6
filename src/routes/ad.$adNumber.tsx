@@ -3,12 +3,13 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ExternalLink } from "lucide-react";
 import { getAdByNumber, getActiveAds } from "@/lib/ads.functions";
-import { INDUSTRIES } from "@/lib/biz-utils";
+import { INDUSTRIES, isReligiousIndustry } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
+import { ChristianMusicPanel } from "@/components/biz/ChristianMusicPanel";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 
 const SITE = "https://www.getbizmusic.com";
