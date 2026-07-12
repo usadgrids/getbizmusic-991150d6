@@ -208,7 +208,10 @@ function AdLanding() {
           </div>
         </div>
 
+        {isReligious && <ChristianMusicPanel businessName={ad.business_name} />}
+
         <div className="mt-10">
+
 
           <div className="flex items-center gap-3 mb-2">
             <div className="h-px flex-1 bg-gray-300" />
