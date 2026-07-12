@@ -322,6 +322,7 @@ function SubmitPage() {
   // --- Form (verified) ---
   const plan = verify.plan!;
   const p = AD_PLANS[plan];
+  const isMinistry = !!verify.freeReligious;
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -329,10 +330,16 @@ function SubmitPage() {
         <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
-        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submit Your Business Ad</h1>
+        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">
+          {isMinistry ? "Submit Your Ministry Ad (Free)" : "Submit Your Business Ad"}
+        </h1>
         <div className="mt-3 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-3 py-1.5 rounded-full">
-          <Check size={14} /> Payment verified — {p.label} (${p.price}/yr, {p.seconds}s rotation)
+          <Check size={14} /> {isMinistry
+            ? "Free Ministry Spot verified — 12-second rotation ($48/yr value)"
+            : `Payment verified — ${p.label} ($${p.price}/yr, ${p.seconds}s rotation)`}
         </div>
+
+
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
           {/* Prominent size spec */}
