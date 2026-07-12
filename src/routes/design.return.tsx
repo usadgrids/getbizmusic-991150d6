@@ -266,13 +266,14 @@ function DesignReturn() {
   );
 }
 
-function Field({ name, label, required, placeholder, maxLength }: { name: string; label: string; required?: boolean; placeholder?: string; maxLength?: number }) {
+function Field({ name, label, required, placeholder, maxLength, type = "text" }: { name: string; label: string; required?: boolean; placeholder?: string; maxLength?: number; type?: string }) {
   return (
     <div>
       <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
         {label}{required && <span className="text-red-500"> *</span>}
       </label>
       <input
+        type={type}
         name={name} required={required} placeholder={placeholder} maxLength={maxLength}
         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
       />
