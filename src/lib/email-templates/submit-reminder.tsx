@@ -50,6 +50,19 @@ const SubmitReminderEmail = ({ submitUrl, designUrl }: Props) => (
             Not a designer? Any 4:3 image editor (Canva, Photoshop, Figma) can export at this size.
           </Text>
 
+          <Section style={proBox}>
+            <Text style={proHeading}>Want it done right, guaranteed to pass compliance?</Text>
+            <Text style={proBody}>
+              Prefer to leave it to the pros? Our team will professionally design your
+              BizSpot Music–compliant ad for just <strong>$49.95</strong> — done for you,
+              guaranteed to meet spec.
+            </Text>
+            {designUrl ? (
+              <Button href={designUrl} style={proButton}>Yes — Design My Ad for $49.95</Button>
+            ) : null}
+          </Section>
+
+
           <Hr style={hr} />
           <Text style={footer}>Questions? Just reply to this email.</Text>
           <Text style={footerSmall}>USADGRIDS NOVELTY ADVERTISING — A WINALL MEDIA LLC CREATIVE</Text>
