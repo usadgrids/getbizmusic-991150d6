@@ -28,6 +28,7 @@ export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
 export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
+export const MINIPLAYER_PLAY_MOOD_EVENT = "miniplayer:play-mood";
 
 export type MiniPlayerTrack = { title: string; author: string };
 export type MiniPlayerPlaylist = { mood: MiniPlayerMood; videoIds: string[] };
@@ -334,6 +335,76 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
     [queueResumeFallback, reportPlayback],
   );
 
+  const loadAndPlayMood = useCallback(
+    (mood: MiniPlayerMood, index = startIndexForMood(mood, randomIndexRef.current)) => {
+      const player = playerRef.current;
+      currentMoodRef.current = mood;
+
+      if (!player || !playerReadyRef.current) {
+        setShowPlayFallback(true);
+        reportPlayback(false, "fallback");
+        return;
+      }
+
+      clearAutoplayFallback();
+      clearResumeFallback();
+      clearTrackRefreshTimeouts();
+
+      pauseRequestedRef.current = false;
+      mutedFallbackRef.current = false;
+      playSucceededRef.current = false;
+      startedRef.current = false;
+      lastVideoIdRef.current = null;
+      setShowPlayFallback(false);
+
+      try {
+        player.setLoop(true);
+        player.setShuffle(false);
+        player.unMute();
+        player.setVolume(clampVolume(volumeRef.current));
+        player.loadPlaylist({
+          listType: "playlist",
+          list: PLAYLIST_BY_MOOD[mood],
+          index,
+          startSeconds: 0,
+        });
+      } catch {
+        setShowPlayFallback(true);
+        reportPlayback(false, "fallback");
+        return;
+      }
+
+      [0, 250, 800].forEach((delay) => {
+        const timeoutId = window.setTimeout(() => {
+          try {
+            player.unMute();
+            player.setVolume(clampVolume(volumeRef.current));
+            player.playVideo();
+            syncEmbeddedFrame();
+            syncTrackData(player);
+          } catch {
+            setShowPlayFallback(true);
+            reportPlayback(false, "fallback");
+          }
+        }, delay);
+        trackRefreshTimeoutsRef.current.push(timeoutId);
+      });
+
+      window.setTimeout(() => publishPlaylist(player), 500);
+      queueResumeFallback();
+    },
+    [
+      clearAutoplayFallback,
+      clearResumeFallback,
+      clearTrackRefreshTimeouts,
+      publishPlaylist,
+      queueResumeFallback,
+      reportPlayback,
+      syncEmbeddedFrame,
+      syncTrackData,
+    ],
+  );
+
   const pauseCurrentTrack = useCallback(() => {
     const player = playerRef.current;
     if (!player) return;
@@ -587,6 +658,12 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
 
     const onPause = () => pauseCurrentTrack();
     const onPlay = () => resumeCurrentTrack();
+    const onPlayMood = (event: Event) => {
+      const detail = (event as CustomEvent<{ mood: MiniPlayerMood; index?: number }>).detail;
+      const mood = detail?.mood;
+      if (mood !== "secular" && mood !== "religious") return;
+      loadAndPlayMood(mood, typeof detail.index === "number" ? detail.index : startIndexForMood(mood, randomIndexRef.current));
+    };
     const onUnmute = () => handleManualPlay();
     const onPrevTrack = () => {
       try {
@@ -618,12 +695,8 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
         const player = playerRef.current;
         if (!player) return;
         if (mood === "secular" || mood === "religious") {
-          currentMoodRef.current = mood;
-          player.loadPlaylist({
-            listType: "playlist",
-            list: PLAYLIST_BY_MOOD[mood],
-            index: detail.index,
-          });
+          loadAndPlayMood(mood, detail.index);
+          return;
         } else {
           player.playVideoAt(detail.index);
         }
@@ -709,6 +782,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
 
     window.addEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
     window.addEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
+    window.addEventListener(MINIPLAYER_PLAY_MOOD_EVENT, onPlayMood);
     window.addEventListener(MINIPLAYER_UNMUTE_EVENT, onUnmute);
     window.addEventListener(MINIPLAYER_PREV_EVENT, onPrevTrack);
     window.addEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
@@ -723,6 +797,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       window.clearInterval(playbackPoll);
       window.removeEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
       window.removeEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
+      window.removeEventListener(MINIPLAYER_PLAY_MOOD_EVENT, onPlayMood);
       window.removeEventListener(MINIPLAYER_UNMUTE_EVENT, onUnmute);
       window.removeEventListener(MINIPLAYER_PREV_EVENT, onPrevTrack);
       window.removeEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
@@ -737,6 +812,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
   }, [
     clearTrackRefreshTimeouts,
     handleManualPlay,
+    loadAndPlayMood,
     pauseCurrentTrack,
     resumeCurrentTrack,
     scheduleTrackRefresh,
