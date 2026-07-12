@@ -299,7 +299,7 @@ export function MiniPlayer() {
         if (forcePlaylistLoad || !startedRef.current) {
           player.loadPlaylist({
             listType: "playlist",
-            list: PLAYLIST_ID,
+            list: PLAYLIST_BY_MOOD[currentMoodRef.current],
             index: randomIndexRef.current,
           });
         }
@@ -375,7 +375,7 @@ export function MiniPlayer() {
       if (!startedRef.current) {
         player.loadPlaylist({
           listType: "playlist",
-          list: PLAYLIST_ID,
+          list: PLAYLIST_BY_MOOD[currentMoodRef.current],
           index: randomIndexRef.current,
         });
       }
