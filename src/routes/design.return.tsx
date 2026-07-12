@@ -27,6 +27,7 @@ function DesignReturn() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
 
   useEffect(() => {
     if (!session_id) { setState({ status: "error", message: "Missing session id" }); return; }
