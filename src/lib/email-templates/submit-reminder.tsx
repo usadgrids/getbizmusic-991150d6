@@ -54,7 +54,7 @@ const SubmitReminderEmail = ({ submitUrl, designUrl }: Props) => (
             <Text style={proHeading}>Want it done right, guaranteed to pass compliance?</Text>
             <Text style={proBody}>
               Prefer to leave it to the pros? Our team will professionally design your
-              BizSpot Music–compliant ad for just <strong>$49.95</strong> — done for you,
+              Get Biz Music–compliant ad for just <strong>$49.95</strong> — done for you,
               guaranteed to meet spec.
             </Text>
             {designUrl ? (
