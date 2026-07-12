@@ -646,6 +646,46 @@ export function MiniPlayer() {
       syncEmbeddedFrame();
       syncTrackData();
     };
+    const onSetPlaylist = (event: Event) => {
+      const detail = (event as CustomEvent<{ mood: MiniPlayerMood }>).detail;
+      const mood = detail?.mood;
+      if (mood !== "secular" && mood !== "religious") return;
+      if (mood === currentMoodRef.current) return;
+      const player = playerRef.current;
+      if (!player || !playerReadyRef.current) {
+        currentMoodRef.current = mood;
+        return;
+      }
+      const listId = PLAYLIST_BY_MOOD[mood];
+      if (PLAYLIST_BY_MOOD.secular === PLAYLIST_BY_MOOD.religious) {
+        // Both playlists share an ID (placeholder Christian playlist not yet
+        // configured) — swap would just restart the same music, so skip it.
+        currentMoodRef.current = mood;
+        return;
+      }
+      const wasPaused = pauseRequestedRef.current;
+      try {
+        randomIndexRef.current = Math.floor(Math.random() * 12) + 1;
+        player.loadPlaylist({
+          listType: "playlist",
+          list: listId,
+          index: randomIndexRef.current,
+        });
+        if (wasPaused) {
+          try { player.pauseVideo(); } catch { /* noop */ }
+        } else {
+          try {
+            player.unMute();
+            player.setVolume(clampVolume(volumeRef.current));
+          } catch { /* noop */ }
+        }
+        publishPlaylist(player);
+        scheduleTrackRefresh();
+      } catch {
+        // ignore swap failures
+      }
+      currentMoodRef.current = mood;
+    };
 
     window.addEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
     window.addEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
@@ -654,6 +694,7 @@ export function MiniPlayer() {
     window.addEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
     window.addEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
     window.addEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
+    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onVisibility);
     window.addEventListener("focus", onVisibility);
