@@ -18,6 +18,7 @@ import type { PublicAd } from "@/lib/ads.functions";
 import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
+import { parseYoutubeId } from "./YoutubeHoverOverlay";
 import {
   MINIPLAYER_PAUSE_EVENT,
   MINIPLAYER_PLAY_EVENT,
