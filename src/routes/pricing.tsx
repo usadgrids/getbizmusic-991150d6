@@ -75,7 +75,7 @@ function PricingPage() {
   const discounted = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
-  const canPay = emailValid && agreedTerms && agreedNoRefund && !loading;
+  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading;
 
   const startCheckout = async () => {
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
