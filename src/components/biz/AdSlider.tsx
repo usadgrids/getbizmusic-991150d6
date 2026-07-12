@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -26,6 +26,8 @@ import {
   MINIPLAYER_NEXT_EVENT,
   MINIPLAYER_ACTIVITY_EVENT,
   MINIPLAYER_TRACK_EVENT,
+  MINIPLAYER_SET_PLAYLIST_EVENT,
+  type MiniPlayerMood,
   type MiniPlayerActivity,
   type MiniPlayerTrack,
 } from "./MiniPlayer";
