@@ -296,12 +296,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       >
         <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
           <div className="hidden sm:block" />
-          <h2 className="order-1 flex min-w-0 items-center justify-center gap-2 text-center font-serif text-xl font-bold text-[#0F2A4A]">
+          <h2 className="order-1 flex min-w-0 items-center justify-center gap-2 text-center font-serif text-xl font-bold text-[#0F2A4A] sm:justify-start">
             {featured && <Sparkles size={18} className="shrink-0 text-[#D4A24C]" />}
             <span className="min-w-0 break-words">{title}</span>
           </h2>
           <div className="order-2 flex w-full flex-col items-center gap-1 sm:w-auto sm:items-end">
-            <div className="relative w-full max-w-sm sm:w-72">
+            <div className="relative w-full max-w-md sm:w-[26rem]">
               <Search
                 size={16}
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0F2A4A]/70"
