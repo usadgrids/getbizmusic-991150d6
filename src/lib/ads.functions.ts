@@ -37,16 +37,45 @@ async function attachUrls<T extends { image_url: string }>(items: T[]) {
   );
 }
 
-function fairShuffle(ads: PublicAd[]): PublicAd[] {
+// Deterministic PRNG so server-rendered and hydrated ad orders match,
+// avoiding React hydration mismatches. The seed rotates hourly so the
+// order still feels fresh across loads while remaining stable for SSR.
+function cyrb128(str: string): number {
+  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
+  for (let i = 0, k; i < str.length; i++) {
+    k = str.charCodeAt(i);
+    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+  }
+  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+  return h1 >>> 0;
+}
+
+function mulberry32(a: number): () => number {
+  return function () {
+    let t = (a += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function fairShuffle(ads: PublicAd[], seed: string): PublicAd[] {
   // Weight Featured Slider ($24) ads 2x vs Standard ($12) so paid tier gets
   // more air time, then Fisher-Yates shuffle for per-load fairness.
+  const rng = mulberry32(cyrb128(seed));
   const weighted: PublicAd[] = [];
   for (const a of ads) {
     weighted.push(a);
     if (a.ad_type === "slider_10") weighted.push(a);
   }
   for (let i = weighted.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
   }
   return weighted;
@@ -76,7 +105,8 @@ export const getActiveAds = createServerFn({ method: "GET" })
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
     const withUrls = (await attachUrls((rows ?? []) as PublicAd[])) as PublicAd[];
-    return fairShuffle(withUrls);
+    const seed = `${data?.city_slug ?? "national"}-${new Date().toISOString().slice(0, 13)}`;
+    return fairShuffle(withUrls, seed);
   });
 
 

@@ -290,57 +290,63 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
   return (
     <section id="ad-slideshow" className="my-8 min-w-0">
-      <div className="relative mb-3 grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-2 min-w-0">
-        <div className="hidden sm:block" />
-        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center min-w-0 order-1">
-          {featured && <Sparkles size={18} className="text-[#D4A24C] shrink-0" />}
-          <span className="min-w-0 break-words">{title}</span>
-        </h2>
-        <div className="flex flex-col items-stretch sm:items-end gap-1 justify-self-stretch sm:justify-self-end min-w-0 order-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-72">
-            <Search
-              size={16}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0F2A4A]/60"
-            />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => window.setTimeout(() => setSearchFocused(false), 150)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && suggestions[0]) {
-                  pickAd(suggestions[0].id);
-                } else if (e.key === "Escape") {
-                  setSearchQuery("");
-                  searchInputRef.current?.blur();
-                }
-              }}
-              placeholder="Search business, category, or ad #"
-              aria-label="Search businesses"
-              className="w-full rounded-full border border-[#0F2A4A]/20 bg-white pl-9 pr-9 py-2 text-sm text-[#0F2A4A] placeholder-gray-400 shadow-sm ring-[#D4A24C] focus:outline-none focus:ring-2"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  searchInputRef.current?.focus();
+      <div
+        className="relative mx-auto mb-3 w-full"
+        style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
+      >
+        <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+          <div className="hidden sm:block" />
+          <h2 className="order-1 flex min-w-0 items-center justify-center gap-2 text-center font-serif text-xl font-bold text-[#0F2A4A]">
+            {featured && <Sparkles size={18} className="shrink-0 text-[#D4A24C]" />}
+            <span className="min-w-0 break-words">{title}</span>
+          </h2>
+          <div className="order-2 flex w-full flex-col items-center gap-1 sm:w-auto sm:items-end">
+            <div className="relative w-full max-w-sm sm:w-72">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0F2A4A]/70"
+              />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setSearchFocused(false), 150)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && suggestions[0]) {
+                    pickAd(suggestions[0].id);
+                  } else if (e.key === "Escape") {
+                    setSearchQuery("");
+                    searchInputRef.current?.blur();
+                  }
                 }}
-                aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-500 hover:bg-gray-100"
-              >
-                <X size={14} />
-              </button>
+                placeholder="Search business, category, or ad #"
+                aria-label="Search businesses"
+                className="w-full rounded-full border border-[#0F2A4A]/50 bg-white pl-9 pr-9 py-2 text-sm text-[#0F2A4A] placeholder-gray-500 shadow-md ring-[#D4A24C] focus:outline-none focus:ring-2"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-600 hover:bg-gray-100"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            {ads.length > 0 && (
+              <span className="whitespace-nowrap text-xs text-gray-500">
+                {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
+              </span>
             )}
           </div>
-          {ads.length > 0 && (
-            <span className="whitespace-nowrap text-xs text-gray-500 text-right">
-              {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
-            </span>
-          )}
         </div>
+
         {searchFocused && searchQuery.trim() !== "" && (
           <div className="absolute left-1/2 top-full z-40 mt-2 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2">
             <div className="overflow-hidden rounded-2xl bg-white shadow-2xl ring-2 ring-[#D4A24C]">
