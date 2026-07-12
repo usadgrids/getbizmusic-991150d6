@@ -194,11 +194,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       setVideoActive(false);
       setPaused(false);
       if (wasMusicPlayingRef.current) {
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.resume();
       }
       wasMusicPlayingRef.current = false;
       videoLeaveTimerRef.current = null;
