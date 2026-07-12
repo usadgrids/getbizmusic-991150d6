@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
@@ -34,6 +34,7 @@ export const Route = createFileRoute("/design")({
 });
 
 function DesignPage() {
+  const location = useLocation();
   const { email: emailParam } = Route.useSearch();
   const [email, setEmail] = useState(emailParam ?? "");
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -43,6 +44,10 @@ function DesignPage() {
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const canPay = emailValid && agreedTerms && agreedNoRefund && !loading;
+
+  if (location.pathname !== "/design") {
+    return <Outlet />;
+  }
 
   const startCheckout = async () => {
     if (!emailValid) return toast.error("Please enter a valid email");
