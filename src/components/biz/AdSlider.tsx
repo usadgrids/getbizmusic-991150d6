@@ -458,11 +458,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     onBlur={() => deactivateVideo()}
                     onTouchStart={activateVideo}
                     onClick={() => (videoActive ? deactivateVideo() : activateVideo())}
-                    aria-label={videoActive ? "Pause video" : "Play video"}
+                    aria-label={videoActive ? "Pause business video" : "Play business video"}
                     className="flex items-center gap-1 rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md hover:text-[#D4A24C]"
                   >
                     {videoActive ? <Pause size={12} /> : <Play size={12} fill="currentColor" />}
-                    {videoActive ? "Pause Video" : "Play Video"}
+                    {videoActive ? "Pause Business Video" : "Play Business Video"}
                   </button>
                 )}
                 {current?.website_url && (
@@ -472,7 +472,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     rel="noopener noreferrer nofollow"
                     className="rounded-full bg-[#0F2A4A]/70 px-2.5 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md hover:text-[#D4A24C]"
                   >
-                    Website
+                    Business Website
                   </a>
                 )}
                 <SlideTimer
