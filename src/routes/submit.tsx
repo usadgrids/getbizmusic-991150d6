@@ -497,7 +497,9 @@ function SubmitPage() {
               </div>
             </>
           )}
-          <Field name="tagline" label="Short tagline (optional, max 80 chars)" maxLength={80} placeholder="Wood-fired flavor, Italian tradition" />
+          {!isMinistry && (
+            <Field name="tagline" label="Short tagline (optional, max 80 chars)" maxLength={80} placeholder="Wood-fired flavor, Italian tradition" />
+          )}
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 flex gap-3">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
