@@ -165,44 +165,89 @@ function PricingPage() {
           Pay first, then submit your ad. We email you a one-time submission link the moment your payment clears.
         </p>
 
-        <div id="pricing" className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-          {(Object.keys(AD_PLANS) as AdPlan[]).map((key) => {
-            const p = AD_PLANS[key];
-            const sel = plan === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setPlan(key)}
-                className={`text-left p-6 rounded-2xl border-2 transition-all bg-white ${
-                  sel ? "border-[#D4A24C] ring-2 ring-[#D4A24C]/30 shadow-lg" : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="text-xs uppercase tracking-wide text-[#D4A24C] font-bold">
-                  {key === "image_5" ? "Intro Offer" : "Featured"}
-                </div>
-                <div className="font-semibold text-[#0F2A4A] text-lg mt-1">{p.label}</div>
-                <div className="text-4xl font-bold text-[#0F2A4A] mt-2">
-                  {sel && repState.status === "valid" ? (
-                    <>
-                      <span className="text-gray-400 line-through text-2xl mr-2">${p.price}</span>
-                      ${Math.round(p.price * 0.5)}
-                    </>
-                  ) : (
-                    <>${p.price}</>
-                  )}
-                  <span className="text-sm font-normal text-gray-500"> / year</span>
-                </div>
-
-                <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
-                  <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> {p.seconds}-second rotation</li>
-                  <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
-                  <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Admin reviewed within 24 hours</li>
-                </ul>
-              </button>
-            );
-          })}
+        {/* Industry gate — required before pricing / free-religious branch */}
+        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
+            What best describes your business? <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white"
+          >
+            <option value="" disabled>Pick your category…</option>
+            {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+          </select>
+          <p className="mt-1.5 text-xs text-gray-500">
+            Churches, Religious Services, and Ministries qualify for a <strong>free 12-second ad spot</strong>.
+          </p>
         </div>
+
+        {isReligious ? (
+          <div className="mt-6 rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Heart size={20} className="text-emerald-600" />
+              <div className="text-xs uppercase tracking-wide text-emerald-700 font-bold">Church & Ministry Free Spot</div>
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-[#0F2A4A]">A free 12-second ad — a $48/year value</h2>
+            <div className="mt-2 inline-flex items-baseline gap-2">
+              <span className="text-gray-400 line-through text-xl">$48/year value</span>
+              <span className="text-3xl font-extrabold text-emerald-700">FREE</span>
+            </div>
+            <p className="text-sm text-[#0F2A4A]/90 mt-3 leading-relaxed">
+              As a novelty gesture to the faith community, Get Biz Music offers churches, religious
+              services, and ministries a <strong>free 12-second ad rotation for one year</strong> —
+              the same premium duration as our Featured Slider Ad. The extra seconds compensate
+              viewers (and you) for the brief background-music swap to Christian music while your ad
+              is on screen. Subject to the same content review as paid ads.
+            </p>
+            <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> 12-second rotation ($48/yr value)</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Christian music plays while your ad is on screen</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Admin reviewed within 24 hours</li>
+            </ul>
+          </div>
+        ) : (
+          <div id="pricing" className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+            {(Object.keys(AD_PLANS) as AdPlan[]).map((key) => {
+              const p = AD_PLANS[key];
+              const sel = plan === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setPlan(key)}
+                  className={`text-left p-6 rounded-2xl border-2 transition-all bg-white ${
+                    sel ? "border-[#D4A24C] ring-2 ring-[#D4A24C]/30 shadow-lg" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="text-xs uppercase tracking-wide text-[#D4A24C] font-bold">
+                    {key === "image_5" ? "Intro Offer" : "Featured"}
+                  </div>
+                  <div className="font-semibold text-[#0F2A4A] text-lg mt-1">{p.label}</div>
+                  <div className="text-4xl font-bold text-[#0F2A4A] mt-2">
+                    {sel && repState.status === "valid" ? (
+                      <>
+                        <span className="text-gray-400 line-through text-2xl mr-2">${p.price}</span>
+                        ${Math.round(p.price * 0.5)}
+                      </>
+                    ) : (
+                      <>${p.price}</>
+                    )}
+                    <span className="text-sm font-normal text-gray-500"> / year</span>
+                  </div>
+
+                  <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
+                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> {p.seconds}-second rotation</li>
+                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
+                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Admin reviewed within 24 hours</li>
+                  </ul>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="mb-5 rounded-lg border border-[#D4A24C]/80 bg-[#FFF8EC] px-4 py-3 text-center">
