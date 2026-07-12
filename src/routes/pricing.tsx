@@ -1,15 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText } from "lucide-react";
+import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createAdCheckout } from "@/lib/payments.functions";
+import { createAdCheckout, createFreeReligiousSubmission } from "@/lib/payments.functions";
 import { validateRepCode } from "@/lib/reps.functions";
-import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { AD_PLANS, INDUSTRIES, RELIGIOUS_INDUSTRY_VALUES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/pricing")({
