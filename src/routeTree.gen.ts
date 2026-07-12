@@ -14,6 +14,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
+import { Route as DesignRouteImport } from './routes/design'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
@@ -56,6 +57,11 @@ const McpRoute = McpRouteImport.update({
 const EditAdRoute = EditAdRouteImport.update({
   id: '/edit-ad',
   path: '/edit-ad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignRoute = DesignRouteImport.update({
+  id: '/design',
+  path: '/design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/design': typeof DesignRoute
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/design': typeof DesignRoute
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/design': typeof DesignRoute
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$city'
     | '/admin'
+    | '/design'
     | '/edit-ad'
     | '/mcp'
     | '/pricing'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/design'
     | '/edit-ad'
     | '/mcp'
     | '/pricing'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$city'
     | '/admin'
+    | '/design'
     | '/edit-ad'
     | '/mcp'
     | '/pricing'
@@ -312,6 +324,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  DesignRoute: typeof DesignRoute
   EditAdRoute: typeof EditAdRoute
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
@@ -367,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/edit-ad'
       fullPath: '/edit-ad'
       preLoaderRoute: typeof EditAdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design': {
+      id: '/design'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -522,6 +542,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  DesignRoute: DesignRoute,
   EditAdRoute: EditAdRoute,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
