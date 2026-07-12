@@ -47,6 +47,7 @@ interface Props {
  */
 export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Props) {
   const videoId = parseYoutubeId(youtubeUrl);
+  const player = useMiniPlayerController();
   const [active, setActive] = useState(false);
   const [nonce, setNonce] = useState(0); // forces iframe remount to restart video
   const leaveTimerRef = useRef<number | null>(null);
