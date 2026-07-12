@@ -609,12 +609,24 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       scheduleTrackRefresh();
     };
     const onPlayIndex = (event: Event) => {
-      const detail = (event as CustomEvent<{ index: number }>).detail;
+      const detail = (event as CustomEvent<{ index: number; mood?: MiniPlayerMood }>).detail;
       if (typeof detail?.index !== "number") return;
+      const mood = detail.mood;
       try {
-        playerRef.current?.playVideoAt(detail.index);
-        playerRef.current?.unMute();
-        playerRef.current?.setVolume(clampVolume(volumeRef.current));
+        const player = playerRef.current;
+        if (!player) return;
+        if (mood === "secular" || mood === "religious") {
+          currentMoodRef.current = mood;
+          player.loadPlaylist({
+            listType: "playlist",
+            list: PLAYLIST_BY_MOOD[mood],
+            index: detail.index,
+          });
+        } else {
+          player.playVideoAt(detail.index);
+        }
+        player.unMute();
+        player.setVolume(clampVolume(volumeRef.current));
       } catch {
         return;
       }

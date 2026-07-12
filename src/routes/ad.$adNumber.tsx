@@ -229,7 +229,7 @@ function AdLanding() {
             }
           />
           <div className="mt-6">
-            <PlaylistMarquee />
+            <PlaylistMarquee mood="secular" />
           </div>
           <div className="mt-4 text-center">
             <Link
@@ -242,7 +242,7 @@ function AdLanding() {
         </div>
       </main>
       <BizFooter />
-      <MiniPlayer />
+      <MiniPlayer initialMood={isReligious ? "religious" : "secular"} />
     </div>
   );
 }

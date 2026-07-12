@@ -166,7 +166,6 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
           <div className="mb-1 text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
             Browse songs · click any title to play
           </div>
-          <PlaylistMarquee />
           <PlaylistMarquee mood="religious" />
         </div>
       </div>
