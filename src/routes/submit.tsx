@@ -7,7 +7,7 @@ import { ArrowLeft, Upload, Check, AlertCircle, Lock, Loader2 } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.functions";
 import { getPaymentByToken } from "@/lib/payments.functions";
-import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
 import type { UsCity } from "@/lib/us-cities";
