@@ -451,7 +451,7 @@ function SubmitPage() {
               <div className="border-t border-emerald-200 pt-4 space-y-3">
                 <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
                   <input type="checkbox" checked={is501c3} onChange={(e) => setIs501c3(e.target.checked)} className="mt-1" />
-                  <span>We are a non-profit <strong>501(c)(3)</strong> organization.</span>
+                  <span>We are a non-profit organization.</span>
                 </label>
 
                 <div className="pl-6 space-y-2">
