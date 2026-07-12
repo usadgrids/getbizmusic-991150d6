@@ -250,17 +250,19 @@ function PricingPage() {
         )}
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="mb-5 rounded-lg border border-[#D4A24C]/80 bg-[#FFF8EC] px-4 py-3 text-center">
-            <p className="text-sm sm:text-base font-bold tracking-wide text-[#0F2A4A] uppercase">
-              Use Rep Code in Flyer to Get 50% Off
-            </p>
-            <p className="mt-1 text-xs sm:text-sm font-semibold text-[#0F2A4A]">
-              DON'T HAVE A REPCODE? TEXT 619-707-0467 to get one.
-            </p>
-          </div>
+          {!isReligious && (
+            <div className="mb-5 rounded-lg border border-[#D4A24C]/80 bg-[#FFF8EC] px-4 py-3 text-center">
+              <p className="text-sm sm:text-base font-bold tracking-wide text-[#0F2A4A] uppercase">
+                Use Rep Code in Flyer to Get 50% Off
+              </p>
+              <p className="mt-1 text-xs sm:text-sm font-semibold text-[#0F2A4A]">
+                DON'T HAVE A REPCODE? TEXT 619-707-0467 to get one.
+              </p>
+            </div>
+          )}
 
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
-            Email for receipt &amp; submission link
+            Email for {isReligious ? "confirmation" : "receipt"} &amp; submission link
           </label>
           <input
             type="email"
@@ -270,30 +272,35 @@ function PricingPage() {
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
 
-          <label className="block text-sm font-semibold text-[#0F2A4A] mt-4 mb-2 flex items-center gap-1.5">
-            <Tag size={14} className="text-[#D4A24C]" /> Have a rep code? <span className="font-normal text-gray-500">(optional)</span>
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={repInput}
-              onChange={(e) => setRepInput(e.target.value.toUpperCase())}
-              placeholder="e.g. ABC123"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {repState.status === "checking" && <Loader2 size={14} className="animate-spin text-gray-400" />}
-              {repState.status === "valid" && <Check size={16} className="text-emerald-600" />}
-            </div>
-          </div>
-          {repState.status === "valid" && (
-            <p className="mt-1.5 text-xs text-emerald-700 font-semibold">
-              ✓ Code {repState.code} applied — {repState.discountPercent}% off
-            </p>
+          {!isReligious && (
+            <>
+              <label className="block text-sm font-semibold text-[#0F2A4A] mt-4 mb-2 flex items-center gap-1.5">
+                <Tag size={14} className="text-[#D4A24C]" /> Have a rep code? <span className="font-normal text-gray-500">(optional)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={repInput}
+                  onChange={(e) => setRepInput(e.target.value.toUpperCase())}
+                  placeholder="e.g. ABC123"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {repState.status === "checking" && <Loader2 size={14} className="animate-spin text-gray-400" />}
+                  {repState.status === "valid" && <Check size={16} className="text-emerald-600" />}
+                </div>
+              </div>
+              {repState.status === "valid" && (
+                <p className="mt-1.5 text-xs text-emerald-700 font-semibold">
+                  ✓ Code {repState.code} applied — {repState.discountPercent}% off
+                </p>
+              )}
+              {repState.status === "invalid" && repInput.trim().length > 0 && (
+                <p className="mt-1.5 text-xs text-red-600">Code not recognized</p>
+              )}
+            </>
           )}
-          {repState.status === "invalid" && repInput.trim().length > 0 && (
-            <p className="mt-1.5 text-xs text-red-600">Code not recognized</p>
-          )}
+
 
 
 
