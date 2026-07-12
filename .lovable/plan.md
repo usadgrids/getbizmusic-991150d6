@@ -1,57 +1,87 @@
+
 ## Goal
-Update the "Submit Later Reminder" email with new pro-design CTA copy, and add a `/design` checkout page ($49.95) for done-for-you ad design, with a post-payment intake form and receipt email promising delivery within 72 hours.
 
-## 1. Update reminder email template
-`src/lib/email-templates/submit-reminder.tsx`
-- Keep the existing "Not a designer?" DIY line.
-- Below it, add a callout block:
-  - Heading/lede: "Want it done right, guaranteed to pass compliance?"
-  - Body: "Prefer to leave it to the pros? Our team will professionally design your BizSpot Music–compliant ad for just $49.95 — done for you, guaranteed to meet spec."
-  - CTA button (gold): **Yes — Design My Ad for $49.95** linking to `https://www.getbizmusic.com/design?email={recipientEmail}`.
-- Add `recipientEmail` to `Props` and `previewData` so the link is prefilled.
+1. Massively expand the industry/category list on the ad submission form so it covers the full range of small businesses (car dealers, accountants, convenience stores, life insurance agents, business opportunities, and many more).
+2. Add three explicitly religious categories: **Churches, Religious Services, Ministries**.
+3. When the ad slider lands on an ad in one of those three religious categories, automatically swap the background music to a Christian YouTube playlist. Swap back to the regular playlist for any other category.
 
-## 2. New `/design` route (checkout page)
-`src/routes/design.tsx`
-- Landing content: benefits (compliant spec, delivered within 72 hrs, one free revision), price $49.95, email field (prefilled from `?email=` query), agreement checkboxes (terms + no-refund, mirroring `submit` flow).
-- On submit → call new server fn `createDesignCheckout` and mount Stripe embedded checkout (same pattern as ad checkout in `src/routes/submit.tsx`/`checkout.return.tsx`).
-- `return_url` → `/design/return?session_id={CHECKOUT_SESSION_ID}`.
-- SEO head(): title/description for the design service.
+## How fast can the swap happen?
 
-## 3. Checkout server function
-`src/lib/design.functions.ts` — new file with `createDesignCheckout` (mirrors `createAdCheckout` in `src/lib/payments.functions.ts`):
-- Inputs: `customerEmail`, `returnUrl`, `environment`, `agreedTerms`, `agreedNoRefund`.
-- Uses Stripe `price_data` with `unit_amount: 4995`, product name "BizSpot Music Pro Ad Design".
-- Persists a row in new table `design_orders` (pending → paid via webhook), with the same disclosure/consent fields.
-- Returns `{ clientSecret }`.
+The MiniPlayer uses a single persistent YouTube IFrame player. Swapping playlists calls `player.loadPlaylist({ list: <new-id> })`:
 
-Also add `lookupDesignBySession` (mirrors `lookupCheckoutBySession`) that flips the row to paid on Stripe confirmation and enqueues the receipt email as a fallback.
+- No page reload — the iframe stays mounted.
+- Music from the new playlist typically begins in **~300–800 ms** (a bit longer on cold/mobile connections, roughly up to ~1 s).
+- The old track cuts out the instant we call `loadPlaylist`, so the silence gap is sub-second in the common case.
 
-## 4. Database migration
-New table `public.design_orders`:
-- `id uuid pk`, `stripe_session_id text unique`, `customer_email text`, `amount_cents int`, `status text` (pending/paid/intake_submitted), `environment text`, consent fields (`agreed_terms`, `agreed_no_refund`, `agreed_at`, `disclosure_version`, `ip_address`), `intake jsonb` (business info + logo URL), `paid_at timestamptz`, `created_at`, `updated_at`.
-- Enable RLS, grants to `authenticated` and `service_role`, policy allowing admins (via `has_role`) to select/update. No anon access; writes are done via service role in server fns and webhook.
+Fast enough to feel intentional on 7–10 s ad rotations, but not frame-perfect. To avoid whiplash we only swap when the *mood class* actually changes (religious ↔ secular), not on every slide.
 
-## 5. Webhook
-`src/routes/api/public/payments/webhook.ts` — extend the existing Stripe webhook to recognize design-order sessions (distinguished by metadata flag `order_type: "design"`), mark the `design_orders` row `paid`, and enqueue the `design-receipt` email (idempotency key `design-receipt-{sessionId}`).
+## 1. Expanded category list
 
-## 6. Post-payment intake form
-`src/routes/design.return.tsx` (file: `src/routes/design.return.tsx` → `/design/return`):
-- Reads `session_id`, polls `lookupDesignBySession` until `paid`.
-- Shows a simple form: business name, phone, website, services offered, tagline, color/style preferences, logo upload (Supabase Storage `ad-uploads` bucket under `design-intake/{orderId}/`), notes.
-- Submit → new server fn `submitDesignIntake({ sessionId, intake })` writes into `design_orders.intake`, flips status to `intake_submitted`, and enqueues an internal notification to the admin address (reuse `enqueueTransactionalEmailInternal`).
-- Confirmation state: "Thanks! Our team will send your initial ad for approval or revision within 72 hours."
+Edit `src/lib/biz-utils.ts` and replace `INDUSTRIES` with a grouped, comprehensive list. Values are stable slugs (used in DB, search, filters); labels are what users see.
 
-## 7. Receipt email template
-`src/lib/email-templates/design-receipt.tsx` — new template registered in `src/lib/email-templates/registry.ts` as `design-receipt`.
-- Confirms payment ($49.95), order number (session id), and states: "You'll receive your initial ad design for approval or revision within 72 hours. One free revision is included."
-- Links back to `/design/return?session_id=...` in case they closed the intake form.
+Proposed set (grouped for readability; single flat array in code):
 
-## 8. Wire from other surfaces (light touch)
-- No other UI changes requested; keep the existing DIY line in the email intact and only surface the pro-design CTA via the reminder email (and the direct `/design` URL for anyone who visits).
+- **Food & Hospitality**: restaurant, cafe_coffee, bakery, food_truck, catering, bar_nightlife, hotel_lodging
+- **Retail & Shopping**: retail, convenience_store, grocery, liquor_store, boutique_apparel, jewelry, florist, gift_shop, thrift_secondhand, farmers_market
+- **Automotive**: auto_repair, auto_dealer, auto_body, tires_wheels, car_wash, towing, motorcycle_powersports, rv_boat
+- **Home & Trades**: home_services_general, plumbing, electrical, hvac, roofing, landscaping_lawn, pest_control, cleaning, moving_storage, handyman, painting, flooring, pool_spa, solar, locksmith
+- **Professional Services**: legal, accounting_tax, financial_advisor, insurance_general, life_insurance, health_insurance, auto_insurance, mortgage_lending, real_estate_agent, real_estate_broker, property_management, notary, marketing_agency, web_design_it, business_consulting, business_opportunities, franchise_opportunity, staffing_recruiting, printing_signs
+- **Health & Wellness**: healthcare_general, dental, chiropractic, optometry, physical_therapy, mental_health_counseling, medical_spa, veterinary, pharmacy, urgent_care, fitness_gym, personal_trainer, yoga_pilates, nutrition
+- **Beauty & Personal Care**: salon_hair, barbershop, nail_salon, spa_massage, tattoo_piercing, lash_brow, esthetician
+- **Family, Pets & Education**: childcare_daycare, tutoring, music_lessons, dance_school, martial_arts, private_school, pet_grooming, pet_boarding, dog_training
+- **Events & Creative**: photographer, videographer, event_planner, dj_entertainment, wedding_services, party_rentals
+- **Community & Nonprofit**: church, religious_services, ministry, nonprofit, community_org
+- **Other**: transportation_rideshare, delivery_courier, security_services, funeral_services, agriculture, other
+
+Also export a small helper `RELIGIOUS_INDUSTRY_VALUES = ["church", "religious_services", "ministry"] as const` and a `isReligiousIndustry(value: string): boolean` so the slider and any future analytics share one source of truth.
+
+**Compatibility note:** existing rows in the DB already have values like `restaurant`, `legal`, `salon`, `auto`, `healthcare`, `realestate`, `retail`, `services`, `other`. Keep those literal values in the list (as legacy-compatible entries or by mapping their labels onto the new richer ones) so existing ads still resolve to a human label in `AdSlider`'s `industryLabel()` lookup. Concretely: keep `auto`, `salon`, `healthcare`, `realestate`, `services` as aliases pointing at sensible labels, and add the new granular slugs alongside them. No DB migration needed — `industry` is free-text.
+
+## 2. Two music playlists
+
+In `src/components/biz/MiniPlayer.tsx`:
+
+- Keep `PLAYLIST_ID` as the default (secular) playlist.
+- Add `CHRISTIAN_PLAYLIST_ID` (you'll supply the YouTube playlist ID — the part after `list=` in the playlist URL; placeholder until then).
+- Add a new event constant `MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist"` with payload `{ mood: "secular" | "religious" }`.
+- Track the currently loaded mood in a ref. On event:
+  - If the mood matches the current mood → no-op (do NOT interrupt playback).
+  - If it changes → call `player.loadPlaylist({ listType: "playlist", list: <chosenId>, index: randomIndex })`, preserve mute/volume, and re-publish the playlist via `MINIPLAYER_PLAYLIST_EVENT` so the marquee updates.
+  - If the user has manually paused music, update the queued playlist but do NOT call `playVideo()` — respect their pause.
+
+## 3. AdSlider: emit mood on ad change
+
+In `src/components/biz/AdSlider.tsx`:
+
+- Import `isReligiousIndustry` and `MINIPLAYER_SET_PLAYLIST_EVENT`.
+- Add a `lastMoodRef` and an effect keyed on `current?.id`:
+  - Compute `mood = isReligiousIndustry(current.industry) ? "religious" : "secular"`.
+  - If `mood !== lastMoodRef.current`, dispatch `new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, { detail: { mood } })` and update the ref.
+- No visual change to the slider itself.
+
+## 4. Surfaces that consume the category list (auto-updated)
+
+The following already read from `INDUSTRIES` and will pick up the new entries with no code change:
+
+- Submit form (industry dropdown).
+- Admin / edit-ad screens.
+- `AdSlider` search suggestions and label rendering.
+
+Double-check `src/routes/submit.tsx`, `src/routes/edit-ad.tsx`, and `src/routes/admin.tsx` after the change to confirm the dropdown renders the fuller list cleanly (may want to visually group with `<optgroup>` — optional polish).
+
+## 5. Non-goals (out of scope this turn)
+
+- No per-ad music override (only category drives it).
+- No crossfade — the YT IFrame API doesn't expose one from a single player.
+- No pricing changes for church/ministry ads — they use existing ad plans.
+- No DB migration.
 
 ## Technical notes
-- All new server fns use `createServerFn` from `@tanstack/react-start` and load `supabaseAdmin` inside handlers only.
-- Stripe key/env selection uses existing `createStripeClient` / `StripeEnv` helpers.
-- Reuse existing consent/disclosure constants (`DISCLOSURE_VERSION`, `DISCLOSURE_SUMMARY`).
-- Uploads use the private `ad-uploads` bucket with a path prefix `design-intake/{orderId}/`; add an RLS policy on `storage.objects` allowing service-role writes and admin reads (client uploads via signed URL issued by a server fn keyed on `session_id`).
-- Idempotency keys: `design-receipt-{sessionId}` for the receipt so webhook + return-page fallback don't double-send.
+
+Files touched:
+- `src/lib/biz-utils.ts` — expanded `INDUSTRIES`, add `RELIGIOUS_INDUSTRY_VALUES`, `isReligiousIndustry`.
+- `src/components/biz/MiniPlayer.tsx` — second playlist ID, `MINIPLAYER_SET_PLAYLIST_EVENT`, mood-aware `loadPlaylist` handler.
+- `src/components/biz/AdSlider.tsx` — dispatch mood on current-ad change.
+
+Need from you:
+- The **YouTube playlist ID** for the Christian music playlist (the value after `list=` in the URL). Until you provide it, I'll wire in a clearly-marked placeholder constant so the code compiles and the swap logic can be tested with a temporary playlist.

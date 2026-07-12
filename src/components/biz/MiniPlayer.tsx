@@ -3,6 +3,13 @@ import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+// TODO: Replace with the user-supplied Christian music playlist ID.
+const CHRISTIAN_PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+export type MiniPlayerMood = "secular" | "religious";
+const PLAYLIST_BY_MOOD: Record<MiniPlayerMood, string> = {
+  secular: PLAYLIST_ID,
+  religious: CHRISTIAN_PLAYLIST_ID,
+};
 const PLAYER_ELEMENT_ID = "family-mini-player-iframe";
 const YOUTUBE_IFRAME_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_STATE_UNSTARTED = -1;
@@ -21,6 +28,7 @@ export const MINIPLAYER_ACTIVITY_EVENT = "miniplayer:activity";
 export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
+export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
 
 export type MiniPlayerTrack = { title: string; author: string };
 export type MiniPlayerActivity = {
@@ -168,6 +176,7 @@ export function MiniPlayer() {
   const playSucceededRef = useRef(false);
   const pauseRequestedRef = useRef(false);
   const volumeRef = useRef(100);
+  const currentMoodRef = useRef<MiniPlayerMood>("secular");
 
   const clearResumeFallback = useCallback(() => {
     if (resumeFallbackRef.current) {
@@ -637,6 +646,46 @@ export function MiniPlayer() {
       syncEmbeddedFrame();
       syncTrackData();
     };
+    const onSetPlaylist = (event: Event) => {
+      const detail = (event as CustomEvent<{ mood: MiniPlayerMood }>).detail;
+      const mood = detail?.mood;
+      if (mood !== "secular" && mood !== "religious") return;
+      if (mood === currentMoodRef.current) return;
+      const player = playerRef.current;
+      if (!player || !playerReadyRef.current) {
+        currentMoodRef.current = mood;
+        return;
+      }
+      const listId = PLAYLIST_BY_MOOD[mood];
+      if (PLAYLIST_BY_MOOD.secular === PLAYLIST_BY_MOOD.religious) {
+        // Both playlists share an ID (placeholder Christian playlist not yet
+        // configured) — swap would just restart the same music, so skip it.
+        currentMoodRef.current = mood;
+        return;
+      }
+      const wasPaused = pauseRequestedRef.current;
+      try {
+        randomIndexRef.current = Math.floor(Math.random() * 12) + 1;
+        player.loadPlaylist({
+          listType: "playlist",
+          list: listId,
+          index: randomIndexRef.current,
+        });
+        if (wasPaused) {
+          try { player.pauseVideo(); } catch { /* noop */ }
+        } else {
+          try {
+            player.unMute();
+            player.setVolume(clampVolume(volumeRef.current));
+          } catch { /* noop */ }
+        }
+        publishPlaylist(player);
+        scheduleTrackRefresh();
+      } catch {
+        // ignore swap failures
+      }
+      currentMoodRef.current = mood;
+    };
 
     window.addEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
     window.addEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
@@ -645,6 +694,7 @@ export function MiniPlayer() {
     window.addEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
     window.addEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
     window.addEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
+    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onVisibility);
     window.addEventListener("focus", onVisibility);
@@ -658,6 +708,7 @@ export function MiniPlayer() {
       window.removeEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
       window.removeEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
       window.removeEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
+      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pageshow", onVisibility);
       window.removeEventListener("focus", onVisibility);

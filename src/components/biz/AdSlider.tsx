@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -26,6 +26,8 @@ import {
   MINIPLAYER_NEXT_EVENT,
   MINIPLAYER_ACTIVITY_EVENT,
   MINIPLAYER_TRACK_EVENT,
+  MINIPLAYER_SET_PLAYLIST_EVENT,
+  type MiniPlayerMood,
   type MiniPlayerActivity,
   type MiniPlayerTrack,
 } from "./MiniPlayer";
@@ -164,6 +166,26 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     }
     setVideoActive(false);
   }, [idx]);
+
+  // Swap the background music playlist to Christian music for religious ads,
+  // and back to the default playlist for anything else. Only fire on actual
+  // mood changes so consecutive same-mood ads don't restart the music.
+  const lastMoodRef = useRef<MiniPlayerMood | null>(null);
+  useEffect(() => {
+    if (!current) return;
+    const mood: MiniPlayerMood = isReligiousIndustry(current.industry)
+      ? "religious"
+      : "secular";
+    if (lastMoodRef.current === mood) return;
+    lastMoodRef.current = mood;
+    try {
+      window.dispatchEvent(
+        new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, { detail: { mood } }),
+      );
+    } catch {
+      /* noop */
+    }
+  }, [current?.id, current?.industry]);
 
   useEffect(() => {
     return () => {
