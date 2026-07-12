@@ -115,7 +115,7 @@ function DesignPage() {
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Benefit icon={<Award size={20} />} title="Guaranteed to meet spec" body="1216×896 (4:3), phone-legible, compliant with our display standards." />
           <Benefit icon={<Clock size={20} />} title="72-hour turnaround" body="You'll receive your initial ad for approval or revision within 72 hours." />
-          <Benefit icon={<Sparkles size={20} />} title="One free revision" body="Not perfect the first time? We'll refine it once, on us." />
+          <Benefit icon={<Sparkles size={20} />} title="Unlimited revisions" body="We'll refine your ad until you give final approval." />
         </div>
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
