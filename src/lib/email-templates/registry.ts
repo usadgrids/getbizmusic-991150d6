@@ -5,6 +5,7 @@ import { template as submissionReceivedTemplate } from './submission-received'
 import { template as adApprovedTemplate } from './ad-approved'
 import { template as submitReminderTemplate } from './submit-reminder'
 import { template as cityRequestNotificationTemplate } from './city-request-notification'
+import { template as designReceiptTemplate } from './design-receipt'
 
 export interface TemplateEntry {
   component: ComponentType<any>
