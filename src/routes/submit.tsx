@@ -399,20 +399,104 @@ function SubmitPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
-            <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
-            <Field name="email" type="email" label="Email" required placeholder="tony@example.com" defaultValue={verify.email} />
-            <Field name="phone" label="Phone" required placeholder="555-555-1234" />
-            <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
-            <div>
-              <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
-              <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
-                <option value="" disabled>Pick one…</option>
-                {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
-              </select>
+          {isMinistry ? (
+            <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 p-5 space-y-4">
+              <div>
+                <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">Ministry Information</h2>
+                <p className="text-sm text-gray-600 mt-0.5">Required for your free 12-second ministry ad spot.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Ministry category <span className="text-red-500">*</span></label>
+                <select
+                  value={ministryIndustry}
+                  onChange={(e) => setMinistryIndustry(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white"
+                >
+                  {RELIGIOUS_INDUSTRY_VALUES.map((v) => {
+                    const label = INDUSTRIES.find((i) => i.value === v)?.label ?? v;
+                    return <option key={v} value={v}>{label}</option>;
+                  })}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Church / Ministry Name <span className="text-red-500">*</span></label>
+                  <input value={churchName} onChange={(e) => setChurchName(e.target.value)} maxLength={200} placeholder="Grace Community Church"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Name of Pastor / Leader <span className="text-red-500">*</span></label>
+                  <input value={pastorName} onChange={(e) => setPastorName(e.target.value)} maxLength={200} placeholder="Pastor John Smith"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Church / Ministry Address <span className="text-red-500">*</span></label>
+                  <input value={churchAddress} onChange={(e) => setChurchAddress(e.target.value)} maxLength={300} placeholder="123 Main St, City, State ZIP"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Phone Number <span className="text-red-500">*</span></label>
+                  <input value={ministryPhone} onChange={(e) => setMinistryPhone(e.target.value)} maxLength={40} placeholder="555-555-1234"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Contact Email</label>
+                  <input value={verify.email ?? ""} readOnly disabled
+                    className="w-full border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-600" />
+                </div>
+              </div>
+
+              <div className="border-t border-emerald-200 pt-4 space-y-3">
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={is501c3} onChange={(e) => setIs501c3(e.target.checked)} className="mt-1" />
+                  <span>We are a non-profit <strong>501(c)(3)</strong> organization.</span>
+                </label>
+
+                <div className="pl-6 space-y-2">
+                  <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                    <input type="radio" name="irs_choice" checked={irsChoice === "have"} onChange={() => setIrsChoice("have")} className="mt-1" />
+                    <span>We <strong>DO</strong> have an IRS non-profit number:</span>
+                  </label>
+                  {irsChoice === "have" && (
+                    <input value={irsNumber} onChange={(e) => setIrsNumber(e.target.value)} maxLength={40} placeholder="e.g. 12-3456789"
+                      className="ml-6 w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                  )}
+                  <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                    <input type="radio" name="irs_choice" checked={irsChoice === "dont"} onChange={() => setIrsChoice("dont")} className="mt-1" />
+                    <span>We <strong>DO NOT</strong> have an IRS non-profit number.</span>
+                  </label>
+                </div>
+
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={attestIndependent} onChange={(e) => setAttestIndependent(e.target.checked)} className="mt-1" />
+                  <span>I attest that we are an <strong>independent religious ministry</strong> operating in good faith.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={attestNovelty} onChange={(e) => setAttestNovelty(e.target.checked)} className="mt-1" />
+                  <span>I understand this free ad is a novelty community gesture with no guaranteed views, plays, or business results, subject to the same content-review policy as paid ads.</span>
+                </label>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
+                <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
+                <Field name="email" type="email" label="Email" required placeholder="tony@example.com" defaultValue={verify.email} />
+                <Field name="phone" label="Phone" required placeholder="555-555-1234" />
+                <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
+                  <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
+                    <option value="" disabled>Pick one…</option>
+                    {INDUSTRIES.filter((i) => !RELIGIOUS_INDUSTRY_VALUES.includes(i.value as typeof RELIGIOUS_INDUSTRY_VALUES[number])).map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
           <Field name="tagline" label="Short tagline (optional, max 80 chars)" maxLength={80} placeholder="Wood-fired flavor, Italian tradition" />
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 flex gap-3">
