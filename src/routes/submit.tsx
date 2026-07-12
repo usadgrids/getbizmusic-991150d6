@@ -77,7 +77,7 @@ function SubmitPage() {
         if (!res.found) {
           setVerify({ status: "bad", reason: res.reason });
         } else {
-          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed });
+          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious });
         }
       } catch (e) {
         if (!cancelled) setVerify({ status: "bad", reason: e instanceof Error ? e.message : "Verification failed" });
