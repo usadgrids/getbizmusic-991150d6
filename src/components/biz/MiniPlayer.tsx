@@ -30,6 +30,7 @@ export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
 export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
 
 export type MiniPlayerTrack = { title: string; author: string };
+export type MiniPlayerPlaylist = { mood: MiniPlayerMood; videoIds: string[] };
 export type MiniPlayerActivity = {
   playing: boolean;
   ready?: boolean;
@@ -156,7 +157,7 @@ function TapToPlayOverlay({
 }
 
 
-export function MiniPlayer() {
+export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlayerMood }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showPlayFallback, setShowPlayFallback] = useState(false);
   const [size, setSize] = useState({ width: 200, height: 113 });
@@ -175,7 +176,7 @@ export function MiniPlayer() {
   const playSucceededRef = useRef(false);
   const pauseRequestedRef = useRef(false);
   const volumeRef = useRef(100);
-  const currentMoodRef = useRef<MiniPlayerMood>("secular");
+  const currentMoodRef = useRef<MiniPlayerMood>(initialMood);
 
   const clearResumeFallback = useCallback(() => {
     if (resumeFallbackRef.current) {
@@ -258,7 +259,9 @@ export function MiniPlayer() {
       }
       if (ids && ids.length > 0) {
         window.dispatchEvent(
-          new CustomEvent(MINIPLAYER_PLAYLIST_EVENT, { detail: { videoIds: ids } }),
+          new CustomEvent<MiniPlayerPlaylist>(MINIPLAYER_PLAYLIST_EVENT, {
+            detail: { mood: currentMoodRef.current, videoIds: ids },
+          }),
         );
         return;
       }
@@ -461,7 +464,7 @@ export function MiniPlayer() {
             disablekb: 1,
             fs: 0,
             iv_load_policy: 3,
-            list: PLAYLIST_ID,
+            list: PLAYLIST_BY_MOOD[currentMoodRef.current],
             listType: "playlist",
             loop: 1,
             modestbranding: 1,
@@ -646,10 +649,14 @@ export function MiniPlayer() {
       syncTrackData();
     };
     const onSetPlaylist = (event: Event) => {
-      const detail = (event as CustomEvent<{ mood: MiniPlayerMood }>).detail;
+      const detail = (event as CustomEvent<{ mood: MiniPlayerMood; force?: boolean }>).detail;
       const mood = detail?.mood;
       if (mood !== "secular" && mood !== "religious") return;
-      if (mood === currentMoodRef.current) return;
+      const shouldReloadSameMood = Boolean(detail?.force);
+      if (mood === currentMoodRef.current && !shouldReloadSameMood) {
+        publishPlaylist();
+        return;
+      }
       const player = playerRef.current;
       if (!player || !playerReadyRef.current) {
         currentMoodRef.current = mood;
