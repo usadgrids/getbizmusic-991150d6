@@ -3,6 +3,13 @@ import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+// TODO: Replace with the user-supplied Christian music playlist ID.
+const CHRISTIAN_PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+export type MiniPlayerMood = "secular" | "religious";
+const PLAYLIST_BY_MOOD: Record<MiniPlayerMood, string> = {
+  secular: PLAYLIST_ID,
+  religious: CHRISTIAN_PLAYLIST_ID,
+};
 const PLAYER_ELEMENT_ID = "family-mini-player-iframe";
 const YOUTUBE_IFRAME_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_STATE_UNSTARTED = -1;
@@ -21,6 +28,7 @@ export const MINIPLAYER_ACTIVITY_EVENT = "miniplayer:activity";
 export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
+export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
 
 export type MiniPlayerTrack = { title: string; author: string };
 export type MiniPlayerActivity = {
