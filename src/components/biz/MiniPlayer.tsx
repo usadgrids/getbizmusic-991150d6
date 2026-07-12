@@ -3,8 +3,7 @@ import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
-// TODO: Replace with the user-supplied Christian music playlist ID.
-const CHRISTIAN_PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+const CHRISTIAN_PLAYLIST_ID = "PLp93JI5bGWYlnNHrPfuEaHXFkpA-d5NIt";
 export type MiniPlayerMood = "secular" | "religious";
 const PLAYLIST_BY_MOOD: Record<MiniPlayerMood, string> = {
   secular: PLAYLIST_ID,
