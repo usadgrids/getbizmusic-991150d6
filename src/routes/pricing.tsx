@@ -23,12 +23,15 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function PricingPage() {
+  const navigate = useNavigate();
+  const [industry, setIndustry] = useState<string>("");
   const [plan, setPlan] = useState<AdPlan>("image_5");
   const [email, setEmail] = useState("");
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedNoRefund, setAgreedNoRefund] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [freeLoading, setFreeLoading] = useState(false);
   const [repInput, setRepInput] = useState("");
   const [repState, setRepState] = useState<
     | { status: "idle" }
@@ -38,6 +41,7 @@ function PricingPage() {
   >({ status: "idle" });
   const repDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevRepStatus = useRef<typeof repState.status>("idle");
+  const isReligious = isReligiousIndustry(industry);
 
   useEffect(() => {
     if (prevRepStatus.current !== "valid" && repState.status === "valid") {
