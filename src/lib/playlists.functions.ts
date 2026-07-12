@@ -1,0 +1,50 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import type { MiniPlayerMood } from "@/components/biz/MiniPlayer";
+
+export type YouTubePlaylistTrack = { videoId: string; title: string };
+
+export const getYouTubePlaylistTracks = createServerFn({ method: "GET" })
+  .inputValidator((data) =>
+    z
+      .object({ mood: z.enum(["secular", "religious"]) })
+      .parse(data),
+  )
+  .handler(async ({ data }): Promise<YouTubePlaylistTrack[]> => {
+    const playlistByMood: Record<MiniPlayerMood, string> = {
+      secular: "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj",
+      religious: "PLp93JI5bGWYlnNHrPfuEaHXFkpA-d5NIt",
+    };
+    const playlistId = playlistByMood[data.mood];
+    const response = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?playlist_id=${encodeURIComponent(playlistId)}`,
+      {
+        headers: {
+          accept: "application/atom+xml, application/xml, text/xml",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Could not load YouTube playlist (${response.status})`);
+    }
+
+    const xml = await response.text();
+    const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? [];
+    return entries
+      .map((entry) => {
+        const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]?.trim();
+        const title = entry.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim();
+        if (!id || !title) return null;
+        return {
+          videoId: id,
+          title: title
+            .replace(/&amp;/g, "&")
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">"),
+        };
+      })
+      .filter((track): track is YouTubePlaylistTrack => track !== null);
+  });
