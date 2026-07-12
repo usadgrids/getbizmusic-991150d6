@@ -20,7 +20,7 @@ export const Route = createFileRoute("/design")({
       {
         name: "description",
         content:
-          "Have our team professionally design your BizSpot Music–compliant ad for just $49.95. Delivered within 72 hours, guaranteed to meet spec. One free revision included.",
+          "Have our team professionally design your BizSpot Music–compliant ad for just $49.95. Delivered within 72 hours, guaranteed to meet spec. Unlimited revisions until final approval.",
       },
       { property: "og:title", content: "Pro Ad Design — $49.95 Done-For-You" },
       {
@@ -107,15 +107,15 @@ function DesignPage() {
           </h1>
           <p className="text-gray-600 mt-3 max-w-xl mx-auto">
             Our team will professionally design your BizSpot Music–compliant ad for just{" "}
-            <strong>$49.95</strong>. Delivered within <strong>72 hours</strong>, one free
-            revision included.
+            <strong>$49.95</strong>. Delivered within <strong>72 hours</strong>, with unlimited
+            revisions until final approval.
           </p>
         </div>
 
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Benefit icon={<Award size={20} />} title="Guaranteed to meet spec" body="1216×896 (4:3), phone-legible, compliant with our display standards." />
           <Benefit icon={<Clock size={20} />} title="72-hour turnaround" body="You'll receive your initial ad for approval or revision within 72 hours." />
-          <Benefit icon={<Sparkles size={20} />} title="One free revision" body="Not perfect the first time? We'll refine it once, on us." />
+          <Benefit icon={<Sparkles size={20} />} title="Unlimited revisions" body="We'll refine your ad until you give final approval." />
         </div>
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">

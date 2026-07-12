@@ -50,8 +50,8 @@ const DesignReceiptEmail = ({ amountFormatted, orderNumber, billingEmail, intake
           <Heading as="h3" style={h3}>What happens next</Heading>
           <Text style={p}>
             You'll receive your initial ad design for approval or revision within
-            <strong> 72 hours</strong> of submitting your business info. One free revision
-            is included so we get it exactly right.
+            <strong> 72 hours</strong> of submitting your business info. Unlimited revisions
+            are included until you give final approval.
           </Text>
 
           <Hr style={hr} />
