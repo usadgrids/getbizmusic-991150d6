@@ -55,7 +55,7 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         line_items: [{
           price_data: {
             currency: "usd",
-            product_data: { name: "BizSpot Music Pro Ad Design" },
+            product_data: { name: "Get Biz Music Pro Ad Design" },
             unit_amount: DESIGN_PRICE_CENTS,
           },
           quantity: 1,
