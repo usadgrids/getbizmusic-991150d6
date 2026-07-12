@@ -277,9 +277,10 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
-  const currentMood: MiniPlayerMood = musicMood ?? (current && isReligiousIndustry(current.industry)
+  const slideMood: MiniPlayerMood = current && isReligiousIndustry(current.industry)
     ? "religious"
-    : "secular");
+    : "secular";
+  const currentMood: MiniPlayerMood = musicMood ?? slideMood;
 
   const ensureCurrentPlaylist = () => {
     window.dispatchEvent(

@@ -222,6 +222,7 @@ function AdLanding() {
           </div>
           <AdSlider
             ads={sliderAds.length > 0 ? sliderAds : ads}
+            musicMood="secular"
             title={
               relatedAds.length > 0
                 ? `More ${industry} in ${ad.city_name ?? "your area"}`
