@@ -179,11 +179,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
         setVideoNonce((n) => n + 1);
         wasMusicPlayingRef.current = true;
         setPaused(true);
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.pause();
       }
       return true;
     });
