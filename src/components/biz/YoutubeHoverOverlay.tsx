@@ -73,11 +73,7 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
       if (!prev) {
         setNonce((n) => n + 1);
         // Pause the background music playlist so the video's audio is heard clearly.
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.pause();
       }
       return true;
     });
