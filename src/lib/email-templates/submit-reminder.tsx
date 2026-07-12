@@ -76,7 +76,10 @@ export const template = {
   component: SubmitReminderEmail,
   subject: 'Your ad submission link — submit when ready',
   displayName: 'Submit Later Reminder',
-  previewData: { submitUrl: 'https://www.getbizmusic.com/submit?token=example-token' },
+  previewData: {
+    submitUrl: 'https://www.getbizmusic.com/submit?token=example-token',
+    designUrl: 'https://www.getbizmusic.com/design',
+  },
 } satisfies TemplateEntry
 
 const main: React.CSSProperties = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', color: NAVY }
