@@ -210,7 +210,58 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   // When the ad changes, clear any saved resume time so the new ad starts fresh.
   useEffect(() => {
     resumeRemainingRef.current = null;
+    // Also dismiss any active hover-video on slide change.
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    setVideoActive(false);
   }, [idx]);
+
+  useEffect(() => {
+    return () => {
+      if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+    };
+  }, []);
+
+  const currentVideoId = parseYoutubeId(current?.youtube_url);
+
+  const activateVideo = () => {
+    if (!currentVideoId) return;
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    setVideoActive((prev) => {
+      if (!prev) {
+        setVideoNonce((n) => n + 1);
+        wasMusicPlayingRef.current = musicPlaying;
+        setPaused(true);
+        try {
+          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
+        } catch {
+          /* noop */
+        }
+      }
+      return true;
+    });
+  };
+
+  const deactivateVideo = () => {
+    if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+    videoLeaveTimerRef.current = window.setTimeout(() => {
+      setVideoActive(false);
+      setPaused(false);
+      if (wasMusicPlayingRef.current) {
+        try {
+          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
+        } catch {
+          /* noop */
+        }
+      }
+      videoLeaveTimerRef.current = null;
+    }, 150);
+  };
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
   // recompute timeLeft from Date.now() each tick so background-tab throttling,
