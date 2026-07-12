@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createAdCheckout, createFreeReligiousSubmission } from "@/lib/payments.functions";
 import { validateRepCode } from "@/lib/reps.functions";
-import { AD_PLANS, INDUSTRIES, RELIGIOUS_INDUSTRY_VALUES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
+import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/pricing")({
