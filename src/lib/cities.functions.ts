@@ -63,13 +63,45 @@ export const submitCityRequest = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("city_requests").insert({
-      city_name: data.city_name,
-      state: data.state,
-      email: data.email,
-      zip: data.zip ?? null,
-      message: data.message ?? null,
-    });
+    const { data: inserted, error } = await supabaseAdmin
+      .from("city_requests")
+      .insert({
+        city_name: data.city_name,
+        state: data.state,
+        email: data.email,
+        zip: data.zip ?? null,
+        message: data.message ?? null,
+      })
+      .select("id, created_at")
+      .single();
     if (error) throw new Error(error.message);
+
+    // Fire-and-forget notifications to admin recipients
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      const recipients = ["request-city@getbizmusic.com", "ralphposadas29@gmail.com"];
+      const submittedAt = inserted?.created_at ?? new Date().toISOString();
+      const templateData = {
+        cityName: data.city_name,
+        state: data.state,
+        zip: data.zip ?? undefined,
+        email: data.email,
+        message: data.message ?? undefined,
+        submittedAt,
+      };
+      await Promise.all(
+        recipients.map((to) =>
+          enqueueTransactionalEmailInternal({
+            templateName: "city-request-notification",
+            recipientEmail: to,
+            templateData,
+            idempotencyKey: `city-request-${inserted?.id ?? crypto.randomUUID()}-${to}`,
+          }),
+        ),
+      );
+    } catch (e) {
+      console.error("city request notification enqueue failed", e);
+    }
+
     return { ok: true };
   });
