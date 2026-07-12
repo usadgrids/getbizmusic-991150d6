@@ -235,7 +235,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setVideoActive((prev) => {
       if (!prev) {
         setVideoNonce((n) => n + 1);
-        wasMusicPlayingRef.current = musicPlaying;
+        wasMusicPlayingRef.current = true;
         setPaused(true);
         try {
           window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
@@ -247,9 +247,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     });
   };
 
-  const deactivateVideo = () => {
-    if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
-    videoLeaveTimerRef.current = window.setTimeout(() => {
+  const deactivateVideo = (immediate = false) => {
+    if (videoLeaveTimerRef.current) {
+      window.clearTimeout(videoLeaveTimerRef.current);
+      videoLeaveTimerRef.current = null;
+    }
+    const run = () => {
       setVideoActive(false);
       setPaused(false);
       if (wasMusicPlayingRef.current) {
@@ -259,8 +262,14 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           /* noop */
         }
       }
+      wasMusicPlayingRef.current = false;
       videoLeaveTimerRef.current = null;
-    }, 150);
+    };
+    if (immediate) {
+      run();
+    } else {
+      videoLeaveTimerRef.current = window.setTimeout(run, 150);
+    }
   };
 
   // Deadline-based rotation: schedule advance at start + duration*1000. Also
