@@ -268,7 +268,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     if (immediate) {
       run();
     } else {
-      videoLeaveTimerRef.current = window.setTimeout(run, 150);
+      videoLeaveTimerRef.current = window.setTimeout(run, 60);
     }
   };
 
