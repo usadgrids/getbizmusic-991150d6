@@ -433,9 +433,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   <button
                     type="button"
                     onMouseEnter={activateVideo}
-                    onMouseLeave={deactivateVideo}
+                    onMouseLeave={() => deactivateVideo()}
                     onFocus={activateVideo}
-                    onBlur={deactivateVideo}
+                    onBlur={() => deactivateVideo()}
                     onTouchStart={activateVideo}
                     onClick={() => (videoActive ? deactivateVideo() : activateVideo())}
                     aria-label={videoActive ? "Pause video" : "Play video"}
