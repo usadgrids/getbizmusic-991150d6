@@ -86,11 +86,7 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
       if (activeRef.current) {
         setActive(false);
         // Resume the background music playlist when the hover video is dismissed.
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.resume();
       }
       leaveTimerRef.current = null;
     }, 120);
