@@ -5,7 +5,7 @@ import {
   MINIPLAYER_ACTIVITY_EVENT,
   MINIPLAYER_NEXT_EVENT,
   MINIPLAYER_PAUSE_EVENT,
-  MINIPLAYER_PLAY_EVENT,
+  MINIPLAYER_PLAY_MOOD_EVENT,
   MINIPLAYER_PREV_EVENT,
   MINIPLAYER_SET_PLAYLIST_EVENT,
   MINIPLAYER_TRACK_EVENT,
@@ -43,11 +43,11 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
   useEffect(() => {
     const onActivity = (e: Event) => {
       const detail = (e as CustomEvent<MiniPlayerActivity>).detail;
-      setPlaying(Boolean(detail?.playing));
+      setPlaying(Boolean(detail?.playing && detail.mood === "religious"));
     };
     const onTrack = (e: Event) => {
       const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      setTrack(detail ?? null);
+      if (detail?.mood === "religious") setTrack(detail);
     };
     const onSet = (e: Event) => {
       const detail = (e as CustomEvent<{ mood: "secular" | "religious" }>).detail;
@@ -87,8 +87,11 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
     if (playing && isReligiousActive) {
       dispatch(MINIPLAYER_PAUSE_EVENT);
     } else {
-      ensureReligious();
-      dispatch(MINIPLAYER_PLAY_EVENT);
+      window.dispatchEvent(
+        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, {
+          detail: { mood: "religious", index: 0 },
+        }),
+      );
     }
   };
 
