@@ -95,6 +95,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const shareResumeTimerRef = useRef<number | null>(null);
   const remainingRef = useRef<number>(0);
   const resumeRemainingRef = useRef<number | null>(null);
+  const [videoActive, setVideoActive] = useState(false);
+  const [videoNonce, setVideoNonce] = useState(0);
+  const videoLeaveTimerRef = useRef<number | null>(null);
+  const wasMusicPlayingRef = useRef(false);
 
   const handleShareOpen = () => {
     setPaused(true);
