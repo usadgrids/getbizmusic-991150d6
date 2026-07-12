@@ -268,7 +268,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     if (immediate) {
       run();
     } else {
-      videoLeaveTimerRef.current = window.setTimeout(run, 150);
+      videoLeaveTimerRef.current = window.setTimeout(run, 60);
     }
   };
 
@@ -555,15 +555,28 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             <div className="text-sm font-semibold text-[#0F2A4A]">
               {paused ? "Ad is paused" : "Ad is playing"}
             </div>
-            <button
-              type="button"
-              onClick={() => setPaused((p) => !p)}
-              aria-label={paused ? "Play ad" : "Pause ad"}
-              className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
-            >
-              {paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
-              {paused ? "Play Ad" : "Pause Ad"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setIdx((i) => (ads.length ? (i - 1 + ads.length) % ads.length : 0))
+                }
+                aria-label="Previous ad"
+                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+              >
+                <SkipBack size={16} fill="currentColor" />
+                Previous Ad
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                aria-label={paused ? "Play ad" : "Pause ad"}
+                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+              >
+                {paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
+                {paused ? "Play Ad" : "Pause Ad"}
+              </button>
+            </div>
           </div>
 
           {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
@@ -613,9 +626,10 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 type="button"
                 onClick={togglePlayPause}
                 aria-label={musicPlaying ? "Pause music" : "Play music"}
-                className="rounded-full p-2 bg-[#0F2A4A] text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
               >
                 {musicPlaying ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
+                {musicPlaying ? "Pause Music" : "Play Music"}
               </button>
               <button
                 type="button"
