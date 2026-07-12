@@ -43,11 +43,11 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
   useEffect(() => {
     const onActivity = (e: Event) => {
       const detail = (e as CustomEvent<MiniPlayerActivity>).detail;
-      setPlaying(Boolean(detail?.playing));
+      setPlaying(Boolean(detail?.playing && detail.mood === "religious"));
     };
     const onTrack = (e: Event) => {
       const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      setTrack(detail ?? null);
+      if (detail?.mood === "religious") setTrack(detail);
     };
     const onSet = (e: Event) => {
       const detail = (e as CustomEvent<{ mood: "secular" | "religious" }>).detail;
