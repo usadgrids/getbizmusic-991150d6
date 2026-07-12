@@ -116,7 +116,7 @@ function TapToPlayOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none animate-in fade-in zoom-in-95 duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none animate-in fade-in zoom-in-95 duration-150"
       aria-live="polite"
       role="dialog"
       aria-modal="true"
@@ -125,7 +125,7 @@ function TapToPlayOverlay({
       <button
         type="button"
         onClick={handleTap}
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C] opacity-50 pointer-events-auto cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center border-2 border-[#D4A24C] opacity-50 pointer-events-auto cursor-pointer transition-transform duration-100 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
         aria-label="Tap anywhere to play music"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C]">
@@ -676,7 +676,7 @@ export function MiniPlayer() {
     <>
       <TapToPlayOverlay visible={showPlayFallback} onTap={handleManualPlay} />
       <div
-        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-300 max-w-[calc(100vw-1.5rem)]"
+        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)]"
         style={{ width: size.width }}
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
