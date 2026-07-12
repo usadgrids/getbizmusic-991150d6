@@ -168,14 +168,17 @@ function PricingPage() {
         {/* Industry gate — required before pricing / free-religious branch */}
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
-            What best describes your business? <span className="text-red-500">*</span>
+            What best describes your business? <span className="text-red-500">*</span>{" "}
+            <span className="text-emerald-700 font-bold">
+              (Choose Churches, Religious Services, and Ministries to get a FREE Annual Ad.)
+            </span>
           </label>
           <select
             value={industry}
             onChange={(e) => setIndustry(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white"
           >
-            <option value="" disabled>Pick your category…</option>
+            <option value="" disabled>Pick Your Business Category</option>
             {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
           </select>
           <p className="mt-1.5 text-xs text-gray-500">
