@@ -62,32 +62,47 @@ function DesignReturn() {
     const fd = new FormData(e.currentTarget);
     const raw = {
       business_name: String(fd.get("business_name") ?? "").trim(),
-      contact_name: String(fd.get("contact_name") ?? "").trim(),
+      owner_name: String(fd.get("owner_name") ?? "").trim(),
+      owner_email: String(fd.get("owner_email") ?? "").trim(),
+      business_email: String(fd.get("business_email") ?? "").trim(),
       phone: String(fd.get("phone") ?? "").trim(),
       website_url: String(fd.get("website_url") ?? "").trim(),
       services: String(fd.get("services") ?? "").trim(),
       tagline: String(fd.get("tagline") ?? "").trim(),
       color_preferences: String(fd.get("color_preferences") ?? "").trim(),
+      design_brief: String(fd.get("design_brief") ?? "").trim(),
       notes: String(fd.get("notes") ?? "").trim(),
     };
-    if (!raw.business_name || !raw.contact_name || !raw.phone || !raw.services) {
-      toast.error("Please fill in business name, contact, phone, and services");
+    if (!raw.business_name || !raw.owner_name || !raw.owner_email || !raw.phone || !raw.services) {
+      toast.error("Please fill in business name, owner name, email, phone, and services");
       return;
     }
     setSubmitting(true);
     try {
-      let logo_path = "";
-      if (logoFile) {
-        if (logoFile.size > 5 * 1024 * 1024) throw new Error("Logo must be under 5 MB");
-        const ext = logoFile.name.split(".").pop()?.toLowerCase() || "png";
-        const safe = `design-intake/${session_id}/logo-${Date.now()}.${ext}`;
+      const uploadFile = async (file: File, kind: string, idx?: number) => {
+        if (file.size > 5 * 1024 * 1024) throw new Error(`${kind} must be under 5 MB`);
+        const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+        const suffix = idx !== undefined ? `-${idx + 1}` : "";
+        const safe = `design-intake/${session_id}/${kind}${suffix}-${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("ad-uploads")
-          .upload(safe, logoFile, { contentType: logoFile.type, upsert: true });
+          .upload(safe, file, { contentType: file.type, upsert: true });
         if (upErr) throw upErr;
-        logo_path = safe;
+        return safe;
+      };
+
+      let logo_path = "";
+      if (logoFile) logo_path = await uploadFile(logoFile, "logo");
+
+      const image_paths: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const f = imageFiles[i];
+        if (f) image_paths.push(await uploadFile(f, "image", i));
       }
-      const res = await submitDesignIntake({ data: { sessionId: session_id, intake: { ...raw, logo_path } } });
+
+      const res = await submitDesignIntake({
+        data: { sessionId: session_id, intake: { ...raw, logo_path, image_paths } },
+      });
       if (!res.ok) throw new Error(res.error ?? "Submission failed");
       setState((s) => ({ ...s, status: "done" }));
     } catch (err) {
@@ -96,6 +111,7 @@ function DesignReturn() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
