@@ -55,7 +55,7 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         line_items: [{
           price_data: {
             currency: "usd",
-            product_data: { name: "BizSpot Music Pro Ad Design" },
+            product_data: { name: "Get Biz Music Pro Ad Design" },
             unit_amount: DESIGN_PRICE_CENTS,
           },
           quantity: 1,
@@ -66,7 +66,7 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         customer_email: data.customerEmail,
         metadata,
         payment_intent_data: {
-          description: "BizSpot Music Pro Ad Design",
+          description: "Get Biz Music Pro Ad Design",
           receipt_email: data.customerEmail,
           statement_descriptor_suffix: "GETBIZMUSIC DSGN",
           metadata,
@@ -170,13 +170,17 @@ const intakeSchema = z.object({
   sessionId: z.string().min(1),
   intake: z.object({
     business_name: z.string().trim().min(1).max(120),
-    contact_name: z.string().trim().min(1).max(120),
+    owner_name: z.string().trim().min(1).max(120),
+    owner_email: z.string().trim().email().max(255),
+    business_email: z.string().trim().max(255).optional().or(z.literal("")),
     phone: z.string().trim().min(7).max(40),
     website_url: z.string().trim().max(255).optional().or(z.literal("")),
     services: z.string().trim().min(1).max(500),
     tagline: z.string().trim().max(120).optional().or(z.literal("")),
     color_preferences: z.string().trim().max(300).optional().or(z.literal("")),
     logo_path: z.string().trim().max(500).optional().or(z.literal("")),
+    image_paths: z.array(z.string().trim().max(500)).max(3).optional().default([]),
+    design_brief: z.string().trim().max(2000).optional().or(z.literal("")),
     notes: z.string().trim().max(1000).optional().or(z.literal("")),
   }),
 });
@@ -214,7 +218,20 @@ export const submitDesignIntake = createServerFn({ method: "POST" })
           cityName: `DESIGN ORDER: ${data.intake.business_name}`,
           stateCode: `Customer: ${row.customer_email}`,
           requesterEmail: row.customer_email,
-          notes: `Services: ${data.intake.services}\nPhone: ${data.intake.phone}\nWebsite: ${data.intake.website_url || "n/a"}\nTagline: ${data.intake.tagline || "n/a"}\nColors: ${data.intake.color_preferences || "n/a"}\nLogo path: ${data.intake.logo_path || "n/a"}\nNotes: ${data.intake.notes || "n/a"}`,
+          notes: [
+            `Owner: ${data.intake.owner_name}`,
+            `Owner email: ${data.intake.owner_email}`,
+            `Business email: ${data.intake.business_email || "n/a"}`,
+            `Phone: ${data.intake.phone}`,
+            `Website: ${data.intake.website_url || "n/a"}`,
+            `Services: ${data.intake.services}`,
+            `Tagline: ${data.intake.tagline || "n/a"}`,
+            `Colors: ${data.intake.color_preferences || "n/a"}`,
+            `Logo path: ${data.intake.logo_path || "n/a"}`,
+            `Image paths: ${(data.intake.image_paths ?? []).join(", ") || "n/a"}`,
+            `Design brief: ${data.intake.design_brief || "n/a"}`,
+            `Notes: ${data.intake.notes || "n/a"}`,
+          ].join("\n"),
         },
       });
     } catch (e) {

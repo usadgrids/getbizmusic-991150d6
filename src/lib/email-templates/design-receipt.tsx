@@ -24,13 +24,13 @@ const DesignReceiptEmail = ({ amountFormatted, orderNumber, billingEmail, intake
         <Section style={content}>
           <Heading as="h2" style={h2}>Payment received — thank you!</Heading>
           <Text style={p}>
-            Your BizSpot Music–compliant ad design order is confirmed. Our team will get
+            Your Get Biz Music–compliant ad design order is confirmed. Our team will get
             started as soon as we have your business details.
           </Text>
 
           <Section style={box}>
             <Text style={boxLabel}>Order summary</Text>
-            <Text style={p}><strong>Service:</strong> Pro Ad Design (BizSpot Music–compliant)</Text>
+            <Text style={p}><strong>Service:</strong> Pro Ad Design (Get Biz Music–compliant)</Text>
             {amountFormatted ? <Text style={p}><strong>Amount:</strong> {amountFormatted} USD</Text> : null}
             {orderNumber ? <Text style={smallMuted}>Order #: {orderNumber}</Text> : null}
             {billingEmail ? <Text style={smallMuted}>Billing email: {billingEmail}</Text> : null}

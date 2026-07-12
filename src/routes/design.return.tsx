@@ -27,6 +27,7 @@ function DesignReturn() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
 
   useEffect(() => {
     if (!session_id) { setState({ status: "error", message: "Missing session id" }); return; }
@@ -61,32 +62,47 @@ function DesignReturn() {
     const fd = new FormData(e.currentTarget);
     const raw = {
       business_name: String(fd.get("business_name") ?? "").trim(),
-      contact_name: String(fd.get("contact_name") ?? "").trim(),
+      owner_name: String(fd.get("owner_name") ?? "").trim(),
+      owner_email: String(fd.get("owner_email") ?? "").trim(),
+      business_email: String(fd.get("business_email") ?? "").trim(),
       phone: String(fd.get("phone") ?? "").trim(),
       website_url: String(fd.get("website_url") ?? "").trim(),
       services: String(fd.get("services") ?? "").trim(),
       tagline: String(fd.get("tagline") ?? "").trim(),
       color_preferences: String(fd.get("color_preferences") ?? "").trim(),
+      design_brief: String(fd.get("design_brief") ?? "").trim(),
       notes: String(fd.get("notes") ?? "").trim(),
     };
-    if (!raw.business_name || !raw.contact_name || !raw.phone || !raw.services) {
-      toast.error("Please fill in business name, contact, phone, and services");
+    if (!raw.business_name || !raw.owner_name || !raw.owner_email || !raw.phone || !raw.services) {
+      toast.error("Please fill in business name, owner name, email, phone, and services");
       return;
     }
     setSubmitting(true);
     try {
-      let logo_path = "";
-      if (logoFile) {
-        if (logoFile.size > 5 * 1024 * 1024) throw new Error("Logo must be under 5 MB");
-        const ext = logoFile.name.split(".").pop()?.toLowerCase() || "png";
-        const safe = `design-intake/${session_id}/logo-${Date.now()}.${ext}`;
+      const uploadFile = async (file: File, kind: string, idx?: number) => {
+        if (file.size > 5 * 1024 * 1024) throw new Error(`${kind} must be under 5 MB`);
+        const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+        const suffix = idx !== undefined ? `-${idx + 1}` : "";
+        const safe = `design-intake/${session_id}/${kind}${suffix}-${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("ad-uploads")
-          .upload(safe, logoFile, { contentType: logoFile.type, upsert: true });
+          .upload(safe, file, { contentType: file.type, upsert: true });
         if (upErr) throw upErr;
-        logo_path = safe;
+        return safe;
+      };
+
+      let logo_path = "";
+      if (logoFile) logo_path = await uploadFile(logoFile, "logo");
+
+      const image_paths: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const f = imageFiles[i];
+        if (f) image_paths.push(await uploadFile(f, "image", i));
       }
-      const res = await submitDesignIntake({ data: { sessionId: session_id, intake: { ...raw, logo_path } } });
+
+      const res = await submitDesignIntake({
+        data: { sessionId: session_id, intake: { ...raw, logo_path, image_paths } },
+      });
       if (!res.ok) throw new Error(res.error ?? "Submission failed");
       setState((s) => ({ ...s, status: "done" }));
     } catch (err) {
@@ -95,6 +111,7 @@ function DesignReturn() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -161,8 +178,10 @@ function DesignReturn() {
             <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
-                <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
-                <Field name="phone" label="Phone" required placeholder="555-555-1234" />
+                <Field name="owner_name" label="Owner / contact name" required placeholder="Tony Romano" />
+                <Field name="owner_email" label="Owner email" required type="email" placeholder="tony@example.com" />
+                <Field name="business_email" label="Business email (optional)" type="email" placeholder="hello@tonyspizza.com" />
+                <Field name="phone" label="Business phone" required placeholder="555-555-1234" />
                 <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
               </div>
 
@@ -191,7 +210,49 @@ function DesignReturn() {
                 </div>
               </div>
 
-              <TextArea name="notes" label="Anything else we should know? (optional)" placeholder="Fonts you like, competitor examples, must-include phone number…" rows={3} />
+              <div>
+                <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
+                  Reference images (up to 3, optional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Upload your main product, spokesmodel/team photo, or any image you'd like us to feature.
+                  PNG or JPG, each under 5 MB.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="border-2 border-dashed border-gray-300 rounded-xl p-3 hover:border-[#D4A24C] transition-colors">
+                      <div className="text-xs font-semibold text-[#0F2A4A] mb-1">
+                        {i === 0 ? "Main product" : i === 1 ? "Spokesmodel / person" : "Additional image"}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const next = [...imageFiles];
+                          next[i] = e.target.files?.[0] ?? null;
+                          setImageFiles(next);
+                        }}
+                        className="block w-full text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#0F2A4A] file:text-white hover:file:bg-[#163864] cursor-pointer"
+                      />
+                      {imageFiles[i] && (
+                        <div className="mt-1 text-xs text-emerald-700 flex items-center gap-1 truncate">
+                          <Check size={12} /> <span className="truncate">{imageFiles[i]!.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <TextArea
+                name="design_brief"
+                label="Describe your design vision"
+                placeholder="Tell us what you'd like the ad to look and feel like — mood, key message, must-include text or elements, competitor examples, inspiration links, etc."
+                rows={5}
+              />
+
+              <TextArea name="notes" label="Anything else we should know? (optional)" placeholder="Fonts you like, must-include phone number, hours…" rows={2} />
+
 
               <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
                 {submitting ? "Sending…" : "Send my info to the design team"}
@@ -205,13 +266,14 @@ function DesignReturn() {
   );
 }
 
-function Field({ name, label, required, placeholder, maxLength }: { name: string; label: string; required?: boolean; placeholder?: string; maxLength?: number }) {
+function Field({ name, label, required, placeholder, maxLength, type = "text" }: { name: string; label: string; required?: boolean; placeholder?: string; maxLength?: number; type?: string }) {
   return (
     <div>
       <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
         {label}{required && <span className="text-red-500"> *</span>}
       </label>
       <input
+        type={type}
         name={name} required={required} placeholder={placeholder} maxLength={maxLength}
         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
       />
