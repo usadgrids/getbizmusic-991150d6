@@ -379,6 +379,19 @@ export function MiniPlayer() {
       return;
     }
 
+    // If the player is already playing (muted autoplay), no PLAYING
+    // state-change event will fire after unmute+playVideo, so listeners
+    // never learn playback is active. Report it directly.
+    try {
+      if (player.getPlayerState() === PLAYER_STATE_PLAYING) {
+        playSucceededRef.current = true;
+        startedRef.current = true;
+        reportPlayback(true, "user");
+      }
+    } catch {
+      // Ignore state read failures — the resume fallback below still covers us.
+    }
+
     queueResumeFallback();
   }, [clearAutoplayFallback, clearResumeFallback, queueResumeFallback, reportPlayback]);
 
