@@ -108,6 +108,7 @@ function AdLanding() {
     INDUSTRIES.find((i) => i.value === ad.industry)?.label ?? ad.industry;
   const relatedAds = ads.filter((a) => a.industry === ad.industry && a.id !== ad.id);
   const sliderAds = relatedAds.length > 0 ? relatedAds : ads.filter((a) => a.id !== ad.id);
+  const isReligious = isReligiousIndustry(ad.industry);
 
   const Img = (
     <img
