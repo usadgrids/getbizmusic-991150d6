@@ -78,7 +78,7 @@ function Index() {
           </p>
           <h1 className="mt-3 text-3xl sm:text-5xl md:text-6xl font-black tracking-tight">
             Imagine! Listening To Music & Viewing<br />
-            Ads In Your City?
+            Business Ads In Your City?
           </h1>
           <p className="mt-4 text-base sm:text-lg text-white/80 max-w-2xl mx-auto">
             Pick your city to see who's advertising — or list your own business for as little as $12/year.
