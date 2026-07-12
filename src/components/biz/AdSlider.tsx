@@ -86,12 +86,9 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [trackTitle, setTrackTitle] = useState("");
-  const [hovered, setHovered] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const hideTimerRef = useRef<number | null>(null);
-  const searchIdleTimerRef = useRef<number | null>(null);
   const shareResumeTimerRef = useRef<number | null>(null);
   const remainingRef = useRef<number>(0);
   const resumeRemainingRef = useRef<number | null>(null);
@@ -143,65 +140,15 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       .slice(0, 6);
   }, [searchQuery, ads]);
 
-  const clearPeekTimer = () => {
-    if (hideTimerRef.current) {
-      window.clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-  };
-
-  const clearSearchIdleTimer = () => {
-    if (searchIdleTimerRef.current) {
-      window.clearTimeout(searchIdleTimerRef.current);
-      searchIdleTimerRef.current = null;
-    }
-  };
-
-  const showSearchPeek = () => {
-    if (searchOpen) return;
-    setHovered(true);
-    clearPeekTimer();
-    hideTimerRef.current = window.setTimeout(() => {
-      setHovered(false);
-      hideTimerRef.current = null;
-    }, 2000);
-  };
-
-
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
     if (i >= 0) setIdx(i);
     setSearchQuery("");
-    setSearchOpen(false);
-    setHovered(false);
-    clearPeekTimer();
-    clearSearchIdleTimer();
+    setSearchFocused(false);
+    searchInputRef.current?.blur();
   };
 
-  useEffect(() => {
-    if (searchOpen) {
-      setTimeout(() => searchInputRef.current?.focus(), 50);
-    }
-  }, [searchOpen]);
 
-  useEffect(() => {
-    return () => {
-      clearPeekTimer();
-      clearSearchIdleTimer();
-    };
-  }, []);
-
-  useEffect(() => {
-    clearSearchIdleTimer();
-    if (searchOpen && searchQuery.trim() === "") {
-      searchIdleTimerRef.current = window.setTimeout(() => {
-        setSearchOpen(false);
-        setHovered(false);
-        searchIdleTimerRef.current = null;
-      }, 3000);
-    }
-    return () => clearSearchIdleTimer();
-  }, [searchOpen, searchQuery]);
   // Track the latest displayed remaining time so pausing can resume from it.
   useEffect(() => {
     remainingRef.current = timeLeft;
@@ -343,20 +290,95 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
   return (
     <section id="ad-slideshow" className="my-8 min-w-0">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center mb-3 gap-2 min-w-0">
-        <div />
-        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center min-w-0">
+      <div className="relative mb-3 grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-2 min-w-0">
+        <div className="hidden sm:block" />
+        <h2 className="font-serif text-xl text-[#0F2A4A] font-bold flex items-center gap-2 text-center justify-center min-w-0 order-1">
           {featured && <Sparkles size={18} className="text-[#D4A24C] shrink-0" />}
           <span className="min-w-0 break-words">{title}</span>
         </h2>
-        {ads.length > 0 && (
-          <div className="flex flex-col items-end justify-center text-xs text-gray-500 justify-self-end text-right shrink-0">
-            <span className="whitespace-nowrap">
+        <div className="flex flex-col items-stretch sm:items-end gap-1 justify-self-stretch sm:justify-self-end min-w-0 order-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search
+              size={16}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0F2A4A]/60"
+            />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => window.setTimeout(() => setSearchFocused(false), 150)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && suggestions[0]) {
+                  pickAd(suggestions[0].id);
+                } else if (e.key === "Escape") {
+                  setSearchQuery("");
+                  searchInputRef.current?.blur();
+                }
+              }}
+              placeholder="Search business, category, or ad #"
+              aria-label="Search businesses"
+              className="w-full rounded-full border border-[#0F2A4A]/20 bg-white pl-9 pr-9 py-2 text-sm text-[#0F2A4A] placeholder-gray-400 shadow-sm ring-[#D4A24C] focus:outline-none focus:ring-2"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  searchInputRef.current?.focus();
+                }}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-500 hover:bg-gray-100"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          {ads.length > 0 && (
+            <span className="whitespace-nowrap text-xs text-gray-500 text-right">
               {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
             </span>
+          )}
+        </div>
+        {searchFocused && searchQuery.trim() !== "" && (
+          <div className="absolute left-1/2 top-full z-40 mt-2 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-2xl ring-2 ring-[#D4A24C]">
+              {suggestions.length === 0 ? (
+                <div className="px-4 py-3 text-sm text-gray-500">No matching businesses.</div>
+              ) : (
+                <div className="max-h-80 overflow-y-auto">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => pickAd(s.id)}
+                      className="flex w-full items-center justify-between gap-2 px-4 py-2 text-left text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
+                    >
+                      <span className="flex min-w-0 items-baseline gap-2 truncate">
+                        {s.ad_number != null && (
+                          <span className="shrink-0 font-mono text-xs text-gray-500">
+                            #{s.ad_number}
+                          </span>
+                        )}
+                        <span className="truncate font-medium">{s.business_name}</span>
+                        <span className="shrink-0 text-xs font-semibold text-[#D4A24C]">
+                          = {industryLabel(s.industry)}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-xs text-gray-500">
+                        {s.duration_seconds ?? 7}s
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
+
 
       {ads.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-10 text-center text-gray-500">
@@ -377,20 +399,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               maxHeight: "min(90svh, 900px)",
             }}
 
-            onMouseEnter={() => {
-              showSearchPeek();
-            }}
-            onMouseMove={() => {
-              showSearchPeek();
-            }}
             onMouseLeave={() => {
-              clearPeekTimer();
-              setHovered(false);
-              if (!searchQuery) setSearchOpen(false);
               if (videoActive) deactivateVideo(true);
             }}
 
           >
+
             <div
               className="relative w-full h-full bg-gray-100"
             >
@@ -464,91 +478,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               </div>
             )}
 
-
-            {/* Hover-revealed search bar (center) */}
-            {(hovered || searchOpen) && (
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex justify-center px-4 pointer-events-none">
-                <div className="pointer-events-auto w-full max-w-md">
-                  {!searchOpen ? (
-                    <button
-                      type="button"
-                      onClick={() => setSearchOpen(true)}
-                      className="mx-auto flex items-center gap-2 rounded-full bg-white/95 px-5 py-3 text-[#0F2A4A] font-semibold shadow-2xl ring-2 ring-[#D4A24C] hover:bg-white"
-                    >
-                      <Search size={18} />
-                      Search businesses…
-                    </button>
-                  ) : (
-                    <div className="rounded-2xl bg-white/98 shadow-2xl ring-2 ring-[#D4A24C] overflow-hidden">
-                      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
-                        <Search size={16} className="text-[#0F2A4A]" />
-                        <input
-                          ref={searchInputRef}
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && suggestions[0]) {
-                              pickAd(suggestions[0].id);
-                            } else if (e.key === "Escape") {
-                              setSearchQuery("");
-                              setSearchOpen(false);
-                            }
-                          }}
-                          placeholder="Search by Business Name, Category, or Ad # (e.g. 2911)"
-                          className="flex-1 bg-transparent text-sm text-[#0F2A4A] placeholder-gray-400 outline-none py-1"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery("");
-                            setSearchOpen(false);
-                            clearSearchIdleTimer();
-                          }}
-                          aria-label="Close search"
-                          className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      {searchQuery && (
-                        <div className="max-h-64 overflow-y-auto">
-                          {suggestions.length === 0 ? (
-                            <div className="px-4 py-3 text-sm text-gray-500">
-                              No matching businesses.
-                            </div>
-                          ) : (
-                            suggestions.map((s) => (
-                              <button
-                                key={s.id}
-                                type="button"
-                                onClick={() => pickAd(s.id)}
-                                className="w-full text-left px-4 py-2 text-sm text-[#0F2A4A] hover:bg-[#0F2A4A]/10 flex items-center justify-between gap-2"
-                              >
-                                <span className="truncate flex items-baseline gap-2 min-w-0">
-                                  {s.ad_number != null && (
-                                    <span className="text-xs font-mono text-gray-500 shrink-0">#{s.ad_number}</span>
-                                  )}
-                                  <span className="font-medium truncate">{s.business_name}</span>
-                                  <span className="text-xs text-[#D4A24C] font-semibold shrink-0">
-                                    = {industryLabel(s.industry)}
-                                  </span>
-                                </span>
-                                <span className="text-xs text-gray-500 shrink-0">
-                                  {s.duration_seconds ?? 7}s
-                                </span>
-                              </button>
-                            ))
-
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
+
 
           {/* Pause / Play ad controls — below the slider, above the share bar */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
