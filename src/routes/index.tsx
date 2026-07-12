@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Music, Megaphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -103,12 +104,17 @@ function Index() {
 
       {/* City grid */}
       <main className="w-full max-w-[1400px] mx-auto px-4 py-10 sm:py-14">
-        <h2 className="text-xl sm:text-2xl font-bold mb-6">
-          {filtered.length} active {filtered.length === 1 ? "city" : "cities"}
-          <span className="ml-2 text-gray-500 font-normal text-base sm:text-lg">
-            — Select A City To View Ads & Listen To Music
-          </span>
-        </h2>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
+          <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#0F2A4A] text-[#FFD700] shadow-md">
+            <Music className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+          </div>
+          <h2 className="text-center text-xl sm:text-3xl font-black tracking-tight text-[#0F2A4A]">
+            Listen To Music & View Ads In These Cities
+          </h2>
+          <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#FFD700] text-[#0F2A4A] shadow-md">
+            <Megaphone className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+          </div>
+        </div>
 
         {zipHasNoActiveCity && zipMatch ? (
           <RequestCityForm city={zipMatch.city} stateCode={zipMatch.stateCode} zip={q.trim()} />
