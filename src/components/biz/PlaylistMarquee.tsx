@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
 import {
+  MINIPLAYER_PLAY_MOOD_EVENT,
   MINIPLAYER_PLAY_INDEX_EVENT,
   MINIPLAYER_TRACK_EVENT,
   type MiniPlayerMood,
@@ -26,6 +27,12 @@ export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
   }
 
   const handleClick = (index: number) => {
+    if (mood) {
+      window.dispatchEvent(
+        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, { detail: { index, mood } }),
+      );
+      return;
+    }
     window.dispatchEvent(
       new CustomEvent(MINIPLAYER_PLAY_INDEX_EVENT, { detail: { index, mood } }),
     );

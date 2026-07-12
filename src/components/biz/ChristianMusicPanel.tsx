@@ -5,7 +5,7 @@ import {
   MINIPLAYER_ACTIVITY_EVENT,
   MINIPLAYER_NEXT_EVENT,
   MINIPLAYER_PAUSE_EVENT,
-  MINIPLAYER_PLAY_EVENT,
+  MINIPLAYER_PLAY_MOOD_EVENT,
   MINIPLAYER_PREV_EVENT,
   MINIPLAYER_SET_PLAYLIST_EVENT,
   MINIPLAYER_TRACK_EVENT,
@@ -87,8 +87,11 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
     if (playing && isReligiousActive) {
       dispatch(MINIPLAYER_PAUSE_EVENT);
     } else {
-      ensureReligious();
-      dispatch(MINIPLAYER_PLAY_EVENT);
+      window.dispatchEvent(
+        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, {
+          detail: { mood: "religious", index: 0 },
+        }),
+      );
     }
   };
 

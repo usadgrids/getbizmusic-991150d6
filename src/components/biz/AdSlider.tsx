@@ -27,6 +27,7 @@ import {
   MINIPLAYER_ACTIVITY_EVENT,
   MINIPLAYER_TRACK_EVENT,
   MINIPLAYER_SET_PLAYLIST_EVENT,
+  MINIPLAYER_PLAY_MOOD_EVENT,
   type MiniPlayerMood,
   type MiniPlayerActivity,
   type MiniPlayerTrack,
@@ -307,7 +308,9 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
       setPaused(true);
     } else {
-      dispatchMusic(MINIPLAYER_PLAY_EVENT);
+      window.dispatchEvent(
+        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, { detail: { mood: currentMood } }),
+      );
       setPaused(false);
     }
   };
