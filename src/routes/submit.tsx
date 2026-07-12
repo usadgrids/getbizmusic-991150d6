@@ -269,7 +269,7 @@ function SubmitPage() {
               <div className="shrink-0 w-10 h-10 rounded-lg bg-[#D4A24C] text-[#0F2A4A] font-bold flex items-center justify-center">4:3</div>
               <div className="flex-1">
                 <div className="text-[#0F2A4A] font-bold text-lg leading-tight">
-                  For A More Professional Looking Ad Sure To Impress Our Viewers - Image must be submitted in 1216 x 986 px (4:3 Ratio ).
+                  For A More Professional Looking Ad Sure To Impress Our Viewers - Image must be submitted in 1216 x 986 px (4:3 Ratio ). If you are not yet ready to submit ad now then Click I'm not ready link below.
                 </div>
                 <ul className="mt-2 text-sm text-[#0F2A4A]/80 space-y-1 list-disc pl-5">
                   <li>Format: <strong>JPG, PNG, or WebP</strong>, under <strong>2 MB</strong></li>
