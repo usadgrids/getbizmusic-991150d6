@@ -542,7 +542,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               </button>
               <button
                 type="button"
-                onClick={() => dispatchMusic(MINIPLAYER_NEXT_EVENT)}
+                onClick={() => { player.setPlaylist(currentMood); player.next(); }}
                 aria-label="Next track"
                 className="rounded-full p-2 text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
               >
