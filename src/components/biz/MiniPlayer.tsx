@@ -708,6 +708,7 @@ export function MiniPlayer() {
       window.removeEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
       window.removeEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
       window.removeEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
+      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pageshow", onVisibility);
       window.removeEventListener("focus", onVisibility);
