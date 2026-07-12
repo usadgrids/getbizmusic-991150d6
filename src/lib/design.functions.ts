@@ -66,7 +66,7 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         customer_email: data.customerEmail,
         metadata,
         payment_intent_data: {
-          description: "BizSpot Music Pro Ad Design",
+          description: "Get Biz Music Pro Ad Design",
           receipt_email: data.customerEmail,
           statement_descriptor_suffix: "GETBIZMUSIC DSGN",
           metadata,
