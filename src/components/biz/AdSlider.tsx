@@ -555,15 +555,28 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             <div className="text-sm font-semibold text-[#0F2A4A]">
               {paused ? "Ad is paused" : "Ad is playing"}
             </div>
-            <button
-              type="button"
-              onClick={() => setPaused((p) => !p)}
-              aria-label={paused ? "Play ad" : "Pause ad"}
-              className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
-            >
-              {paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
-              {paused ? "Play Ad" : "Pause Ad"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setIdx((i) => (ads.length ? (i - 1 + ads.length) % ads.length : 0))
+                }
+                aria-label="Previous ad"
+                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+              >
+                <SkipBack size={16} fill="currentColor" />
+                Previous Ad
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                aria-label={paused ? "Play ad" : "Pause ad"}
+                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
+              >
+                {paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}
+                {paused ? "Play Ad" : "Pause Ad"}
+              </button>
+            </div>
           </div>
 
           {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
