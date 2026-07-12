@@ -135,16 +135,74 @@ function SubmitPage() {
     if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
-    const fd = new FormData(e.currentTarget);
-    const raw = {
-      business_name: String(fd.get("business_name") ?? ""),
-      contact_name: String(fd.get("contact_name") ?? ""),
-      email: String(fd.get("email") ?? verify.email ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      website_url: String(fd.get("website_url") ?? ""),
-      industry: String(fd.get("industry") ?? ""),
-      tagline: String(fd.get("tagline") ?? ""),
-    };
+    // Religious/free path: validate ministry fields and mirror into standard.
+    let ministry_info: {
+      church_name: string;
+      church_address: string;
+      pastor_name: string;
+      phone: string;
+      is_501c3: boolean;
+      has_irs_number: boolean;
+      irs_number?: string;
+      attest_independent_ministry: true;
+      attest_novelty: true;
+    } | undefined;
+
+    let effectiveIndustry: string;
+    let raw: Record<string, string>;
+
+    if (verify.freeReligious) {
+      if (!RELIGIOUS_INDUSTRY_VALUES.includes(ministryIndustry as typeof RELIGIOUS_INDUSTRY_VALUES[number])) {
+        toast.error("Please choose a ministry category"); return;
+      }
+      if (!churchName.trim() || !churchAddress.trim() || !pastorName.trim() || !ministryPhone.trim()) {
+        toast.error("Please fill in every Ministry Information field"); return;
+      }
+      if (!is501c3) { toast.error("Please confirm 501(c)(3) status"); return; }
+      if (irsChoice !== "have" && irsChoice !== "dont") {
+        toast.error("Please indicate whether you have an IRS non-profit number"); return;
+      }
+      if (irsChoice === "have" && !irsNumber.trim()) {
+        toast.error("Please enter your IRS non-profit number"); return;
+      }
+      if (!attestIndependent) { toast.error("Please attest that you are an independent religious ministry"); return; }
+      if (!attestNovelty) { toast.error("Please acknowledge the novelty terms"); return; }
+
+      effectiveIndustry = ministryIndustry;
+      raw = {
+        business_name: churchName.trim(),
+        contact_name: pastorName.trim(),
+        email: verify.email ?? "",
+        phone: ministryPhone.trim(),
+        website_url: "",
+        industry: effectiveIndustry,
+        tagline: "",
+      };
+      ministry_info = {
+        church_name: churchName.trim(),
+        church_address: churchAddress.trim(),
+        pastor_name: pastorName.trim(),
+        phone: ministryPhone.trim(),
+        is_501c3: true,
+        has_irs_number: irsChoice === "have",
+        irs_number: irsChoice === "have" ? irsNumber.trim() : "",
+        attest_independent_ministry: true,
+        attest_novelty: true,
+      };
+    } else {
+      const fd = new FormData(e.currentTarget);
+      raw = {
+        business_name: String(fd.get("business_name") ?? ""),
+        contact_name: String(fd.get("contact_name") ?? ""),
+        email: String(fd.get("email") ?? verify.email ?? ""),
+        phone: String(fd.get("phone") ?? ""),
+        website_url: String(fd.get("website_url") ?? ""),
+        industry: String(fd.get("industry") ?? ""),
+        tagline: String(fd.get("tagline") ?? ""),
+      };
+      effectiveIndustry = raw.industry;
+    }
+
     const parsed = formSchema.safeParse(raw);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Please check the form"); return; }
 
@@ -162,6 +220,7 @@ function SubmitPage() {
         submission_token: token,
         requested_city_name: city.name,
         requested_state_code: city.stateCode,
+        ...(ministry_info ? { ministry_info } : {}),
       } });
       setDone(true);
     } catch (err) {
@@ -171,6 +230,7 @@ function SubmitPage() {
       setSubmitting(false);
     }
   };
+
 
   // --- Guard states ---
   if (verify.status === "checking") {
