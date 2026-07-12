@@ -88,6 +88,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [activeMusicMood, setActiveMusicMood] = useState<MiniPlayerMood>("secular");
   const [trackTitle, setTrackTitle] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -267,11 +268,19 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
       setTrackTitle(detail?.title ?? "");
     };
+    const onSetPlaylist = (e: Event) => {
+      const detail = (e as CustomEvent<{ mood: MiniPlayerMood }>).detail;
+      if (detail?.mood === "secular" || detail?.mood === "religious") {
+        setActiveMusicMood(detail.mood);
+      }
+    };
     window.addEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
     window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
+    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
     return () => {
       window.removeEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
       window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
+      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
     };
   }, []);
 
@@ -294,8 +303,8 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   };
 
   const togglePlayPause = () => {
-    if (musicPlaying) {
-      dispatchMusic(MINIPLAYER_PAUSE_EVENT);
+    if (musicPlaying && activeMusicMood === currentMood) {
+      window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
       setPaused(true);
     } else {
       dispatchMusic(MINIPLAYER_PLAY_EVENT);
