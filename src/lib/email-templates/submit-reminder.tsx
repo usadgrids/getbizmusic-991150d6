@@ -4,6 +4,7 @@ import type { TemplateEntry } from './registry'
 
 interface Props {
   submitUrl?: string
+  designUrl?: string
 }
 
 const NAVY = '#0F2A4A'
