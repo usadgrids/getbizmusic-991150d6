@@ -10,7 +10,7 @@ interface Props {
 const NAVY = '#0F2A4A'
 const GOLD = '#D4A24C'
 
-const SubmitReminderEmail = ({ submitUrl }: Props) => (
+const SubmitReminderEmail = ({ submitUrl, designUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your ad submission link — submit whenever your image is ready</Preview>
