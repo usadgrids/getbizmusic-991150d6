@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
-import { MINIPLAYER_PAUSE_EVENT, MINIPLAYER_PLAY_EVENT } from "./MiniPlayer";
+import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 /** Extract the 11-char YouTube video id from any common URL shape. */
 export function parseYoutubeId(url: string | null | undefined): string | null {
@@ -47,6 +47,7 @@ interface Props {
  */
 export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Props) {
   const videoId = parseYoutubeId(youtubeUrl);
+  const player = useMiniPlayerController();
   const [active, setActive] = useState(false);
   const [nonce, setNonce] = useState(0); // forces iframe remount to restart video
   const leaveTimerRef = useRef<number | null>(null);
@@ -72,11 +73,7 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
       if (!prev) {
         setNonce((n) => n + 1);
         // Pause the background music playlist so the video's audio is heard clearly.
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.pause();
       }
       return true;
     });
@@ -89,11 +86,7 @@ export function YoutubeHoverOverlay({ youtubeUrl, businessName, children }: Prop
       if (activeRef.current) {
         setActive(false);
         // Resume the background music playlist when the hover video is dismissed.
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.resume();
       }
       leaveTimerRef.current = null;
     }, 120);

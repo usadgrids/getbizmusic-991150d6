@@ -19,19 +19,8 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import {
-  MINIPLAYER_PAUSE_EVENT,
-  MINIPLAYER_PLAY_EVENT,
-  MINIPLAYER_PREV_EVENT,
-  MINIPLAYER_NEXT_EVENT,
-  MINIPLAYER_ACTIVITY_EVENT,
-  MINIPLAYER_TRACK_EVENT,
-  MINIPLAYER_SET_PLAYLIST_EVENT,
-  MINIPLAYER_PLAY_MOOD_EVENT,
-  type MiniPlayerMood,
-  type MiniPlayerActivity,
-  type MiniPlayerTrack,
-} from "./MiniPlayer";
+import { type MiniPlayerMood } from "./MiniPlayer";
+import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 function SlideTimer({
   duration,
@@ -88,9 +77,10 @@ function resolveDuration(ad: PublicAd | undefined): number {
 export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const [activeMusicMood, setActiveMusicMood] = useState<MiniPlayerMood>("secular");
-  const [trackTitle, setTrackTitle] = useState("");
+  const player = useMiniPlayerController();
+  const musicPlaying = player.playing;
+  const activeMusicMood = player.activeMood;
+  const trackTitle = player.track?.title ?? "";
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -189,11 +179,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
         setVideoNonce((n) => n + 1);
         wasMusicPlayingRef.current = true;
         setPaused(true);
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.pause();
       }
       return true;
     });
@@ -208,11 +194,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       setVideoActive(false);
       setPaused(false);
       if (wasMusicPlayingRef.current) {
-        try {
-          window.dispatchEvent(new CustomEvent(MINIPLAYER_PLAY_EVENT));
-        } catch {
-          /* noop */
-        }
+        player.resume();
       }
       wasMusicPlayingRef.current = false;
       videoLeaveTimerRef.current = null;
@@ -260,31 +242,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   }, [idx, duration, paused, ads.length, current]);
 
   // Listen to music player activity/track
-  useEffect(() => {
-    const onActivity = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerActivity>).detail;
-      setMusicPlaying(Boolean(detail?.playing));
-    };
-    const onTrack = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      setTrackTitle(detail?.title ?? "");
-    };
-    const onSetPlaylist = (e: Event) => {
-      const detail = (e as CustomEvent<{ mood: MiniPlayerMood }>).detail;
-      if (detail?.mood === "secular" || detail?.mood === "religious") {
-        setActiveMusicMood(detail.mood);
-      }
-    };
-    window.addEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-    window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
-    return () => {
-      window.removeEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-      window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
-    };
-  }, []);
-
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
   const slideMood: MiniPlayerMood = current && isReligiousIndustry(current.industry)
@@ -292,28 +249,16 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
     : "secular";
   const currentMood: MiniPlayerMood = musicMood ?? slideMood;
 
-  const ensureCurrentPlaylist = () => {
-    window.dispatchEvent(
-      new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, { detail: { mood: currentMood } }),
-    );
-  };
-
-  const dispatchMusic = (event: string) => {
-    ensureCurrentPlaylist();
-    window.dispatchEvent(new CustomEvent(event));
-  };
-
   const togglePlayPause = () => {
     if (musicPlaying && activeMusicMood === currentMood) {
-      window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
+      player.pause();
       setPaused(true);
     } else {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, { detail: { mood: currentMood } }),
-      );
+      player.playMood(currentMood);
       setPaused(false);
     }
   };
+
 
 
   return (
@@ -580,7 +525,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             <div className="flex items-center justify-end gap-1 flex-1">
               <button
                 type="button"
-                onClick={() => dispatchMusic(MINIPLAYER_PREV_EVENT)}
+                onClick={() => { player.setPlaylist(currentMood); player.prev(); }}
                 aria-label="Previous track"
                 className="rounded-full p-2 text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
               >
@@ -597,7 +542,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               </button>
               <button
                 type="button"
-                onClick={() => dispatchMusic(MINIPLAYER_NEXT_EVENT)}
+                onClick={() => { player.setPlaylist(currentMood); player.next(); }}
                 aria-label="Next track"
                 className="rounded-full p-2 text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
               >

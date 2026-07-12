@@ -1,26 +1,17 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
-import {
-  MINIPLAYER_PLAY_MOOD_EVENT,
-  MINIPLAYER_PLAY_INDEX_EVENT,
-  MINIPLAYER_TRACK_EVENT,
-  type MiniPlayerMood,
-  type MiniPlayerTrack,
-} from "./MiniPlayer";
+import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
+import type { MiniPlayerMood } from "./MiniPlayer";
 
 export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
   const { tracks, isLoading } = usePlaylistTracks(mood);
+  const player = useMiniPlayerController();
   const [currentTitle, setCurrentTitle] = useState<string>("");
 
   useEffect(() => {
-    const onTrack = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      setCurrentTitle(detail?.title ?? "");
-    };
-    window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-    return () => window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-  }, []);
+    setCurrentTitle(player.track?.title ?? "");
+  }, [player.track]);
 
   if (isLoading || tracks.length === 0) {
     return <div className="mt-1 h-7 w-full rounded-full bg-white/40 animate-pulse" />;
@@ -28,14 +19,10 @@ export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
 
   const handleClick = (index: number) => {
     if (mood) {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, { detail: { index, mood } }),
-      );
+      player.playMood(mood, index);
       return;
     }
-    window.dispatchEvent(
-      new CustomEvent(MINIPLAYER_PLAY_INDEX_EVENT, { detail: { index, mood } }),
-    );
+    player.playIndex(index);
   };
 
   const renderRow = (keyPrefix: string) =>

@@ -1,17 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Pause, Play, SkipBack, SkipForward, Music } from "lucide-react";
 import { PlaylistMarquee } from "./PlaylistMarquee";
-import {
-  MINIPLAYER_ACTIVITY_EVENT,
-  MINIPLAYER_NEXT_EVENT,
-  MINIPLAYER_PAUSE_EVENT,
-  MINIPLAYER_PLAY_MOOD_EVENT,
-  MINIPLAYER_PREV_EVENT,
-  MINIPLAYER_SET_PLAYLIST_EVENT,
-  MINIPLAYER_TRACK_EVENT,
-  type MiniPlayerActivity,
-  type MiniPlayerTrack,
-} from "./MiniPlayer";
+import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 /**
  * Inline Christian music player shown on religious ad detail pages.
@@ -19,9 +9,7 @@ import {
  * the Christian playlist. Clicking Play in the AdSlider (secular) swaps back.
  */
 export function ChristianMusicPanel({ businessName }: { businessName: string }) {
-  const [playing, setPlaying] = useState(false);
-  const [track, setTrack] = useState<MiniPlayerTrack | null>(null);
-  const [isReligiousActive, setIsReligiousActive] = useState(true);
+  const player = useMiniPlayerController("religious");
   const primedRef = useRef(false);
 
   // On mount, ask the global player to load the Christian playlist so this
@@ -29,83 +17,28 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
   useEffect(() => {
     if (primedRef.current) return;
     primedRef.current = true;
-    try {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, {
-          detail: { mood: "religious", force: true },
-        }),
-      );
-    } catch {
-      /* noop */
-    }
-  }, []);
+    player.setPlaylist("religious", true);
+  }, [player]);
 
-  useEffect(() => {
-    const onActivity = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerActivity>).detail;
-      setPlaying(Boolean(detail?.playing && detail.mood === "religious"));
-    };
-    const onTrack = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      if (detail?.mood === "religious") setTrack(detail);
-    };
-    const onSet = (e: Event) => {
-      const detail = (e as CustomEvent<{ mood: "secular" | "religious" }>).detail;
-      if (detail?.mood) setIsReligiousActive(detail.mood === "religious");
-    };
-    window.addEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-    window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSet);
-    return () => {
-      window.removeEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-      window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSet);
-    };
-  }, []);
-
-  const dispatch = (event: string) => {
-    try {
-      window.dispatchEvent(new CustomEvent(event));
-    } catch {
-      /* noop */
-    }
-  };
-
-  const ensureReligious = () => {
-    try {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, {
-          detail: { mood: "religious", force: true },
-        }),
-      );
-    } catch {
-      /* noop */
-    }
-  };
+  const showingActive = player.playing && player.activeMood === "religious";
 
   const handlePlayPause = () => {
-    if (playing && isReligiousActive) {
-      dispatch(MINIPLAYER_PAUSE_EVENT);
+    if (showingActive) {
+      player.pause();
     } else {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, {
-          detail: { mood: "religious", index: 0 },
-        }),
-      );
+      player.playMood("religious", 0);
     }
   };
 
   const handlePrev = () => {
-    ensureReligious();
-    dispatch(MINIPLAYER_PREV_EVENT);
+    player.setPlaylist("religious", true);
+    player.prev();
   };
 
   const handleNext = () => {
-    ensureReligious();
-    dispatch(MINIPLAYER_NEXT_EVENT);
+    player.setPlaylist("religious", true);
+    player.next();
   };
-
-  const showingActive = playing && isReligiousActive;
 
   return (
     <section
@@ -158,8 +91,8 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
               {showingActive ? "Now playing" : "Christian playlist"}
             </div>
             <div className="truncate text-sm font-semibold text-[#0F2A4A]">
-              {isReligiousActive && track?.title
-                ? track.title
+              {showingActive && player.track?.title
+                ? player.track.title
                 : "Tap play to start Christian music"}
             </div>
           </div>
