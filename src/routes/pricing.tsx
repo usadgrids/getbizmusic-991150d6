@@ -338,23 +338,27 @@ function PricingPage() {
                 foot traffic. It's all about community spirit and good vibes!
               </p>
             </div>
-            <div className="flex items-start gap-2">
-              <Ban size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
-              <p>
-                <span className="font-semibold text-[#0F2A4A]">Our refund policy:</span>{" "}
-                Once you complete your purchase, it's final — we're not able to offer refunds. This is
-                because your spot is reserved just for you for the full year, right when you buy it.
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <FileText size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
-              <p className="text-xs text-[#5a4a2c]">
-                Heads up, as California law requires (Civil Code § 1723), we're letting you know about
-                this no-refund policy before you purchase, not after. By completing your purchase,
-                you're confirming you saw this note ahead of time and you're all set with these terms.
-                Thanks so much for supporting local business! 🎉
-              </p>
-            </div>
+            {!isReligious && (
+              <>
+                <div className="flex items-start gap-2">
+                  <Ban size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
+                  <p>
+                    <span className="font-semibold text-[#0F2A4A]">Our refund policy:</span>{" "}
+                    Once you complete your purchase, it's final — we're not able to offer refunds. This is
+                    because your spot is reserved just for you for the full year, right when you buy it.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <FileText size={16} className="text-[#D4A24C] mt-0.5 shrink-0" />
+                  <p className="text-xs text-[#5a4a2c]">
+                    Heads up, as California law requires (Civil Code § 1723), we're letting you know about
+                    this no-refund policy before you purchase, not after. By completing your purchase,
+                    you're confirming you saw this note ahead of time and you're all set with these terms.
+                    Thanks so much for supporting local business! 🎉
+                  </p>
+                </div>
+              </>
+            )}
           </div>
 
             <div className="mt-5 space-y-3 border-t border-[#D4A24C]/40 pt-4">
@@ -378,28 +382,47 @@ function PricingPage() {
                   className="mt-0.5"
                 />
                 <Label htmlFor="agree-refund" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
-                  I understand and I'm good with the no-refund policy — once I purchase, it's final.
+                  {isReligious
+                    ? "I acknowledge this free ministry ad is a novelty community gesture — no guaranteed results, subject to the same content-review policy as paid ads."
+                    : "I understand and I'm good with the no-refund policy — once I purchase, it's final."}
                 </Label>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={startCheckout}
-            disabled={!canPay}
-            className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D4A24C]"
-          >
-            {loading ? "Starting…" : `Complete Purchase — $${discounted}`}
-          </button>
-          {!agreedTerms || !agreedNoRefund ? (
+          {isReligious ? (
+            <button
+              onClick={startFreeReligious}
+              disabled={!canPay || freeLoading}
+              className="mt-6 w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {freeLoading ? "Reserving your free spot…" : "Continue to Free Ministry Ad Submission"}
+            </button>
+          ) : (
+            <button
+              onClick={startCheckout}
+              disabled={!canPay}
+              className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D4A24C]"
+            >
+              {loading ? "Starting…" : `Complete Purchase — $${discounted}`}
+            </button>
+          )}
+          {!industry ? (
+            <p className="mt-2 text-xs text-center text-amber-700">
+              Please pick your business category above to continue.
+            </p>
+          ) : !agreedTerms || !agreedNoRefund ? (
             <p className="mt-2 text-xs text-center text-gray-500">
               Please confirm both boxes above to continue.
             </p>
           ) : null}
           <p className="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1.5">
-            <Shield size={12} /> Secure checkout. You'll get a receipt and unique submission link by email.
+            <Shield size={12} /> {isReligious
+              ? "You'll get a confirmation and your submission link by email."
+              : "Secure checkout. You'll get a receipt and unique submission link by email."}
           </p>
         </div>
+
       </main>
       <BizFooter />
     </div>
