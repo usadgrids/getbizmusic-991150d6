@@ -242,31 +242,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   }, [idx, duration, paused, ads.length, current]);
 
   // Listen to music player activity/track
-  useEffect(() => {
-    const onActivity = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerActivity>).detail;
-      setMusicPlaying(Boolean(detail?.playing));
-    };
-    const onTrack = (e: Event) => {
-      const detail = (e as CustomEvent<MiniPlayerTrack>).detail;
-      setTrackTitle(detail?.title ?? "");
-    };
-    const onSetPlaylist = (e: Event) => {
-      const detail = (e as CustomEvent<{ mood: MiniPlayerMood }>).detail;
-      if (detail?.mood === "secular" || detail?.mood === "religious") {
-        setActiveMusicMood(detail.mood);
-      }
-    };
-    window.addEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-    window.addEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
-    return () => {
-      window.removeEventListener(MINIPLAYER_ACTIVITY_EVENT, onActivity);
-      window.removeEventListener(MINIPLAYER_TRACK_EVENT, onTrack);
-      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
-    };
-  }, []);
-
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
   const slideMood: MiniPlayerMood = current && isReligiousIndustry(current.industry)
@@ -274,28 +249,16 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
     : "secular";
   const currentMood: MiniPlayerMood = musicMood ?? slideMood;
 
-  const ensureCurrentPlaylist = () => {
-    window.dispatchEvent(
-      new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, { detail: { mood: currentMood } }),
-    );
-  };
-
-  const dispatchMusic = (event: string) => {
-    ensureCurrentPlaylist();
-    window.dispatchEvent(new CustomEvent(event));
-  };
-
   const togglePlayPause = () => {
     if (musicPlaying && activeMusicMood === currentMood) {
-      window.dispatchEvent(new CustomEvent(MINIPLAYER_PAUSE_EVENT));
+      player.pause();
       setPaused(true);
     } else {
-      window.dispatchEvent(
-        new CustomEvent(MINIPLAYER_PLAY_MOOD_EVENT, { detail: { mood: currentMood } }),
-      );
+      player.playMood(currentMood);
       setPaused(false);
     }
   };
+
 
 
   return (
