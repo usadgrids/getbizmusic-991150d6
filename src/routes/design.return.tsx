@@ -143,10 +143,17 @@ function DesignReturn() {
 
         {state.status === "paid" && (
           <>
-            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-3 py-1.5 rounded-full">
-              <Check size={14} /> Payment received
+            <div className="bg-white rounded-2xl border border-emerald-200 p-6 sm:p-8 text-center shadow-sm">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-3">
+                <Check size={32} />
+              </div>
+              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0F2A4A]">Payment Complete</h1>
+              <p className="text-gray-600 mt-2">
+                Thank you! Your $49.95 payment was received{state.email ? <> and a receipt was sent to <strong>{state.email}</strong></> : ""}.
+              </p>
             </div>
-            <h1 className="mt-4 font-serif text-3xl font-bold text-[#0F2A4A]">Send us your business info</h1>
+
+            <h2 className="mt-8 font-serif text-2xl font-bold text-[#0F2A4A]">Next step: send us your business info</h2>
             <p className="text-gray-600 mt-2">
               Takes 2–3 minutes. We'll design your ad and email it back within 72 hours for your approval or revision.
             </p>
