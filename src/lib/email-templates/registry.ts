@@ -26,4 +26,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'ad-approved': adApprovedTemplate,
   'submit-reminder': submitReminderTemplate,
   'city-request-notification': cityRequestNotificationTemplate,
+  'design-receipt': designReceiptTemplate,
 }
