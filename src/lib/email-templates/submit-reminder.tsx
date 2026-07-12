@@ -100,6 +100,20 @@ const ctaButton: React.CSSProperties = {
   borderRadius: '6px', textDecoration: 'none', fontSize: '15px', display: 'inline-block', margin: '10px 0',
 }
 const smallLink: React.CSSProperties = { fontSize: '12px', color: '#6b7280', margin: '8px 0 0 0' }
+const proBox: React.CSSProperties = {
+  backgroundColor: '#FFF8EC', border: `2px solid ${GOLD}`, borderRadius: '10px',
+  padding: '18px', margin: '18px 0', textAlign: 'center' as const,
+}
+const proHeading: React.CSSProperties = {
+  fontSize: '15px', color: NAVY, fontWeight: 700, margin: '0 0 8px 0',
+}
+const proBody: React.CSSProperties = {
+  fontSize: '14px', lineHeight: '22px', color: '#3a2f1c', margin: '0 0 12px 0',
+}
+const proButton: React.CSSProperties = {
+  backgroundColor: NAVY, color: '#ffffff', fontWeight: 700, padding: '12px 22px',
+  borderRadius: '6px', textDecoration: 'none', fontSize: '15px', display: 'inline-block',
+}
 const hr: React.CSSProperties = { borderColor: '#e5e7eb', margin: '22px 0' }
 const footer: React.CSSProperties = { fontSize: '13px', color: '#6b7280', margin: '10px 0' }
 const footerSmall: React.CSSProperties = { fontSize: '11px', color: '#9ca3af', margin: '4px 0 0 0' }
