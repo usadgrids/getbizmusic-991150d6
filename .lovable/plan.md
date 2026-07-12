@@ -1,87 +1,69 @@
-
 ## Goal
 
-1. Massively expand the industry/category list on the ad submission form so it covers the full range of small businesses (car dealers, accountants, convenience stores, life insurance agents, business opportunities, and many more).
-2. Add three explicitly religious categories: **Churches, Religious Services, Ministries**.
-3. When the ad slider lands on an ad in one of those three religious categories, automatically swap the background music to a Christian YouTube playlist. Swap back to the regular playlist for any other category.
+Add a **free ad tier for religious categories** (Churches, Religious Services, Ministries) that skips Stripe checkout, gets a **12-second rotation (a $48/yr value, offered free)** to compensate viewers/advertisers for the Christian playlist swap, and collects ministry-specific intake fields. Existing prev/next slider controls already let viewers scrub back to a religious ad — the mood-swap effect will re-fire automatically.
 
-## How fast can the swap happen?
+---
 
-The MiniPlayer uses a single persistent YouTube IFrame player. Swapping playlists calls `player.loadPlaylist({ list: <new-id> })`:
+## 1. Pricing page — category gate + free-religious panel
 
-- No page reload — the iframe stays mounted.
-- Music from the new playlist typically begins in **~300–800 ms** (a bit longer on cold/mobile connections, roughly up to ~1 s).
-- The old track cuts out the instant we call `loadPlaylist`, so the silence gap is sub-second in the common case.
+Edit `src/routes/pricing.tsx`:
 
-Fast enough to feel intentional on 7–10 s ad rotations, but not frame-perfect. To avoid whiplash we only swap when the *mood class* actually changes (religious ↔ secular), not on every slide.
+- Add an **Industry / Category** dropdown (from `INDUSTRIES`) at the top of the pricing card, required before anything else activates.
+- When the selection is in `RELIGIOUS_INDUSTRY_VALUES` (church, religious_services, ministry):
+  - **Hide** the $24 / $48 tiles, rep-code field, and Stripe pay button.
+  - **Show** a "Church & Ministry Free Spot" panel:
+    > As a novelty gesture to the faith community, Get Biz Music gives churches, religious services, and ministries a **FREE 12-second ad rotation for one year — a $48 value** — the same premium duration as our Featured Slider Ad. This compensates viewers (and you) for the brief background-music swap to Christian music while your ad is on screen. Subject to the same content review as paid ads.
+  - Show a strikethrough badge: `$48/year value — FREE`.
+  - Keep the terms + novelty-consent checkboxes (swap the no-refund copy for novelty/no-guaranteed-results consent since $0 doesn't need a refund clause).
+  - Button: **"Continue to Free Ministry Ad Submission"** → calls new server fn, then `navigate({ to: "/submit", search: { token } })`.
+- Non-religious selection: page behaves exactly as today.
 
-## 1. Expanded category list
+## 2. Free-token server function
 
-Edit `src/lib/biz-utils.ts` and replace `INDUSTRIES` with a grouped, comprehensive list. Values are stable slugs (used in DB, search, filters); labels are what users see.
+New export in `src/lib/payments.functions.ts` — `createFreeReligiousSubmission`:
 
-Proposed set (grouped for readability; single flat array in code):
+- Input: `{ industry, customerEmail, agreedTerms, agreedNovelty }`; validate industry ∈ `RELIGIOUS_INDUSTRY_VALUES` and both booleans true.
+- Insert into `ad_payments`: `plan: "slider_10"` (the 12s value tier — see §4 note), `amount_cents: 0`, `status: "paid"`, `paid_at: now()`, consent columns filled, `rep_id/rep_code` null, `stripe_session_id: "free-religious-<uuid>"` synthetic.
+- Return `{ token }`.
 
-- **Food & Hospitality**: restaurant, cafe_coffee, bakery, food_truck, catering, bar_nightlife, hotel_lodging
-- **Retail & Shopping**: retail, convenience_store, grocery, liquor_store, boutique_apparel, jewelry, florist, gift_shop, thrift_secondhand, farmers_market
-- **Automotive**: auto_repair, auto_dealer, auto_body, tires_wheels, car_wash, towing, motorcycle_powersports, rv_boat
-- **Home & Trades**: home_services_general, plumbing, electrical, hvac, roofing, landscaping_lawn, pest_control, cleaning, moving_storage, handyman, painting, flooring, pool_spa, solar, locksmith
-- **Professional Services**: legal, accounting_tax, financial_advisor, insurance_general, life_insurance, health_insurance, auto_insurance, mortgage_lending, real_estate_agent, real_estate_broker, property_management, notary, marketing_agency, web_design_it, business_consulting, business_opportunities, franchise_opportunity, staffing_recruiting, printing_signs
-- **Health & Wellness**: healthcare_general, dental, chiropractic, optometry, physical_therapy, mental_health_counseling, medical_spa, veterinary, pharmacy, urgent_care, fitness_gym, personal_trainer, yoga_pilates, nutrition
-- **Beauty & Personal Care**: salon_hair, barbershop, nail_salon, spa_massage, tattoo_piercing, lash_brow, esthetician
-- **Family, Pets & Education**: childcare_daycare, tutoring, music_lessons, dance_school, martial_arts, private_school, pet_grooming, pet_boarding, dog_training
-- **Events & Creative**: photographer, videographer, event_planner, dj_entertainment, wedding_services, party_rentals
-- **Community & Nonprofit**: church, religious_services, ministry, nonprofit, community_org
-- **Other**: transportation_rideshare, delivery_courier, security_services, funeral_services, agriculture, other
+Extend `getPaymentByToken` to derive and return `freeReligious: amount_cents === 0` so the submit page knows to render the ministry section.
 
-Also export a small helper `RELIGIOUS_INDUSTRY_VALUES = ["church", "religious_services", "ministry"] as const` and a `isReligiousIndustry(value: string): boolean` so the slider and any future analytics share one source of truth.
+## 3. Submit form — ministry fields
 
-**Compatibility note:** existing rows in the DB already have values like `restaurant`, `legal`, `salon`, `auto`, `healthcare`, `realestate`, `retail`, `services`, `other`. Keep those literal values in the list (as legacy-compatible entries or by mapping their labels onto the new richer ones) so existing ads still resolve to a human label in `AdSlider`'s `industryLabel()` lookup. Concretely: keep `auto`, `salon`, `healthcare`, `realestate`, `services` as aliases pointing at sensible labels, and add the new granular slugs alongside them. No DB migration needed — `industry` is free-text.
+Edit `src/routes/submit.tsx`. When `verify.freeReligious === true`, render an extra **"Ministry Information"** section above the standard fields (all required):
 
-## 2. Two music playlists
+- Church / Ministry Name → mirrored into `business_name`
+- Church / Ministry Address (single field)
+- Name of Pastor / Leader → mirrored into `contact_name`
+- Phone Number → mirrored into `phone`
+- Attestation block, all three checkboxes required:
+  - `[ ] We are a non-profit 501(c)(3) organization.`
+  - Radio: `( ) We DO have an IRS non-profit number: [___]` vs `( ) We DO NOT have an IRS non-profit number.`
+  - `[ ] I attest we are an independent religious ministry operating in good faith.`
+  - `[ ] I understand this free ad is a novelty community gesture with no guaranteed views or business results, subject to the same content-review policy as paid ads.`
 
-In `src/components/biz/MiniPlayer.tsx`:
+Standard image upload + "I'm not ready — email me my submission link" escape hatch stay unchanged. The existing `submit-reminder` email already advertises the $49.95 Pro Ad Design offer, so religious submitters see the same offer if they defer.
 
-- Keep `PLAYLIST_ID` as the default (secular) playlist.
-- Add `CHRISTIAN_PLAYLIST_ID` (you'll supply the YouTube playlist ID — the part after `list=` in the playlist URL; placeholder until then).
-- Add a new event constant `MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist"` with payload `{ mood: "secular" | "religious" }`.
-- Track the currently loaded mood in a ref. On event:
-  - If the mood matches the current mood → no-op (do NOT interrupt playback).
-  - If it changes → call `player.loadPlaylist({ listType: "playlist", list: <chosenId>, index: randomIndex })`, preserve mute/volume, and re-publish the playlist via `MINIPLAYER_PLAYLIST_EVENT` so the marquee updates.
-  - If the user has manually paused music, update the queued playlist but do NOT call `playVideo()` — respect their pause.
+Ministry attestation payload is included in the **admin notification email** (no DB migration this turn). Ask us later if you want it persisted to a new `ministry_info jsonb` column.
 
-## 3. AdSlider: emit mood on ad change
+## 4. Ad slider — 12-second religious duration + scrub-back music swap
 
-In `src/components/biz/AdSlider.tsx`:
+- `ads.functions.ts` (submission → live ad flow): when the source `ad_payments` row is free-religious, persist the resulting ad with `duration_seconds: 12` and `ad_type: "slider_10"` so `resolveDuration()` in `AdSlider` naturally yields 12s. (Alternatively add `AD_PLANS.religious_free = { seconds: 12, price: 0, label: "Church / Ministry Free Spot" }` — but reusing `slider_10` avoids UI-label churn everywhere. **Chosen: reuse `slider_10`, persist `duration_seconds = 12` explicitly.**)
+- `AdSlider.tsx` — no logic change needed for scrub-back:
+  - Prev/next arrows already exist (line 520, `setIdx((i - 1 + n) % n)`).
+  - The mood-swap `useEffect` shipped last turn is keyed on `current?.id` / `current?.industry` and fires whenever mood transitions — so clicking back to a religious ad re-fires the Christian playlist swap, and forward again to a secular ad restores the regular playlist. This works with mouse click, keyboard, and any touch-swipe wiring already in place.
+  - Verify after build: click the left arrow while on a secular ad following a religious one; confirm music swaps back to Christian in ~300–800 ms.
 
-- Import `isReligiousIndustry` and `MINIPLAYER_SET_PLAYLIST_EVENT`.
-- Add a `lastMoodRef` and an effect keyed on `current?.id`:
-  - Compute `mood = isReligiousIndustry(current.industry) ? "religious" : "secular"`.
-  - If `mood !== lastMoodRef.current`, dispatch `new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, { detail: { mood } })` and update the ref.
-- No visual change to the slider itself.
+## 5. Files touched
 
-## 4. Surfaces that consume the category list (auto-updated)
+- `src/routes/pricing.tsx` — industry dropdown gate, religious free-panel branch, free-submission handoff.
+- `src/lib/payments.functions.ts` — `createFreeReligiousSubmission`; `freeReligious` flag on `getPaymentByToken`.
+- `src/routes/submit.tsx` — conditional ministry section, mirror-into-standard-fields on submit, attach ministry payload to admin notification.
+- `src/lib/ads.functions.ts` — accept ministry info; force `duration_seconds: 12` and `ad_type: "slider_10"` for free-religious submissions; forward ministry payload to admin email.
 
-The following already read from `INDUSTRIES` and will pick up the new entries with no code change:
+## 6. Non-goals
 
-- Submit form (industry dropdown).
-- Admin / edit-ad screens.
-- `AdSlider` search suggestions and label rendering.
-
-Double-check `src/routes/submit.tsx`, `src/routes/edit-ad.tsx`, and `src/routes/admin.tsx` after the change to confirm the dropdown renders the fuller list cleanly (may want to visually group with `<optgroup>` — optional polish).
-
-## 5. Non-goals (out of scope this turn)
-
-- No per-ad music override (only category drives it).
-- No crossfade — the YT IFrame API doesn't expose one from a single player.
-- No pricing changes for church/ministry ads — they use existing ad plans.
-- No DB migration.
-
-## Technical notes
-
-Files touched:
-- `src/lib/biz-utils.ts` — expanded `INDUSTRIES`, add `RELIGIOUS_INDUSTRY_VALUES`, `isReligiousIndustry`.
-- `src/components/biz/MiniPlayer.tsx` — second playlist ID, `MINIPLAYER_SET_PLAYLIST_EVENT`, mood-aware `loadPlaylist` handler.
-- `src/components/biz/AdSlider.tsx` — dispatch mood on current-ad change.
-
-Need from you:
-- The **YouTube playlist ID** for the Christian music playlist (the value after `list=` in the URL). Until you provide it, I'll wire in a clearly-marked placeholder constant so the code compiles and the swap logic can be tested with a temporary playlist.
+- No DB migration (ministry attestation lives in the admin email + client-side enforcement).
+- No new email templates — reminder already advertises $49.95 design.
+- No new pricing tier row in `AD_PLANS` — free religious reuses `slider_10` at `$0` in the DB row; the pricing-page copy displays the "$48 value — FREE" framing.
+- No changes to the mood-swap event contract shipped last turn.

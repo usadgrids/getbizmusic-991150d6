@@ -164,7 +164,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
   });
 
 type TokenLookupResult =
-  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean }
+  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; freeReligious: boolean }
   | { found: false; reason: string };
 
 export const getPaymentByToken = createServerFn({ method: "POST" })
@@ -173,7 +173,7 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ad_payments")
-      .select("submission_token, plan, customer_email, token_used, status")
+      .select("submission_token, plan, customer_email, token_used, status, amount_cents")
       .eq("submission_token", data.token)
       .maybeSingle();
     if (error || !row) return { found: false, reason: "Invalid or unknown token" };
@@ -184,7 +184,58 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
       plan: row.plan as "image_5" | "slider_10",
       email: row.customer_email as string,
       tokenUsed: row.token_used as boolean,
+      freeReligious: Number(row.amount_cents ?? 0) === 0,
     };
+  });
+
+const RELIGIOUS_INDUSTRIES = ["church", "religious_services", "ministry"] as const;
+
+export const createFreeReligiousSubmission = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    industry: string;
+    customerEmail: string;
+    agreedTerms: boolean;
+    agreedNovelty: boolean;
+  }) =>
+    z.object({
+      industry: z.enum(RELIGIOUS_INDUSTRIES),
+      customerEmail: z.string().trim().email().max(255),
+      agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
+      agreedNovelty: z.literal(true, { message: "You must acknowledge the novelty terms" }),
+    }).parse(data)
+  )
+  .handler(async ({ data }): Promise<{ token: string } | { error: string }> => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const agreedAt = new Date().toISOString();
+      const ipAddress = getClientIp();
+      const syntheticSession = `free-religious-${crypto.randomUUID()}`;
+      const { data: inserted, error } = await supabaseAdmin
+        .from("ad_payments")
+        .insert({
+          stripe_session_id: syntheticSession,
+          customer_email: data.customerEmail,
+          plan: "slider_10",
+          amount_cents: 0,
+          status: "paid",
+          paid_at: agreedAt,
+          environment: "sandbox",
+          agreed_terms: true,
+          agreed_no_refund: true,
+          agreed_at: agreedAt,
+          disclosure_version: DISCLOSURE_VERSION,
+          ip_address: ipAddress,
+        })
+        .select("submission_token")
+        .maybeSingle();
+      if (error || !inserted?.submission_token) {
+        return { error: error?.message ?? "Could not create free ministry spot" };
+      }
+      return { token: inserted.submission_token as string };
+    } catch (e) {
+      console.error("createFreeReligiousSubmission error:", e);
+      return { error: e instanceof Error ? e.message : "Unexpected error" };
+    }
   });
 
 export const lookupCheckoutBySession = createServerFn({ method: "POST" })

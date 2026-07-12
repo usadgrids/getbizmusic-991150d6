@@ -7,7 +7,7 @@ import { ArrowLeft, Upload, Check, AlertCircle, Lock, Loader2 } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { createSubmission, scheduleSubmissionReminder } from "@/lib/ads.functions";
 import { getPaymentByToken } from "@/lib/payments.functions";
-import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
 import type { UsCity } from "@/lib/us-cities";
@@ -43,7 +43,7 @@ function SubmitPage() {
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
 
-  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string }>(
+  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean }>(
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
@@ -55,6 +55,18 @@ function SubmitPage() {
   const [reminderSent, setReminderSent] = useState(false);
   const [city, setCity] = useState<UsCity | null>(null);
 
+  // Ministry-only state (used when verify.freeReligious is true)
+  const [ministryIndustry, setMinistryIndustry] = useState<string>("church");
+  const [churchName, setChurchName] = useState("");
+  const [churchAddress, setChurchAddress] = useState("");
+  const [pastorName, setPastorName] = useState("");
+  const [ministryPhone, setMinistryPhone] = useState("");
+  const [is501c3, setIs501c3] = useState(false);
+  const [irsChoice, setIrsChoice] = useState<"have" | "dont" | "">("");
+  const [irsNumber, setIrsNumber] = useState("");
+  const [attestIndependent, setAttestIndependent] = useState(false);
+  const [attestNovelty, setAttestNovelty] = useState(false);
+
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
@@ -65,7 +77,7 @@ function SubmitPage() {
         if (!res.found) {
           setVerify({ status: "bad", reason: res.reason });
         } else {
-          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed });
+          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious });
         }
       } catch (e) {
         if (!cancelled) setVerify({ status: "bad", reason: e instanceof Error ? e.message : "Verification failed" });
@@ -123,16 +135,74 @@ function SubmitPage() {
     if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
-    const fd = new FormData(e.currentTarget);
-    const raw = {
-      business_name: String(fd.get("business_name") ?? ""),
-      contact_name: String(fd.get("contact_name") ?? ""),
-      email: String(fd.get("email") ?? verify.email ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      website_url: String(fd.get("website_url") ?? ""),
-      industry: String(fd.get("industry") ?? ""),
-      tagline: String(fd.get("tagline") ?? ""),
-    };
+    // Religious/free path: validate ministry fields and mirror into standard.
+    let ministry_info: {
+      church_name: string;
+      church_address: string;
+      pastor_name: string;
+      phone: string;
+      is_501c3: boolean;
+      has_irs_number: boolean;
+      irs_number?: string;
+      attest_independent_ministry: true;
+      attest_novelty: true;
+    } | undefined;
+
+    let effectiveIndustry: string;
+    let raw: Record<string, string>;
+
+    if (verify.freeReligious) {
+      if (!RELIGIOUS_INDUSTRY_VALUES.includes(ministryIndustry as typeof RELIGIOUS_INDUSTRY_VALUES[number])) {
+        toast.error("Please choose a ministry category"); return;
+      }
+      if (!churchName.trim() || !churchAddress.trim() || !pastorName.trim() || !ministryPhone.trim()) {
+        toast.error("Please fill in every Ministry Information field"); return;
+      }
+      if (!is501c3) { toast.error("Please confirm 501(c)(3) status"); return; }
+      if (irsChoice !== "have" && irsChoice !== "dont") {
+        toast.error("Please indicate whether you have an IRS non-profit number"); return;
+      }
+      if (irsChoice === "have" && !irsNumber.trim()) {
+        toast.error("Please enter your IRS non-profit number"); return;
+      }
+      if (!attestIndependent) { toast.error("Please attest that you are an independent religious ministry"); return; }
+      if (!attestNovelty) { toast.error("Please acknowledge the novelty terms"); return; }
+
+      effectiveIndustry = ministryIndustry;
+      raw = {
+        business_name: churchName.trim(),
+        contact_name: pastorName.trim(),
+        email: verify.email ?? "",
+        phone: ministryPhone.trim(),
+        website_url: "",
+        industry: effectiveIndustry,
+        tagline: "",
+      };
+      ministry_info = {
+        church_name: churchName.trim(),
+        church_address: churchAddress.trim(),
+        pastor_name: pastorName.trim(),
+        phone: ministryPhone.trim(),
+        is_501c3: true,
+        has_irs_number: irsChoice === "have",
+        irs_number: irsChoice === "have" ? irsNumber.trim() : "",
+        attest_independent_ministry: true,
+        attest_novelty: true,
+      };
+    } else {
+      const fd = new FormData(e.currentTarget);
+      raw = {
+        business_name: String(fd.get("business_name") ?? ""),
+        contact_name: String(fd.get("contact_name") ?? ""),
+        email: String(fd.get("email") ?? verify.email ?? ""),
+        phone: String(fd.get("phone") ?? ""),
+        website_url: String(fd.get("website_url") ?? ""),
+        industry: String(fd.get("industry") ?? ""),
+        tagline: String(fd.get("tagline") ?? ""),
+      };
+      effectiveIndustry = raw.industry;
+    }
+
     const parsed = formSchema.safeParse(raw);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Please check the form"); return; }
 
@@ -150,6 +220,7 @@ function SubmitPage() {
         submission_token: token,
         requested_city_name: city.name,
         requested_state_code: city.stateCode,
+        ...(ministry_info ? { ministry_info } : {}),
       } });
       setDone(true);
     } catch (err) {
@@ -159,6 +230,7 @@ function SubmitPage() {
       setSubmitting(false);
     }
   };
+
 
   // --- Guard states ---
   if (verify.status === "checking") {
@@ -250,6 +322,7 @@ function SubmitPage() {
   // --- Form (verified) ---
   const plan = verify.plan!;
   const p = AD_PLANS[plan];
+  const isMinistry = !!verify.freeReligious;
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -257,10 +330,16 @@ function SubmitPage() {
         <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
-        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submit Your Business Ad</h1>
+        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">
+          {isMinistry ? "Submit Your Ministry Ad (Free)" : "Submit Your Business Ad"}
+        </h1>
         <div className="mt-3 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-3 py-1.5 rounded-full">
-          <Check size={14} /> Payment verified — {p.label} (${p.price}/yr, {p.seconds}s rotation)
+          <Check size={14} /> {isMinistry
+            ? "Free Ministry Spot verified — 12-second rotation ($48/yr value)"
+            : `Payment verified — ${p.label} ($${p.price}/yr, ${p.seconds}s rotation)`}
         </div>
+
+
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
           {/* Prominent size spec */}
@@ -320,21 +399,107 @@ function SubmitPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
-            <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
-            <Field name="email" type="email" label="Email" required placeholder="tony@example.com" defaultValue={verify.email} />
-            <Field name="phone" label="Phone" required placeholder="555-555-1234" />
-            <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
-            <div>
-              <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
-              <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
-                <option value="" disabled>Pick one…</option>
-                {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
-              </select>
+          {isMinistry ? (
+            <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 p-5 space-y-4">
+              <div>
+                <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">Ministry Information</h2>
+                <p className="text-sm text-gray-600 mt-0.5">Required for your free 12-second ministry ad spot.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Ministry category <span className="text-red-500">*</span></label>
+                <select
+                  value={ministryIndustry}
+                  onChange={(e) => setMinistryIndustry(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white"
+                >
+                  {RELIGIOUS_INDUSTRY_VALUES.map((v) => {
+                    const label = INDUSTRIES.find((i) => i.value === v)?.label ?? v;
+                    return <option key={v} value={v}>{label}</option>;
+                  })}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Church / Ministry Name <span className="text-red-500">*</span></label>
+                  <input value={churchName} onChange={(e) => setChurchName(e.target.value)} maxLength={200} placeholder="Grace Community Church"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Name of Pastor / Leader <span className="text-red-500">*</span></label>
+                  <input value={pastorName} onChange={(e) => setPastorName(e.target.value)} maxLength={200} placeholder="Pastor John Smith"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Church / Ministry Address <span className="text-red-500">*</span></label>
+                  <input value={churchAddress} onChange={(e) => setChurchAddress(e.target.value)} maxLength={300} placeholder="123 Main St, City, State ZIP"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Phone Number <span className="text-red-500">*</span></label>
+                  <input value={ministryPhone} onChange={(e) => setMinistryPhone(e.target.value)} maxLength={40} placeholder="555-555-1234"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Contact Email</label>
+                  <input value={verify.email ?? ""} readOnly disabled
+                    className="w-full border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-600" />
+                </div>
+              </div>
+
+              <div className="border-t border-emerald-200 pt-4 space-y-3">
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={is501c3} onChange={(e) => setIs501c3(e.target.checked)} className="mt-1" />
+                  <span>We are a non-profit <strong>501(c)(3)</strong> organization.</span>
+                </label>
+
+                <div className="pl-6 space-y-2">
+                  <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                    <input type="radio" name="irs_choice" checked={irsChoice === "have"} onChange={() => setIrsChoice("have")} className="mt-1" />
+                    <span>We <strong>DO</strong> have an IRS non-profit number:</span>
+                  </label>
+                  {irsChoice === "have" && (
+                    <input value={irsNumber} onChange={(e) => setIrsNumber(e.target.value)} maxLength={40} placeholder="e.g. 12-3456789"
+                      className="ml-6 w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]" />
+                  )}
+                  <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                    <input type="radio" name="irs_choice" checked={irsChoice === "dont"} onChange={() => setIrsChoice("dont")} className="mt-1" />
+                    <span>We <strong>DO NOT</strong> have an IRS non-profit number.</span>
+                  </label>
+                </div>
+
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={attestIndependent} onChange={(e) => setAttestIndependent(e.target.checked)} className="mt-1" />
+                  <span>I attest that we are an <strong>independent religious ministry</strong> operating in good faith.</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
+                  <input type="checkbox" checked={attestNovelty} onChange={(e) => setAttestNovelty(e.target.checked)} className="mt-1" />
+                  <span>I understand this free ad is a novelty community gesture with no guaranteed views, plays, or business results, subject to the same content-review policy as paid ads.</span>
+                </label>
+              </div>
             </div>
-          </div>
-          <Field name="tagline" label="Short tagline (optional, max 80 chars)" maxLength={80} placeholder="Wood-fired flavor, Italian tradition" />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
+                <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
+                <Field name="email" type="email" label="Email" required placeholder="tony@example.com" defaultValue={verify.email} />
+                <Field name="phone" label="Phone" required placeholder="555-555-1234" />
+                <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
+                  <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
+                    <option value="" disabled>Pick one…</option>
+                    {INDUSTRIES.filter((i) => !RELIGIOUS_INDUSTRY_VALUES.includes(i.value as typeof RELIGIOUS_INDUSTRY_VALUES[number])).map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+          {!isMinistry && (
+            <Field name="tagline" label="Short tagline (optional, max 80 chars)" maxLength={80} placeholder="Wood-fired flavor, Italian tradition" />
+          )}
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 flex gap-3">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />

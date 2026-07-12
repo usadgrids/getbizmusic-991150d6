@@ -204,6 +204,18 @@ async function resolveOrCreateCity(name: string, stateCode: string): Promise<str
 }
 
 
+const ministryInfoSchema = z.object({
+  church_name: z.string().trim().min(1).max(200),
+  church_address: z.string().trim().min(1).max(300),
+  pastor_name: z.string().trim().min(1).max(200),
+  phone: z.string().trim().min(7).max(40),
+  is_501c3: z.boolean(),
+  has_irs_number: z.boolean(),
+  irs_number: z.string().trim().max(40).optional().or(z.literal("")),
+  attest_independent_ministry: z.literal(true),
+  attest_novelty: z.literal(true),
+});
+
 const submissionSchema = z.object({
   business_name: z.string().trim().min(1).max(120),
   contact_name: z.string().trim().min(1).max(120),
@@ -216,6 +228,7 @@ const submissionSchema = z.object({
   submission_token: z.string().uuid(),
   requested_city_name: z.string().trim().min(1).max(120),
   requested_state_code: z.string().trim().length(2).regex(/^[A-Za-z]{2}$/),
+  ministry_info: ministryInfoSchema.optional(),
 });
 
 export const createSubmission = createServerFn({ method: "POST" })
@@ -275,8 +288,40 @@ export const createSubmission = createServerFn({ method: "POST" })
       console.error("submission-received enqueue failed:", e);
     }
 
+    // Ministry / religious submission — notify admin with attestation payload.
+    if (data.ministry_info) {
+      try {
+        const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+        const m = data.ministry_info;
+        await enqueueTransactionalEmailInternal({
+          templateName: "city-request-notification",
+          recipientEmail: "ralphposadas29@gmail.com",
+          idempotencyKey: `ministry-submission-${data.submission_token}`,
+          templateData: {
+            cityName: `FREE MINISTRY AD: ${m.church_name}`,
+            stateCode: `${data.requested_city_name}, ${stateCode}`,
+            requesterEmail: data.email,
+            notes: [
+              `Industry: ${data.industry}`,
+              `Church / Ministry: ${m.church_name}`,
+              `Address: ${m.church_address}`,
+              `Pastor / Leader: ${m.pastor_name}`,
+              `Phone: ${m.phone}`,
+              `501(c)(3): ${m.is_501c3 ? "Yes" : "No"}`,
+              `IRS Non-Profit #: ${m.has_irs_number ? (m.irs_number || "(number not provided)") : "We DO NOT have an IRS non-profit number"}`,
+              `Attests independent religious ministry: ${m.attest_independent_ministry ? "Yes" : "No"}`,
+              `Attests novelty terms: ${m.attest_novelty ? "Yes" : "No"}`,
+            ].join("\n"),
+          },
+        });
+      } catch (e) {
+        console.error("ministry admin notification failed:", e);
+      }
+    }
+
     return { ok: true as const };
   });
+
 
 // Submitter isn't ready yet — email them their private submission link so
 // they can come back later. Token stays valid until used.
