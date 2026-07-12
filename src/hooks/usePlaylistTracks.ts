@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   MINIPLAYER_PLAYLIST_EVENT,
   type MiniPlayerMood,
   type MiniPlayerPlaylist,
 } from "@/components/biz/MiniPlayer";
+import { getYouTubePlaylistTracks } from "@/lib/playlists.functions";
 
 export type PlaylistTrack = { videoId: string; title: string };
 
@@ -22,6 +24,7 @@ async function fetchTitle(videoId: string): Promise<PlaylistTrack> {
 }
 
 export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
+  const fetchPlaylistTracks = useServerFn(getYouTubePlaylistTracks);
   const [playlists, setPlaylists] = useState<Partial<Record<MiniPlayerMood, string[]>>>({});
   const [currentMood, setCurrentMood] = useState<MiniPlayerMood>(preferredMood ?? "secular");
 
@@ -47,17 +50,28 @@ export function usePlaylistTracks(preferredMood?: MiniPlayerMood) {
   }, []);
 
   const videoIds = playlists[preferredMood ?? currentMood] ?? [];
+  const mood = preferredMood ?? currentMood;
+
+  const playlistQuery = useQuery({
+    queryKey: ["yt-playlist-feed", mood],
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 7 * 24 * 60 * 60 * 1000,
+    queryFn: () => fetchPlaylistTracks({ data: { mood } }),
+  });
 
   const query = useQuery({
     queryKey: ["yt-playlist-titles", videoIds.join(",")],
-    enabled: videoIds.length > 0,
+    enabled: playlistQuery.data == null && videoIds.length > 0,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 7 * 24 * 60 * 60 * 1000,
     queryFn: async () => Promise.all(videoIds.map(fetchTitle)),
   });
 
   const tracks: PlaylistTrack[] =
-    query.data ?? videoIds.map((id) => ({ videoId: id, title: "Loading…" }));
+    playlistQuery.data ?? query.data ?? videoIds.map((id) => ({ videoId: id, title: "Loading…" }));
 
-  return { tracks, isLoading: videoIds.length === 0 || query.isLoading };
+  return {
+    tracks,
+    isLoading: playlistQuery.isLoading || (tracks.length === 0 && query.isLoading),
+  };
 }
