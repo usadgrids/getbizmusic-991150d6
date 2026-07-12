@@ -89,8 +89,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const hideTimerRef = useRef<number | null>(null);
-  const searchIdleTimerRef = useRef<number | null>(null);
   const shareResumeTimerRef = useRef<number | null>(null);
   const remainingRef = useRef<number>(0);
   const resumeRemainingRef = useRef<number | null>(null);
@@ -142,65 +140,15 @@ export function AdSlider({ ads, title, featured = false }: Props) {
       .slice(0, 6);
   }, [searchQuery, ads]);
 
-  const clearPeekTimer = () => {
-    if (hideTimerRef.current) {
-      window.clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-  };
-
-  const clearSearchIdleTimer = () => {
-    if (searchIdleTimerRef.current) {
-      window.clearTimeout(searchIdleTimerRef.current);
-      searchIdleTimerRef.current = null;
-    }
-  };
-
-  const showSearchPeek = () => {
-    if (searchOpen) return;
-    setHovered(true);
-    clearPeekTimer();
-    hideTimerRef.current = window.setTimeout(() => {
-      setHovered(false);
-      hideTimerRef.current = null;
-    }, 2000);
-  };
-
-
   const pickAd = (adId: string) => {
     const i = ads.findIndex((a) => a.id === adId);
     if (i >= 0) setIdx(i);
     setSearchQuery("");
-    setSearchOpen(false);
-    setHovered(false);
-    clearPeekTimer();
-    clearSearchIdleTimer();
+    setSearchFocused(false);
+    searchInputRef.current?.blur();
   };
 
-  useEffect(() => {
-    if (searchOpen) {
-      setTimeout(() => searchInputRef.current?.focus(), 50);
-    }
-  }, [searchOpen]);
 
-  useEffect(() => {
-    return () => {
-      clearPeekTimer();
-      clearSearchIdleTimer();
-    };
-  }, []);
-
-  useEffect(() => {
-    clearSearchIdleTimer();
-    if (searchOpen && searchQuery.trim() === "") {
-      searchIdleTimerRef.current = window.setTimeout(() => {
-        setSearchOpen(false);
-        setHovered(false);
-        searchIdleTimerRef.current = null;
-      }, 3000);
-    }
-    return () => clearSearchIdleTimer();
-  }, [searchOpen, searchQuery]);
   // Track the latest displayed remaining time so pausing can resume from it.
   useEffect(() => {
     remainingRef.current = timeLeft;
