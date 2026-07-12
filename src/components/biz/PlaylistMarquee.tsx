@@ -4,11 +4,12 @@ import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
 import {
   MINIPLAYER_PLAY_INDEX_EVENT,
   MINIPLAYER_TRACK_EVENT,
+  type MiniPlayerMood,
   type MiniPlayerTrack,
 } from "./MiniPlayer";
 
-export function PlaylistMarquee() {
-  const { tracks, isLoading } = usePlaylistTracks();
+export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
+  const { tracks, isLoading } = usePlaylistTracks(mood);
   const [currentTitle, setCurrentTitle] = useState<string>("");
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function PlaylistMarquee() {
 
   const handleClick = (index: number) => {
     window.dispatchEvent(
-      new CustomEvent(MINIPLAYER_PLAY_INDEX_EVENT, { detail: { index } }),
+      new CustomEvent(MINIPLAYER_PLAY_INDEX_EVENT, { detail: { index, mood } }),
     );
   };
 

@@ -222,6 +222,7 @@ function AdLanding() {
           </div>
           <AdSlider
             ads={sliderAds.length > 0 ? sliderAds : ads}
+            musicMood="secular"
             title={
               relatedAds.length > 0
                 ? `More ${industry} in ${ad.city_name ?? "your area"}`
@@ -229,7 +230,7 @@ function AdLanding() {
             }
           />
           <div className="mt-6">
-            <PlaylistMarquee />
+            <PlaylistMarquee mood="secular" />
           </div>
           <div className="mt-4 text-center">
             <Link
@@ -242,7 +243,7 @@ function AdLanding() {
         </div>
       </main>
       <BizFooter />
-      <MiniPlayer />
+      <MiniPlayer initialMood={isReligious ? "religious" : "secular"} />
     </div>
   );
 }

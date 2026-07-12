@@ -32,7 +32,7 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
     try {
       window.dispatchEvent(
         new CustomEvent(MINIPLAYER_SET_PLAYLIST_EVENT, {
-          detail: { mood: "religious" },
+          detail: { mood: "religious", force: true },
         }),
       );
     } catch {
@@ -166,7 +166,7 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
           <div className="mb-1 text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
             Browse songs · click any title to play
           </div>
-          <PlaylistMarquee />
+          <PlaylistMarquee mood="religious" />
         </div>
       </div>
     </section>
