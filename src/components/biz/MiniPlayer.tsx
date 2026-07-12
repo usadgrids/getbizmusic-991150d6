@@ -176,6 +176,7 @@ export function MiniPlayer() {
   const playSucceededRef = useRef(false);
   const pauseRequestedRef = useRef(false);
   const volumeRef = useRef(100);
+  const currentMoodRef = useRef<MiniPlayerMood>("secular");
 
   const clearResumeFallback = useCallback(() => {
     if (resumeFallbackRef.current) {
