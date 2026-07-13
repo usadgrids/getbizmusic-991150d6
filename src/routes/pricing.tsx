@@ -200,13 +200,11 @@ function PricingPage() {
             <p className="text-sm text-[#0F2A4A]/90 mt-3 leading-relaxed">
               As a novelty gesture to the faith community, Get Biz Music offers churches, religious
               services, and ministries a <strong>free 12-second ad rotation for one year</strong> —
-              the same premium duration as our Featured Slider Ad. The extra seconds compensate
-              viewers (and you) for the brief background-music swap to Christian music while your ad
-              is on screen. Subject to the same content review as paid ads.
+              the same premium duration as our Featured Slider Ad. Subject to the same content
+              review as paid ads.
             </p>
             <ul className="mt-4 space-y-1.5 text-sm text-gray-700">
               <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> 12-second rotation ($48/yr value)</li>
-              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Christian music plays while your ad is on screen</li>
               <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Nationwide visibility, all year</li>
               <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Admin reviewed within 24 hours</li>
             </ul>
