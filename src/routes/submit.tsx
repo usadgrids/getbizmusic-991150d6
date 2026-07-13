@@ -14,6 +14,7 @@ import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
   token: z.string().uuid().optional(),
+  industry: z.string().optional(),
 });
 
 export const Route = createFileRoute("/submit")({
