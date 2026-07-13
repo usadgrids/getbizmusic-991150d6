@@ -3,13 +3,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ExternalLink } from "lucide-react";
 import { getAdByNumber, getActiveAds } from "@/lib/ads.functions";
-import { INDUSTRIES, isReligiousIndustry } from "@/lib/biz-utils";
+import { INDUSTRIES } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
-import { ChristianMusicPanel } from "@/components/biz/ChristianMusicPanel";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 
 const SITE = "https://www.getbizmusic.com";
@@ -108,7 +107,6 @@ function AdLanding() {
     INDUSTRIES.find((i) => i.value === ad.industry)?.label ?? ad.industry;
   const relatedAds = ads.filter((a) => a.industry === ad.industry && a.id !== ad.id);
   const sliderAds = relatedAds.length > 0 ? relatedAds : ads.filter((a) => a.id !== ad.id);
-  const isReligious = isReligiousIndustry(ad.industry);
 
   const Img = (
     <img
@@ -208,8 +206,6 @@ function AdLanding() {
           </div>
         </div>
 
-        {isReligious && <ChristianMusicPanel businessName={ad.business_name} />}
-
         <div className="mt-10">
 
 
@@ -222,7 +218,6 @@ function AdLanding() {
           </div>
           <AdSlider
             ads={sliderAds.length > 0 ? sliderAds : ads}
-            musicMood="secular"
             title={
               relatedAds.length > 0
                 ? `More ${industry} in ${ad.city_name ?? "your area"}`
@@ -230,7 +225,7 @@ function AdLanding() {
             }
           />
           <div className="mt-6">
-            <PlaylistMarquee mood="secular" />
+            <PlaylistMarquee />
           </div>
           <div className="mt-4 text-center">
             <Link
@@ -243,7 +238,7 @@ function AdLanding() {
         </div>
       </main>
       <BizFooter />
-      <MiniPlayer initialMood={isReligious ? "religious" : "secular"} />
+      <MiniPlayer />
     </div>
   );
 }

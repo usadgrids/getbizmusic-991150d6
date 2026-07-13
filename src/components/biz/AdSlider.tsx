@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -19,8 +19,6 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import { ChristianMusicPanel } from "./ChristianMusicPanel";
-import { type MiniPlayerMood } from "./MiniPlayer";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 function SlideTimer({
@@ -61,7 +59,6 @@ interface Props {
   ads: PublicAd[];
   title: string;
   featured?: boolean;
-  musicMood?: MiniPlayerMood;
 }
 
 // Resolve the authoritative rotation seconds for an ad. Always prefer the
@@ -75,13 +72,11 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
+export function AdSlider({ ads, title, featured = false }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const currentMood: MiniPlayerMood = musicMood ?? "secular";
-  const player = useMiniPlayerController(currentMood);
+  const player = useMiniPlayerController();
   const musicPlaying = player.playing;
-  const activeMusicMood = player.activeMood;
   const trackTitle = player.track?.title ?? "";
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -93,10 +88,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [videoNonce, setVideoNonce] = useState(0);
   const videoLeaveTimerRef = useRef<number | null>(null);
   const wasMusicPlayingRef = useRef(false);
-  const [christianActive, setChristianActive] = useState(false);
-  const christianLeaveTimerRef = useRef<number | null>(null);
-  const christianWasPlayingRef = useRef(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
 
   const handleShareOpen = () => {
     setPaused(true);
@@ -169,79 +160,12 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   useEffect(() => {
     return () => {
       if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
-      if (christianLeaveTimerRef.current) window.clearTimeout(christianLeaveTimerRef.current);
     };
   }, []);
 
   const currentVideoId = parseYoutubeId(current?.youtube_url);
-  const currentIsReligious = current ? isReligiousIndustry(current.industry) : false;
 
-  // Auto-dismiss the Christian hover when the slide changes away from a religious ad.
-  useEffect(() => {
-    if (!currentIsReligious && christianActive) {
-      deactivateChristian(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, currentIsReligious]);
 
-  const activateChristian = () => {
-    if (!currentIsReligious) return;
-    if (christianLeaveTimerRef.current) {
-      window.clearTimeout(christianLeaveTimerRef.current);
-      christianLeaveTimerRef.current = null;
-    }
-    if (!christianActive) {
-      christianWasPlayingRef.current = musicPlaying && activeMusicMood === "secular";
-      setPaused(true);
-    }
-    // Keep this call directly inside the click/touch event chain. Loading the
-    // Christian playlist via playMood replaces secular audio without a separate
-    // pause/reload command that can race and leave the YouTube iframe silent.
-    player.playMood("religious", 0);
-    setChristianActive(true);
-  };
-
-  const deactivateChristian = (immediate = false) => {
-    if (christianLeaveTimerRef.current) {
-      window.clearTimeout(christianLeaveTimerRef.current);
-      christianLeaveTimerRef.current = null;
-    }
-    const run = () => {
-      setChristianActive(false);
-      setPaused(false);
-      // Restore secular playlist visibility; only auto-play if secular music
-      // was already playing before Christian took over.
-      if (christianWasPlayingRef.current) {
-        player.playMood("secular");
-      } else {
-        player.pause();
-        player.setPlaylist("secular", true);
-      }
-      christianWasPlayingRef.current = false;
-      christianLeaveTimerRef.current = null;
-    };
-    if (immediate) run();
-    else christianLeaveTimerRef.current = window.setTimeout(run, 120);
-  };
-
-  // Touch: when active, tapping outside the slider dismisses Christian hover.
-  useEffect(() => {
-    if (!christianActive) return;
-    const onDocTouch = (e: TouchEvent) => {
-      const el = sliderRef.current;
-      if (!el) return;
-      const target = e.target as Node | null;
-      if (target && el.contains(target)) return;
-      deactivateChristian(true);
-    };
-    document.addEventListener("touchstart", onDocTouch, { passive: true });
-    document.addEventListener("mousedown", onDocTouch as unknown as EventListener);
-    return () => {
-      document.removeEventListener("touchstart", onDocTouch);
-      document.removeEventListener("mousedown", onDocTouch as unknown as EventListener);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [christianActive]);
 
   const activateVideo = () => {
     if (!currentVideoId) return;
@@ -320,11 +244,11 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
   const togglePlayPause = () => {
-    if (musicPlaying && activeMusicMood === currentMood) {
+    if (musicPlaying) {
       player.pause();
       setPaused(true);
     } else {
-      player.playMood(currentMood);
+      player.resume();
       setPaused(false);
     }
   };
@@ -440,7 +364,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             }}
           >
           <div
-            ref={sliderRef}
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
@@ -450,7 +373,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
-              if (christianActive) deactivateChristian(true);
             }}
 
           >
@@ -491,16 +413,8 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                   </div>
                 </div>
               )}
-              {christianActive && currentIsReligious && (
-                <div
-                  className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3 sm:px-6"
-                >
-                  <div className="w-full max-w-[720px] pointer-events-auto">
-                    <ChristianMusicPanel businessName={current.business_name} />
-                  </div>
-                </div>
-              )}
             </div>
+
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
                 {currentVideoId && (
@@ -537,29 +451,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               </div>
             )}
 
-            {currentIsReligious && (
-              <div className="absolute bottom-3 right-3 z-20">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (christianActive) deactivateChristian(true);
-                    else activateChristian();
-                  }}
-                  aria-label={
-                    christianActive ? "Stop Christian music" : "Play Christian music"
-                  }
-                  className="flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#0F2A4A]/85 px-3 py-1.5 text-xs font-bold text-[#D4A24C] shadow-lg backdrop-blur-sm hover:bg-[#0F2A4A]"
-                >
-                  {christianActive ? (
-                    <Pause size={12} fill="currentColor" />
-                  ) : (
-                    <Play size={12} fill="currentColor" />
-                  )}
-                  {christianActive ? "Stop Christian Music" : "Play Christian Music"}
-                </button>
-              </div>
-            )}
 
           </div>
 
@@ -609,16 +500,16 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             </div>
           )}
 
-          {/* Music player — flush to slider borders, matches Christian panel styling */}
+          {/* Music player — flush to slider borders */}
           {featured && (
             <section
-              aria-label={`${currentMood === "religious" ? "Christian" : "Secular"} music player`}
+              aria-label="Background music player"
               className="mt-3 w-full rounded-2xl border-2 border-[#D4A24C] bg-white shadow-lg overflow-hidden"
             >
               <div className="flex items-center gap-2 bg-[#0F2A4A] px-4 py-2 text-[#D4A24C]">
                 <Music size={18} />
                 <h3 className="font-serif text-base sm:text-lg font-bold">
-                  {currentMood === "religious" ? "Christian Music Player" : "Background Music Player"}
+                  Background Music Player
                 </h3>
                 <span className="ml-auto text-[11px] font-medium uppercase tracking-wider opacity-80">
                   <MusicWaveform playing={musicPlaying} />
@@ -629,7 +520,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => { player.setPlaylist(currentMood); player.prev(); }}
+                    onClick={() => player.prev()}
                     aria-label="Previous track"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
                   >
@@ -649,7 +540,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { player.setPlaylist(currentMood); player.next(); }}
+                    onClick={() => player.next()}
                     aria-label="Next track"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
                   >
@@ -658,7 +549,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
                   <div className="ml-2 min-w-0 flex-1">
                     <div className="text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
-                      {musicPlaying ? "Now playing" : `${currentMood === "religious" ? "Christian" : "Background"} playlist`}
+                      {musicPlaying ? "Now playing" : "Background playlist"}
                     </div>
                     <div className="truncate text-sm font-semibold text-[#0F2A4A]">
                       {trackTitle || (musicPlaying ? "Now playing…" : "Tap play to start music")}
@@ -670,7 +561,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                   <div className="mb-1 text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
                     Browse songs · click any title to play
                   </div>
-                  <PlaylistMarquee mood={currentMood} />
+                  <PlaylistMarquee />
                 </div>
               </div>
             </section>

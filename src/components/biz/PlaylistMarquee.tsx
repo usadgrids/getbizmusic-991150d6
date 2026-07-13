@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
-import type { MiniPlayerMood } from "./MiniPlayer";
 
-export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
-  const { tracks, isLoading } = usePlaylistTracks(mood);
-  const player = useMiniPlayerController(mood);
+export function PlaylistMarquee() {
+  const { tracks, isLoading } = usePlaylistTracks();
+  const player = useMiniPlayerController();
   const [currentTitle, setCurrentTitle] = useState<string>("");
 
   useEffect(() => {
@@ -18,10 +17,6 @@ export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
   }
 
   const handleClick = (index: number) => {
-    if (mood) {
-      player.playMood(mood, index);
-      return;
-    }
     player.playIndex(index);
   };
 
