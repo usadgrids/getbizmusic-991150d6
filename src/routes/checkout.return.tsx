@@ -13,7 +13,7 @@ export const Route = createFileRoute("/checkout/return")({
 });
 
 function CheckoutReturn() {
-  const { session_id } = Route.useSearch();
+  const { session_id, industry } = Route.useSearch();
   const [state, setState] = useState<{ status: "loading" | "paid" | "pending" | "error"; token?: string; email?: string; message?: string }>({ status: "loading" });
 
   useEffect(() => {
