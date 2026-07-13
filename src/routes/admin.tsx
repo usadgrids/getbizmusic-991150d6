@@ -1371,11 +1371,35 @@ function RepFormModal({
 
 function DesignOrdersSection() {
   const listFn = useServerFn(listDesignOrders);
+  const deleteFn = useServerFn(deleteDesignOrder);
+  const completeFn = useServerFn(setDesignOrderCompleted);
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ["design-orders"],
     queryFn: () => listFn(),
   });
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const toggleCompleted = async (id: string, next: boolean) => {
+    try {
+      await completeFn({ data: { id, completed: next } });
+      toast.success(next ? "Marked as completed" : "Marked as not completed");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const remove = async (o: DesignOrderRow) => {
+    const label = o.intake?.business_name || o.customer_email;
+    if (!confirm(`Are you sure you want to delete the design order for "${label}"? This permanently removes the intake and cannot be undone.`)) return;
+    try {
+      await deleteFn({ data: { id: o.id } });
+      toast.success("Design order deleted");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
 
   return (
     <section>
@@ -1407,6 +1431,8 @@ function DesignOrdersSection() {
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Paid</th>
                 <th className="px-4 py-2">Intake</th>
+                <th className="px-4 py-2" title="Design completed, submitted & approved">Completed</th>
+                <th className="px-4 py-2"></th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
@@ -1414,9 +1440,10 @@ function DesignOrdersSection() {
               {orders.map((o: DesignOrderRow) => {
                 const isOpen = expandedId === o.id;
                 const bn = o.intake?.business_name || "—";
+                const completed = !!o.completed_at;
                 return (
                   <React.Fragment key={o.id}>
-                    <tr className="border-t border-gray-100">
+                    <tr className={`border-t border-gray-100 ${completed ? "bg-emerald-50/40" : ""}`}>
                       <td className="px-4 py-2 font-medium text-[#0F2A4A]">{bn}</td>
                       <td className="px-4 py-2 text-xs text-gray-700">{o.customer_email}</td>
                       <td className="px-4 py-2">
@@ -1432,6 +1459,21 @@ function DesignOrdersSection() {
                       <td className="px-4 py-2 text-xs text-gray-600">
                         {o.intake_submitted_at ? new Date(o.intake_submitted_at).toLocaleDateString() : "—"}
                       </td>
+                      <td className="px-4 py-2">
+                        <label className="inline-flex items-center gap-2 cursor-pointer" title="Design completed, submitted & approved">
+                          <input
+                            type="checkbox"
+                            checked={completed}
+                            onChange={(e) => toggleCompleted(o.id, e.target.checked)}
+                            className="h-4 w-4 accent-emerald-600 cursor-pointer"
+                          />
+                          {completed && o.completed_at && (
+                            <span className="text-[10px] text-emerald-700">
+                              {new Date(o.completed_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </label>
+                      </td>
                       <td className="px-4 py-2 text-right">
                         <button
                           onClick={() => setExpandedId(isOpen ? null : o.id)}
@@ -1440,14 +1482,23 @@ function DesignOrdersSection() {
                           {isOpen ? "Hide" : "View intake"}
                         </button>
                       </td>
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          onClick={() => remove(o)}
+                          className="text-red-600 hover:text-red-700 inline-flex items-center gap-1 text-xs"
+                        >
+                          <Trash2 size={12} /> Remove
+                        </button>
+                      </td>
                     </tr>
                     {isOpen && (
                       <tr className="bg-slate-50/70 border-t border-gray-100">
-                        <td colSpan={6} className="px-4 py-4">
+                        <td colSpan={8} className="px-4 py-4">
                           {o.intake ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs text-gray-700">
                               <IntakeRow label="Business" value={o.intake.business_name} />
                               <IntakeRow label="Owner" value={o.intake.owner_name} />
+
                               <IntakeRow label="Owner email" value={o.intake.owner_email} />
                               <IntakeRow label="Business email" value={o.intake.business_email} />
                               <IntakeRow label="Phone" value={o.intake.phone} />
