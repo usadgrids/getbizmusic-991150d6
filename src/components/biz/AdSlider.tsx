@@ -541,6 +541,38 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               </div>
             )}
 
+            {currentIsReligious && (
+              <div className="absolute bottom-3 right-3 z-20">
+                <button
+                  type="button"
+                  onMouseEnter={activateChristian}
+                  onMouseLeave={() => deactivateChristian()}
+                  onFocus={activateChristian}
+                  onBlur={() => deactivateChristian()}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    activateChristian();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (christianActive) deactivateChristian(true);
+                    else activateChristian();
+                  }}
+                  aria-label={
+                    christianActive ? "Stop Christian music" : "Play Christian music"
+                  }
+                  className="flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#0F2A4A]/85 px-3 py-1.5 text-xs font-bold text-[#D4A24C] shadow-lg backdrop-blur-sm hover:bg-[#0F2A4A]"
+                >
+                  {christianActive ? (
+                    <Pause size={12} fill="currentColor" />
+                  ) : (
+                    <Play size={12} fill="currentColor" />
+                  )}
+                  {christianActive ? "Stop Christian Music" : "Play Christian Music"}
+                </button>
+              </div>
+            )}
+
           </div>
 
 
