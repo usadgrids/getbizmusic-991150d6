@@ -1368,3 +1368,143 @@ function RepFormModal({
     </div>
   );
 }
+
+function DesignOrdersSection() {
+  const listFn = useServerFn(listDesignOrders);
+  const { data: orders = [], isLoading, refetch } = useQuery({
+    queryKey: ["design-orders"],
+    queryFn: () => listFn(),
+  });
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Pencil size={18} className="text-[#D4A24C]" />
+        <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">
+          Custom Design Orders ({orders.length})
+        </h2>
+        <button
+          onClick={() => refetch()}
+          className="ml-auto text-xs text-[#0F2A4A] hover:underline"
+        >
+          Refresh
+        </button>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        {isLoading ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">Loading…</div>
+        ) : orders.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">
+            No paid design orders yet.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
+              <tr>
+                <th className="px-4 py-2">Business</th>
+                <th className="px-4 py-2">Customer</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Paid</th>
+                <th className="px-4 py-2">Intake</th>
+                <th className="px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o: DesignOrderRow) => {
+                const isOpen = expandedId === o.id;
+                const bn = o.intake?.business_name || "—";
+                return (
+                  <React.Fragment key={o.id}>
+                    <tr className="border-t border-gray-100">
+                      <td className="px-4 py-2 font-medium text-[#0F2A4A]">{bn}</td>
+                      <td className="px-4 py-2 text-xs text-gray-700">{o.customer_email}</td>
+                      <td className="px-4 py-2">
+                        {o.status === "intake_submitted" ? (
+                          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Intake received</span>
+                        ) : (
+                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Awaiting intake</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-gray-600">
+                        {o.paid_at ? new Date(o.paid_at).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-gray-600">
+                        {o.intake_submitted_at ? new Date(o.intake_submitted_at).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          onClick={() => setExpandedId(isOpen ? null : o.id)}
+                          className="text-xs text-[#0F2A4A] hover:underline"
+                        >
+                          {isOpen ? "Hide" : "View intake"}
+                        </button>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className="bg-slate-50/70 border-t border-gray-100">
+                        <td colSpan={6} className="px-4 py-4">
+                          {o.intake ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs text-gray-700">
+                              <IntakeRow label="Business" value={o.intake.business_name} />
+                              <IntakeRow label="Owner" value={o.intake.owner_name} />
+                              <IntakeRow label="Owner email" value={o.intake.owner_email} />
+                              <IntakeRow label="Business email" value={o.intake.business_email} />
+                              <IntakeRow label="Phone" value={o.intake.phone} />
+                              <IntakeRow label="Website" value={o.intake.website_url} />
+                              <IntakeRow label="Services" value={o.intake.services} />
+                              <IntakeRow label="Tagline" value={o.intake.tagline} />
+                              <IntakeRow label="Colors" value={o.intake.color_preferences} />
+                              <IntakeRow label="Design brief" value={o.intake.design_brief} full />
+                              <IntakeRow label="Notes" value={o.intake.notes} full />
+                              <div className="md:col-span-2 pt-2 border-t border-gray-200">
+                                <div className="text-[11px] uppercase tracking-wider text-gray-500 mb-2">Uploaded assets</div>
+                                <div className="flex flex-wrap gap-3">
+                                  {o.logo_url && (
+                                    <a href={o.logo_url} target="_blank" rel="noreferrer" className="block">
+                                      <img src={o.logo_url} alt="Logo" className="h-24 w-24 object-contain bg-white border border-gray-200 rounded-md" />
+                                      <div className="text-[10px] text-gray-500 mt-1 text-center">Logo</div>
+                                    </a>
+                                  )}
+                                  {(o.image_urls ?? []).map((u, i) => (
+                                    <a key={i} href={u} target="_blank" rel="noreferrer" className="block">
+                                      <img src={u} alt={`Reference ${i + 1}`} className="h-24 w-24 object-cover bg-white border border-gray-200 rounded-md" />
+                                      <div className="text-[10px] text-gray-500 mt-1 text-center">Image {i + 1}</div>
+                                    </a>
+                                  ))}
+                                  {!o.logo_url && (!o.image_urls || o.image_urls.length === 0) && (
+                                    <div className="italic text-gray-500">No uploads.</div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="md:col-span-2 pt-2 text-[11px] text-gray-500">
+                                Session: <span className="font-mono">{o.stripe_session_id}</span> · {o.environment}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-xs italic text-gray-500">
+                              Customer paid but has not yet submitted the intake form.
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function IntakeRow({ label, value, full }: { label: string; value?: string | null; full?: boolean }) {
+  return (
+    <div className={full ? "md:col-span-2" : ""}>
+      <span className="font-semibold text-[#0F2A4A]">{label}:</span>{" "}
+      <span className="text-gray-700">{value?.trim() ? value : "—"}</span>
+    </div>
+  );
+}
