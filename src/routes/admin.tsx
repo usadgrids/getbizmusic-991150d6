@@ -18,7 +18,7 @@ import {
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { getActiveCities } from "@/lib/cities.functions";
-import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 
@@ -412,7 +412,11 @@ function AdminConsole() {
                     <td className="px-4 py-2 text-xs text-gray-700">{city?.state ?? "—"}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-600">
-                      {a.ad_type === "slider_10" ? "Featured · $24" : "Standard · $12"}
+                      {isReligiousIndustry(a.industry)
+                        ? "FREE · $0"
+                        : a.ad_type === "slider_10"
+                        ? "Featured · $24"
+                        : "Standard · $12"}
                     </td>
                     <td className="px-4 py-2">
                       {a.status === "active" ? (
