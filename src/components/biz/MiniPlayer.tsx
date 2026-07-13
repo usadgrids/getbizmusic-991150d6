@@ -21,6 +21,7 @@ export const MINIPLAYER_ACTIVITY_EVENT = "miniplayer:activity";
 export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
+export const MINIPLAYER_RELIGIOUS_PAUSE_EVENT = "miniplayer:religious-pause";
 
 export type MiniPlayerTrack = { title: string; author: string };
 export type MiniPlayerPlaylist = { videoIds: string[] };
