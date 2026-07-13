@@ -347,6 +347,8 @@ function AdminConsole() {
 
         <ManualSubmitSection onCreated={refreshAll} />
 
+        <ZelleOrdersSection />
+
         <AdRepsSection />
 
         <DesignOrdersSection />
