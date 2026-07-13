@@ -30,4 +30,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'city-request-notification': cityRequestNotificationTemplate,
   'design-receipt': designReceiptTemplate,
   'design-intake-link': designIntakeLinkTemplate,
+  'design-order-notification': designOrderNotificationTemplate,
 }
