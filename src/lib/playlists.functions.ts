@@ -1,23 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import type { MiniPlayerMood } from "@/components/biz/MiniPlayer";
 
 export type YouTubePlaylistTrack = { videoId: string; title: string };
 
-export const getYouTubePlaylistTracks = createServerFn({ method: "GET" })
-  .inputValidator((data) =>
-    z
-      .object({ mood: z.enum(["secular", "religious"]) })
-      .parse(data),
-  )
-  .handler(async ({ data }): Promise<YouTubePlaylistTrack[]> => {
-    const playlistByMood: Record<MiniPlayerMood, string> = {
-      secular: "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj",
-      religious: "PLp93JI5bGWYlnNHrPfuEaHXFkpA-d5NIt",
-    };
-    const playlistId = playlistByMood[data.mood];
+const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
+
+export const getYouTubePlaylistTracks = createServerFn({ method: "GET" }).handler(
+  async (): Promise<YouTubePlaylistTrack[]> => {
     const response = await fetch(
-      `https://www.youtube.com/feeds/videos.xml?playlist_id=${encodeURIComponent(playlistId)}`,
+      `https://www.youtube.com/feeds/videos.xml?playlist_id=${encodeURIComponent(PLAYLIST_ID)}`,
       {
         headers: {
           accept: "application/atom+xml, application/xml, text/xml",
@@ -47,4 +37,5 @@ export const getYouTubePlaylistTracks = createServerFn({ method: "GET" })
         };
       })
       .filter((track): track is YouTubePlaylistTrack => track !== null);
-  });
+  },
+);
