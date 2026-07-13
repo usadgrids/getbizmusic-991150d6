@@ -53,7 +53,8 @@ function Index() {
     setZipMatch(null);
   }, [q]);
 
-  const filtered = cities.filter((c) => {
+  const citiesWithAds = cities.filter((c) => c.ad_count > 0);
+  const filtered = citiesWithAds.filter((c) => {
     const s = q.trim().toLowerCase();
     if (!s) return true;
     if (zipMatch) {
