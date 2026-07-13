@@ -610,6 +610,7 @@ const updateAdSchema = z.object({
   industry: z.string().trim().min(1).max(40),
   ad_type: z.enum(["image_5", "slider_10"]),
   image_path: z.string().trim().min(1).max(500).optional(),
+  ministry_info: ministryInfoSchema.nullable().optional(),
 });
 
 export const updateAd = createServerFn({ method: "POST" })
@@ -627,6 +628,7 @@ export const updateAd = createServerFn({ method: "POST" })
       ad_type: "image_5" | "slider_10";
       duration_seconds: number;
       image_url?: string;
+      ministry_info?: unknown;
     } = {
       business_name: data.business_name,
       website_url: data.website_url || null,
@@ -637,7 +639,8 @@ export const updateAd = createServerFn({ method: "POST" })
       duration_seconds: planSeconds(data.ad_type),
     };
     if (data.image_path) patch.image_url = data.image_path;
-    const { error } = await supabaseAdmin.from("ads").update(patch).eq("id", data.id);
+    if (data.ministry_info !== undefined) patch.ministry_info = data.ministry_info;
+    const { error } = await supabaseAdmin.from("ads").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
