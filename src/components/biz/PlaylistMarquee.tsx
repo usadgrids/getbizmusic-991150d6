@@ -4,7 +4,7 @@ import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 const NORMAL_DURATION = "200s";
-const FAST_DURATION = "20s";
+const FAST_DURATION = "60s";
 
 export function PlaylistMarquee() {
   const { tracks, isLoading } = usePlaylistTracks();
