@@ -272,6 +272,23 @@ function DesignReturn() {
               <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
                 {submitting ? "Sending…" : "Send my info to the design team"}
               </button>
+
+              <button
+                type="button"
+                onClick={handleEmailLink}
+                disabled={emailing}
+                className="w-full bg-[#0F2A4A] text-white font-semibold py-3 rounded-md hover:bg-[#163864] transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                {emailing ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Emailing link…
+                  </>
+                ) : (
+                  <>
+                    <Mail size={16} /> I am not yet ready — email my design link for later
+                  </>
+                )}
+              </button>
             </form>
           </>
         )}
