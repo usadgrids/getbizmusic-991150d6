@@ -500,16 +500,16 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             </div>
           )}
 
-          {/* Music player — flush to slider borders, matches Christian panel styling */}
+          {/* Music player — flush to slider borders */}
           {featured && (
             <section
-              aria-label={`${currentMood === "religious" ? "Christian" : "Secular"} music player`}
+              aria-label="Background music player"
               className="mt-3 w-full rounded-2xl border-2 border-[#D4A24C] bg-white shadow-lg overflow-hidden"
             >
               <div className="flex items-center gap-2 bg-[#0F2A4A] px-4 py-2 text-[#D4A24C]">
                 <Music size={18} />
                 <h3 className="font-serif text-base sm:text-lg font-bold">
-                  {currentMood === "religious" ? "Christian Music Player" : "Background Music Player"}
+                  Background Music Player
                 </h3>
                 <span className="ml-auto text-[11px] font-medium uppercase tracking-wider opacity-80">
                   <MusicWaveform playing={musicPlaying} />
@@ -520,7 +520,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => { player.setPlaylist(currentMood); player.prev(); }}
+                    onClick={() => player.prev()}
                     aria-label="Previous track"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
                   >
@@ -540,7 +540,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { player.setPlaylist(currentMood); player.next(); }}
+                    onClick={() => player.next()}
                     aria-label="Next track"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
                   >
@@ -549,7 +549,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
                   <div className="ml-2 min-w-0 flex-1">
                     <div className="text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
-                      {musicPlaying ? "Now playing" : `${currentMood === "religious" ? "Christian" : "Background"} playlist`}
+                      {musicPlaying ? "Now playing" : "Background playlist"}
                     </div>
                     <div className="truncate text-sm font-semibold text-[#0F2A4A]">
                       {trackTitle || (musicPlaying ? "Now playing…" : "Tap play to start music")}
@@ -561,7 +561,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   <div className="mb-1 text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
                     Browse songs · click any title to play
                   </div>
-                  <PlaylistMarquee mood={currentMood} />
+                  <PlaylistMarquee />
                 </div>
               </div>
             </section>
