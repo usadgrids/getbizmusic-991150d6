@@ -504,53 +504,72 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             </div>
           )}
 
-          {/* Music controls — drive the YouTube playlist while the slideshow runs */}
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <Music size={16} className="text-[#D4A24C] shrink-0" />
-              <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-gray-500">
-                  Background music
+          {/* Music player — flush to slider borders, matches Christian panel styling */}
+          {featured && (
+            <section
+              aria-label={`${currentMood === "religious" ? "Christian" : "Secular"} music player`}
+              className="mt-3 w-full rounded-2xl border-2 border-[#D4A24C] bg-white shadow-lg overflow-hidden"
+            >
+              <div className="flex items-center gap-2 bg-[#0F2A4A] px-4 py-2 text-[#D4A24C]">
+                <Music size={18} />
+                <h3 className="font-serif text-base sm:text-lg font-bold">
+                  {currentMood === "religious" ? "Christian Music Player" : "Background Music Player"}
+                </h3>
+                <span className="ml-auto text-[11px] font-medium uppercase tracking-wider opacity-80">
+                  <MusicWaveform playing={musicPlaying} />
+                </span>
+              </div>
+
+              <div className="px-4 py-3 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { player.setPlaylist(currentMood); player.prev(); }}
+                    aria-label="Previous track"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
+                  >
+                    <SkipBack size={16} fill="currentColor" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={togglePlayPause}
+                    aria-label={musicPlaying ? "Pause music" : "Play music"}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#0F2A4A] text-[#D4A24C] shadow hover:bg-[#0F2A4A]/90"
+                  >
+                    {musicPlaying ? (
+                      <Pause size={18} fill="currentColor" />
+                    ) : (
+                      <Play size={18} fill="currentColor" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { player.setPlaylist(currentMood); player.next(); }}
+                    aria-label="Next track"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0F2A4A]/10 text-[#0F2A4A] hover:bg-[#0F2A4A]/20"
+                  >
+                    <SkipForward size={16} fill="currentColor" />
+                  </button>
+
+                  <div className="ml-2 min-w-0 flex-1">
+                    <div className="text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
+                      {musicPlaying ? "Now playing" : `${currentMood === "religious" ? "Christian" : "Background"} playlist`}
+                    </div>
+                    <div className="truncate text-sm font-semibold text-[#0F2A4A]">
+                      {trackTitle || (musicPlaying ? "Now playing…" : "Tap play to start music")}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs font-medium text-[#0F2A4A] truncate max-w-[140px] sm:max-w-[260px]">
-                  {trackTitle || (musicPlaying ? "Now playing…" : "Paused")}
+
+                <div>
+                  <div className="mb-1 text-[11px] uppercase tracking-wider text-[#0F2A4A]/60">
+                    Browse songs · click any title to play
+                  </div>
+                  <PlaylistMarquee mood={currentMood} />
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center justify-center px-2">
-              <MusicWaveform playing={musicPlaying} />
-            </div>
-
-            <div className="flex items-center justify-end gap-1 flex-1">
-              <button
-                type="button"
-                onClick={() => { player.setPlaylist(currentMood); player.prev(); }}
-                aria-label="Previous track"
-                className="rounded-full p-2 text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
-              >
-                <SkipBack size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={togglePlayPause}
-                aria-label={musicPlaying ? "Pause music" : "Play music"}
-                className="flex items-center gap-2 rounded-full bg-[#0F2A4A] px-4 py-2 text-sm font-semibold text-[#D4A24C] hover:bg-[#0F2A4A]/90"
-              >
-                {musicPlaying ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
-                {musicPlaying ? "Pause Music" : "Play Music"}
-              </button>
-              <button
-                type="button"
-                onClick={() => { player.setPlaylist(currentMood); player.next(); }}
-                aria-label="Next track"
-                className="rounded-full p-2 text-[#0F2A4A] hover:bg-[#0F2A4A]/10"
-              >
-                <SkipForward size={16} />
-              </button>
-            </div>
-          </div>
-          {featured && <PlaylistMarquee />}
+            </section>
+          )}
         </div>
       )}
     </section>
