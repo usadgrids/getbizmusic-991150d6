@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -92,6 +92,10 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [videoNonce, setVideoNonce] = useState(0);
   const videoLeaveTimerRef = useRef<number | null>(null);
   const wasMusicPlayingRef = useRef(false);
+  const [christianActive, setChristianActive] = useState(false);
+  const christianLeaveTimerRef = useRef<number | null>(null);
+  const christianWasPlayingRef = useRef(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const handleShareOpen = () => {
     setPaused(true);
@@ -164,10 +168,78 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   useEffect(() => {
     return () => {
       if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+      if (christianLeaveTimerRef.current) window.clearTimeout(christianLeaveTimerRef.current);
     };
   }, []);
 
   const currentVideoId = parseYoutubeId(current?.youtube_url);
+  const currentIsReligious = current ? isReligiousIndustry(current.industry) : false;
+
+  // Auto-dismiss the Christian hover when the slide changes away from a religious ad.
+  useEffect(() => {
+    if (!currentIsReligious && christianActive) {
+      deactivateChristian(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, currentIsReligious]);
+
+  const activateChristian = () => {
+    if (!currentIsReligious) return;
+    if (christianLeaveTimerRef.current) {
+      window.clearTimeout(christianLeaveTimerRef.current);
+      christianLeaveTimerRef.current = null;
+    }
+    setChristianActive((prev) => {
+      if (!prev) {
+        christianWasPlayingRef.current = musicPlaying;
+        setPaused(true);
+        player.playMood("religious");
+      }
+      return true;
+    });
+  };
+
+  const deactivateChristian = (immediate = false) => {
+    if (christianLeaveTimerRef.current) {
+      window.clearTimeout(christianLeaveTimerRef.current);
+      christianLeaveTimerRef.current = null;
+    }
+    const run = () => {
+      setChristianActive(false);
+      setPaused(false);
+      // Restore secular playlist visibility; only auto-play if secular music
+      // was already playing before Christian took over.
+      if (christianWasPlayingRef.current) {
+        player.playMood("secular");
+      } else {
+        player.pause();
+        player.setPlaylist("secular", true);
+      }
+      christianWasPlayingRef.current = false;
+      christianLeaveTimerRef.current = null;
+    };
+    if (immediate) run();
+    else christianLeaveTimerRef.current = window.setTimeout(run, 120);
+  };
+
+  // Touch: when active, tapping outside the slider dismisses Christian hover.
+  useEffect(() => {
+    if (!christianActive) return;
+    const onDocTouch = (e: TouchEvent) => {
+      const el = sliderRef.current;
+      if (!el) return;
+      const target = e.target as Node | null;
+      if (target && el.contains(target)) return;
+      deactivateChristian(true);
+    };
+    document.addEventListener("touchstart", onDocTouch, { passive: true });
+    document.addEventListener("mousedown", onDocTouch as unknown as EventListener);
+    return () => {
+      document.removeEventListener("touchstart", onDocTouch);
+      document.removeEventListener("mousedown", onDocTouch as unknown as EventListener);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [christianActive]);
 
   const activateVideo = () => {
     if (!currentVideoId) return;
@@ -366,6 +438,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             }}
           >
           <div
+            ref={sliderRef}
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
@@ -375,6 +448,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
+              if (christianActive) deactivateChristian();
             }}
 
           >
@@ -415,6 +489,21 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                   </div>
                 </div>
               )}
+              {christianActive && currentIsReligious && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
+                  <div className="pointer-events-auto flex items-center gap-2 rounded-full border-2 border-[#D4A24C] bg-[#0F2A4A]/95 px-4 py-2 text-[#D4A24C] shadow-2xl backdrop-blur-sm">
+                    <Music size={16} />
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-[10px] uppercase tracking-wider opacity-80">
+                        Christian music playing
+                      </span>
+                      <span className="max-w-[60vw] truncate text-sm font-semibold text-white">
+                        {trackTitle || "Loading Christian playlist…"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
@@ -449,6 +538,38 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                   remaining={timeLeft}
                   accent={accent}
                 />
+              </div>
+            )}
+
+            {currentIsReligious && (
+              <div className="absolute bottom-3 right-3 z-20">
+                <button
+                  type="button"
+                  onMouseEnter={activateChristian}
+                  onMouseLeave={() => deactivateChristian()}
+                  onFocus={activateChristian}
+                  onBlur={() => deactivateChristian()}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    activateChristian();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (christianActive) deactivateChristian(true);
+                    else activateChristian();
+                  }}
+                  aria-label={
+                    christianActive ? "Stop Christian music" : "Play Christian music"
+                  }
+                  className="flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#0F2A4A]/85 px-3 py-1.5 text-xs font-bold text-[#D4A24C] shadow-lg backdrop-blur-sm hover:bg-[#0F2A4A]"
+                >
+                  {christianActive ? (
+                    <Pause size={12} fill="currentColor" />
+                  ) : (
+                    <Play size={12} fill="currentColor" />
+                  )}
+                  {christianActive ? "Stop Christian Music" : "Play Christian Music"}
+                </button>
               </div>
             )}
 
