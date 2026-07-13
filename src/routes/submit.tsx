@@ -39,7 +39,7 @@ const formSchema = z.object({
 });
 
 function SubmitPage() {
-  const { token } = Route.useSearch();
+  const { token, industry: searchIndustry } = Route.useSearch();
   const submit = useServerFn(createSubmission);
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
