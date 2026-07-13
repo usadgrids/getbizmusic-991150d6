@@ -895,6 +895,23 @@ function AdminField({
   );
 }
 
+function buildMinistryInfo(v: {
+  churchName: string; churchAddress: string; pastorName: string; ministryPhone: string;
+  is501c3: boolean; hasIrs: boolean; irsNumber: string;
+}) {
+  return {
+    church_name: v.churchName.trim(),
+    church_address: v.churchAddress.trim(),
+    pastor_name: v.pastorName.trim(),
+    phone: v.ministryPhone.trim(),
+    is_501c3: v.is501c3,
+    has_irs_number: v.hasIrs,
+    irs_number: v.hasIrs ? v.irsNumber.trim() : "",
+    attest_independent_ministry: true as const,
+    attest_novelty: true as const,
+  };
+}
+
 function EditAdModal({
   ad,
   onClose,
@@ -910,6 +927,17 @@ function EditAdModal({
     ad_type: "image_5" | "slider_10";
     image_url: string;
     ad_number: number | null;
+    ministry_info?: {
+      church_name?: string;
+      church_address?: string;
+      pastor_name?: string;
+      phone?: string;
+      is_501c3?: boolean;
+      has_irs_number?: boolean;
+      irs_number?: string;
+      attest_independent_ministry?: boolean;
+      attest_novelty?: boolean;
+    } | null;
   };
   onClose: () => void;
   onSaved: () => void;
@@ -923,6 +951,18 @@ function EditAdModal({
   const [adType, setAdType] = useState<"image_5" | "slider_10">(ad.ad_type);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Ministry / religious intake fields (only shown when industry is religious).
+  const mi = ad.ministry_info ?? null;
+  const [churchName, setChurchName] = useState(mi?.church_name ?? ad.business_name ?? "");
+  const [churchAddress, setChurchAddress] = useState(mi?.church_address ?? "");
+  const [pastorName, setPastorName] = useState(mi?.pastor_name ?? "");
+  const [ministryPhone, setMinistryPhone] = useState(mi?.phone ?? "");
+  const [is501c3, setIs501c3] = useState<boolean>(mi?.is_501c3 ?? false);
+  const [hasIrs, setHasIrs] = useState<boolean>(mi?.has_irs_number ?? false);
+  const [irsNumber, setIrsNumber] = useState(mi?.irs_number ?? "");
+
+  const showMinistry = isReligiousIndustry(industry);
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
@@ -945,6 +985,25 @@ function EditAdModal({
           .upload(image_path, file, { contentType: file.type, upsert: false });
         if (upErr) throw upErr;
       }
+
+      let ministry_info: ReturnType<typeof buildMinistryInfo> | null = null;
+      if (showMinistry) {
+        if (!churchName.trim() || !churchAddress.trim() || !pastorName.trim() || !ministryPhone.trim()) {
+          toast.error("Please fill every Ministry Information field");
+          setBusy(false);
+          return;
+        }
+        if (hasIrs && !irsNumber.trim()) {
+          toast.error("Enter the IRS non-profit number or uncheck 'Has IRS number'");
+          setBusy(false);
+          return;
+        }
+        ministry_info = buildMinistryInfo({
+          churchName, churchAddress, pastorName, ministryPhone,
+          is501c3, hasIrs, irsNumber,
+        });
+      }
+
       await updateFn({
         data: {
           id: ad.id,
@@ -955,6 +1014,7 @@ function EditAdModal({
           industry,
           ad_type: adType,
           image_path,
+          ministry_info: showMinistry ? ministry_info! : null,
         },
       });
       toast.success("Ad updated");
@@ -1068,6 +1128,55 @@ function EditAdModal({
             className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
         </div>
+
+        {showMinistry && (
+          <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[#0F2A4A] font-bold text-sm">Ministry Information (Free Religious Ad)</div>
+              {mi ? null : <div className="text-[10px] text-amber-800">No ministry info on file — fill in below.</div>}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Church / Ministry name *</label>
+                <input value={churchName} onChange={(e) => setChurchName(e.target.value)} maxLength={200}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Pastor / Leader name *</label>
+                <input value={pastorName} onChange={(e) => setPastorName(e.target.value)} maxLength={200}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Address *</label>
+                <input value={churchAddress} onChange={(e) => setChurchAddress(e.target.value)} maxLength={300}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Phone *</label>
+                <input value={ministryPhone} onChange={(e) => setMinistryPhone(e.target.value)} maxLength={40}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">IRS Non-Profit #</label>
+                <input value={irsNumber} onChange={(e) => setIrsNumber(e.target.value)} maxLength={40} disabled={!hasIrs}
+                  placeholder={hasIrs ? "e.g. 12-3456789" : "N/A"}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white disabled:bg-gray-100" />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 text-xs text-[#0F2A4A]">
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={is501c3} onChange={(e) => setIs501c3(e.target.checked)} />
+                We are a non-profit 501(c)(3) organization
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={hasIrs} onChange={(e) => setHasIrs(e.target.checked)} />
+                We have an IRS non-profit number
+              </label>
+            </div>
+          </div>
+        )}
+
+
 
 
         <div className="flex gap-2 pt-2">

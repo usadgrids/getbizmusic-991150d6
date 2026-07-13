@@ -158,6 +158,7 @@ export type Database = {
           id: string
           image_path: string
           industry: string
+          ministry_info: Json | null
           payment_id: string | null
           phone: string
           reject_reason: string | null
@@ -179,6 +180,7 @@ export type Database = {
           id?: string
           image_path: string
           industry: string
+          ministry_info?: Json | null
           payment_id?: string | null
           phone: string
           reject_reason?: string | null
@@ -200,6 +202,7 @@ export type Database = {
           id?: string
           image_path?: string
           industry?: string
+          ministry_info?: Json | null
           payment_id?: string | null
           phone?: string
           reject_reason?: string | null
@@ -247,6 +250,7 @@ export type Database = {
           id: string
           image_url: string
           industry: string
+          ministry_info: Json | null
           starts_at: string
           status: string
           submission_id: string | null
@@ -266,6 +270,7 @@ export type Database = {
           id?: string
           image_url: string
           industry: string
+          ministry_info?: Json | null
           starts_at?: string
           status?: string
           submission_id?: string | null
@@ -285,6 +290,7 @@ export type Database = {
           id?: string
           image_url?: string
           industry?: string
+          ministry_info?: Json | null
           starts_at?: string
           status?: string
           submission_id?: string | null
