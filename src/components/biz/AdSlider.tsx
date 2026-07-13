@@ -157,6 +157,23 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setVideoActive(false);
   }, [idx]);
 
+  // Auto-pause the background music while a religious-category ad is showing;
+  // auto-resume when the slider moves off it (only if music was playing before).
+  const wasPlayingBeforeReligiousRef = useRef(false);
+  useEffect(() => {
+    if (!current) return;
+    if (isReligiousIndustry(current.industry)) {
+      if (player.playing) {
+        wasPlayingBeforeReligiousRef.current = true;
+        player.pause();
+      }
+    } else if (wasPlayingBeforeReligiousRef.current) {
+      wasPlayingBeforeReligiousRef.current = false;
+      player.resume();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, current?.industry]);
+
   useEffect(() => {
     return () => {
       if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
