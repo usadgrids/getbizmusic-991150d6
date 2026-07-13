@@ -11,6 +11,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -161,6 +162,7 @@ const PaymentReceiptEmail = ({
             </Section>
 
             <Hr style={hr} />
+            <ProminentNotice />
             <Text style={footer}>
               Questions about this receipt? Reply to this email and our team will respond
               within 24 hours.
