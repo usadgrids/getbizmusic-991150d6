@@ -43,7 +43,7 @@
       {
         "name": "get_pricing",
         "title": "Get ad pricing",
-        "description": "Return the current BizSpot National City ad plans and their annual pricing in USD.",
+        "description": "Return the current Get Biz Music ad plans and their annual pricing in USD.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,

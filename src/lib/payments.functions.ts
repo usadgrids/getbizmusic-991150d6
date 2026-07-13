@@ -2,11 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { AD_PLANS } from "@/lib/biz-utils";
 
-const PLAN_TO_PRICE = {
-  image_5: "ad_7s_annual",
-  slider_10: "ad_10s_annual",
-} as const;
+// Window (in ms) during which a repeat createAdCheckout call from the same
+// email+plan reuses the previously-created pending Stripe session instead of
+// creating a new one. Guards against double-click / back-button duplicate charges.
+const DUPLICATE_CHECKOUT_WINDOW_MS = 5 * 60 * 1000;
 
 export const DISCLOSURE_VERSION = "v1";
 export const DISCLOSURE_SUMMARY =
@@ -52,23 +53,15 @@ export const createAdCheckout = createServerFn({ method: "POST" })
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const stripe = createStripeClient(data.environment);
-      const lookupKey = PLAN_TO_PRICE[data.plan];
-      const prices = await stripe.prices.list({ lookup_keys: [lookupKey] });
-      if (!prices.data.length) throw new Error(`Price ${lookupKey} not found`);
-      const stripePrice = prices.data[0];
-
-      const productId = typeof stripePrice.product === "string" ? stripePrice.product : stripePrice.product.id;
-      const product = await stripe.products.retrieve(productId);
 
       const agreedAt = new Date().toISOString();
       const disclosureVersion = data.disclosureVersion ?? DISCLOSURE_VERSION;
       const ipAddress = getClientIp();
-      const isRecurring = stripePrice.type === "recurring";
-      // Authoritative base price comes from AD_PLANS (Stripe price may still
-      // reflect legacy $12/$24 lookup keys). This ensures rep-code 50% off
-      // is applied to the current $24/$48 base, not the stale Stripe amount.
-      const { AD_PLANS } = await import("@/lib/biz-utils");
-      const baseAmount = AD_PLANS[data.plan].price * 100;
+
+      // Single source of truth for pricing.
+      const planMeta = AD_PLANS[data.plan];
+      const productName = `Get Biz Music — ${planMeta.label}`;
+      const baseAmount = planMeta.price * 100;
 
       // Validate rep code server-side
       let repId: string | null = null;
@@ -95,6 +88,32 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         ? Math.round(chargeAmount * (commissionPercent / 100))
         : 0;
 
+      // Duplicate-payment guard: if the same email+plan started a checkout very
+      // recently and it's still pending, reuse that Stripe session's clientSecret
+      // instead of creating another one.
+      const sinceIso = new Date(Date.now() - DUPLICATE_CHECKOUT_WINDOW_MS).toISOString();
+      const { data: recent } = await supabaseAdmin
+        .from("ad_payments")
+        .select("stripe_session_id, amount_cents, created_at")
+        .eq("customer_email", data.customerEmail)
+        .eq("plan", data.plan)
+        .eq("status", "pending")
+        .eq("environment", data.environment)
+        .gte("created_at", sinceIso)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (recent?.stripe_session_id && (recent.amount_cents ?? 0) === chargeAmount) {
+        try {
+          const existing = await stripe.checkout.sessions.retrieve(recent.stripe_session_id);
+          if (existing.status === "open" && existing.client_secret) {
+            return { clientSecret: existing.client_secret };
+          }
+        } catch (e) {
+          // Session missing/expired — fall through and create a fresh one.
+        }
+      }
+
       const metadata: Record<string, string> = {
         plan: data.plan,
         customer_email: data.customerEmail,
@@ -106,17 +125,22 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         ...(repCode ? { rep_code: repCode, rep_id: repId ?? "", commission_percent: String(commissionPercent ?? 0), commission_cents: String(commissionCents), discount_cents: String(discountCents) } : {}),
       };
 
-      // Always use price_data with our authoritative AD_PLANS amount so the
-      // Stripe checkout total matches the app's current pricing (and any rep
-      // discount) regardless of legacy Stripe price values.
       const lineItem = {
         price_data: {
-          currency: stripePrice.currency,
-          product_data: { name: product.name },
+          currency: "usd",
+          product_data: { name: productName },
           unit_amount: chargeAmount,
         },
         quantity: 1,
       };
+
+      const descriptionParts = [
+        productName,
+        `${planMeta.seconds}s rotation`,
+        data.customerEmail,
+      ];
+      if (repCode) descriptionParts.push(`rep:${repCode}`);
+      const description = descriptionParts.join(" — ").slice(0, 350);
 
       const session = await stripe.checkout.sessions.create({
         line_items: [lineItem],
@@ -126,7 +150,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         customer_email: data.customerEmail,
         metadata,
         payment_intent_data: {
-          description: product.name,
+          description,
           receipt_email: data.customerEmail,
           statement_descriptor_suffix: "GETBIZMUSIC AD",
           metadata,
@@ -196,12 +220,14 @@ export const createFreeReligiousSubmission = createServerFn({ method: "POST" })
     customerEmail: string;
     agreedTerms: boolean;
     agreedNovelty: boolean;
+    environment: StripeEnv;
   }) =>
     z.object({
       industry: z.enum(RELIGIOUS_INDUSTRIES),
       customerEmail: z.string().trim().email().max(255),
       agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
       agreedNovelty: z.literal(true, { message: "You must acknowledge the novelty terms" }),
+      environment: z.enum(["sandbox", "live"]),
     }).parse(data)
   )
   .handler(async ({ data }): Promise<{ token: string } | { error: string }> => {
@@ -219,7 +245,9 @@ export const createFreeReligiousSubmission = createServerFn({ method: "POST" })
           amount_cents: 0,
           status: "paid",
           paid_at: agreedAt,
-          environment: "sandbox",
+          // Use the caller's real environment (live vs sandbox) so free-religious
+          // rows don't pollute prod reporting with a hardcoded "sandbox" tag.
+          environment: data.environment,
           agreed_terms: true,
           agreed_no_refund: true,
           agreed_at: agreedAt,

@@ -78,6 +78,7 @@ function PricingPage() {
   const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading;
 
   const startCheckout = async () => {
+    if (loading) return;
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
     if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
     setLoading(true);
@@ -106,6 +107,7 @@ function PricingPage() {
 
   const startFreeReligious = async () => {
     if (!isReligious) return;
+    if (freeLoading) return;
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
     if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
     setFreeLoading(true);
@@ -116,6 +118,7 @@ function PricingPage() {
           customerEmail: email,
           agreedTerms: true,
           agreedNovelty: true,
+          environment: getStripeEnvironment(),
         },
       });
       if ("error" in res) throw new Error(res.error);
