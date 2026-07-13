@@ -496,17 +496,13 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
                 </div>
               )}
               {christianActive && currentIsReligious && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
-                  <div className="pointer-events-auto flex items-center gap-2 rounded-full border-2 border-[#D4A24C] bg-[#0F2A4A]/95 px-4 py-2 text-[#D4A24C] shadow-2xl backdrop-blur-sm">
-                    <Music size={16} />
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-[10px] uppercase tracking-wider opacity-80">
-                        Christian music playing
-                      </span>
-                      <span className="max-w-[60vw] truncate text-sm font-semibold text-white">
-                        {trackTitle || "Loading Christian playlist…"}
-                      </span>
-                    </div>
+                <div
+                  className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3 sm:px-6"
+                  onMouseEnter={activateChristian}
+                  onMouseLeave={() => deactivateChristian()}
+                >
+                  <div className="w-full max-w-[720px] pointer-events-auto">
+                    <ChristianMusicPanel businessName={current.business_name} />
                   </div>
                 </div>
               )}
