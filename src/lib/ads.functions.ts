@@ -279,6 +279,7 @@ export const createSubmission = createServerFn({ method: "POST" })
       payment_id: pay.id,
       requested_city_name: data.requested_city_name,
       requested_state_code: stateCode,
+      ministry_info: data.ministry_info ?? null,
     });
     if (error) throw new Error(error.message);
 
