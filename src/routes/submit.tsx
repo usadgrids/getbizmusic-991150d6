@@ -494,7 +494,7 @@ function SubmitPage() {
                 <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
                 <div>
                   <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
-                  <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
+                  <select name="industry" required defaultValue={searchIndustry ?? ""} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
                     <option value="" disabled>Pick one…</option>
                     {INDUSTRIES.filter((i) => !RELIGIOUS_INDUSTRY_VALUES.includes(i.value as typeof RELIGIOUS_INDUSTRY_VALUES[number])).map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
                   </select>
