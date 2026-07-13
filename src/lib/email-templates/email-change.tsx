@@ -11,6 +11,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface EmailChangeEmailProps {
   siteName: string
@@ -53,6 +54,7 @@ export const EmailChangeEmail = ({
         <Button style={button} href={confirmationUrl}>
           Confirm Email Change
         </Button>
+        <ProminentNotice />
         <Text style={footer}>
           If you didn't request this change, please secure your account
           immediately.

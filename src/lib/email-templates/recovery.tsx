@@ -10,6 +10,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface RecoveryEmailProps {
   siteName: string
@@ -33,6 +34,7 @@ export const RecoveryEmail = ({
         <Button style={button} href={confirmationUrl}>
           Reset Password
         </Button>
+        <ProminentNotice />
         <Text style={footer}>
           If you didn't request a password reset, you can safely ignore this
           email. Your password will not be changed.

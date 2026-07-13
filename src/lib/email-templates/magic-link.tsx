@@ -10,6 +10,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface MagicLinkEmailProps {
   siteName: string
@@ -33,6 +34,7 @@ export const MagicLinkEmail = ({
         <Button style={button} href={confirmationUrl}>
           Log In
         </Button>
+        <ProminentNotice />
         <Text style={footer}>
           If you didn't request this link, you can safely ignore this email.
         </Text>

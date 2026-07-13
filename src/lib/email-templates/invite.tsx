@@ -11,6 +11,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface InviteEmailProps {
   siteName: string
@@ -40,6 +41,7 @@ export const InviteEmail = ({
         <Button style={button} href={confirmationUrl}>
           Accept Invitation
         </Button>
+        <ProminentNotice />
         <Text style={footer}>
           If you weren't expecting this invitation, you can safely ignore this
           email.

@@ -11,6 +11,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface SignupEmailProps {
   siteName: string
@@ -48,6 +49,7 @@ export const SignupEmail = ({
         <Button style={button} href={confirmationUrl}>
           Verify Email
         </Button>
+        <ProminentNotice />
         <Text style={footer}>
           If you didn't create an account, you can safely ignore this email.
         </Text>
