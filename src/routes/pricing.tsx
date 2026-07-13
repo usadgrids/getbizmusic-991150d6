@@ -33,6 +33,14 @@ function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [freeLoading, setFreeLoading] = useState(false);
   const [repInput, setRepInput] = useState("");
+  const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
+  const [ownerName, setOwnerName] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [zelleLoading, setZelleLoading] = useState(false);
+  const [zelleResult, setZelleResult] = useState<{
+    token: string; memoCode: string; amountFormatted: string; zellePhone: string; submitUrl: string;
+  } | null>(null);
   const [repState, setRepState] = useState<
     | { status: "idle" }
     | { status: "checking" }
