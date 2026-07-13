@@ -244,11 +244,11 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   const accent = featured ? "#D4A24C" : "#0F2A4A";
 
   const togglePlayPause = () => {
-    if (musicPlaying && activeMusicMood === currentMood) {
+    if (musicPlaying) {
       player.pause();
       setPaused(true);
     } else {
-      player.playMood(currentMood);
+      player.resume();
       setPaused(false);
     }
   };
@@ -364,7 +364,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             }}
           >
           <div
-            ref={sliderRef}
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
@@ -374,7 +373,6 @@ export function AdSlider({ ads, title, featured = false }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
-              if (christianActive) deactivateChristian(true);
             }}
 
           >
@@ -415,16 +413,8 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                   </div>
                 </div>
               )}
-              {christianActive && currentIsReligious && (
-                <div
-                  className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3 sm:px-6"
-                >
-                  <div className="w-full max-w-[720px] pointer-events-auto">
-                    <ChristianMusicPanel businessName={current.business_name} />
-                  </div>
-                </div>
-              )}
             </div>
+
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
                 {currentVideoId && (
