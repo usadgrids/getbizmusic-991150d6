@@ -43,6 +43,31 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
       const agreedAt = new Date().toISOString();
       const ipAddress = getClientIp();
 
+      // Duplicate-payment guard: reuse a recent pending design session's
+      // clientSecret if the same email started one within the window.
+      const DUPLICATE_WINDOW_MS = 5 * 60 * 1000;
+      const sinceIso = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
+      const { data: recent } = await supabaseAdmin
+        .from("design_orders")
+        .select("stripe_session_id, created_at")
+        .eq("customer_email", data.customerEmail)
+        .eq("status", "pending")
+        .eq("environment", data.environment)
+        .gte("created_at", sinceIso)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (recent?.stripe_session_id) {
+        try {
+          const existing = await stripe.checkout.sessions.retrieve(recent.stripe_session_id);
+          if (existing.status === "open" && existing.client_secret) {
+            return { clientSecret: existing.client_secret };
+          }
+        } catch {
+          // fall through
+        }
+      }
+
       const metadata: Record<string, string> = {
         order_type: "design",
         customer_email: data.customerEmail,
@@ -52,11 +77,14 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         disclosure_version: DESIGN_DISCLOSURE_VERSION,
       };
 
+      const productName = "Get Biz Music Pro Ad Design";
+      const description = `${productName} — ${data.customerEmail}`.slice(0, 350);
+
       const session = await stripe.checkout.sessions.create({
         line_items: [{
           price_data: {
             currency: "usd",
-            product_data: { name: "Get Biz Music Pro Ad Design" },
+            product_data: { name: productName },
             unit_amount: DESIGN_PRICE_CENTS,
           },
           quantity: 1,
@@ -67,7 +95,7 @@ export const createDesignCheckout = createServerFn({ method: "POST" })
         customer_email: data.customerEmail,
         metadata,
         payment_intent_data: {
-          description: "Get Biz Music Pro Ad Design",
+          description,
           receipt_email: data.customerEmail,
           statement_descriptor_suffix: "GETBIZMUSIC DSGN",
           metadata,

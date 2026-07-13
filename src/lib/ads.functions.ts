@@ -376,24 +376,39 @@ async function assertAdmin(userId: string) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
+// Allowlist of email addresses permitted to claim the admin role. Anyone
+// else calling claimAdmin — even if no admin row exists yet — is rejected,
+// closing the "race-to-first-admin" hole.
+const ADMIN_EMAIL_ALLOWLIST = new Set<string>([
+  "ralphposadas29@gmail.com",
+]);
+
 export const claimAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const callerEmail = String((context.claims as { email?: string })?.email ?? "").toLowerCase();
+    if (!callerEmail || !ADMIN_EMAIL_ALLOWLIST.has(callerEmail)) {
+      throw new Error("This account is not authorized to claim admin access.");
+    }
     const { count } = await supabaseAdmin
       .from("user_roles")
       .select("id", { count: "exact", head: true })
       .eq("role", "admin");
     if ((count ?? 0) > 0) {
-      // Already have an admin — only existing admin can grant more
+      // Already have an admin — allowlisted caller is auto-granted if missing.
       const { data: me } = await supabaseAdmin
         .from("user_roles")
         .select("id")
         .eq("user_id", context.userId)
         .eq("role", "admin")
         .maybeSingle();
-      if (!me) throw new Error("Admin already exists. Ask the owner to grant access.");
-      return { ok: true as const, alreadyAdmin: true };
+      if (me) return { ok: true as const, alreadyAdmin: true };
+      const { error: grantErr } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: context.userId, role: "admin" });
+      if (grantErr) throw new Error(grantErr.message);
+      return { ok: true as const, alreadyAdmin: false };
     }
     const { error } = await supabaseAdmin
       .from("user_roles")
