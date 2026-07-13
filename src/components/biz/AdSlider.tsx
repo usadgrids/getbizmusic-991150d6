@@ -19,6 +19,7 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
+import { ChristianMusicPanel } from "./ChristianMusicPanel";
 import { type MiniPlayerMood } from "./MiniPlayer";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
