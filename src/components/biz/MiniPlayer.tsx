@@ -3,12 +3,6 @@ import { ChevronDown, ChevronUp, Music, Play, Volume2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLAYLIST_ID = "PLp93JI5bGWYnVI3YlstpndURt44OgrIKj";
-const CHRISTIAN_PLAYLIST_ID = "PLp93JI5bGWYlnNHrPfuEaHXFkpA-d5NIt";
-export type MiniPlayerMood = "secular" | "religious";
-const PLAYLIST_BY_MOOD: Record<MiniPlayerMood, string> = {
-  secular: PLAYLIST_ID,
-  religious: CHRISTIAN_PLAYLIST_ID,
-};
 const PLAYER_ELEMENT_ID = "family-mini-player-iframe";
 const YOUTUBE_IFRAME_API_SRC = "https://www.youtube.com/iframe_api";
 const PLAYER_STATE_UNSTARTED = -1;
@@ -27,14 +21,11 @@ export const MINIPLAYER_ACTIVITY_EVENT = "miniplayer:activity";
 export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
-export const MINIPLAYER_SET_PLAYLIST_EVENT = "miniplayer:set-playlist";
-export const MINIPLAYER_PLAY_MOOD_EVENT = "miniplayer:play-mood";
 
-export type MiniPlayerTrack = { title: string; author: string; mood?: MiniPlayerMood };
-export type MiniPlayerPlaylist = { mood: MiniPlayerMood; videoIds: string[] };
+export type MiniPlayerTrack = { title: string; author: string };
+export type MiniPlayerPlaylist = { videoIds: string[] };
 export type MiniPlayerActivity = {
   playing: boolean;
-  mood?: MiniPlayerMood;
   ready?: boolean;
   source?: "player" | "user" | "fallback";
 };
@@ -90,8 +81,6 @@ type WindowWithYT = Window & {
 };
 
 const clampVolume = (value: number) => Math.max(0, Math.min(100, value));
-const startIndexForMood = (mood: MiniPlayerMood, randomIndex: number) =>
-  mood === "religious" ? 0 : randomIndex;
 
 function TapToPlayOverlay({
   visible,
@@ -161,7 +150,7 @@ function TapToPlayOverlay({
 }
 
 
-export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlayerMood }) {
+export function MiniPlayer() {
   const [collapsed, setCollapsed] = useState(false);
   const [showPlayFallback, setShowPlayFallback] = useState(false);
   const [size, setSize] = useState({ width: 200, height: 113 });
@@ -180,7 +169,6 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
   const playSucceededRef = useRef(false);
   const pauseRequestedRef = useRef(false);
   const volumeRef = useRef(100);
-  const currentMoodRef = useRef<MiniPlayerMood>(initialMood);
 
   const clearResumeFallback = useCallback(() => {
     if (resumeFallbackRef.current) {
@@ -215,7 +203,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
     (playing: boolean, source: MiniPlayerActivity["source"] = "player") => {
       window.dispatchEvent(
         new CustomEvent<MiniPlayerActivity>(MINIPLAYER_ACTIVITY_EVENT, {
-          detail: { playing, mood: currentMoodRef.current, ready: startedRef.current || playing, source },
+          detail: { playing, ready: startedRef.current || playing, source },
         }),
       );
     },
@@ -241,7 +229,6 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
             detail: {
               title: videoData.title || "",
               author: videoData.author || "",
-              mood: currentMoodRef.current,
             },
           }),
         );
@@ -265,7 +252,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       if (ids && ids.length > 0) {
         window.dispatchEvent(
           new CustomEvent<MiniPlayerPlaylist>(MINIPLAYER_PLAYLIST_EVENT, {
-            detail: { mood: currentMoodRef.current, videoIds: ids },
+            detail: { videoIds: ids },
           }),
         );
         return;
@@ -307,8 +294,8 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
         if (forcePlaylistLoad || !startedRef.current) {
           player.loadPlaylist({
             listType: "playlist",
-            list: PLAYLIST_BY_MOOD[currentMoodRef.current],
-            index: startIndexForMood(currentMoodRef.current, randomIndexRef.current),
+            list: PLAYLIST_ID,
+            index: randomIndexRef.current,
           });
         }
 
@@ -335,83 +322,6 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       }
     },
     [queueResumeFallback, reportPlayback],
-  );
-
-  const loadAndPlayMood = useCallback(
-    (mood: MiniPlayerMood, index = startIndexForMood(mood, randomIndexRef.current)) => {
-      const player = playerRef.current;
-      currentMoodRef.current = mood;
-
-      if (!player || !playerReadyRef.current) {
-        setShowPlayFallback(true);
-        reportPlayback(false, "fallback");
-        return;
-      }
-
-      clearAutoplayFallback();
-      clearResumeFallback();
-      clearTrackRefreshTimeouts();
-
-      pauseRequestedRef.current = false;
-      mutedFallbackRef.current = false;
-      playSucceededRef.current = false;
-      startedRef.current = false;
-      lastVideoIdRef.current = null;
-      setShowPlayFallback(false);
-
-      try {
-        player.setLoop(true);
-        player.setShuffle(false);
-        player.unMute();
-        player.setVolume(clampVolume(volumeRef.current));
-        player.loadPlaylist({
-          listType: "playlist",
-          list: PLAYLIST_BY_MOOD[mood],
-          index,
-          startSeconds: 0,
-        });
-        // The first play attempt must stay in the same synchronous user-event
-        // chain as the button tap/click. Delaying every playVideo call behind a
-        // timer lets browser media policy reject sound, especially after
-        // switching between secular and Christian playlists.
-        player.playVideo();
-        syncEmbeddedFrame();
-        syncTrackData(player);
-      } catch {
-        setShowPlayFallback(true);
-        reportPlayback(false, "fallback");
-        return;
-      }
-
-      [0, 250, 800].forEach((delay) => {
-        const timeoutId = window.setTimeout(() => {
-          try {
-            player.unMute();
-            player.setVolume(clampVolume(volumeRef.current));
-            player.playVideo();
-            syncEmbeddedFrame();
-            syncTrackData(player);
-          } catch {
-            setShowPlayFallback(true);
-            reportPlayback(false, "fallback");
-          }
-        }, delay);
-        trackRefreshTimeoutsRef.current.push(timeoutId);
-      });
-
-      window.setTimeout(() => publishPlaylist(player), 500);
-      queueResumeFallback();
-    },
-    [
-      clearAutoplayFallback,
-      clearResumeFallback,
-      clearTrackRefreshTimeouts,
-      publishPlaylist,
-      queueResumeFallback,
-      reportPlayback,
-      syncEmbeddedFrame,
-      syncTrackData,
-    ],
   );
 
   const pauseCurrentTrack = useCallback(() => {
@@ -460,8 +370,8 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       if (!startedRef.current) {
         player.loadPlaylist({
           listType: "playlist",
-          list: PLAYLIST_BY_MOOD[currentMoodRef.current],
-          index: startIndexForMood(currentMoodRef.current, randomIndexRef.current),
+          list: PLAYLIST_ID,
+          index: randomIndexRef.current,
         });
       }
 
@@ -546,7 +456,7 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
             disablekb: 1,
             fs: 0,
             iv_load_policy: 3,
-            list: PLAYLIST_BY_MOOD[currentMoodRef.current],
+            list: PLAYLIST_ID,
             listType: "playlist",
             loop: 1,
             modestbranding: 1,
@@ -667,12 +577,6 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
 
     const onPause = () => pauseCurrentTrack();
     const onPlay = () => resumeCurrentTrack();
-    const onPlayMood = (event: Event) => {
-      const detail = (event as CustomEvent<{ mood: MiniPlayerMood; index?: number }>).detail;
-      const mood = detail?.mood;
-      if (mood !== "secular" && mood !== "religious") return;
-      loadAndPlayMood(mood, typeof detail.index === "number" ? detail.index : startIndexForMood(mood, randomIndexRef.current));
-    };
     const onUnmute = () => handleManualPlay();
     const onPrevTrack = () => {
       try {
@@ -697,18 +601,12 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       scheduleTrackRefresh();
     };
     const onPlayIndex = (event: Event) => {
-      const detail = (event as CustomEvent<{ index: number; mood?: MiniPlayerMood }>).detail;
+      const detail = (event as CustomEvent<{ index: number }>).detail;
       if (typeof detail?.index !== "number") return;
-      const mood = detail.mood;
       try {
         const player = playerRef.current;
         if (!player) return;
-        if (mood === "secular" || mood === "religious") {
-          loadAndPlayMood(mood, detail.index);
-          return;
-        } else {
-          player.playVideoAt(detail.index);
-        }
+        player.playVideoAt(detail.index);
         player.unMute();
         player.setVolume(clampVolume(volumeRef.current));
       } catch {
@@ -744,60 +642,14 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       syncEmbeddedFrame();
       syncTrackData();
     };
-    const onSetPlaylist = (event: Event) => {
-      const detail = (event as CustomEvent<{ mood: MiniPlayerMood; force?: boolean }>).detail;
-      const mood = detail?.mood;
-      if (mood !== "secular" && mood !== "religious") return;
-      const shouldReloadSameMood = Boolean(detail?.force);
-      if (mood === currentMoodRef.current && !shouldReloadSameMood) {
-        publishPlaylist();
-        return;
-      }
-      const player = playerRef.current;
-      if (!player || !playerReadyRef.current) {
-        currentMoodRef.current = mood;
-        return;
-      }
-      const listId = PLAYLIST_BY_MOOD[mood];
-      if (PLAYLIST_BY_MOOD.secular === PLAYLIST_BY_MOOD.religious) {
-        // Both playlists share an ID (placeholder Christian playlist not yet
-        // configured) — swap would just restart the same music, so skip it.
-        currentMoodRef.current = mood;
-        return;
-      }
-      const wasPaused = pauseRequestedRef.current;
-      try {
-        randomIndexRef.current = mood === "religious" ? 0 : Math.floor(Math.random() * 12) + 1;
-        currentMoodRef.current = mood;
-        player.loadPlaylist({
-          listType: "playlist",
-          list: listId,
-          index: startIndexForMood(mood, randomIndexRef.current),
-        });
-        if (wasPaused) {
-          try { player.pauseVideo(); } catch { /* noop */ }
-        } else {
-          try {
-            player.unMute();
-            player.setVolume(clampVolume(volumeRef.current));
-          } catch { /* noop */ }
-        }
-        window.setTimeout(() => publishPlaylist(player), 400);
-        scheduleTrackRefresh();
-      } catch {
-        // ignore swap failures
-      }
-    };
 
     window.addEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
     window.addEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
-    window.addEventListener(MINIPLAYER_PLAY_MOOD_EVENT, onPlayMood);
     window.addEventListener(MINIPLAYER_UNMUTE_EVENT, onUnmute);
     window.addEventListener(MINIPLAYER_PREV_EVENT, onPrevTrack);
     window.addEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
     window.addEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
     window.addEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
-    window.addEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onVisibility);
     window.addEventListener("focus", onVisibility);
@@ -806,13 +658,11 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
       window.clearInterval(playbackPoll);
       window.removeEventListener(MINIPLAYER_PAUSE_EVENT, onPause);
       window.removeEventListener(MINIPLAYER_PLAY_EVENT, onPlay);
-      window.removeEventListener(MINIPLAYER_PLAY_MOOD_EVENT, onPlayMood);
       window.removeEventListener(MINIPLAYER_UNMUTE_EVENT, onUnmute);
       window.removeEventListener(MINIPLAYER_PREV_EVENT, onPrevTrack);
       window.removeEventListener(MINIPLAYER_NEXT_EVENT, onNextTrack);
       window.removeEventListener(MINIPLAYER_VOLUME_EVENT, onVolume);
       window.removeEventListener(MINIPLAYER_PLAY_INDEX_EVENT, onPlayIndex);
-      window.removeEventListener(MINIPLAYER_SET_PLAYLIST_EVENT, onSetPlaylist);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pageshow", onVisibility);
       window.removeEventListener("focus", onVisibility);
@@ -821,7 +671,6 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
   }, [
     clearTrackRefreshTimeouts,
     handleManualPlay,
-    loadAndPlayMood,
     pauseCurrentTrack,
     resumeCurrentTrack,
     scheduleTrackRefresh,
