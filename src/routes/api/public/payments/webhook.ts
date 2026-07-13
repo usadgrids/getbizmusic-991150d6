@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
+import { sendPaidOrderNotificationToProcessing } from "@/lib/email/paid-order-notification.server";
 
 const PLAN_LABELS: Record<string, string> = {
   image_5: 'Standard Image Ad',
@@ -156,6 +157,25 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       cardLast4,
       paidAtIso,
     });
+
+    // Notify processing team for all paid ad orders (skip free religious spots).
+    if (amount > 0 && !session.id.startsWith('free-religious-')) {
+      await sendPaidOrderNotificationToProcessing({
+        orderType: 'ad',
+        email: recipientEmail,
+        plan,
+        amountCents: amount,
+        currency,
+        sessionId: session.id,
+        submissionToken,
+        paymentIntentId,
+        receiptUrl,
+        cardholderName,
+        cardBrand,
+        cardLast4,
+        paidAtIso,
+      });
+    }
   } else {
     console.warn('payment-receipt skipped — missing email or submission_token', {
       hasEmail: !!recipientEmail,
@@ -324,6 +344,18 @@ async function handleDesignCheckoutCompleted(session: any, env: StripeEnv) {
   } catch (e) {
     console.error("design-receipt enqueue failed:", e);
   }
+
+  // Notify processing team for all paid design orders.
+  await sendPaidOrderNotificationToProcessing({
+    orderType: 'design',
+    email,
+    amountCents: amount,
+    currency: session.currency ?? null,
+    sessionId: session.id,
+    paymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null,
+    receiptUrl: null,
+    paidAtIso: new Date().toISOString(),
+  });
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
