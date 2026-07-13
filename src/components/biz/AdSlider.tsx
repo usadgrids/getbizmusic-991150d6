@@ -19,7 +19,8 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
+import { emit, useMiniPlayerController } from "@/hooks/useMiniPlayerController";
+import { MINIPLAYER_RELIGIOUS_PAUSE_EVENT } from "@/components/biz/MiniPlayer";
 
 function SlideTimer({
   duration,
@@ -67,6 +68,8 @@ interface Props {
 // legal/contractual guarantee to advertisers.
 function resolveDuration(ad: PublicAd | undefined): number {
   if (!ad) return 0;
+  // Religious categories are contractually capped at 10 seconds per slide.
+  if (isReligiousIndustry(ad.industry)) return 10;
   const raw = Number(ad.duration_seconds);
   if (Number.isFinite(raw) && raw > 0) return raw;
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
@@ -160,19 +163,24 @@ export function AdSlider({ ads, title, featured = false }: Props) {
   // Auto-pause the background music while a religious-category ad is showing;
   // auto-resume when the slider moves off it (only if music was playing before).
   const wasPlayingBeforeReligiousRef = useRef(false);
+  const isReligious = !!current && isReligiousIndustry(current.industry);
   useEffect(() => {
     if (!current) return;
-    if (isReligiousIndustry(current.industry)) {
+    if (isReligious) {
       if (player.playing) {
         wasPlayingBeforeReligiousRef.current = true;
         player.pause();
       }
-    } else if (wasPlayingBeforeReligiousRef.current) {
-      wasPlayingBeforeReligiousRef.current = false;
-      player.resume();
+      emit(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, { paused: true });
+    } else {
+      if (wasPlayingBeforeReligiousRef.current) {
+        wasPlayingBeforeReligiousRef.current = false;
+        player.resume();
+      }
+      emit(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, { paused: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, current?.industry]);
+  }, [idx, isReligious]);
 
   useEffect(() => {
     return () => {
@@ -324,7 +332,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             </div>
             {ads.length > 0 && (
               <span className="whitespace-nowrap text-xs text-gray-500">
-                {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
+                {idx + 1} / {ads.length} · {duration}s each
               </span>
             )}
           </div>
@@ -431,6 +439,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                 </div>
               )}
             </div>
+
+            {isReligious && (
+              <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/80 px-3 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md">
+                <Pause size={12} fill="currentColor" />
+                Music is paused
+              </div>
+            )}
 
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">

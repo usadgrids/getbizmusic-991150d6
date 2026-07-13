@@ -21,6 +21,7 @@ export const MINIPLAYER_ACTIVITY_EVENT = "miniplayer:activity";
 export const MINIPLAYER_VOLUME_EVENT = "miniplayer:volume";
 export const MINIPLAYER_PLAY_INDEX_EVENT = "miniplayer:play-index";
 export const MINIPLAYER_PLAYLIST_EVENT = "miniplayer:playlist";
+export const MINIPLAYER_RELIGIOUS_PAUSE_EVENT = "miniplayer:religious-pause";
 
 export type MiniPlayerTrack = { title: string; author: string };
 export type MiniPlayerPlaylist = { videoIds: string[] };
@@ -153,7 +154,18 @@ function TapToPlayOverlay({
 export function MiniPlayer() {
   const [collapsed, setCollapsed] = useState(false);
   const [showPlayFallback, setShowPlayFallback] = useState(false);
+  const [religiousPaused, setReligiousPaused] = useState(false);
   const [size, setSize] = useState({ width: 200, height: 113 });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ paused: boolean }>).detail;
+      setReligiousPaused(Boolean(detail?.paused));
+    };
+    window.addEventListener(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, handler);
+    return () => window.removeEventListener(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, handler);
+  }, []);
 
   const playerHostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
@@ -692,14 +704,20 @@ export function MiniPlayer() {
 
   return (
     <>
-      <TapToPlayOverlay visible={showPlayFallback} onTap={handleManualPlay} />
+      <TapToPlayOverlay visible={showPlayFallback && !religiousPaused} onTap={handleManualPlay} />
       <div
         className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)]"
         style={{ width: size.width }}
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
           <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
-            <span className="truncate pr-2">{showPlayFallback ? "🎵 Tap to Play Music" : "🎵 Now Playing"}</span>
+            <span className="truncate pr-2">
+              {religiousPaused
+                ? "⏸ Music is paused"
+                : showPlayFallback
+                  ? "🎵 Tap to Play Music"
+                  : "🎵 Now Playing"}
+            </span>
             <button
               type="button"
               onClick={() => setCollapsed((current) => !current)}
@@ -720,7 +738,12 @@ export function MiniPlayer() {
           >
             <div id={PLAYER_ELEMENT_ID} ref={playerHostRef} className="h-full w-full" />
 
-            {showPlayFallback ? (
+            {religiousPaused ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold text-[#D4A24C] sm:text-xs">
+                <Volume2 size={14} />
+                <span>Music is paused</span>
+              </div>
+            ) : showPlayFallback ? (
               <button
                 type="button"
                 onClick={handleManualPlay}
