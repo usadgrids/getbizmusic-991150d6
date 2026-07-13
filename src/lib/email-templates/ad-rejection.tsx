@@ -10,6 +10,7 @@ import {
   Text,
   Hr,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -68,6 +69,7 @@ const AdRejectionEmail = ({ businessName, contactName, reason, plan }: Props) =>
           </Text>
 
           <Hr style={hr} />
+          <ProminentNotice />
           <Text style={footer}>
             Questions? Reply to this email and our team will respond within 24 hours.
           </Text>
