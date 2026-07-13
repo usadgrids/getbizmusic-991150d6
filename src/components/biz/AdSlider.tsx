@@ -67,6 +67,8 @@ interface Props {
 // legal/contractual guarantee to advertisers.
 function resolveDuration(ad: PublicAd | undefined): number {
   if (!ad) return 0;
+  // Religious categories are contractually capped at 10 seconds per slide.
+  if (isReligiousIndustry(ad.industry)) return 10;
   const raw = Number(ad.duration_seconds);
   if (Number.isFinite(raw) && raw > 0) return raw;
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
