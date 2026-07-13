@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -19,8 +19,6 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import { ChristianMusicPanel } from "./ChristianMusicPanel";
-import { type MiniPlayerMood } from "./MiniPlayer";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
 function SlideTimer({
@@ -61,7 +59,6 @@ interface Props {
   ads: PublicAd[];
   title: string;
   featured?: boolean;
-  musicMood?: MiniPlayerMood;
 }
 
 // Resolve the authoritative rotation seconds for an ad. Always prefer the
@@ -75,13 +72,11 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
+export function AdSlider({ ads, title, featured = false }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const currentMood: MiniPlayerMood = musicMood ?? "secular";
-  const player = useMiniPlayerController(currentMood);
+  const player = useMiniPlayerController();
   const musicPlaying = player.playing;
-  const activeMusicMood = player.activeMood;
   const trackTitle = player.track?.title ?? "";
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -93,10 +88,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [videoNonce, setVideoNonce] = useState(0);
   const videoLeaveTimerRef = useRef<number | null>(null);
   const wasMusicPlayingRef = useRef(false);
-  const [christianActive, setChristianActive] = useState(false);
-  const christianLeaveTimerRef = useRef<number | null>(null);
-  const christianWasPlayingRef = useRef(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
 
   const handleShareOpen = () => {
     setPaused(true);
