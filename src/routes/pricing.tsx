@@ -86,7 +86,7 @@ function PricingPage() {
         data: {
           plan,
           customerEmail: email,
-          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&industry=${encodeURIComponent(industry)}`,
           environment: getStripeEnvironment(),
           agreedTerms,
           agreedNoRefund,
