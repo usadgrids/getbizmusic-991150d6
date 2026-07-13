@@ -285,6 +285,7 @@ export type DesignOrderRow = {
   paid_at: string | null;
   created_at: string;
   intake_submitted_at: string | null;
+  completed_at: string | null;
   intake: {
     business_name?: string;
     owner_name?: string;
