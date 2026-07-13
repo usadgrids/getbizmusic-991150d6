@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Check, Loader2, Upload, ArrowLeft } from "lucide-react";
+import { Check, Loader2, Upload, ArrowLeft, Mail } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { lookupDesignBySession, submitDesignIntake } from "@/lib/design.functions";
+import { emailDesignIntakeLink, lookupDesignBySession, submitDesignIntake } from "@/lib/design.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/design/return")({
