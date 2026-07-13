@@ -438,6 +438,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
             }}
           >
           <div
+            ref={sliderRef}
             className="relative rounded-2xl overflow-hidden shadow-xl bg-white w-full group max-w-full"
             style={{
               border: `3px solid ${accent}`,
@@ -447,6 +448,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
+              if (christianActive) deactivateChristian();
             }}
 
           >
