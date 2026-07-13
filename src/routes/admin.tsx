@@ -1112,6 +1112,55 @@ function EditAdModal({
           />
         </div>
 
+        {showMinistry && (
+          <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[#0F2A4A] font-bold text-sm">Ministry Information (Free Religious Ad)</div>
+              {mi ? null : <div className="text-[10px] text-amber-800">No ministry info on file — fill in below.</div>}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Church / Ministry name *</label>
+                <input value={churchName} onChange={(e) => setChurchName(e.target.value)} maxLength={200}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Pastor / Leader name *</label>
+                <input value={pastorName} onChange={(e) => setPastorName(e.target.value)} maxLength={200}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Address *</label>
+                <input value={churchAddress} onChange={(e) => setChurchAddress(e.target.value)} maxLength={300}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Phone *</label>
+                <input value={ministryPhone} onChange={(e) => setMinistryPhone(e.target.value)} maxLength={40}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#0F2A4A] mb-1">IRS Non-Profit #</label>
+                <input value={irsNumber} onChange={(e) => setIrsNumber(e.target.value)} maxLength={40} disabled={!hasIrs}
+                  placeholder={hasIrs ? "e.g. 12-3456789" : "N/A"}
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white disabled:bg-gray-100" />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 text-xs text-[#0F2A4A]">
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={is501c3} onChange={(e) => setIs501c3(e.target.checked)} />
+                We are a non-profit 501(c)(3) organization
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={hasIrs} onChange={(e) => setHasIrs(e.target.checked)} />
+                We have an IRS non-profit number
+              </label>
+            </div>
+          </div>
+        )}
+
+
+
 
         <div className="flex gap-2 pt-2">
           <button
