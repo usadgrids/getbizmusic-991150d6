@@ -910,6 +910,17 @@ function EditAdModal({
     ad_type: "image_5" | "slider_10";
     image_url: string;
     ad_number: number | null;
+    ministry_info?: {
+      church_name?: string;
+      church_address?: string;
+      pastor_name?: string;
+      phone?: string;
+      is_501c3?: boolean;
+      has_irs_number?: boolean;
+      irs_number?: string;
+      attest_independent_ministry?: boolean;
+      attest_novelty?: boolean;
+    } | null;
   };
   onClose: () => void;
   onSaved: () => void;
@@ -923,6 +934,18 @@ function EditAdModal({
   const [adType, setAdType] = useState<"image_5" | "slider_10">(ad.ad_type);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Ministry / religious intake fields (only shown when industry is religious).
+  const mi = ad.ministry_info ?? null;
+  const [churchName, setChurchName] = useState(mi?.church_name ?? ad.business_name ?? "");
+  const [churchAddress, setChurchAddress] = useState(mi?.church_address ?? "");
+  const [pastorName, setPastorName] = useState(mi?.pastor_name ?? "");
+  const [ministryPhone, setMinistryPhone] = useState(mi?.phone ?? "");
+  const [is501c3, setIs501c3] = useState<boolean>(mi?.is_501c3 ?? false);
+  const [hasIrs, setHasIrs] = useState<boolean>(mi?.has_irs_number ?? false);
+  const [irsNumber, setIrsNumber] = useState(mi?.irs_number ?? "");
+
+  const showMinistry = isReligiousIndustry(industry);
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
@@ -945,6 +968,25 @@ function EditAdModal({
           .upload(image_path, file, { contentType: file.type, upsert: false });
         if (upErr) throw upErr;
       }
+
+      let ministry_info: ReturnType<typeof buildMinistryInfo> | null = null;
+      if (showMinistry) {
+        if (!churchName.trim() || !churchAddress.trim() || !pastorName.trim() || !ministryPhone.trim()) {
+          toast.error("Please fill every Ministry Information field");
+          setBusy(false);
+          return;
+        }
+        if (hasIrs && !irsNumber.trim()) {
+          toast.error("Enter the IRS non-profit number or uncheck 'Has IRS number'");
+          setBusy(false);
+          return;
+        }
+        ministry_info = buildMinistryInfo({
+          churchName, churchAddress, pastorName, ministryPhone,
+          is501c3, hasIrs, irsNumber,
+        });
+      }
+
       await updateFn({
         data: {
           id: ad.id,
@@ -955,6 +997,7 @@ function EditAdModal({
           industry,
           ad_type: adType,
           image_path,
+          ministry_info: showMinistry ? ministry_info! : null,
         },
       });
       toast.success("Ad updated");
