@@ -57,7 +57,11 @@ function SubmitPage() {
   const [city, setCity] = useState<UsCity | null>(null);
 
   // Ministry-only state (used when verify.freeReligious is true)
-  const [ministryIndustry, setMinistryIndustry] = useState<string>("church");
+  const [ministryIndustry, setMinistryIndustry] = useState<string>(
+    searchIndustry && RELIGIOUS_INDUSTRY_VALUES.includes(searchIndustry as typeof RELIGIOUS_INDUSTRY_VALUES[number])
+      ? searchIndustry
+      : "church"
+  );
   const [churchName, setChurchName] = useState("");
   const [churchAddress, setChurchAddress] = useState("");
   const [pastorName, setPastorName] = useState("");
