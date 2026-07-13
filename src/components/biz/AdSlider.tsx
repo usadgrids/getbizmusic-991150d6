@@ -168,10 +168,78 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   useEffect(() => {
     return () => {
       if (videoLeaveTimerRef.current) window.clearTimeout(videoLeaveTimerRef.current);
+      if (christianLeaveTimerRef.current) window.clearTimeout(christianLeaveTimerRef.current);
     };
   }, []);
 
   const currentVideoId = parseYoutubeId(current?.youtube_url);
+  const currentIsReligious = current ? isReligiousIndustry(current.industry) : false;
+
+  // Auto-dismiss the Christian hover when the slide changes away from a religious ad.
+  useEffect(() => {
+    if (!currentIsReligious && christianActive) {
+      deactivateChristian(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, currentIsReligious]);
+
+  const activateChristian = () => {
+    if (!currentIsReligious) return;
+    if (christianLeaveTimerRef.current) {
+      window.clearTimeout(christianLeaveTimerRef.current);
+      christianLeaveTimerRef.current = null;
+    }
+    setChristianActive((prev) => {
+      if (!prev) {
+        christianWasPlayingRef.current = musicPlaying;
+        setPaused(true);
+        player.playMood("religious");
+      }
+      return true;
+    });
+  };
+
+  const deactivateChristian = (immediate = false) => {
+    if (christianLeaveTimerRef.current) {
+      window.clearTimeout(christianLeaveTimerRef.current);
+      christianLeaveTimerRef.current = null;
+    }
+    const run = () => {
+      setChristianActive(false);
+      setPaused(false);
+      // Restore secular playlist visibility; only auto-play if secular music
+      // was already playing before Christian took over.
+      if (christianWasPlayingRef.current) {
+        player.playMood("secular");
+      } else {
+        player.pause();
+        player.setPlaylist("secular", true);
+      }
+      christianWasPlayingRef.current = false;
+      christianLeaveTimerRef.current = null;
+    };
+    if (immediate) run();
+    else christianLeaveTimerRef.current = window.setTimeout(run, 120);
+  };
+
+  // Touch: when active, tapping outside the slider dismisses Christian hover.
+  useEffect(() => {
+    if (!christianActive) return;
+    const onDocTouch = (e: TouchEvent) => {
+      const el = sliderRef.current;
+      if (!el) return;
+      const target = e.target as Node | null;
+      if (target && el.contains(target)) return;
+      deactivateChristian(true);
+    };
+    document.addEventListener("touchstart", onDocTouch, { passive: true });
+    document.addEventListener("mousedown", onDocTouch as unknown as EventListener);
+    return () => {
+      document.removeEventListener("touchstart", onDocTouch);
+      document.removeEventListener("mousedown", onDocTouch as unknown as EventListener);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [christianActive]);
 
   const activateVideo = () => {
     if (!currentVideoId) return;
