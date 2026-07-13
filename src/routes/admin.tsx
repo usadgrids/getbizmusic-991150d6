@@ -895,6 +895,23 @@ function AdminField({
   );
 }
 
+function buildMinistryInfo(v: {
+  churchName: string; churchAddress: string; pastorName: string; ministryPhone: string;
+  is501c3: boolean; hasIrs: boolean; irsNumber: string;
+}) {
+  return {
+    church_name: v.churchName.trim(),
+    church_address: v.churchAddress.trim(),
+    pastor_name: v.pastorName.trim(),
+    phone: v.ministryPhone.trim(),
+    is_501c3: v.is501c3,
+    has_irs_number: v.hasIrs,
+    irs_number: v.hasIrs ? v.irsNumber.trim() : "",
+    attest_independent_ministry: true as const,
+    attest_novelty: true as const,
+  };
+}
+
 function EditAdModal({
   ad,
   onClose,
