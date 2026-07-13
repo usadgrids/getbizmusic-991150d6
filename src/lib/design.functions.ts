@@ -138,16 +138,29 @@ export const lookupDesignBySession = createServerFn({ method: "POST" })
           // Fallback receipt send in case webhook hasn't landed
           try {
             const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+            const { sendPaidOrderNotificationToProcessing } = await import("@/lib/email/paid-order-notification.server");
+            const customerEmail = (updated.customer_email as string) || session.customer_email || "";
             await enqueueTransactionalEmailInternal({
               templateName: "design-receipt",
-              recipientEmail: (updated.customer_email as string) || session.customer_email || "",
+              recipientEmail: customerEmail,
               idempotencyKey: `design-receipt-${session.id}`,
               templateData: {
                 amountFormatted: `$${(DESIGN_PRICE_CENTS / 100).toFixed(2)}`,
                 orderNumber: session.id,
-                billingEmail: (updated.customer_email as string) || session.customer_email,
+                billingEmail: customerEmail,
                 intakeUrl: `https://www.getbizmusic.com/design/return?session_id=${session.id}`,
               },
+            });
+
+            // Notify processing team for paid design orders.
+            await sendPaidOrderNotificationToProcessing({
+              orderType: "design",
+              email: customerEmail,
+              amountCents: DESIGN_PRICE_CENTS,
+              currency: session.currency ?? null,
+              sessionId: session.id,
+              paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+              paidAtIso: new Date().toISOString(),
             });
           } catch (e) {
             console.error("fallback design-receipt enqueue failed:", e);
