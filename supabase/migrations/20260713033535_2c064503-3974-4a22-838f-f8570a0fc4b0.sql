@@ -1,0 +1,1 @@
+ALTER TABLE public.design_orders ADD COLUMN IF NOT EXISTS completed_at timestamptz;
