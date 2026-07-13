@@ -9,6 +9,7 @@ import { template as designReceiptTemplate } from './design-receipt'
 import { template as designIntakeLinkTemplate } from './design-intake-link'
 import { template as designOrderNotificationTemplate } from './design-order-notification'
 import { template as paidOrderNotificationTemplate } from './paid-order-notification'
+import { template as zelleInstructionsTemplate } from './zelle-instructions'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -33,4 +34,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'design-intake-link': designIntakeLinkTemplate,
   'design-order-notification': designOrderNotificationTemplate,
   'paid-order-notification': paidOrderNotificationTemplate,
+  'zelle-instructions': zelleInstructionsTemplate,
 }
