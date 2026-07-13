@@ -18,7 +18,7 @@ import {
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { getActiveCities } from "@/lib/cities.functions";
-import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 
