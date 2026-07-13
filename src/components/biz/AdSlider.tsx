@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
 
 
 
@@ -77,7 +77,8 @@ function resolveDuration(ad: PublicAd | undefined): number {
 export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const player = useMiniPlayerController();
+  const currentMood: MiniPlayerMood = musicMood ?? "secular";
+  const player = useMiniPlayerController(currentMood);
   const musicPlaying = player.playing;
   const activeMusicMood = player.activeMood;
   const trackTitle = player.track?.title ?? "";
@@ -243,11 +244,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
   // Listen to music player activity/track
   const accent = featured ? "#D4A24C" : "#0F2A4A";
-
-  const slideMood: MiniPlayerMood = current && isReligiousIndustry(current.industry)
-    ? "religious"
-    : "secular";
-  const currentMood: MiniPlayerMood = musicMood ?? slideMood;
 
   const togglePlayPause = () => {
     if (musicPlaying && activeMusicMood === currentMood) {

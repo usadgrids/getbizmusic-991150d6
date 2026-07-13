@@ -6,7 +6,7 @@ import type { MiniPlayerMood } from "./MiniPlayer";
 
 export function PlaylistMarquee({ mood }: { mood?: MiniPlayerMood }) {
   const { tracks, isLoading } = usePlaylistTracks(mood);
-  const player = useMiniPlayerController();
+  const player = useMiniPlayerController(mood);
   const [currentTitle, setCurrentTitle] = useState<string>("");
 
   useEffect(() => {
