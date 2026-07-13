@@ -211,32 +211,33 @@ export const submitDesignIntake = createServerFn({ method: "POST" })
     try {
       const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
       await enqueueTransactionalEmailInternal({
-        templateName: "city-request-notification",
+        templateName: "design-order-notification",
         recipientEmail: "ralphposadas29@gmail.com",
         idempotencyKey: `design-intake-${data.sessionId}`,
         templateData: {
-          cityName: `DESIGN ORDER: ${data.intake.business_name}`,
-          stateCode: `Customer: ${row.customer_email}`,
-          requesterEmail: row.customer_email,
-          notes: [
-            `Owner: ${data.intake.owner_name}`,
-            `Owner email: ${data.intake.owner_email}`,
-            `Business email: ${data.intake.business_email || "n/a"}`,
-            `Phone: ${data.intake.phone}`,
-            `Website: ${data.intake.website_url || "n/a"}`,
-            `Services: ${data.intake.services}`,
-            `Tagline: ${data.intake.tagline || "n/a"}`,
-            `Colors: ${data.intake.color_preferences || "n/a"}`,
-            `Logo path: ${data.intake.logo_path || "n/a"}`,
-            `Image paths: ${(data.intake.image_paths ?? []).join(", ") || "n/a"}`,
-            `Design brief: ${data.intake.design_brief || "n/a"}`,
-            `Notes: ${data.intake.notes || "n/a"}`,
-          ].join("\n"),
+          businessName: data.intake.business_name,
+          ownerName: data.intake.owner_name,
+          ownerEmail: data.intake.owner_email,
+          businessEmail: data.intake.business_email || "",
+          customerEmail: row.customer_email as string,
+          phone: data.intake.phone,
+          websiteUrl: data.intake.website_url || "",
+          services: data.intake.services,
+          tagline: data.intake.tagline || "",
+          colorPreferences: data.intake.color_preferences || "",
+          logoPath: data.intake.logo_path || "",
+          imagePaths: data.intake.image_paths ?? [],
+          designBrief: data.intake.design_brief || "",
+          notes: data.intake.notes || "",
+          sessionId: data.sessionId,
+          submittedAt: new Date().toISOString(),
         },
       });
     } catch (e) {
       console.error("design intake admin notification failed:", e);
     }
+
+
 
     return { ok: true };
   });
