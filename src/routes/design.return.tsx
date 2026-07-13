@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Check, Loader2, Upload, ArrowLeft } from "lucide-react";
+import { Check, Loader2, Upload, ArrowLeft, Mail } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { lookupDesignBySession, submitDesignIntake } from "@/lib/design.functions";
+import { emailDesignIntakeLink, lookupDesignBySession, submitDesignIntake } from "@/lib/design.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/design/return")({
@@ -26,6 +26,7 @@ function DesignReturn() {
     { status: "loading" }
   );
   const [submitting, setSubmitting] = useState(false);
+  const [emailing, setEmailing] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
 
@@ -55,6 +56,20 @@ function DesignReturn() {
     tick();
     return () => { cancelled = true; };
   }, [session_id]);
+
+  const handleEmailLink = async () => {
+    if (!session_id) return;
+    setEmailing(true);
+    try {
+      const res = await emailDesignIntakeLink({ data: { sessionId: session_id, environment: getStripeEnvironment() } });
+      if (!res.ok) throw new Error(res.error ?? "Email failed");
+      toast.success("Design intake link emailed — check your inbox shortly.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Email failed");
+    } finally {
+      setEmailing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -256,6 +271,23 @@ function DesignReturn() {
 
               <button type="submit" disabled={submitting} className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-60">
                 {submitting ? "Sending…" : "Send my info to the design team"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleEmailLink}
+                disabled={emailing}
+                className="w-full bg-[#0F2A4A] text-white font-semibold py-3 rounded-md hover:bg-[#163864] transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                {emailing ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Emailing link…
+                  </>
+                ) : (
+                  <>
+                    <Mail size={16} /> I am not yet ready — email my design link for later
+                  </>
+                )}
               </button>
             </form>
           </>

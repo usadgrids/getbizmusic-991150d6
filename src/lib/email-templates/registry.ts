@@ -6,6 +6,7 @@ import { template as adApprovedTemplate } from './ad-approved'
 import { template as submitReminderTemplate } from './submit-reminder'
 import { template as cityRequestNotificationTemplate } from './city-request-notification'
 import { template as designReceiptTemplate } from './design-receipt'
+import { template as designIntakeLinkTemplate } from './design-intake-link'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -27,4 +28,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'submit-reminder': submitReminderTemplate,
   'city-request-notification': cityRequestNotificationTemplate,
   'design-receipt': designReceiptTemplate,
+  'design-intake-link': designIntakeLinkTemplate,
 }
