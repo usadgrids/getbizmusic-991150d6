@@ -194,7 +194,12 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       if (!prev) {
         christianWasPlayingRef.current = musicPlaying;
         setPaused(true);
-        player.playMood("religious");
+        // Pause any secular audio first, then force-load + play the Christian
+        // playlist. setPlaylist("religious", true) guarantees the mini-player
+        // swaps its list even if it thinks it's already on that mood.
+        player.pause();
+        player.setPlaylist("religious", true);
+        player.playMood("religious", 0);
       }
       return true;
     });
