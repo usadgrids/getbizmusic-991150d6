@@ -440,6 +440,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
               )}
             </div>
 
+            {isReligious && (
+              <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-[#0F2A4A]/80 px-3 py-1 text-white text-xs font-bold backdrop-blur-sm shadow-md">
+                <Pause size={12} fill="currentColor" />
+                Music is paused
+              </div>
+            )}
+
             {ads.length > 0 && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
                 {currentVideoId && (
