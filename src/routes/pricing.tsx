@@ -83,7 +83,10 @@ function PricingPage() {
   const discounted = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
-  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading;
+  const zelleFieldsOk = payMethod !== "zelle" || (
+    ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7
+  );
+  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && zelleFieldsOk;
 
   const startCheckout = async () => {
     if (loading) return;
