@@ -544,7 +544,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
         expires_at: expires.toISOString(),
         status: "active",
         city_id: cityId,
-        ministry_info: (sub as { ministry_info?: unknown }).ministry_info ?? null,
+        ministry_info: ((sub as { ministry_info?: unknown }).ministry_info ?? null) as never,
       }).select("ad_number, edit_token").maybeSingle();
       if (insErr) throw new Error(insErr.message);
       adNumber = inserted?.ad_number ?? null;
