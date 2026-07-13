@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText, Heart } from "lucide-react";
+import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText, Heart, CreditCard, Send, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createAdCheckout, createFreeReligiousSubmission } from "@/lib/payments.functions";
+import { createAdCheckout, createFreeReligiousSubmission, createZelleAdOrder } from "@/lib/payments.functions";
 import { validateRepCode } from "@/lib/reps.functions";
 import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -33,6 +33,14 @@ function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [freeLoading, setFreeLoading] = useState(false);
   const [repInput, setRepInput] = useState("");
+  const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
+  const [ownerName, setOwnerName] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [zelleLoading, setZelleLoading] = useState(false);
+  const [zelleResult, setZelleResult] = useState<{
+    token: string; memoCode: string; amountFormatted: string; zellePhone: string; submitUrl: string;
+  } | null>(null);
   const [repState, setRepState] = useState<
     | { status: "idle" }
     | { status: "checking" }
@@ -75,7 +83,10 @@ function PricingPage() {
   const discounted = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
-  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading;
+  const zelleFieldsOk = payMethod !== "zelle" || (
+    ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7
+  );
+  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && zelleFieldsOk;
 
   const startCheckout = async () => {
     if (loading) return;
@@ -132,6 +143,44 @@ function PricingPage() {
   };
 
 
+  const startZelleOrder = async () => {
+    if (zelleLoading) return;
+    if (!ownerName.trim()) { toast.error("Please enter the business owner name"); return; }
+    if (!businessName.trim()) { toast.error("Please enter the business name"); return; }
+    if (!emailValid) { toast.error("Please enter a valid email"); return; }
+    if (!phone.trim() || phone.trim().length < 7) { toast.error("Please enter a valid phone number"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
+    setZelleLoading(true);
+    try {
+      const res = await createZelleAdOrder({
+        data: {
+          plan,
+          ownerName: ownerName.trim(),
+          businessName: businessName.trim(),
+          customerEmail: email.trim(),
+          phone: phone.trim(),
+          agreedTerms: true,
+          agreedNoRefund: true,
+          environment: getStripeEnvironment(),
+          ...(repState.status === "valid" ? { repCode: repState.code } : {}),
+        },
+      });
+      if (!res.ok) throw new Error(res.error);
+      setZelleResult({
+        token: res.token,
+        memoCode: res.memoCode,
+        amountFormatted: res.amountFormatted,
+        zellePhone: res.zellePhone,
+        submitUrl: res.submitUrl,
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not create Zelle order");
+    } finally {
+      setZelleLoading(false);
+    }
+  };
+
+
   if (clientSecret) {
     return (
       <div className="min-h-screen bg-[#f5f6f8]">
@@ -153,6 +202,115 @@ function PricingPage() {
       </div>
     );
   }
+
+  if (zelleResult) {
+    const copyPhone = () => {
+      navigator.clipboard?.writeText(zelleResult.zellePhone).then(
+        () => toast.success("Zelle number copied"),
+        () => toast.error("Could not copy"),
+      );
+    };
+    const copyMemo = () => {
+      navigator.clipboard?.writeText(`Order ${zelleResult.memoCode}`).then(
+        () => toast.success("Memo copied"),
+        () => toast.error("Could not copy"),
+      );
+    };
+    return (
+      <div className="min-h-screen bg-[#f5f6f8]">
+        <PaymentTestModeBanner />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setZelleResult(null); }}
+            className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4"
+          >
+            <ArrowLeft size={14} /> Back to plans
+          </button>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                <Send size={12} /> Zelle payment reserved
+              </div>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F2A4A] mt-3">
+                Your spot is reserved — send your Zelle payment
+              </h1>
+              <p className="text-sm text-gray-600 mt-2">
+                We emailed instructions to <strong>{email}</strong>. Your ad goes live once we confirm your Zelle payment (usually within 24 hours).
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-xl border-2 border-purple-500 bg-purple-50/60 p-5 text-center">
+              <div className="text-[11px] uppercase tracking-wider text-purple-700 font-bold">Send Zelle to</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#0F2A4A] mt-1 tracking-wide">
+                {zelleResult.zellePhone}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">WINALL MEDIA LLC (Get Biz Music)</div>
+              <button
+                onClick={copyPhone}
+                className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white border border-purple-300 text-purple-700 font-semibold px-3 py-1.5 rounded-md hover:bg-purple-100"
+              >
+                <Copy size={12} /> Copy number
+              </button>
+
+              <div className="mt-5 grid grid-cols-2 gap-3 text-left">
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold">Amount</div>
+                  <div className="text-2xl font-bold text-[#0F2A4A] mt-0.5">{zelleResult.amountFormatted}</div>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold flex items-center justify-between">
+                    Memo
+                    <button onClick={copyMemo} className="text-purple-700 hover:text-purple-900" title="Copy memo">
+                      <Copy size={11} />
+                    </button>
+                  </div>
+                  <div className="text-lg font-mono font-bold text-[#0F2A4A] mt-0.5">Order {zelleResult.memoCode}</div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 mt-3 italic">
+                Please include the memo so we can match your payment to your order.
+              </p>
+            </div>
+
+            <div className="mt-6 bg-[#FFF8EC] border-2 border-[#D4A24C] rounded-xl p-5 text-center">
+              <div className="text-xs uppercase tracking-wide text-[#D4A24C] font-bold">Ready to upload your ad?</div>
+              <p className="text-sm text-[#0F2A4A] mt-1">
+                You can submit your ad artwork now. It goes live once we confirm your Zelle payment.
+              </p>
+              <Link
+                to="/submit"
+                search={{ token: zelleResult.token }}
+                className="mt-3 inline-block bg-[#D4A24C] text-[#0F2A4A] font-bold px-6 py-2.5 rounded-md hover:bg-[#e0b266]"
+              >
+                Submit Your Ad
+              </Link>
+            </div>
+
+            <div className="mt-4 bg-white border-2 border-[#0F2A4A] rounded-xl p-4 text-center">
+              <div className="text-sm text-[#0F2A4A]">
+                <strong>Not ready to design it yourself?</strong>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                We'll professionally design your ad — guaranteed to pass compliance. Just <strong>$49.95</strong>.
+              </p>
+              <Link
+                to="/design"
+                className="mt-2 inline-block bg-[#0F2A4A] text-white font-semibold px-4 py-2 rounded-md text-sm hover:bg-[#163864]"
+              >
+                Get Pro Ad Design — $49.95
+              </Link>
+            </div>
+
+            <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center gap-1.5">
+              <Shield size={12} /> A copy of these instructions was emailed to you.
+            </p>
+          </div>
+        </main>
+        <BizFooter />
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -265,6 +423,90 @@ function PricingPage() {
             </div>
           )}
 
+          {/* Payment-method tabs (paid, non-religious flow only) */}
+          {!isReligious && (
+            <div className="mb-5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Payment method</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("card")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "card"
+                      ? "bg-[#0F2A4A] text-white border-[#0F2A4A]"
+                      : "bg-white text-[#0F2A4A] border-gray-300 hover:border-gray-400"
+                  }`}
+                >
+                  <CreditCard size={16} /> Pay with Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("zelle")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "zelle"
+                      ? "bg-purple-700 text-white border-purple-700"
+                      : "bg-white text-purple-700 border-purple-300 hover:border-purple-500"
+                  }`}
+                >
+                  <Send size={16} /> Pay with Zelle
+                </button>
+              </div>
+              {payMethod === "zelle" && (
+                <p className="mt-2 text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded-md px-3 py-2">
+                  Send Zelle to <strong>619-707-0467</strong>. Your ad goes live once we confirm payment (usually within 24 hours).
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Zelle-only contact fields */}
+          {!isReligious && payMethod === "zelle" && (
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Business Owner Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  placeholder="Jane Smith"
+                  maxLength={120}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Business Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="Smith Family Bakery"
+                  maxLength={160}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="619-555-1212"
+                  maxLength={40}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <p className="text-[11px] text-gray-500">
+                We use these to confirm your Zelle payment and reach you if we have questions. You can refine them later at the ad-submission step.
+              </p>
+            </div>
+          )}
+
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
             Email for {isReligious ? "confirmation" : "receipt"} &amp; submission link{" "}
             <span className="text-red-500">*</span>
@@ -276,6 +518,7 @@ function PricingPage() {
             placeholder="you@example.com"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
+
 
           {!isReligious && (
             <>
@@ -403,6 +646,18 @@ function PricingPage() {
             >
               {freeLoading ? "Reserving your free spot…" : "Continue to Free Ministry Ad Submission"}
             </button>
+          ) : payMethod === "zelle" ? (
+            <button
+              onClick={startZelleOrder}
+              disabled={!canPay || zelleLoading}
+              className="mt-6 w-full bg-purple-700 text-white font-bold py-3 rounded-md hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {zelleLoading ? (
+                <>Reserving your spot…</>
+              ) : (
+                <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${discounted}</>
+              )}
+            </button>
           ) : (
             <button
               onClick={startCheckout}
@@ -424,8 +679,11 @@ function PricingPage() {
           <p className="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1.5">
             <Shield size={12} /> {isReligious
               ? "You'll get a confirmation and your submission link by email."
-              : "Secure checkout. You'll get a receipt and unique submission link by email."}
+              : payMethod === "zelle"
+                ? "We'll email your Zelle payment instructions and a private submission link."
+                : "Secure checkout. You'll get a receipt and unique submission link by email."}
           </p>
+
         </div>
 
       </main>

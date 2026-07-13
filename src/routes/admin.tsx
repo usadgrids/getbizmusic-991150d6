@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, Users, Percent, DollarSign } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, Users, Percent, DollarSign, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -21,6 +21,7 @@ import { getActiveCities } from "@/lib/cities.functions";
 import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
+import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, type ZelleOrderAdminRow } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -345,6 +346,8 @@ function AdminConsole() {
         </section>
 
         <ManualSubmitSection onCreated={refreshAll} />
+
+        <ZelleOrdersSection />
 
         <AdRepsSection />
 
@@ -1672,3 +1675,191 @@ function IntakeRow({ label, value, full }: { label: string; value?: string | nul
     </div>
   );
 }
+
+/* ================= Zelle Orders ================= */
+
+function ZelleOrdersSection() {
+  const listFn = useServerFn(listZelleOrders);
+  const markPaidFn = useServerFn(markZelleOrderPaid);
+  const cancelFn = useServerFn(cancelZelleOrder);
+  const { data: orders = [], isLoading, refetch } = useQuery({
+    queryKey: ["zelle-orders"],
+    queryFn: () => listFn(),
+  });
+
+  const awaiting = orders.filter((o) => o.status === "awaiting_zelle");
+
+  const markPaid = async (o: ZelleOrderAdminRow) => {
+    const label = o.business_name || o.customer_email;
+    if (!confirm(`Confirm you received the Zelle payment from "${label}" ($${(o.amount_cents / 100).toFixed(2)})? This sends the receipt and processing email.`)) return;
+    try {
+      const res = await markPaidFn({ data: { id: o.id } });
+      if (!res.ok) throw new Error(res.error);
+      toast.success("Marked paid — receipt and processing emails sent");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const cancel = async (o: ZelleOrderAdminRow) => {
+    const label = o.business_name || o.customer_email;
+    if (!confirm(`Cancel Zelle order for "${label}"? This invalidates their submission link.`)) return;
+    try {
+      const res = await cancelFn({ data: { id: o.id } });
+      if (!res.ok) throw new Error(res.error);
+      toast.success("Order cancelled");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const planLabel = (plan: string) =>
+    plan === "slider_10" ? "Featured Slider (10s)" : plan === "image_5" ? "Standard Image (7s)" : plan;
+
+  const statusPill = (status: string) => {
+    const map: Record<string, string> = {
+      awaiting_zelle: "bg-purple-100 text-purple-800 border-purple-300",
+      paid: "bg-emerald-100 text-emerald-800 border-emerald-300",
+      cancelled: "bg-gray-200 text-gray-700 border-gray-300",
+    };
+    const cls = map[status] ?? "bg-gray-100 text-gray-700 border-gray-300";
+    return (
+      <span className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 border rounded-full ${cls}`}>
+        {status === "awaiting_zelle" && <Clock size={10} />}
+        {status === "paid" && <Check size={10} />}
+        {status.replace(/_/g, " ")}
+      </span>
+    );
+  };
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Send size={18} className="text-purple-700" />
+        <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">
+          Zelle Orders ({orders.length})
+          {awaiting.length > 0 && (
+            <span className="ml-2 text-xs text-purple-700 bg-purple-100 border border-purple-300 rounded-full px-2 py-0.5 uppercase tracking-wide font-bold align-middle">
+              {awaiting.length} awaiting payment
+            </span>
+          )}
+        </h2>
+        <button
+          onClick={() => refetch()}
+          className="ml-auto text-xs text-[#0F2A4A] hover:underline"
+        >
+          Refresh
+        </button>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        {isLoading ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">Loading…</div>
+        ) : orders.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">
+            No Zelle orders yet. Buyers who choose Zelle at checkout will appear here.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                  <th className="px-4 py-2">Business / Owner</th>
+                  <th className="px-4 py-2">Contact</th>
+                  <th className="px-4 py-2">Plan</th>
+                  <th className="px-4 py-2">Amount</th>
+                  <th className="px-4 py-2">Rep</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Created</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {orders.map((o) => {
+                  const memo = o.stripe_session_id.replace(/^zelle-/, "").slice(0, 8).toUpperCase();
+                  const submitUrl = `/submit?token=${o.submission_token}`;
+                  return (
+                    <tr key={o.id} className="align-top">
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-[#0F2A4A]">{o.business_name || "—"}</div>
+                        <div className="text-xs text-gray-500">{o.owner_name || "—"}</div>
+                        <div className="text-[10px] font-mono text-gray-400 mt-0.5">Memo: {memo}</div>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        <div><a href={`mailto:${o.customer_email}`} className="text-[#0F2A4A] hover:underline">{o.customer_email}</a></div>
+                        <div className="text-gray-600">{o.phone || "—"}</div>
+                      </td>
+                      <td className="px-4 py-3 text-xs">{planLabel(o.plan)}</td>
+                      <td className="px-4 py-3 text-xs">
+                        <div className="font-semibold text-[#0F2A4A]">${(o.amount_cents / 100).toFixed(2)}</div>
+                        {o.discount_cents > 0 && (
+                          <div className="text-[10px] text-emerald-700">
+                            Saved ${(o.discount_cents / 100).toFixed(2)}
+                          </div>
+                        )}
+                        <div className="text-[10px] text-gray-400">{o.environment}</div>
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        {o.rep_code ? (
+                          <span className="font-mono bg-emerald-50 border border-emerald-200 text-emerald-800 rounded px-1.5 py-0.5">
+                            {o.rep_code}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {statusPill(o.status)}
+                        {o.paid_at && (
+                          <div className="text-[10px] text-gray-500 mt-1">
+                            Paid {new Date(o.paid_at).toLocaleDateString()}
+                          </div>
+                        )}
+                        {o.token_used && (
+                          <div className="text-[10px] text-blue-700 mt-1">Submitted</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {new Date(o.created_at).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1.5">
+                          {o.status === "awaiting_zelle" && (
+                            <>
+                              <button
+                                onClick={() => markPaid(o)}
+                                className="text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2 py-1 rounded inline-flex items-center gap-1 justify-center"
+                              >
+                                <Check size={11} /> Mark Zelle Paid
+                              </button>
+                              <button
+                                onClick={() => cancel(o)}
+                                className="text-[11px] border border-red-300 text-red-700 hover:bg-red-50 font-semibold px-2 py-1 rounded inline-flex items-center gap-1 justify-center"
+                              >
+                                <X size={11} /> Cancel
+                              </button>
+                            </>
+                          )}
+                          <a
+                            href={submitUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] text-[#0F2A4A] hover:underline inline-flex items-center gap-1 justify-center"
+                          >
+                            <ExternalLink size={11} /> Submit link
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+

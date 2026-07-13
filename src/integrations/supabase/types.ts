@@ -20,6 +20,7 @@ export type Database = {
           agreed_no_refund: boolean
           agreed_terms: boolean
           amount_cents: number
+          business_name: string | null
           city_id: string | null
           commission_cents: number
           commission_percent: number | null
@@ -30,7 +31,10 @@ export type Database = {
           environment: string
           id: string
           ip_address: string | null
+          owner_name: string | null
           paid_at: string | null
+          payment_method: string
+          phone: string | null
           plan: string
           rep_code: string | null
           rep_id: string | null
@@ -44,6 +48,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents: number
+          business_name?: string | null
           city_id?: string | null
           commission_cents?: number
           commission_percent?: number | null
@@ -54,7 +59,10 @@ export type Database = {
           environment?: string
           id?: string
           ip_address?: string | null
+          owner_name?: string | null
           paid_at?: string | null
+          payment_method?: string
+          phone?: string | null
           plan: string
           rep_code?: string | null
           rep_id?: string | null
@@ -68,6 +76,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents?: number
+          business_name?: string | null
           city_id?: string | null
           commission_cents?: number
           commission_percent?: number | null
@@ -78,7 +87,10 @@ export type Database = {
           environment?: string
           id?: string
           ip_address?: string | null
+          owner_name?: string | null
           paid_at?: string | null
+          payment_method?: string
+          phone?: string | null
           plan?: string
           rep_code?: string | null
           rep_id?: string | null

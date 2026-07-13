@@ -20,7 +20,7 @@ export function PricingBanner() {
             <h3 className="font-semibold">Standard Image Ad</h3>
           </div>
           <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-[#0F2A4A]">$12</span>
+            <span className="text-4xl font-bold text-[#0F2A4A]">$24</span>
             <span className="text-gray-500 text-sm">/ year</span>
           </div>
           <p className="text-xs text-[#D4A24C] font-semibold mt-1">Intro offer</p>
@@ -31,10 +31,10 @@ export function PricingBanner() {
             <li className="flex gap-2"><Check size={16} className="text-emerald-600 shrink-0 mt-0.5" /> 1 full year of exposure</li>
           </ul>
           <Link
-            to="/submit"
+            to="/pricing"
             className="mt-5 inline-block w-full text-center bg-[#0F2A4A] text-white font-semibold py-2.5 rounded-md hover:bg-[#163864] transition-colors"
           >
-            Get Started — $12
+            Get Started — $24
           </Link>
         </div>
         <div className="bg-[#0F2A4A] border-2 border-[#D4A24C] rounded-2xl p-6 shadow-lg text-white relative">
@@ -46,7 +46,7 @@ export function PricingBanner() {
             <h3 className="font-semibold">Featured Slider Ad</h3>
           </div>
           <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-white">$24</span>
+            <span className="text-4xl font-bold text-white">$48</span>
             <span className="text-white/70 text-sm">/ year</span>
           </div>
           <p className="text-xs text-[#D4A24C] font-semibold mt-1">Premium placement</p>
@@ -58,10 +58,10 @@ export function PricingBanner() {
             <li className="flex gap-2"><Check size={16} className="text-[#D4A24C] shrink-0 mt-0.5" /> 1 full year of exposure</li>
           </ul>
           <Link
-            to="/submit"
+            to="/pricing"
             className="mt-5 inline-block w-full text-center bg-[#D4A24C] text-[#0F2A4A] font-semibold py-2.5 rounded-md hover:bg-[#e0b266] transition-colors"
           >
-            Get Featured — $24
+            Get Featured — $48
           </Link>
         </div>
       </div>
