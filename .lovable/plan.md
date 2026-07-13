@@ -1,69 +1,103 @@
-## Goal
 
-Add a **free ad tier for religious categories** (Churches, Religious Services, Ministries) that skips Stripe checkout, gets a **12-second rotation (a $48/yr value, offered free)** to compensate viewers/advertisers for the Christian playlist swap, and collects ministry-specific intake fields. Existing prev/next slider controls already let viewers scrub back to a religious ad — the mood-swap effect will re-fire automatically.
+# Add Zelle payment option to ad checkout (synced with card pricing + rep codes + design upsell)
 
----
+Add a "Pay with Zelle" alternative on the ad checkout that mirrors the Stripe flow's pricing rules exactly, applies rep-code discounts the same way, and follows up with a Pro Ad Design upsell email if the buyer isn't ready to submit. Zelle sends to **619-707-0467**. Buyer gets their submission link immediately; admin reconciles later in `/admin`.
 
-## 1. Pricing page — category gate + free-religious panel
+## Pricing rules (must match card checkout)
 
-Edit `src/routes/pricing.tsx`:
+Single source of truth is `AD_PLANS` in `src/lib/biz-utils.ts`. Zelle uses the same values — no hardcoding.
 
-- Add an **Industry / Category** dropdown (from `INDUSTRIES`) at the top of the pricing card, required before anything else activates.
-- When the selection is in `RELIGIOUS_INDUSTRY_VALUES` (church, religious_services, ministry):
-  - **Hide** the $24 / $48 tiles, rep-code field, and Stripe pay button.
-  - **Show** a "Church & Ministry Free Spot" panel:
-    > As a novelty gesture to the faith community, Get Biz Music gives churches, religious services, and ministries a **FREE 12-second ad rotation for one year — a $48 value** — the same premium duration as our Featured Slider Ad. This compensates viewers (and you) for the brief background-music swap to Christian music while your ad is on screen. Subject to the same content review as paid ads.
-  - Show a strikethrough badge: `$48/year value — FREE`.
-  - Keep the terms + novelty-consent checkboxes (swap the no-refund copy for novelty/no-guaranteed-results consent since $0 doesn't need a refund clause).
-  - Button: **"Continue to Free Ministry Ad Submission"** → calls new server fn, then `navigate({ to: "/submit", search: { token } })`.
-- Non-religious selection: page behaves exactly as today.
+| Plan | Rotation | Full price | With rep code (50% off) |
+|---|---|---|---|
+| Standard Image Ad (`image_5`) | 7 seconds | **$24** | **$12** |
+| Featured Slider Ad (`slider_10`) | 10 seconds | **$48** | **$24** |
 
-## 2. Free-token server function
+Note: `src/components/biz/PricingBanner.tsx` currently displays $12 / $24 — that's the outdated banner. During this work I'll verify `AD_PLANS` shows $24 / $48 (matching Stripe checkout) and, if the banner is stale, update the banner numbers to match. No business-logic change beyond that display sync.
 
-New export in `src/lib/payments.functions.ts` — `createFreeReligiousSubmission`:
+Rep-code logic: reuse the existing server-side validation in `createAdCheckout` (looks up `ad_reps` by normalized code, applies 50% off, records `rep_id / rep_code / commission_percent / commission_cents / discount_cents`). Zelle path calls the same helper.
 
-- Input: `{ industry, customerEmail, agreedTerms, agreedNovelty }`; validate industry ∈ `RELIGIOUS_INDUSTRY_VALUES` and both booleans true.
-- Insert into `ad_payments`: `plan: "slider_10"` (the 12s value tier — see §4 note), `amount_cents: 0`, `status: "paid"`, `paid_at: now()`, consent columns filled, `rep_id/rep_code` null, `stripe_session_id: "free-religious-<uuid>"` synthetic.
-- Return `{ token }`.
+## User-facing flow
 
-Extend `getPaymentByToken` to derive and return `freeReligious: amount_cents === 0` so the submit page knows to render the ministry section.
+`/pricing` → pick plan → two options:
+- **Pay with Card (Stripe)** — unchanged
+- **Pay with Zelle** — new
 
-## 3. Submit form — ministry fields
+Zelle form collects:
+- Business Owner Name *
+- Business Name *
+- Email *
+- Phone *
+- **Rep code (optional)** — same field as Stripe; live-shows discounted total when valid
+- Terms + no-refund checkboxes (same disclosures as Stripe)
 
-Edit `src/routes/submit.tsx`. When `verify.freeReligious === true`, render an extra **"Ministry Information"** section above the standard fields (all required):
+On submit:
+1. Order created: `payment_method='zelle'`, `status='awaiting_zelle'`, `amount_cents` = discounted total, all rep fields populated.
+2. Submission token issued immediately (auto-issue, per your earlier choice).
+3. Confirmation screen shows:
+   - Plan + exact amount due (e.g. "$24.00" or "$12.00 with rep code REP123")
+   - "Send via Zelle to **619-707-0467**"
+   - Memo: short order code (last 8 of session id)
+   - **Submit Your Ad** button (uses token now)
+   - Note: "Your ad goes live after we confirm your Zelle payment (usually within 24 hrs)."
+4. `zelle-instructions` email sent immediately with same info.
 
-- Church / Ministry Name → mirrored into `business_name`
-- Church / Ministry Address (single field)
-- Name of Pastor / Leader → mirrored into `contact_name`
-- Phone Number → mirrored into `phone`
-- Attestation block, all three checkboxes required:
-  - `[ ] We are a non-profit 501(c)(3) organization.`
-  - Radio: `( ) We DO have an IRS non-profit number: [___]` vs `( ) We DO NOT have an IRS non-profit number.`
-  - `[ ] I attest we are an independent religious ministry operating in good faith.`
-  - `[ ] I understand this free ad is a novelty community gesture with no guaranteed views or business results, subject to the same content-review policy as paid ads.`
+## Design upsell email (if buyer doesn't submit)
 
-Standard image upload + "I'm not ready — email me my submission link" escape hatch stay unchanged. The existing `submit-reminder` email already advertises the $49.95 Pro Ad Design offer, so religious submitters see the same offer if they defer.
+Reuse the existing `submit-reminder` scheduling mechanism (already wired for Stripe orders) and add an upsell block:
+- **New template `zelle-submit-reminder`** (or extend existing submit reminder) sent 24 hrs after order if `token_used=false`:
+  - Reminder to submit their ad
+  - **Upsell**: "Not ready? Let us design it for you — **Pro Ad Design $49.95**" with CTA link to `/design?token=<their-token>`
+  - Reuses `DESIGN_PRICE_CENTS` from `src/lib/design.functions.ts` as the source of truth (no hardcoded $49.95 in the template — pulled from the constant so future price changes flow through).
 
-Ministry attestation payload is included in the **admin notification email** (no DB migration this turn). Ask us later if you want it persisted to a new `ministry_info jsonb` column.
+## Admin flow (`/admin`)
 
-## 4. Ad slider — 12-second religious duration + scrub-back music swap
+- Zelle orders show `Zelle · Awaiting` badge and display owner name / business name / phone in the row detail.
+- Rep code / discount shown same as Stripe orders.
+- **Mark Zelle Paid** button on `awaiting_zelle` rows → flips to `paid`, fires the same `payment-receipt` + `paid-order-notification` (to `processing@getbizmusic.com`) emails already used for Stripe.
+- **Cancel Zelle Order** button → sets `status='cancelled'`, `token_used=true` (invalidates submission).
 
-- `ads.functions.ts` (submission → live ad flow): when the source `ad_payments` row is free-religious, persist the resulting ad with `duration_seconds: 12` and `ad_type: "slider_10"` so `resolveDuration()` in `AdSlider` naturally yields 12s. (Alternatively add `AD_PLANS.religious_free = { seconds: 12, price: 0, label: "Church / Ministry Free Spot" }` — but reusing `slider_10` avoids UI-label churn everywhere. **Chosen: reuse `slider_10`, persist `duration_seconds = 12` explicitly.**)
-- `AdSlider.tsx` — no logic change needed for scrub-back:
-  - Prev/next arrows already exist (line 520, `setIdx((i - 1 + n) % n)`).
-  - The mood-swap `useEffect` shipped last turn is keyed on `current?.id` / `current?.industry` and fires whenever mood transitions — so clicking back to a religious ad re-fires the Christian playlist swap, and forward again to a secular ad restores the regular playlist. This works with mouse click, keyboard, and any touch-swipe wiring already in place.
-  - Verify after build: click the left arrow while on a secular ad following a religious one; confirm music swaps back to Christian in ~300–800 ms.
+## Data model
 
-## 5. Files touched
+Migration adds to `ad_payments`:
+- `payment_method text not null default 'stripe'` (`'stripe' | 'zelle'`)
+- `owner_name text`, `business_name text`, `phone text` (nullable; Zelle only for now)
+- Index on `(payment_method, status)`
 
-- `src/routes/pricing.tsx` — industry dropdown gate, religious free-panel branch, free-submission handoff.
-- `src/lib/payments.functions.ts` — `createFreeReligiousSubmission`; `freeReligious` flag on `getPaymentByToken`.
-- `src/routes/submit.tsx` — conditional ministry section, mirror-into-standard-fields on submit, attach ministry payload to admin notification.
-- `src/lib/ads.functions.ts` — accept ministry info; force `duration_seconds: 12` and `ad_type: "slider_10"` for free-religious submissions; forward ministry payload to admin email.
+Status `'awaiting_zelle'` is a new string value; the column is free-text today, so no enum change. Existing `rep_id / rep_code / commission_cents / discount_cents / commission_percent` columns are reused unchanged.
 
-## 6. Non-goals
+`stripe_session_id` gets a synthetic value `zelle-<uuid>` (same pattern as `free-religious-<uuid>`) so the unique constraint holds and Stripe code paths ignore it.
 
-- No DB migration (ministry attestation lives in the admin email + client-side enforcement).
-- No new email templates — reminder already advertises $49.95 design.
-- No new pricing tier row in `AD_PLANS` — free religious reuses `slider_10` at `$0` in the DB row; the pricing-page copy displays the "$48 value — FREE" framing.
-- No changes to the mood-swap event contract shipped last turn.
+## Files to add / edit
+
+**New**
+- `supabase/migrations/<ts>_zelle_payment.sql`
+- `src/lib/email-templates/zelle-instructions.tsx` — amount, Zelle #, memo, submit link
+- `src/lib/email-templates/zelle-submit-reminder.tsx` — 24hr reminder + $49.95 design upsell (price from `DESIGN_PRICE_CENTS`)
+- `src/components/biz/ZelleCheckoutForm.tsx`
+- `src/components/biz/ZelleInstructions.tsx`
+
+**Edit**
+- `src/lib/email-templates/registry.ts` — register both new templates
+- `src/lib/payments.functions.ts` — add:
+  - `createZelleAdOrder` — validates fields, applies rep-code discount via the same helper `createAdCheckout` uses, inserts row, enqueues `zelle-instructions`, schedules `zelle-submit-reminder` (24hr)
+  - `markZelleOrderPaid` — admin-gated (`has_role admin`), flips status, enqueues receipt + processing notification
+  - `cancelZelleOrder` — admin-gated, invalidates token
+- `src/routes/pricing.tsx` — Card/Zelle tabs; render `ZelleCheckoutForm` under Zelle; on success render `ZelleInstructions`
+- `src/components/biz/PricingBanner.tsx` — sync displayed prices to $24 / $48 if `AD_PLANS` confirms those are current
+- `src/routes/admin.tsx` — payment-method badge/column, Mark Paid + Cancel buttons for Zelle orders
+- `src/lib/mcp/tools/get-pricing.ts` — note Zelle as alternate payment method
+
+**Not touched**: `createAdCheckout` (Stripe), design checkout, free-religious flow, webhook.
+
+## Test plan (preview)
+
+1. `/pricing` → pick Featured Slider → **Pay with Zelle** tab.
+2. Fill fields, enter valid rep code → total shows $24 (50% of $48). Submit.
+3. Confirmation screen: shows $24, `619-707-0467`, memo code, Submit CTA.
+4. `zelle-instructions` email received with matching details.
+5. `/admin` shows the row with `Zelle · Awaiting` + rep code + discount.
+6. Don't submit — wait to confirm the 24hr reminder email includes the **$49.95 Pro Design** upsell (or trigger the queue manually to verify template).
+7. In `/admin`, click **Mark Zelle Paid** → receipt + processing emails send, status = paid.
+8. Repeat without rep code → $48 charged.
+9. Repeat with Standard Image → $24 (no rep) / $12 (with rep).
+10. Confirm Stripe card checkout still works unchanged (`4242 4242 4242 4242`).
