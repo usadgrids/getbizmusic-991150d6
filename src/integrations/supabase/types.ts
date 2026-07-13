@@ -396,6 +396,7 @@ export type Database = {
           agreed_no_refund: boolean
           agreed_terms: boolean
           amount_cents: number
+          completed_at: string | null
           created_at: string
           customer_email: string
           disclosure_version: string | null
@@ -414,6 +415,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents: number
+          completed_at?: string | null
           created_at?: string
           customer_email: string
           disclosure_version?: string | null
@@ -432,6 +434,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents?: number
+          completed_at?: string | null
           created_at?: string
           customer_email?: string
           disclosure_version?: string | null

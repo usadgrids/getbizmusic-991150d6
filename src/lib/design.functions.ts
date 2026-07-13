@@ -285,6 +285,7 @@ export type DesignOrderRow = {
   paid_at: string | null;
   created_at: string;
   intake_submitted_at: string | null;
+  completed_at: string | null;
   intake: {
     business_name?: string;
     owner_name?: string;
@@ -319,7 +320,7 @@ export const listDesignOrders = createServerFn({ method: "GET" })
 
     const { data, error } = await supabaseAdmin
       .from("design_orders")
-      .select("id, stripe_session_id, customer_email, amount_cents, status, environment, paid_at, created_at, intake_submitted_at, intake")
+      .select("id, stripe_session_id, customer_email, amount_cents, status, environment, paid_at, created_at, intake_submitted_at, completed_at, intake")
       .in("status", ["paid", "intake_submitted"])
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -344,4 +345,37 @@ export const listDesignOrders = createServerFn({ method: "GET" })
         };
       }),
     );
+  });
+
+export const deleteDesignOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }): Promise<{ ok: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: role } = await supabaseAdmin
+      .from("user_roles").select("id")
+      .eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+    if (!role) throw new Error("Forbidden: admin role required");
+    const { error } = await supabaseAdmin.from("design_orders").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setDesignOrderCompleted = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; completed: boolean }) =>
+    z.object({ id: z.string().uuid(), completed: z.boolean() }).parse(d)
+  )
+  .handler(async ({ context, data }): Promise<{ ok: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: role } = await supabaseAdmin
+      .from("user_roles").select("id")
+      .eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+    if (!role) throw new Error("Forbidden: admin role required");
+    const { error } = await supabaseAdmin
+      .from("design_orders")
+      .update({ completed_at: data.completed ? new Date().toISOString() : null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
