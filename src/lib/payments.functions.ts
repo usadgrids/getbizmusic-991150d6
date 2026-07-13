@@ -1,8 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { AD_PLANS } from "@/lib/biz-utils";
+import { DESIGN_PRICE_CENTS } from "@/lib/design.functions";
+
+const ZELLE_PHONE = "619-707-0467";
 
 // Window (in ms) during which a repeat createAdCheckout call from the same
 // email+plan reuses the previously-created pending Stripe session instead of
