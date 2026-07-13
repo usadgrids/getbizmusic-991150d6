@@ -270,6 +270,7 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           // key derived from sessionId prevents duplicate sends.
           try {
             const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+            const { sendPaidOrderNotificationToProcessing } = await import("@/lib/email/paid-order-notification.server");
             const plan = updated.plan as string;
             const planLabels: Record<string, string> = {
               image_5: "Standard Image Ad",
@@ -316,6 +317,26 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
                 receiptUrl: charge?.receipt_url ?? undefined,
               },
             });
+
+            // Notify processing team for paid ad orders (skip free religious spots).
+            const amountCents = (updated.amount_cents as number) ?? 0;
+            if (amountCents > 0 && !session.id.startsWith("free-religious-")) {
+              await sendPaidOrderNotificationToProcessing({
+                orderType: "ad",
+                email: customerEmail as string,
+                plan,
+                amountCents,
+                currency: session.currency ?? null,
+                sessionId: session.id,
+                submissionToken: updated.submission_token as string,
+                paymentIntentId: paymentIntent?.id ?? (typeof session.payment_intent === "string" ? session.payment_intent : null),
+                receiptUrl: charge?.receipt_url ?? null,
+                cardholderName: charge?.billing_details?.name ?? session.customer_details?.name ?? null,
+                cardBrand: cardDetails?.brand ?? null,
+                cardLast4: cardDetails?.last4 ?? null,
+                paidAtIso,
+              });
+            }
           } catch (e) {
             console.error("fallback payment-receipt enqueue failed:", e);
           }
