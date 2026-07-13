@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 export type YouTubePlaylistTrack = { videoId: string; title: string };
 
@@ -28,14 +29,51 @@ export const getYouTubePlaylistTracks = createServerFn({ method: "GET" }).handle
         if (!id || !title) return null;
         return {
           videoId: id,
-          title: title
-            .replace(/&amp;/g, "&")
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">"),
+          title: decodeEntities(title),
         };
       })
       .filter((track): track is YouTubePlaylistTrack => track !== null);
   },
 );
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+/**
+ * Fetch titles for arbitrary video IDs via YouTube oEmbed (no API key).
+ * Used to backfill titles for playlist entries beyond the RSS feed's ~15-item window.
+ */
+export const getYouTubeVideoTitles = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        videoIds: z.array(z.string().regex(/^[a-zA-Z0-9_-]{6,20}$/)).max(200),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<YouTubePlaylistTrack[]> => {
+    const results = await Promise.all(
+      data.videoIds.map(async (videoId) => {
+        try {
+          const res = await fetch(
+            `https://www.youtube.com/oembed?url=${encodeURIComponent(
+              `https://www.youtube.com/watch?v=${videoId}`,
+            )}&format=json`,
+            { headers: { accept: "application/json" } },
+          );
+          if (!res.ok) return { videoId, title: "" };
+          const json = (await res.json()) as { title?: string };
+          return { videoId, title: decodeEntities(json.title ?? "") };
+        } catch {
+          return { videoId, title: "" };
+        }
+      }),
+    );
+    return results.filter((r) => r.title.length > 0);
+  });
