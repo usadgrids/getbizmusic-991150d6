@@ -78,6 +78,18 @@ function fairShuffle(ads: PublicAd[], seed: string): PublicAd[] {
     const j = Math.floor(rng() * (i + 1));
     [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
   }
+  // Break up consecutive duplicates (same ad id back-to-back) by swapping
+  // each offender with the next non-duplicate slot. Featured ads are weighted
+  // 2x above, so without this pass the same ad can appear twice in a row.
+  for (let i = 1; i < weighted.length; i++) {
+    if (weighted[i].id !== weighted[i - 1].id) continue;
+    for (let j = i + 1; j < weighted.length; j++) {
+      if (weighted[j].id !== weighted[i - 1].id && (j + 1 >= weighted.length || weighted[j + 1].id !== weighted[i].id)) {
+        [weighted[i], weighted[j]] = [weighted[j], weighted[i]];
+        break;
+      }
+    }
+  }
   return weighted;
 }
 
