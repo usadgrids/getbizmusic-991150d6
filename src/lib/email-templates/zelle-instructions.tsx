@@ -19,6 +19,7 @@ interface Props {
   businessName?: string
   phone?: string
   billingEmail?: string
+  zelleQrUrl?: string
 }
 
 const NAVY = '#0F2A4A'
