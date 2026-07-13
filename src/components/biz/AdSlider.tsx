@@ -457,7 +457,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
-              if (christianActive) deactivateChristian();
+              if (christianActive) deactivateChristian(true);
             }}
 
           >
@@ -501,8 +501,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               {christianActive && currentIsReligious && (
                 <div
                   className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3 sm:px-6"
-                    onMouseEnter={keepChristianOpen}
-                  onMouseLeave={() => deactivateChristian()}
                 >
                   <div className="w-full max-w-[720px] pointer-events-auto">
                     <ChristianMusicPanel businessName={current.business_name} />
