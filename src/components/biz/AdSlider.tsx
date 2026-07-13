@@ -19,7 +19,8 @@ import { ShareBar } from "./ShareBar";
 import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
-import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
+import { emit, useMiniPlayerController } from "@/hooks/useMiniPlayerController";
+import { MINIPLAYER_RELIGIOUS_PAUSE_EVENT } from "@/components/biz/MiniPlayer";
 
 function SlideTimer({
   duration,
