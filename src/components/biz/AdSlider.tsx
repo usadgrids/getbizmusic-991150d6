@@ -201,13 +201,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
     setChristianActive(true);
   };
 
-  const keepChristianOpen = () => {
-    if (christianLeaveTimerRef.current) {
-      window.clearTimeout(christianLeaveTimerRef.current);
-      christianLeaveTimerRef.current = null;
-    }
-  };
-
   const deactivateChristian = (immediate = false) => {
     if (christianLeaveTimerRef.current) {
       window.clearTimeout(christianLeaveTimerRef.current);
