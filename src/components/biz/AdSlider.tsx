@@ -326,7 +326,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
             </div>
             {ads.length > 0 && (
               <span className="whitespace-nowrap text-xs text-gray-500">
-                {idx + 1} / {ads.length} · {current?.duration_seconds ?? 0}s each
+                {idx + 1} / {ads.length} · {duration}s each
               </span>
             )}
           </div>
