@@ -420,6 +420,90 @@ function PricingPage() {
             </div>
           )}
 
+          {/* Payment-method tabs (paid, non-religious flow only) */}
+          {!isReligious && (
+            <div className="mb-5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Payment method</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("card")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "card"
+                      ? "bg-[#0F2A4A] text-white border-[#0F2A4A]"
+                      : "bg-white text-[#0F2A4A] border-gray-300 hover:border-gray-400"
+                  }`}
+                >
+                  <CreditCard size={16} /> Pay with Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("zelle")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "zelle"
+                      ? "bg-purple-700 text-white border-purple-700"
+                      : "bg-white text-purple-700 border-purple-300 hover:border-purple-500"
+                  }`}
+                >
+                  <Send size={16} /> Pay with Zelle
+                </button>
+              </div>
+              {payMethod === "zelle" && (
+                <p className="mt-2 text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded-md px-3 py-2">
+                  Send Zelle to <strong>619-707-0467</strong>. Your ad goes live once we confirm payment (usually within 24 hours).
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Zelle-only contact fields */}
+          {!isReligious && payMethod === "zelle" && (
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Business Owner Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  placeholder="Jane Smith"
+                  maxLength={120}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Business Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="Smith Family Bakery"
+                  maxLength={160}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="619-555-1212"
+                  maxLength={40}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <p className="text-[11px] text-gray-500">
+                We use these to confirm your Zelle payment and reach you if we have questions. You can refine them later at the ad-submission step.
+              </p>
+            </div>
+          )}
+
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
             Email for {isReligious ? "confirmation" : "receipt"} &amp; submission link{" "}
             <span className="text-red-500">*</span>
@@ -431,6 +515,7 @@ function PricingPage() {
             placeholder="you@example.com"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
           />
+
 
           {!isReligious && (
             <>
