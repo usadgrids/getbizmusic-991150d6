@@ -643,6 +643,18 @@ function PricingPage() {
             >
               {freeLoading ? "Reserving your free spot…" : "Continue to Free Ministry Ad Submission"}
             </button>
+          ) : payMethod === "zelle" ? (
+            <button
+              onClick={startZelleOrder}
+              disabled={!canPay || zelleLoading}
+              className="mt-6 w-full bg-purple-700 text-white font-bold py-3 rounded-md hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {zelleLoading ? (
+                <>Reserving your spot…</>
+              ) : (
+                <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${discounted}</>
+              )}
+            </button>
           ) : (
             <button
               onClick={startCheckout}
@@ -664,8 +676,11 @@ function PricingPage() {
           <p className="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1.5">
             <Shield size={12} /> {isReligious
               ? "You'll get a confirmation and your submission link by email."
-              : "Secure checkout. You'll get a receipt and unique submission link by email."}
+              : payMethod === "zelle"
+                ? "We'll email your Zelle payment instructions and a private submission link."
+                : "Secure checkout. You'll get a receipt and unique submission link by email."}
           </p>
+
         </div>
 
       </main>
