@@ -10,7 +10,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { INDUSTRIES, AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_PLANS, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 
 
 
