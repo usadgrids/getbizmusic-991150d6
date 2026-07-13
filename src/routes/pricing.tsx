@@ -11,6 +11,7 @@ import { createAdCheckout, createFreeReligiousSubmission, createZelleAdOrder } f
 import { validateRepCode } from "@/lib/reps.functions";
 import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -251,6 +252,20 @@ function PricingPage() {
               >
                 <Copy size={12} /> Copy number
               </button>
+
+              <div className="mt-5 flex flex-col items-center bg-white rounded-xl border-2 border-purple-300 p-4">
+                <div className="text-[11px] uppercase tracking-wider text-purple-700 font-bold mb-2">
+                  Or scan to pay instantly
+                </div>
+                <img
+                  src={zelleQr.url}
+                  alt="Zelle QR code for WINALL MEDIA LLC — 619-707-0467"
+                  className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
+                />
+                <div className="text-xs text-gray-600 mt-2 text-center">
+                  Open your bank's Zelle scanner and point at this code
+                </div>
+              </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3 text-left">
                 <div className="bg-white rounded-lg border border-gray-200 p-3">

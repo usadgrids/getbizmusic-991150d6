@@ -544,6 +544,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
             businessName: data.businessName,
             phone: data.phone,
             billingEmail: data.customerEmail,
+            zelleQrUrl: "https://www.getbizmusic.com/__l5e/assets-v1/9a996bbf-8aeb-48a7-8ac5-1db406351740/zelle-qr.jpeg",
           },
         });
       } catch (e) {

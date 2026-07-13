@@ -19,6 +19,7 @@ interface Props {
   businessName?: string
   phone?: string
   billingEmail?: string
+  zelleQrUrl?: string
 }
 
 const NAVY = '#0F2A4A'
@@ -40,6 +41,7 @@ const ZelleInstructionsEmail = ({
   businessName,
   phone,
   billingEmail,
+  zelleQrUrl,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -80,6 +82,21 @@ const ZelleInstructionsEmail = ({
             <Text style={zelleHint}>
               Please include the memo above so we can match your payment to your order.
             </Text>
+            {zelleQrUrl ? (
+              <table cellPadding={0} cellSpacing={0} style={{ margin: '16px auto 0', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: 'center', padding: '12px', background: '#ffffff', border: '2px solid #7c3aed', borderRadius: '12px' }}>
+                      <Text style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6d28d9', fontWeight: 700, margin: '0 0 8px' }}>
+                        Or scan to pay instantly
+                      </Text>
+                      <img src={zelleQrUrl} width={220} height={220} alt="Zelle QR code — WINALL MEDIA LLC" style={{ display: 'block', margin: '0 auto', width: '220px', height: '220px' }} />
+                      <Text style={{ fontSize: '11px', color: '#6b7280', margin: '8px 0 0' }}>Open your bank's Zelle scanner</Text>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            ) : null}
           </Section>
 
           <Section style={orderBox}>
