@@ -8,7 +8,7 @@ import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/checkout/return")({
   validateSearch: (search) =>
-    z.object({ session_id: z.string().optional() }).parse(search),
+    z.object({ session_id: z.string().optional(), industry: z.string().optional() }).parse(search),
   component: CheckoutReturn,
 });
 
