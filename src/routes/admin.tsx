@@ -20,6 +20,7 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { getActiveCities } from "@/lib/cities.functions";
 import { INDUSTRIES, AD_PLANS } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
+import { listDesignOrders, type DesignOrderRow } from "@/lib/design.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
