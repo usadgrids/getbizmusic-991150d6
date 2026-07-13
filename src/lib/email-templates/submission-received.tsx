@@ -1,5 +1,6 @@
 import React from 'react'
 import { Body, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -42,6 +43,7 @@ const SubmissionReceivedEmail = ({ contactName, businessName, isEdit }: Props) =
               : "Once approved, you'll get a follow-up email with your unique ad number and shareable link you can post anywhere — social media, your website, email signatures, and more."}
           </Text>
           <Hr style={hr} />
+          <ProminentNotice />
           <Text style={footer}>Questions? Just reply to this email.</Text>
           <Text style={footerSmall}>USADGRIDS NOVELTY ADVERTISING — A WINALL MEDIA LLC CREATIVE</Text>
         </Section>

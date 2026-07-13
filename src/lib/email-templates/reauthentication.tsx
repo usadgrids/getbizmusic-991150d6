@@ -9,6 +9,7 @@ import {
   Preview,
   Text,
 } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -23,6 +24,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Heading style={h1}>Confirm reauthentication</Heading>
         <Text style={text}>Use the code below to confirm your identity:</Text>
         <Text style={codeStyle}>{token}</Text>
+        <ProminentNotice />
         <Text style={footer}>
           This code will expire shortly. If you didn't request this, you can
           safely ignore this email.

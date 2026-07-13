@@ -1,5 +1,6 @@
 import React from 'react'
 import { Body, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -37,6 +38,7 @@ const CityRequestNotificationEmail = ({ cityName, state, zip, email, message, su
           ) : null}
           {submittedAt ? <Text style={p}><strong>Submitted:</strong> {submittedAt}</Text> : null}
           <Hr style={hr} />
+          <ProminentNotice />
           <Text style={footer}>View all requests in the Backend → Tables → city_requests.</Text>
           <Text style={footerSmall}>USADGRIDS NOVELTY ADVERTISING — A WINALL MEDIA LLC CREATIVE</Text>
         </Section>

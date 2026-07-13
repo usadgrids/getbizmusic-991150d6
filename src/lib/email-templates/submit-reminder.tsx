@@ -1,5 +1,6 @@
 import React from 'react'
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
+import { ProminentNotice } from './prominent-notice'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -64,6 +65,7 @@ const SubmitReminderEmail = ({ submitUrl, designUrl }: Props) => (
 
 
           <Hr style={hr} />
+          <ProminentNotice />
           <Text style={footer}>Questions? Just reply to this email.</Text>
           <Text style={footerSmall}>USADGRIDS NOVELTY ADVERTISING — A WINALL MEDIA LLC CREATIVE</Text>
         </Section>
