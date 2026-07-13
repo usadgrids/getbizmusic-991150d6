@@ -17,7 +17,7 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
   useEffect(() => {
     if (primedRef.current) return;
     primedRef.current = true;
-    player.setPlaylist("religious", true);
+    player.setPlaylist("religious");
   }, [player]);
 
   const showingActive = player.playing && player.activeMood === "religious";
@@ -31,12 +31,18 @@ export function ChristianMusicPanel({ businessName }: { businessName: string }) 
   };
 
   const handlePrev = () => {
-    player.setPlaylist("religious", true);
+    if (player.activeMood !== "religious") {
+      player.playMood("religious", 0);
+      return;
+    }
     player.prev();
   };
 
   const handleNext = () => {
-    player.setPlaylist("religious", true);
+    if (player.activeMood !== "religious") {
+      player.playMood("religious", 0);
+      return;
+    }
     player.next();
   };
 

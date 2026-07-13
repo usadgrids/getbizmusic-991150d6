@@ -190,19 +190,15 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
       window.clearTimeout(christianLeaveTimerRef.current);
       christianLeaveTimerRef.current = null;
     }
-    setChristianActive((prev) => {
-      if (!prev) {
-        christianWasPlayingRef.current = musicPlaying;
-        setPaused(true);
-        // Pause any secular audio first, then force-load + play the Christian
-        // playlist. setPlaylist("religious", true) guarantees the mini-player
-        // swaps its list even if it thinks it's already on that mood.
-        player.pause();
-        player.setPlaylist("religious", true);
-        player.playMood("religious", 0);
-      }
-      return true;
-    });
+    if (!christianActive) {
+      christianWasPlayingRef.current = musicPlaying && activeMusicMood === "secular";
+      setPaused(true);
+    }
+    // Keep this call directly inside the click/touch event chain. Loading the
+    // Christian playlist via playMood replaces secular audio without a separate
+    // pause/reload command that can race and leave the YouTube iframe silent.
+    player.playMood("religious", 0);
+    setChristianActive(true);
   };
 
   const deactivateChristian = (immediate = false) => {
@@ -454,7 +450,7 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
 
             onMouseLeave={() => {
               if (videoActive) deactivateVideo(true);
-              if (christianActive) deactivateChristian();
+              if (christianActive) deactivateChristian(true);
             }}
 
           >
@@ -498,8 +494,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               {christianActive && currentIsReligious && (
                 <div
                   className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3 sm:px-6"
-                  onMouseEnter={activateChristian}
-                  onMouseLeave={() => deactivateChristian()}
                 >
                   <div className="w-full max-w-[720px] pointer-events-auto">
                     <ChristianMusicPanel businessName={current.business_name} />
@@ -547,14 +541,6 @@ export function AdSlider({ ads, title, featured = false, musicMood }: Props) {
               <div className="absolute bottom-3 right-3 z-20">
                 <button
                   type="button"
-                  onMouseEnter={activateChristian}
-                  onMouseLeave={() => deactivateChristian()}
-                  onFocus={activateChristian}
-                  onBlur={() => deactivateChristian()}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    activateChristian();
-                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (christianActive) deactivateChristian(true);

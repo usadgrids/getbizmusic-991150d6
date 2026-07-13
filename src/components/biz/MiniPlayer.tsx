@@ -370,6 +370,13 @@ export function MiniPlayer({ initialMood = "secular" }: { initialMood?: MiniPlay
           index,
           startSeconds: 0,
         });
+        // The first play attempt must stay in the same synchronous user-event
+        // chain as the button tap/click. Delaying every playVideo call behind a
+        // timer lets browser media policy reject sound, especially after
+        // switching between secular and Christian playlists.
+        player.playVideo();
+        syncEmbeddedFrame();
+        syncTrackData(player);
       } catch {
         setShowPlayFallback(true);
         reportPlayback(false, "fallback");

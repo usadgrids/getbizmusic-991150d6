@@ -79,6 +79,9 @@ export function useMiniPlayerController(filterMood?: MiniPlayerMood): MiniPlayer
       MINIPLAYER_ACTIVITY_EVENT,
       (detail) => {
         if (!detail) return;
+        if (detail.mood === "secular" || detail.mood === "religious") {
+          setActiveMood(detail.mood);
+        }
         if (filterMood && detail.mood !== filterMood) {
           setPlaying(false);
           return;
@@ -88,6 +91,9 @@ export function useMiniPlayerController(filterMood?: MiniPlayerMood): MiniPlayer
     );
     const offTrack = onMiniPlayerEvent<MiniPlayerTrack>(MINIPLAYER_TRACK_EVENT, (detail) => {
       if (!detail) return;
+      if (detail.mood === "secular" || detail.mood === "religious") {
+        setActiveMood(detail.mood);
+      }
       if (filterMood && detail.mood !== filterMood) return;
       setTrack(detail);
     });
