@@ -70,7 +70,7 @@ function CheckoutReturn() {
               <div className="text-sm font-semibold text-[#0F2A4A] mb-2">Continue here to upload your ad:</div>
               <Link
                 to="/submit"
-                search={{ token: state.token }}
+                search={{ token: state.token, ...(industry ? { industry } : {}) }}
                 className="inline-flex items-center gap-2 bg-[#D4A24C] text-[#0F2A4A] font-bold px-5 py-2.5 rounded-md hover:bg-[#e0b266] transition-colors"
               >
                 Submit Your Ad <ArrowRight size={16} />
