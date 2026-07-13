@@ -26,6 +26,7 @@ function DesignReturn() {
     { status: "loading" }
   );
   const [submitting, setSubmitting] = useState(false);
+  const [emailing, setEmailing] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
 
@@ -55,6 +56,20 @@ function DesignReturn() {
     tick();
     return () => { cancelled = true; };
   }, [session_id]);
+
+  const handleEmailLink = async () => {
+    if (!session_id) return;
+    setEmailing(true);
+    try {
+      const res = await emailDesignIntakeLink({ data: { sessionId: session_id, environment: getStripeEnvironment() } });
+      if (!res.ok) throw new Error(res.error ?? "Email failed");
+      toast.success("Design intake link emailed — check your inbox shortly.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Email failed");
+    } finally {
+      setEmailing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
