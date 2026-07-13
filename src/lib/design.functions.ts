@@ -273,3 +273,75 @@ export const emailDesignIntakeLink = createServerFn({ method: "POST" })
       return { ok: false, error: e instanceof Error ? e.message : "Email failed" };
     }
   });
+
+// Admin: list all custom design orders (paid + intake_submitted), with signed URLs for uploaded assets.
+export type DesignOrderRow = {
+  id: string;
+  stripe_session_id: string;
+  customer_email: string;
+  amount_cents: number;
+  status: string;
+  environment: string;
+  paid_at: string | null;
+  created_at: string;
+  intake_submitted_at: string | null;
+  intake: {
+    business_name?: string;
+    owner_name?: string;
+    owner_email?: string;
+    business_email?: string;
+    phone?: string;
+    website_url?: string;
+    services?: string;
+    tagline?: string;
+    color_preferences?: string;
+    logo_path?: string;
+    image_paths?: string[];
+    design_brief?: string;
+    notes?: string;
+  } | null;
+  logo_url?: string | null;
+  image_urls?: string[];
+};
+
+export const listDesignOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<DesignOrderRow[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Verify admin
+    const { data: role } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!role) throw new Error("Forbidden: admin role required");
+
+    const { data, error } = await supabaseAdmin
+      .from("design_orders")
+      .select("id, stripe_session_id, customer_email, amount_cents, status, environment, paid_at, created_at, intake_submitted_at, intake")
+      .in("status", ["paid", "intake_submitted"])
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    const TTL = 60 * 60 * 24 * 7;
+    const signOne = async (path?: string | null) => {
+      if (!path) return null;
+      const { data: s } = await supabaseAdmin.storage.from("ad-uploads").createSignedUrl(path, TTL);
+      return s?.signedUrl ?? null;
+    };
+
+    return await Promise.all(
+      (data ?? []).map(async (row) => {
+        const intake = (row.intake ?? null) as DesignOrderRow["intake"];
+        const logo_url = await signOne(intake?.logo_path);
+        const image_urls = await Promise.all((intake?.image_paths ?? []).map((p) => signOne(p)));
+        return {
+          ...(row as any),
+          intake,
+          logo_url,
+          image_urls: image_urls.filter((u): u is string => !!u),
+        };
+      }),
+    );
+  });
