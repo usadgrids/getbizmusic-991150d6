@@ -301,20 +301,7 @@ function PricingPage() {
               </Link>
             </div>
 
-            <div className="mt-4 bg-white border-2 border-[#0F2A4A] rounded-xl p-4 text-center">
-              <div className="text-sm text-[#0F2A4A]">
-                <strong>Not ready to design it yourself?</strong>
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                We'll professionally design your ad — guaranteed to pass compliance. Just <strong>$49.95</strong>.
-              </p>
-              <Link
-                to="/design"
-                className="mt-2 inline-block bg-[#0F2A4A] text-white font-semibold px-4 py-2 rounded-md text-sm hover:bg-[#163864]"
-              >
-                Get Pro Ad Design — $49.95
-              </Link>
-            </div>
+
 
             <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center gap-1.5">
               <Shield size={12} /> A copy of these instructions was emailed to you.
