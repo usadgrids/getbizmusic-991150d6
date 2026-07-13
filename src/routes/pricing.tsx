@@ -263,7 +263,8 @@ function PricingPage() {
           )}
 
           <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
-            Email for {isReligious ? "confirmation" : "receipt"} &amp; submission link
+            Email for {isReligious ? "confirmation" : "receipt"} &amp; submission link{" "}
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
