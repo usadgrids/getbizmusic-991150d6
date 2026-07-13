@@ -154,7 +154,18 @@ function TapToPlayOverlay({
 export function MiniPlayer() {
   const [collapsed, setCollapsed] = useState(false);
   const [showPlayFallback, setShowPlayFallback] = useState(false);
+  const [religiousPaused, setReligiousPaused] = useState(false);
   const [size, setSize] = useState({ width: 200, height: 113 });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ paused: boolean }>).detail;
+      setReligiousPaused(Boolean(detail?.paused));
+    };
+    window.addEventListener(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, handler);
+    return () => window.removeEventListener(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, handler);
+  }, []);
 
   const playerHostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
