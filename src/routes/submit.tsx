@@ -14,6 +14,7 @@ import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
   token: z.string().uuid().optional(),
+  industry: z.string().optional(),
 });
 
 export const Route = createFileRoute("/submit")({
@@ -38,7 +39,7 @@ const formSchema = z.object({
 });
 
 function SubmitPage() {
-  const { token } = Route.useSearch();
+  const { token, industry: searchIndustry } = Route.useSearch();
   const submit = useServerFn(createSubmission);
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
@@ -56,7 +57,11 @@ function SubmitPage() {
   const [city, setCity] = useState<UsCity | null>(null);
 
   // Ministry-only state (used when verify.freeReligious is true)
-  const [ministryIndustry, setMinistryIndustry] = useState<string>("church");
+  const [ministryIndustry, setMinistryIndustry] = useState<string>(
+    searchIndustry && RELIGIOUS_INDUSTRY_VALUES.includes(searchIndustry as typeof RELIGIOUS_INDUSTRY_VALUES[number])
+      ? searchIndustry
+      : "church"
+  );
   const [churchName, setChurchName] = useState("");
   const [churchAddress, setChurchAddress] = useState("");
   const [pastorName, setPastorName] = useState("");
@@ -489,7 +494,7 @@ function SubmitPage() {
                 <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
                 <div>
                   <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
-                  <select name="industry" required defaultValue="" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
+                  <select name="industry" required defaultValue={searchIndustry ?? ""} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
                     <option value="" disabled>Pick one…</option>
                     {INDUSTRIES.filter((i) => !RELIGIOUS_INDUSTRY_VALUES.includes(i.value as typeof RELIGIOUS_INDUSTRY_VALUES[number])).map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
                   </select>

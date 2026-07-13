@@ -86,7 +86,7 @@ function PricingPage() {
         data: {
           plan,
           customerEmail: email,
-          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&industry=${encodeURIComponent(industry)}`,
           environment: getStripeEnvironment(),
           agreedTerms,
           agreedNoRefund,
@@ -120,7 +120,7 @@ function PricingPage() {
       });
       if ("error" in res) throw new Error(res.error);
       if (!res.token) throw new Error("No token returned");
-      navigate({ to: "/submit", search: { token: res.token } });
+      navigate({ to: "/submit", search: { token: res.token, industry } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not reserve your free ministry spot");
     } finally {
