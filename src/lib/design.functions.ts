@@ -240,3 +240,34 @@ export const submitDesignIntake = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export const emailDesignIntakeLink = createServerFn({ method: "POST" })
+  .inputValidator((data: { sessionId: string; environment: StripeEnv }) =>
+    z.object({ sessionId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(data)
+  )
+  .handler(async ({ data }): Promise<{ ok: boolean; error?: string }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("design_orders")
+      .select("id, status, customer_email")
+      .eq("stripe_session_id", data.sessionId)
+      .maybeSingle();
+    if (!row) return { ok: false, error: "Order not found" };
+    if (row.status === "pending") return { ok: false, error: "Payment not yet confirmed" };
+
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "design-intake-link",
+        recipientEmail: row.customer_email as string,
+        idempotencyKey: `design-intake-link-${data.sessionId}`,
+        templateData: {
+          intakeUrl: `https://www.getbizmusic.com/design/return?session_id=${data.sessionId}`,
+        },
+      });
+      return { ok: true };
+    } catch (e) {
+      console.error("emailDesignIntakeLink failed:", e);
+      return { ok: false, error: e instanceof Error ? e.message : "Email failed" };
+    }
+  });
