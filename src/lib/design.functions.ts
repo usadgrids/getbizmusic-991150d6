@@ -320,7 +320,7 @@ export const listDesignOrders = createServerFn({ method: "GET" })
 
     const { data, error } = await supabaseAdmin
       .from("design_orders")
-      .select("id, stripe_session_id, customer_email, amount_cents, status, environment, paid_at, created_at, intake_submitted_at, intake")
+      .select("id, stripe_session_id, customer_email, amount_cents, status, environment, paid_at, created_at, intake_submitted_at, completed_at, intake")
       .in("status", ["paid", "intake_submitted"])
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
