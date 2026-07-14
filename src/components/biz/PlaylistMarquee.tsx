@@ -215,7 +215,7 @@ export function PlaylistMarquee() {
       onPointerCancel={endDrag}
     >
       {arrowBtn("left")}
-      <div ref={trackRef} className="marquee-track flex w-max gap-2 px-2 min-w-0">
+      <div ref={trackRef} className="flex w-max gap-2 px-2 min-w-0" style={{ willChange: "transform" }}>
         {renderRow("a")}
         {renderRow("b")}
       </div>
