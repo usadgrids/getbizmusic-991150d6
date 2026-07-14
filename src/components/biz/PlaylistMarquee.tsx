@@ -3,80 +3,175 @@ import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { usePlaylistTracks } from "@/hooks/usePlaylistTracks";
 import { useMiniPlayerController } from "@/hooks/useMiniPlayerController";
 
-const NORMAL_DURATION = "200s";
-const FAST_DURATION = "60s";
+// Seconds to traverse one full "row" of the duplicated track at each speed.
+const NORMAL_SECONDS = 200;
+const FAST_SECONDS = 60;
 
 export function PlaylistMarquee() {
   const { tracks, isLoading } = usePlaylistTracks();
   const player = useMiniPlayerController();
   const [currentTitle, setCurrentTitle] = useState<string>("");
+
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const releaseTimerRef = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Live-mutable state for the rAF loop — refs so they don't trigger re-renders.
+  const offsetRef = useRef(0);
+  const halfWidthRef = useRef(0);
+  const speedRef = useRef<"normal" | "fast">("normal");
+  const directionRef = useRef<1 | -1>(1); // 1 = scroll left (normal), -1 = reverse
+  const draggingRef = useRef(false);
+  const burstUntilRef = useRef(0);
+
+  // Pointer drag tracking
+  const dragStartXRef = useRef(0);
+  const dragStartOffsetRef = useRef(0);
+  const dragMovedRef = useRef(false);
+  const dragPointerIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     setCurrentTitle(player.track?.title ?? "");
   }, [player.track]);
 
+  // Measure half-width whenever the track content changes.
   useEffect(() => {
-    return () => {
-      if (releaseTimerRef.current) window.clearTimeout(releaseTimerRef.current);
+    const measure = () => {
+      const el = trackRef.current;
+      if (!el) return;
+      halfWidthRef.current = el.scrollWidth / 2;
     };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (trackRef.current) ro.observe(trackRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [tracks.length]);
+
+  // rAF-driven marquee. Continues to run when arrows/burst change speed,
+  // and pauses when user is dragging.
+  useEffect(() => {
+    let last = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const el = trackRef.current;
+      const half = halfWidthRef.current;
+      if (el && half > 0 && !draggingRef.current) {
+        // End of burst timer?
+        if (burstUntilRef.current && now > burstUntilRef.current) {
+          burstUntilRef.current = 0;
+          speedRef.current = "normal";
+          directionRef.current = 1;
+        }
+        const seconds = speedRef.current === "fast" ? FAST_SECONDS : NORMAL_SECONDS;
+        const pxPerSec = half / seconds;
+        offsetRef.current -= pxPerSec * dt * directionRef.current;
+        // Wrap
+        if (offsetRef.current <= -half) offsetRef.current += half;
+        if (offsetRef.current > 0) offsetRef.current -= half;
+        el.style.transform = `translate3d(${offsetRef.current}px,0,0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   if (isLoading || tracks.length === 0) {
     return <div className="mt-1 h-7 w-full rounded-full bg-white/40 animate-pulse" />;
   }
 
-  const handleClick = (index: number) => {
+  const handleTrackClick = (index: number) => {
+    // Suppress click that ended a drag.
+    if (dragMovedRef.current) return;
     player.playIndex(index);
   };
 
-  const applySpeed = (direction: "forward" | "reverse" | null) => {
-    const el = trackRef.current;
-    if (!el) return;
-    if (releaseTimerRef.current) {
-      window.clearTimeout(releaseTimerRef.current);
-      releaseTimerRef.current = null;
-    }
-    if (direction === null) {
-      el.style.animationDuration = NORMAL_DURATION;
-      el.style.animationDirection = "normal";
-      el.style.animationPlayState = "";
-      return;
-    }
-    el.style.animationDuration = FAST_DURATION;
-    el.style.animationDirection = direction === "reverse" ? "reverse" : "normal";
-    el.style.animationPlayState = "running";
+  const burst = (dir: 1 | -1) => {
+    speedRef.current = "fast";
+    directionRef.current = dir;
+    burstUntilRef.current = performance.now() + 900;
   };
 
-  const burst = (direction: "forward" | "reverse") => {
-    applySpeed(direction);
-    releaseTimerRef.current = window.setTimeout(() => applySpeed(null), 900);
+  const holdStart = (dir: 1 | -1) => () => {
+    speedRef.current = "fast";
+    directionRef.current = dir;
+    burstUntilRef.current = 0;
+  };
+  const holdEnd = () => {
+    speedRef.current = "normal";
+    directionRef.current = 1;
+    burstUntilRef.current = 0;
   };
 
-  const holdStart = (direction: "forward" | "reverse") => (e: React.PointerEvent) => {
-    e.preventDefault();
+  // Touch/pointer drag on the container to swipe through songs.
+  const onPointerDown = (e: React.PointerEvent) => {
+    // Only handle primary touch/mouse; ignore if starting on an arrow button.
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-marquee-arrow]")) return;
+    draggingRef.current = true;
+    dragMovedRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartOffsetRef.current = offsetRef.current;
+    dragPointerIdRef.current = e.pointerId;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-    applySpeed(direction);
   };
-  const holdEnd = (e: React.PointerEvent) => {
-    (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
-    applySpeed(null);
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!draggingRef.current) return;
+    const dx = e.clientX - dragStartXRef.current;
+    if (Math.abs(dx) > 4) dragMovedRef.current = true;
+    const el = trackRef.current;
+    const half = halfWidthRef.current;
+    if (!el || half === 0) return;
+    let next = dragStartOffsetRef.current + dx;
+    // Keep within one repeating cycle for stable wrap on release.
+    while (next <= -half) next += half;
+    while (next > 0) next -= half;
+    offsetRef.current = next;
+    el.style.transform = `translate3d(${next}px,0,0)`;
+  };
+
+  const endDrag = (e: React.PointerEvent) => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    if (dragPointerIdRef.current !== null) {
+      (e.currentTarget as HTMLElement).releasePointerCapture?.(dragPointerIdRef.current);
+      dragPointerIdRef.current = null;
+    }
+    // Reset a moved-drag flag shortly after so the synthesized click is swallowed.
+    if (dragMovedRef.current) {
+      window.setTimeout(() => {
+        dragMovedRef.current = false;
+      }, 50);
+    }
   };
 
   const arrowBtn = (side: "left" | "right") => {
-    const direction = side === "left" ? "reverse" : "forward";
+    const dir: 1 | -1 = side === "left" ? -1 : 1;
     const Icon = side === "left" ? ChevronLeft : ChevronRight;
     return (
       <button
         type="button"
+        data-marquee-arrow
         aria-label={side === "left" ? "Scroll playlist left" : "Scroll playlist right"}
-        onClick={() => burst(direction)}
-        onPointerDown={holdStart(direction)}
-        onPointerUp={holdEnd}
+        onClick={() => burst(dir)}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+          holdStart(dir)();
+        }}
+        onPointerUp={(e) => {
+          (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+          holdEnd();
+        }}
         onPointerCancel={holdEnd}
         onPointerLeave={(e) => {
-          if (e.buttons) applySpeed(null);
+          if (e.buttons) holdEnd();
         }}
         className={`absolute top-1/2 -translate-y-1/2 ${
           side === "left" ? "left-0.5" : "right-0.5"
@@ -95,7 +190,7 @@ export function PlaylistMarquee() {
         <button
           key={`${keyPrefix}-${t.videoId}-${i}`}
           type="button"
-          onClick={() => handleClick(i)}
+          onClick={() => handleTrackClick(i)}
           className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
             isCurrent
               ? "bg-[#0F2A4A] text-[#D4A24C]"
@@ -110,7 +205,15 @@ export function PlaylistMarquee() {
     });
 
   return (
-    <div className="marquee-container relative mt-1 w-full max-w-full overflow-hidden rounded-full bg-[#0F2A4A]/10 py-1 pl-7 pr-7 border border-[#0F2A4A]/15 min-w-0" style={{ contain: "layout paint" }}>
+    <div
+      ref={containerRef}
+      className="marquee-container relative mt-1 w-full max-w-full overflow-hidden rounded-full bg-[#0F2A4A]/10 py-1 pl-7 pr-7 border border-[#0F2A4A]/15 min-w-0 touch-pan-y select-none"
+      style={{ contain: "layout paint" }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+    >
       {arrowBtn("left")}
       <div ref={trackRef} className="marquee-track flex w-max gap-2 px-2 min-w-0">
         {renderRow("a")}
