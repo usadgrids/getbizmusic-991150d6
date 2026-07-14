@@ -29,7 +29,17 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
 
   const open = (u: string) => {
     onOpen?.();
-    window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
+    // On mobile, popup windows with size features are blocked. Use a plain
+    // new-tab open, and fall back to same-tab navigation if the browser
+    // still blocks it.
+    const isMobile =
+      typeof window !== "undefined" &&
+      (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        window.matchMedia("(max-width: 768px)").matches);
+    const win = isMobile
+      ? window.open(u, "_blank", "noopener,noreferrer")
+      : window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
+    if (!win) window.location.href = u;
   };
 
   const shareFacebook = () =>
