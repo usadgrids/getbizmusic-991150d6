@@ -92,7 +92,7 @@ function PricingPage() {
   const startCheckout = async () => {
     if (loading) return;
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
-    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please check the agreement box to continue"); return; }
     setLoading(true);
     try {
       const result = await createAdCheckout({
@@ -121,7 +121,7 @@ function PricingPage() {
     if (!isReligious) return;
     if (freeLoading) return;
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
-    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please check the agreement box to continue"); return; }
     setFreeLoading(true);
     try {
       const res = await createFreeReligiousSubmission({
@@ -150,7 +150,7 @@ function PricingPage() {
     if (!businessName.trim()) { toast.error("Please enter the business name"); return; }
     if (!emailValid) { toast.error("Please enter a valid email"); return; }
     if (!phone.trim() || phone.trim().length < 7) { toast.error("Please enter a valid phone number"); return; }
-    if (!agreedTerms || !agreedNoRefund) { toast.error("Please confirm both boxes to continue"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please check the agreement box to continue"); return; }
     setZelleLoading(true);
     try {
       const res = await createZelleAdOrder({
@@ -673,7 +673,7 @@ function PricingPage() {
             </p>
           ) : !agreedTerms || !agreedNoRefund ? (
             <p className="mt-2 text-xs text-center text-gray-500">
-              Please confirm both boxes above to continue.
+              Please check the agreement box above to continue.
             </p>
           ) : null}
           <p className="mt-3 text-xs text-gray-500 flex items-center justify-center gap-1.5">
