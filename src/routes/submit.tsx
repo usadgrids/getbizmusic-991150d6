@@ -199,11 +199,14 @@ function SubmitPage() {
       };
     } else {
       const fd = new FormData(e.currentTarget);
+      const voice = voicePhone.trim();
+      const sms = smsSameAsVoice ? voice : smsPhone.trim();
+      const phoneField = !sms || sms === voice ? voice : `Voice: ${voice} | SMS: ${sms}`;
       raw = {
         business_name: String(fd.get("business_name") ?? ""),
         contact_name: String(fd.get("contact_name") ?? ""),
         email: String(fd.get("email") ?? verify.email ?? ""),
-        phone: String(fd.get("phone") ?? ""),
+        phone: phoneField,
         website_url: String(fd.get("website_url") ?? ""),
         industry: String(fd.get("industry") ?? ""),
         tagline: String(fd.get("tagline") ?? ""),
