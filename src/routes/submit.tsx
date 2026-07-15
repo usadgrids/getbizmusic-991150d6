@@ -495,11 +495,48 @@ function SubmitPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field name="business_name" label="Business name" required placeholder="Tony's Pizzeria" />
                 <Field name="contact_name" label="Contact name" required placeholder="Tony Romano" />
-                <Field name="email" type="email" label="Email" required placeholder="tony@example.com" defaultValue={verify.email} />
-                <Field name="phone" label="Phone" required placeholder="555-555-1234" />
+                <Field name="email" type="email" label="Customer Support Email" required placeholder="tony@example.com" defaultValue={verify.email} />
+                <div>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
+                    Customer Support Number Voice <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={voicePhone}
+                    onChange={(e) => setVoicePhone(e.target.value)}
+                    required
+                    maxLength={40}
+                    placeholder="555-555-1234"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">
+                    Customer Support Number Text/SMS <span className="text-red-500">*</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-gray-700 mb-1.5">
+                    <input
+                      type="checkbox"
+                      checked={smsSameAsVoice}
+                      onChange={(e) => setSmsSameAsVoice(e.target.checked)}
+                    />
+                    Same as Customer Support Number Voice
+                  </label>
+                  {!smsSameAsVoice && (
+                    <input
+                      type="tel"
+                      value={smsPhone}
+                      onChange={(e) => setSmsPhone(e.target.value)}
+                      required
+                      maxLength={40}
+                      placeholder="555-555-9876"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+                    />
+                  )}
+                </div>
                 <Field name="website_url" label="Website (optional)" placeholder="https://example.com" />
                 <div>
-                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Industry <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-[#0F2A4A] mb-1">Business Category <span className="text-red-500">*</span></label>
                   <select name="industry" required defaultValue={searchIndustry ?? ""} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C] bg-white">
                     <option value="" disabled>Pick one…</option>
                     {INDUSTRIES.filter((i) => !RELIGIOUS_INDUSTRY_VALUES.includes(i.value as typeof RELIGIOUS_INDUSTRY_VALUES[number])).map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
