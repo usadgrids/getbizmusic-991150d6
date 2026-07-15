@@ -55,6 +55,9 @@ function SubmitPage() {
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [city, setCity] = useState<UsCity | null>(null);
+  const [voicePhone, setVoicePhone] = useState("");
+  const [smsPhone, setSmsPhone] = useState("");
+  const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
 
   // Ministry-only state (used when verify.freeReligious is true)
   const [ministryIndustry, setMinistryIndustry] = useState<string>(
