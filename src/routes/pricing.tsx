@@ -614,27 +614,25 @@ function PricingPage() {
             <div className="mt-5 space-y-3 border-t border-[#D4A24C]/40 pt-4">
               <div className="flex items-start gap-3">
                 <Checkbox
-                  id="agree-terms"
-                  checked={agreedTerms}
-                  onCheckedChange={(v) => setAgreedTerms(v === true)}
+                  id="agree-all"
+                  checked={agreedTerms && agreedNoRefund}
+                  onCheckedChange={(v) => {
+                    const on = v === true;
+                    setAgreedTerms(on);
+                    setAgreedNoRefund(on);
+                  }}
                   className="mt-0.5"
                 />
-                <Label htmlFor="agree-terms" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
-                  Got it — I understand this is a fun novelty ad spot with no guaranteed views,
-                  plays, or business results.
-                </Label>
-              </div>
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="agree-refund"
-                  checked={agreedNoRefund}
-                  onCheckedChange={(v) => setAgreedNoRefund(v === true)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="agree-refund" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
-                  {isReligious
-                    ? "I acknowledge this free ministry ad is a novelty community gesture — no guaranteed results, subject to the same content-review policy as paid ads."
-                    : "I understand and I'm good with the no-refund policy — once I purchase, it's final."}
+                <Label htmlFor="agree-all" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
+                  <span className="font-semibold">I agree to all of the following:</span>
+                  <ul className="mt-2 space-y-2 list-disc pl-5 font-normal">
+                    <li>Got it — I understand this is a fun novelty ad spot with no guaranteed views, plays, or business results.</li>
+                    {!isReligious && (
+                      <li>I understand and I'm good with the no-refund policy — once I purchase, it's final.</li>
+                    )}
+                    <li>Your business and contact info will be instantly available to anyone who clicks your ad.</li>
+                    <li>I agree to receive texts, calls, or emails from WINALL Media, LLC. for other products and services. Consent is not required to purchase. Msg &amp; data rates may apply. Opt out anytime.</li>
+                  </ul>
                 </Label>
               </div>
             </div>
