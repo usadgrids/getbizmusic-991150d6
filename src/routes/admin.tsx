@@ -664,6 +664,9 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const [autoApprove, setAutoApprove] = useState(true);
   const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
   const [selectedCityIds, setSelectedCityIds] = useState<string[]>([]);
+  const [voicePhone, setVoicePhone] = useState("");
+  const [smsPhone, setSmsPhone] = useState("");
+  const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
 
   const toggleCity = (id: string) =>
     setSelectedCityIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -681,6 +684,8 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (!file) { toast.error("Please choose an image"); return; }
     if (selectedCityIds.length === 0) { toast.error("Select at least one city"); return; }
+    if (!voicePhone.trim() || voicePhone.trim().length < 7) { toast.error("Please enter a valid voice number"); return; }
+    if (!smsSameAsVoice && (!smsPhone.trim() || smsPhone.trim().length < 7)) { toast.error("Please enter a valid SMS number"); return; }
     const fd = new FormData(e.currentTarget);
     setBusy(true);
     try {
@@ -692,12 +697,16 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
+      const voice = voicePhone.trim();
+      const sms = smsSameAsVoice ? voice : smsPhone.trim();
+      const phoneField = !sms || sms === voice ? voice : `Voice: ${voice} | SMS: ${sms}`;
+
       const res = await createFn({
         data: {
           business_name: String(fd.get("business_name") ?? ""),
           contact_name: String(fd.get("contact_name") ?? ""),
           email: String(fd.get("email") ?? ""),
-          phone: String(fd.get("phone") ?? ""),
+          phone: phoneField,
           website_url: String(fd.get("website_url") ?? ""),
           youtube_url: String(fd.get("youtube_url") ?? ""),
           industry: String(fd.get("industry") ?? ""),
@@ -717,6 +726,9 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
       (e.target as HTMLFormElement).reset();
       setFile(null);
       setSelectedCityIds([]);
+      setVoicePhone("");
+      setSmsPhone("");
+      setSmsSameAsVoice(true);
       setOpen(false);
       onCreated();
     } catch (err) {
@@ -773,11 +785,22 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <AdminField name="business_name" label="Business name" required />
             <AdminField name="contact_name" label="Contact name" required />
-            <AdminField name="email" type="email" label="Email" required />
-            <AdminField name="phone" label="Phone" required />
+            <AdminField name="email" type="email" label="Customer Support Email" required />
+            <div>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
+                Customer Support Number Voice <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={voicePhone}
+                onChange={(e) => setVoicePhone(e.target.value)}
+                required maxLength={40} placeholder="555-555-1234"
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              />
+            </div>
             <AdminField name="website_url" label="Website (optional)" placeholder="https://..." />
             <div>
-              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business Category *</label>
               <select
                 name="industry" required defaultValue=""
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
@@ -785,6 +808,28 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
                 <option value="" disabled>Pick one…</option>
                 {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
               </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
+                Customer Support Number Text/SMS <span className="text-red-500">*</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-gray-700 mb-1.5">
+                <input
+                  type="checkbox"
+                  checked={smsSameAsVoice}
+                  onChange={(e) => setSmsSameAsVoice(e.target.checked)}
+                />
+                Same as Customer Support Number Voice
+              </label>
+              {!smsSameAsVoice && (
+                <input
+                  type="tel"
+                  value={smsPhone}
+                  onChange={(e) => setSmsPhone(e.target.value)}
+                  required maxLength={40} placeholder="555-555-9876"
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+                />
+              )}
             </div>
           </div>
 
@@ -1089,7 +1134,7 @@ function EditAdModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business Category *</label>
             <select
               value={industry} onChange={(e) => setIndustry(e.target.value)} required
               className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"

@@ -20,6 +20,7 @@ export const INDUSTRIES = [
   { value: "church", label: "Church" },
   { value: "cleaning", label: "Cleaning Services" },
   { value: "community_org", label: "Community Organization" },
+  { value: "community_event", label: "Community Event (FREE)" },
   { value: "convenience_store", label: "Convenience Store" },
   { value: "dance_school", label: "Dance School" },
   { value: "delivery_courier", label: "Delivery / Courier" },
@@ -116,6 +117,7 @@ export const RELIGIOUS_INDUSTRY_VALUES = [
   "church",
   "religious_services",
   "ministry",
+  "community_event",
 ] as const;
 
 export function isReligiousIndustry(value: string | null | undefined): boolean {
