@@ -1134,7 +1134,7 @@ function EditAdModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+            <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business Category *</label>
             <select
               value={industry} onChange={(e) => setIndustry(e.target.value)} required
               className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
