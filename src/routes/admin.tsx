@@ -726,6 +726,9 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
       (e.target as HTMLFormElement).reset();
       setFile(null);
       setSelectedCityIds([]);
+      setVoicePhone("");
+      setSmsPhone("");
+      setSmsSameAsVoice(true);
       setOpen(false);
       onCreated();
     } catch (err) {
@@ -782,11 +785,22 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <AdminField name="business_name" label="Business name" required />
             <AdminField name="contact_name" label="Contact name" required />
-            <AdminField name="email" type="email" label="Email" required />
-            <AdminField name="phone" label="Phone" required />
+            <AdminField name="email" type="email" label="Customer Support Email" required />
+            <div>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
+                Customer Support Number Voice <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={voicePhone}
+                onChange={(e) => setVoicePhone(e.target.value)}
+                required maxLength={40} placeholder="555-555-1234"
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              />
+            </div>
             <AdminField name="website_url" label="Website (optional)" placeholder="https://..." />
             <div>
-              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Industry *</label>
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business Category *</label>
               <select
                 name="industry" required defaultValue=""
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
@@ -794,6 +808,28 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
                 <option value="" disabled>Pick one…</option>
                 {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
               </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
+                Customer Support Number Text/SMS <span className="text-red-500">*</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-gray-700 mb-1.5">
+                <input
+                  type="checkbox"
+                  checked={smsSameAsVoice}
+                  onChange={(e) => setSmsSameAsVoice(e.target.checked)}
+                />
+                Same as Customer Support Number Voice
+              </label>
+              {!smsSameAsVoice && (
+                <input
+                  type="tel"
+                  value={smsPhone}
+                  onChange={(e) => setSmsPhone(e.target.value)}
+                  required maxLength={40} placeholder="555-555-9876"
+                  className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+                />
+              )}
             </div>
           </div>
 
