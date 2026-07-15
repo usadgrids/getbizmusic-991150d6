@@ -664,6 +664,9 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const [autoApprove, setAutoApprove] = useState(true);
   const [adType, setAdType] = useState<"image_5" | "slider_10">("image_5");
   const [selectedCityIds, setSelectedCityIds] = useState<string[]>([]);
+  const [voicePhone, setVoicePhone] = useState("");
+  const [smsPhone, setSmsPhone] = useState("");
+  const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
 
   const toggleCity = (id: string) =>
     setSelectedCityIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -681,6 +684,8 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (!file) { toast.error("Please choose an image"); return; }
     if (selectedCityIds.length === 0) { toast.error("Select at least one city"); return; }
+    if (!voicePhone.trim() || voicePhone.trim().length < 7) { toast.error("Please enter a valid voice number"); return; }
+    if (!smsSameAsVoice && (!smsPhone.trim() || smsPhone.trim().length < 7)) { toast.error("Please enter a valid SMS number"); return; }
     const fd = new FormData(e.currentTarget);
     setBusy(true);
     try {
@@ -692,12 +697,16 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
+      const voice = voicePhone.trim();
+      const sms = smsSameAsVoice ? voice : smsPhone.trim();
+      const phoneField = !sms || sms === voice ? voice : `Voice: ${voice} | SMS: ${sms}`;
+
       const res = await createFn({
         data: {
           business_name: String(fd.get("business_name") ?? ""),
           contact_name: String(fd.get("contact_name") ?? ""),
           email: String(fd.get("email") ?? ""),
-          phone: String(fd.get("phone") ?? ""),
+          phone: phoneField,
           website_url: String(fd.get("website_url") ?? ""),
           youtube_url: String(fd.get("youtube_url") ?? ""),
           industry: String(fd.get("industry") ?? ""),
