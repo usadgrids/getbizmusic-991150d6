@@ -31,55 +31,52 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     typeof window !== "undefined" &&
     (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       window.matchMedia("(max-width: 768px)").matches);
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
+    text,
+  )}`;
+  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+  const whatsAppUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`;
 
-  const open = (u: string) => {
-    onOpen?.();
-    // On mobile, popup blockers frequently block window.open even from a
-    // user gesture (especially inside iframes / in-app browsers). The most
-    // reliable path is a synthetic anchor click with target="_blank", and
-    // fall back to same-tab navigation if that is also blocked.
-    if (isMobile) {
-      try {
-        const a = document.createElement("a");
-        a.href = u;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return;
-      } catch {
-        window.location.href = u;
-        return;
-      }
-    }
-    const win = window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
-    if (!win) window.location.href = u;
+  const pauseAfterShareStarts = () => {
+    window.setTimeout(() => onOpen?.(), 0);
   };
 
-  const shareFacebook = () =>
-    open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
-  const shareTwitter = () =>
-    open(
-      `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
-        text,
-      )}`,
-    );
-  const shareLinkedIn = () =>
-    open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`);
-  const shareWhatsApp = () =>
-    open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`);
+  const handleLinkShare = () => {
+    pauseAfterShareStarts();
+  };
+
+  const open = (u: string) => {
+    // Mobile share dialogs must be started immediately from the tap event.
+    // Defer slider state changes until after the browser has accepted the open.
+    if (isMobile) {
+      const win = window.open(u, "_blank");
+      pauseAfterShareStarts();
+      if (!win) {
+        try {
+          window.top?.location.assign(u);
+        } catch {
+          window.location.assign(u);
+        }
+      }
+      return;
+    }
+    const win = window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
+    pauseAfterShareStarts();
+    if (!win) window.location.assign(u);
+  };
 
   const nativeShare = async () => {
-    onOpen?.();
     if (navigator.share) {
       try {
-        await navigator.share({ title: businessName, text, url });
+        const sharePromise = navigator.share({ title: businessName, text, url });
+        pauseAfterShareStarts();
+        await sharePromise;
       } catch {
         /* user cancelled */
       }
     } else {
-      shareFacebook();
+      open(facebookUrl);
     }
   };
 
@@ -106,22 +103,22 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
       role="group"
       aria-label={`Share ad #${adNumber}`}
     >
-      <button type="button" onClick={shareFacebook} aria-label="Share on Facebook"
+      <a href={facebookUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on Facebook"
         className={`${btn} ${sz} bg-[#1877F2]`}>
         <Facebook size={compact ? 14 : 16} />
-      </button>
-      <button type="button" onClick={shareTwitter} aria-label="Share on X"
+      </a>
+      <a href={twitterUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on X"
         className={`${btn} ${sz} bg-black`}>
         <XIcon size={compact ? 12 : 14} />
-      </button>
-      <button type="button" onClick={shareLinkedIn} aria-label="Share on LinkedIn"
+      </a>
+      <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on LinkedIn"
         className={`${btn} ${sz} bg-[#0A66C2]`}>
         <Linkedin size={compact ? 14 : 16} />
-      </button>
-      <button type="button" onClick={shareWhatsApp} aria-label="Share on WhatsApp"
+      </a>
+      <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on WhatsApp"
         className={`${btn} ${sz} bg-[#25D366]`}>
         <MessageCircle size={compact ? 14 : 16} />
-      </button>
+      </a>
       <button type="button" onClick={copyLink} aria-label="Copy link"
         className={`${btn} ${sz} bg-[#0F2A4A]`}>
         {copied ? <Check size={compact ? 14 : 16} /> : <LinkIcon size={compact ? 14 : 16} />}
