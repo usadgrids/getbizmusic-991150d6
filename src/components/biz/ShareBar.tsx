@@ -27,18 +27,33 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
   const url = `${SITE}/ad/${adNumber}?v=${Date.now()}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
 
+  const isMobile =
+    typeof window !== "undefined" &&
+    (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      window.matchMedia("(max-width: 768px)").matches);
+
   const open = (u: string) => {
     onOpen?.();
-    // On mobile, popup windows with size features are blocked. Use a plain
-    // new-tab open, and fall back to same-tab navigation if the browser
-    // still blocks it.
-    const isMobile =
-      typeof window !== "undefined" &&
-      (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        window.matchMedia("(max-width: 768px)").matches);
-    const win = isMobile
-      ? window.open(u, "_blank", "noopener,noreferrer")
-      : window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
+    // On mobile, popup blockers frequently block window.open even from a
+    // user gesture (especially inside iframes / in-app browsers). The most
+    // reliable path is a synthetic anchor click with target="_blank", and
+    // fall back to same-tab navigation if that is also blocked.
+    if (isMobile) {
+      try {
+        const a = document.createElement("a");
+        a.href = u;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return;
+      } catch {
+        window.location.href = u;
+        return;
+      }
+    }
+    const win = window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
     if (!win) window.location.href = u;
   };
 
