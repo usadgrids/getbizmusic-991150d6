@@ -88,8 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Get Biz Music - National City, CA — Nationwide USA Business Advertising" },
       { name: "twitter:description", content: "Advertise your National City business — $12/year intro offer (about $1/month)." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f1114ad-f846-4b09-b816-2b6ebe7499fd/id-preview-eb625536--ed103cb5-eb75-4100-9676-a1eae1f15cec.lovable.app-1781553079049.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7f1114ad-f846-4b09-b816-2b6ebe7499fd/id-preview-eb625536--ed103cb5-eb75-4100-9676-a1eae1f15cec.lovable.app-1781553079049.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

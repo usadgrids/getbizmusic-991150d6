@@ -32,29 +32,28 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       window.matchMedia("(max-width: 768px)").matches);
 
+  const pauseAfterShareStarts = () => {
+    window.setTimeout(() => onOpen?.(), 0);
+  };
+
   const open = (u: string) => {
-    onOpen?.();
-    // On mobile, popup blockers frequently block window.open even from a
-    // user gesture (especially inside iframes / in-app browsers). The most
-    // reliable path is a synthetic anchor click with target="_blank", and
-    // fall back to same-tab navigation if that is also blocked.
+    // Mobile share dialogs must be started immediately from the tap event.
+    // Defer slider state changes until after the browser has accepted the open.
     if (isMobile) {
-      try {
-        const a = document.createElement("a");
-        a.href = u;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return;
-      } catch {
-        window.location.href = u;
-        return;
+      const win = window.open(u, "_blank");
+      pauseAfterShareStarts();
+      if (!win) {
+        try {
+          window.top?.location.assign(u);
+        } catch {
+          window.location.assign(u);
+        }
       }
+      return;
     }
     const win = window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
-    if (!win) window.location.href = u;
+    pauseAfterShareStarts();
+    if (!win) window.location.assign(u);
   };
 
   const shareFacebook = () =>
@@ -71,10 +70,11 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`);
 
   const nativeShare = async () => {
-    onOpen?.();
     if (navigator.share) {
       try {
-        await navigator.share({ title: businessName, text, url });
+        const sharePromise = navigator.share({ title: businessName, text, url });
+        pauseAfterShareStarts();
+        await sharePromise;
       } catch {
         /* user cancelled */
       }
