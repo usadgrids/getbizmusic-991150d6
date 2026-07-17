@@ -23,21 +23,31 @@ function XIcon({ size = 16 }: { size?: number }) {
 export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = false }: Props) {
   const [copied, setCopied] = useState(false);
   const [nativeImageFile, setNativeImageFile] = useState<File | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const url = adNumber == null ? SITE : `${SITE}/ad/${adNumber}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
   const shareImageUrl = adNumber == null ? null : `/api/public/ad-image/${adNumber}`;
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-      window.matchMedia("(max-width: 768px)").matches);
   const facebookUrl = `${isMobile ? "https://m.facebook.com" : "https://www.facebook.com"}/sharer/sharer.php?u=${encodeURIComponent(url)}`;
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
     text,
   )}`;
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
   const whatsAppUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 768px)");
+    const update = () => {
+      setIsMobile(
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || media.matches,
+      );
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
