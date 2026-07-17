@@ -34,6 +34,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -167,6 +168,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAdImageAdNumberRoute =
+  ApiPublicAdImageAdNumberRouteImport.update({
+    id: '/api/public/ad-image/$adNumber',
+    path: '/api/public/ad-image/$adNumber',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -214,6 +222,7 @@ export interface FileRoutesByTo {
   '/$city': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -242,6 +251,7 @@ export interface FileRoutesById {
   '/$city/': typeof CityIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/$city/'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
+    | '/api/public/ad-image/$adNumber'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/$city'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
+    | '/api/public/ad-image/$adNumber'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -324,6 +336,7 @@ export interface FileRouteTypes {
     | '/$city/'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
+    | '/api/public/ad-image/$adNumber'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -349,6 +362,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -534,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ad-image/$adNumber': {
+      id: '/api/public/ad-image/$adNumber'
+      path: '/api/public/ad-image/$adNumber'
+      fullPath: '/api/public/ad-image/$adNumber'
+      preLoaderRoute: typeof ApiPublicAdImageAdNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -586,6 +607,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
