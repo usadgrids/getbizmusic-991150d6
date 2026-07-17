@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Facebook, Linkedin, MessageCircle, Share2, Link as LinkIcon, Check } from "lucide-react";
 
 const SITE = "https://www.getbizmusic.com";
@@ -22,61 +22,94 @@ function XIcon({ size = 16 }: { size?: number }) {
 
 export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = false }: Props) {
   const [copied, setCopied] = useState(false);
-  if (adNumber == null) return null;
+  const [nativeImageFile, setNativeImageFile] = useState<File | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const url = `${SITE}/ad/${adNumber}?v=${Date.now()}`;
+  const url = adNumber == null ? SITE : `${SITE}/ad/${adNumber}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
+  const shareImageUrl = adNumber == null ? null : `/api/public/ad-image/${adNumber}`;
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-      window.matchMedia("(max-width: 768px)").matches);
-  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  const facebookUrl = `${isMobile ? "https://m.facebook.com" : "https://www.facebook.com"}/sharer/sharer.php?u=${encodeURIComponent(url)}`;
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
     text,
   )}`;
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
   const whatsAppUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`;
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 768px)");
+    const update = () => {
+      setIsMobile(
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || media.matches,
+      );
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (
+      typeof window === "undefined" ||
+      typeof File === "undefined" ||
+      typeof navigator.canShare !== "function" ||
+      !shareImageUrl ||
+      adNumber == null
+    ) {
+      setNativeImageFile(null);
+      return;
+    }
+
+    setNativeImageFile(null);
+    fetch(shareImageUrl, { cache: "force-cache", credentials: "omit" })
+      .then((res) => (res.ok ? res.blob() : null))
+      .then((blob) => {
+        if (cancelled || !blob || !blob.type.startsWith("image/")) return;
+        const ext = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
+        const file = new File([blob], `ad-${adNumber}.${ext}`, { type: blob.type || "image/jpeg" });
+        if (navigator.canShare?.({ files: [file] })) setNativeImageFile(file);
+      })
+      .catch(() => {
+        if (!cancelled) setNativeImageFile(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [adNumber, shareImageUrl]);
+
   const pauseAfterShareStarts = () => {
     window.setTimeout(() => onOpen?.(), 0);
   };
 
-  const handleLinkShare = () => {
-    pauseAfterShareStarts();
-  };
-
-  const open = (u: string) => {
-    // Mobile share dialogs must be started immediately from the tap event.
-    // Defer slider state changes until after the browser has accepted the open.
-    if (isMobile) {
-      const win = window.open(u, "_blank");
-      pauseAfterShareStarts();
-      if (!win) {
-        try {
-          window.top?.location.assign(u);
-        } catch {
-          window.location.assign(u);
-        }
-      }
-      return;
+  const handleLinkShare = (event?: MouseEvent<HTMLAnchorElement>) => {
+    if (isMobile && event) {
+      event.preventDefault();
+      window.location.assign(event.currentTarget.href);
     }
-    const win = window.open(u, "_blank", "noopener,noreferrer,width=680,height=640");
     pauseAfterShareStarts();
-    if (!win) window.location.assign(u);
   };
 
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        const sharePromise = navigator.share({ title: businessName, text, url });
+        const withImage = nativeImageFile
+          ? { title: businessName, text: `${text}\n${url}`, url, files: [nativeImageFile] }
+          : null;
+        const shareData =
+          withImage && (!navigator.canShare || navigator.canShare(withImage))
+            ? withImage
+            : { title: businessName, text, url };
+        const sharePromise = navigator.share(shareData);
         pauseAfterShareStarts();
         await sharePromise;
       } catch {
         /* user cancelled */
       }
     } else {
-      open(facebookUrl);
+      window.location.assign(facebookUrl);
     }
   };
 
@@ -95,6 +128,8 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     "rounded-full flex items-center justify-center text-white shadow-md transition hover:scale-105 active:scale-95";
   const sz = compact ? "w-8 h-8" : "w-9 h-9";
 
+  if (adNumber == null) return null;
+
   return (
     <div
       className="flex items-center gap-1.5"
@@ -103,19 +138,19 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
       role="group"
       aria-label={`Share ad #${adNumber}`}
     >
-      <a href={facebookUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on Facebook"
+      <a href={facebookUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on Facebook"
         className={`${btn} ${sz} bg-[#1877F2]`}>
         <Facebook size={compact ? 14 : 16} />
       </a>
-      <a href={twitterUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on X"
+      <a href={twitterUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on X"
         className={`${btn} ${sz} bg-black`}>
         <XIcon size={compact ? 12 : 14} />
       </a>
-      <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on LinkedIn"
+      <a href={linkedInUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on LinkedIn"
         className={`${btn} ${sz} bg-[#0A66C2]`}>
         <Linkedin size={compact ? 14 : 16} />
       </a>
-      <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on WhatsApp"
+      <a href={whatsAppUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on WhatsApp"
         className={`${btn} ${sz} bg-[#25D366]`}>
         <MessageCircle size={compact ? 14 : 16} />
       </a>
