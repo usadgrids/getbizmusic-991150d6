@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Facebook, Linkedin, MessageCircle, Share2, Link as LinkIcon, Check } from "lucide-react";
 
 const SITE = "https://www.getbizmusic.com";
@@ -23,11 +23,10 @@ function XIcon({ size = 16 }: { size?: number }) {
 export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = false }: Props) {
   const [copied, setCopied] = useState(false);
   const [nativeImageFile, setNativeImageFile] = useState<File | null>(null);
-  if (adNumber == null) return null;
 
-  const url = `${SITE}/ad/${adNumber}`;
+  const url = adNumber == null ? SITE : `${SITE}/ad/${adNumber}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
-  const shareImageUrl = `/api/public/ad-image/${adNumber}`;
+  const shareImageUrl = adNumber == null ? null : `/api/public/ad-image/${adNumber}`;
 
   const isMobile =
     typeof window !== "undefined" &&
@@ -45,7 +44,9 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     if (
       typeof window === "undefined" ||
       typeof File === "undefined" ||
-      typeof navigator.canShare !== "function"
+      typeof navigator.canShare !== "function" ||
+      !shareImageUrl ||
+      adNumber == null
     ) {
       setNativeImageFile(null);
       return;
@@ -73,7 +74,7 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     window.setTimeout(() => onOpen?.(), 0);
   };
 
-  const handleLinkShare = (event?: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLinkShare = (event?: MouseEvent<HTMLAnchorElement>) => {
     if (isMobile && event) {
       event.preventDefault();
       window.location.assign(event.currentTarget.href);
@@ -116,6 +117,8 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
   const btn =
     "rounded-full flex items-center justify-center text-white shadow-md transition hover:scale-105 active:scale-95";
   const sz = compact ? "w-8 h-8" : "w-9 h-9";
+
+  if (adNumber == null) return null;
 
   return (
     <div
