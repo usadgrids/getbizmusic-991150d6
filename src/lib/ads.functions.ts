@@ -695,15 +695,21 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     const expires = new Date(now);
     expires.setFullYear(expires.getFullYear() + 1);
 
+    const isCommunityEvent = data.industry === "community_event";
+    const businessName = data.business_name || (isCommunityEvent ? "Community Event" : "");
+    const contactName = data.contact_name || (isCommunityEvent ? "Community Event" : "");
+    const emailValue = data.email || (isCommunityEvent ? "community-event@getbizmusic.com" : "");
+    const phoneValue = data.phone || (isCommunityEvent ? "N/A" : "");
+
     let created = 0;
     for (const city_id of data.city_ids) {
       const { data: sub, error } = await supabaseAdmin
         .from("ad_submissions")
         .insert({
-          business_name: data.business_name,
-          contact_name: data.contact_name,
-          email: data.email,
-          phone: data.phone,
+          business_name: businessName,
+          contact_name: contactName,
+          email: emailValue,
+          phone: phoneValue,
           website_url: data.website_url || null,
           youtube_url: data.youtube_url || null,
           industry: data.industry,
@@ -721,7 +727,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
       if (data.auto_approve) {
         const { data: adRow, error: adErr } = await supabaseAdmin.from("ads").insert({
           submission_id: sub.id,
-          business_name: data.business_name,
+          business_name: businessName,
           website_url: data.website_url || null,
           youtube_url: data.youtube_url || null,
           tagline: data.tagline || null,
