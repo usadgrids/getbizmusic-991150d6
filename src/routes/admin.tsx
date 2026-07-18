@@ -686,8 +686,10 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (!file) { toast.error("Please choose an image"); return; }
     if (selectedCityIds.length === 0) { toast.error("Select at least one city"); return; }
-    if (!voicePhone.trim() || voicePhone.trim().length < 7) { toast.error("Please enter a valid voice number"); return; }
-    if (!smsSameAsVoice && (!smsPhone.trim() || smsPhone.trim().length < 7)) { toast.error("Please enter a valid SMS number"); return; }
+    if (!isCommunityEvent) {
+      if (!voicePhone.trim() || voicePhone.trim().length < 7) { toast.error("Please enter a valid voice number"); return; }
+      if (!smsSameAsVoice && (!smsPhone.trim() || smsPhone.trim().length < 7)) { toast.error("Please enter a valid SMS number"); return; }
+    }
     const fd = new FormData(e.currentTarget);
     setBusy(true);
     try {
