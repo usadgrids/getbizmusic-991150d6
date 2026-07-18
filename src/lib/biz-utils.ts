@@ -20,7 +20,7 @@ export const INDUSTRIES = [
   { value: "church", label: "Church" },
   { value: "cleaning", label: "Cleaning Services" },
   { value: "community_org", label: "Community Organization" },
-  { value: "community_event", label: "Community Event (FREE)" },
+  { value: "community_event", label: "FREE Community Event" },
   { value: "convenience_store", label: "Convenience Store" },
   { value: "dance_school", label: "Dance School" },
   { value: "delivery_courier", label: "Delivery / Courier" },
