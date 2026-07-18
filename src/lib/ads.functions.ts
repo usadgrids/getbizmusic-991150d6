@@ -662,10 +662,10 @@ export const removeAd = createServerFn({ method: "POST" })
 
 // Admin-only manual submission that bypasses payment. Optionally auto-approves.
 const manualSchema = z.object({
-  business_name: z.string().trim().min(1).max(120),
-  contact_name: z.string().trim().min(1).max(120),
-  email: z.string().trim().email().max(255),
-  phone: z.string().trim().min(1).max(40),
+  business_name: z.string().trim().max(120).optional().default(""),
+  contact_name: z.string().trim().max(120).optional().default(""),
+  email: z.string().trim().max(255).optional().default(""),
+  phone: z.string().trim().max(40).optional().default(""),
   website_url: z.string().trim().url().max(255).optional().or(z.literal("")),
   youtube_url: z.string().trim().url().max(500).optional().or(z.literal("")),
   industry: z.string().trim().min(1).max(40),
@@ -674,6 +674,12 @@ const manualSchema = z.object({
   image_path: z.string().trim().min(1).max(500),
   auto_approve: z.boolean().optional().default(true),
   city_ids: z.array(z.string().uuid()).min(1).max(50),
+}).superRefine((d, ctx) => {
+  if (d.industry === "community_event") return;
+  if (!d.business_name || d.business_name.length < 1) ctx.addIssue({ code: "custom", path: ["business_name"], message: "Required" });
+  if (!d.contact_name || d.contact_name.length < 1) ctx.addIssue({ code: "custom", path: ["contact_name"], message: "Required" });
+  if (!d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) ctx.addIssue({ code: "custom", path: ["email"], message: "Valid email required" });
+  if (!d.phone || d.phone.length < 7) ctx.addIssue({ code: "custom", path: ["phone"], message: "Phone required" });
 });
 
 export const createManualSubmission = createServerFn({ method: "POST" })
