@@ -733,6 +733,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
       setVoicePhone("");
       setSmsPhone("");
       setSmsSameAsVoice(true);
+      setIndustry("");
       setOpen(false);
       onCreated();
     } catch (err) {
