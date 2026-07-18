@@ -667,6 +667,8 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
   const [voicePhone, setVoicePhone] = useState("");
   const [smsPhone, setSmsPhone] = useState("");
   const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
+  const [industry, setIndustry] = useState("");
+  const isCommunityEvent = industry === "community_event";
 
   const toggleCity = (id: string) =>
     setSelectedCityIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
