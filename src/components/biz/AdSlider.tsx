@@ -457,7 +457,7 @@ export function AdSlider({ ads, title, featured = false }: Props) {
                     }}
                   >
                     <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${currentVideoId}`}
+                      src={`https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${currentVideoId}`}
                       title={`${current.business_name} video`}
                       allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                       allowFullScreen
