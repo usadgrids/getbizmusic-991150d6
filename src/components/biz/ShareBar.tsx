@@ -24,6 +24,7 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
   const [copied, setCopied] = useState(false);
   const [nativeImageFile, setNativeImageFile] = useState<File | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasWebShare, setHasWebShare] = useState(false);
 
   const url = adNumber == null ? SITE : `${SITE}/ad/${adNumber}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
@@ -46,6 +47,7 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     };
     update();
     media.addEventListener("change", update);
+    setHasWebShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
     return () => media.removeEventListener("change", update);
   }, []);
 
@@ -84,33 +86,53 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
     window.setTimeout(() => onOpen?.(), 0);
   };
 
-  const handleLinkShare = (event?: MouseEvent<HTMLAnchorElement>) => {
-    if (isMobile && event) {
-      event.preventDefault();
-      window.location.assign(event.currentTarget.href);
+  // Attempt Web Share API. Returns true if the share sheet was invoked
+  // (success or user cancel); false if unavailable so caller can fall back.
+  const tryWebShare = async (): Promise<boolean> => {
+    if (!hasWebShare || typeof navigator.share !== "function") return false;
+    const withImage = nativeImageFile
+      ? { title: businessName, text: `${text}\n${url}`, url, files: [nativeImageFile] }
+      : null;
+    const shareData =
+      withImage && (!navigator.canShare || navigator.canShare(withImage))
+        ? withImage
+        : { title: businessName, text, url };
+    try {
+      const sharePromise = navigator.share(shareData);
+      pauseAfterShareStarts();
+      await sharePromise;
+      return true;
+    } catch (err) {
+      // AbortError = user cancelled; still counts as handled.
+      if ((err as DOMException)?.name === "AbortError") return true;
+      return false;
     }
+  };
+
+  // Mobile icon click: try Web Share first, fall back to the real outbound URL.
+  const handleShareLink = async (
+    event: MouseEvent<HTMLAnchorElement>,
+    fallbackHref: string,
+  ) => {
+    if (!isMobile) {
+      // Desktop: let the anchor open the network's share window in a new tab.
+      pauseAfterShareStarts();
+      return;
+    }
+    event.preventDefault();
+    const shared = await tryWebShare();
+    if (shared) return;
     pauseAfterShareStarts();
+    // Fallback: navigate to the real outbound share URL in the same tab
+    // (mobile browsers block popups outside a direct user gesture).
+    window.location.assign(fallbackHref);
   };
 
   const nativeShare = async () => {
-    if (navigator.share) {
-      try {
-        const withImage = nativeImageFile
-          ? { title: businessName, text: `${text}\n${url}`, url, files: [nativeImageFile] }
-          : null;
-        const shareData =
-          withImage && (!navigator.canShare || navigator.canShare(withImage))
-            ? withImage
-            : { title: businessName, text, url };
-        const sharePromise = navigator.share(shareData);
-        pauseAfterShareStarts();
-        await sharePromise;
-      } catch {
-        /* user cancelled */
-      }
-    } else {
-      window.location.assign(facebookUrl);
-    }
+    const shared = await tryWebShare();
+    if (shared) return;
+    pauseAfterShareStarts();
+    window.location.assign(facebookUrl);
   };
 
   const copyLink = async () => {
@@ -138,19 +160,23 @@ export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = fa
       role="group"
       aria-label={`Share ad #${adNumber}`}
     >
-      <a href={facebookUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on Facebook"
+      <a href={facebookUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer"
+        onClick={(e) => handleShareLink(e, facebookUrl)} aria-label="Share on Facebook"
         className={`${btn} ${sz} bg-[#1877F2]`}>
         <Facebook size={compact ? 14 : 16} />
       </a>
-      <a href={twitterUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on X"
+      <a href={twitterUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer"
+        onClick={(e) => handleShareLink(e, twitterUrl)} aria-label="Share on X"
         className={`${btn} ${sz} bg-black`}>
         <XIcon size={compact ? 12 : 14} />
       </a>
-      <a href={linkedInUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on LinkedIn"
+      <a href={linkedInUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer"
+        onClick={(e) => handleShareLink(e, linkedInUrl)} aria-label="Share on LinkedIn"
         className={`${btn} ${sz} bg-[#0A66C2]`}>
         <Linkedin size={compact ? 14 : 16} />
       </a>
-      <a href={whatsAppUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer" onClick={handleLinkShare} aria-label="Share on WhatsApp"
+      <a href={whatsAppUrl} target={isMobile ? undefined : "_blank"} rel="noopener noreferrer"
+        onClick={(e) => handleShareLink(e, whatsAppUrl)} aria-label="Share on WhatsApp"
         className={`${btn} ${sz} bg-[#25D366]`}>
         <MessageCircle size={compact ? 14 : 16} />
       </a>
