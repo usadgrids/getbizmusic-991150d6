@@ -787,18 +787,18 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <AdminField name="business_name" label="Business name" required />
-            <AdminField name="contact_name" label="Contact name" required />
-            <AdminField name="email" type="email" label="Customer Support Email" required />
+            <AdminField name="business_name" label="Business name" required={!isCommunityEvent} />
+            <AdminField name="contact_name" label="Contact name" required={!isCommunityEvent} />
+            <AdminField name="email" type="email" label="Customer Support Email" required={!isCommunityEvent} />
             <div>
               <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
-                Customer Support Number Voice <span className="text-red-500">*</span>
+                Customer Support Number Voice {!isCommunityEvent && <span className="text-red-500">*</span>}
               </label>
               <input
                 type="tel"
                 value={voicePhone}
                 onChange={(e) => setVoicePhone(e.target.value)}
-                required maxLength={40} placeholder="555-555-1234"
+                required={!isCommunityEvent} maxLength={40} placeholder="555-555-1234"
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
               />
             </div>
@@ -806,16 +806,22 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
             <div>
               <label className="block text-xs font-medium text-[#0F2A4A] mb-1">Business Category *</label>
               <select
-                name="industry" required defaultValue=""
+                name="industry" required value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
               >
                 <option value="" disabled>Pick one…</option>
                 {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
               </select>
+              {isCommunityEvent && (
+                <p className="mt-1 text-[11px] text-emerald-700">
+                  Community Event — contact fields are optional.
+                </p>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-[#0F2A4A] mb-1">
-                Customer Support Number Text/SMS <span className="text-red-500">*</span>
+                Customer Support Number Text/SMS {!isCommunityEvent && <span className="text-red-500">*</span>}
               </label>
               <label className="flex items-center gap-2 text-xs text-gray-700 mb-1.5">
                 <input
@@ -830,7 +836,7 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
                   type="tel"
                   value={smsPhone}
                   onChange={(e) => setSmsPhone(e.target.value)}
-                  required maxLength={40} placeholder="555-555-9876"
+                  required={!isCommunityEvent} maxLength={40} placeholder="555-555-9876"
                   className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
                 />
               )}
