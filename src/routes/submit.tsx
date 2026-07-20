@@ -415,7 +415,7 @@ function SubmitPage() {
             <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
               Where should your ad appear? <span className="text-red-500">*</span>
             </label>
-            <CityStateCombobox value={city} onChange={setCity} />
+            <CityStateCombobox value={city} onChange={setCity} zip={cityZip} />
             <p className="mt-1.5 text-xs text-gray-500">
               Pick any US city + state. If we don't have a page for it yet, we'll create one when your ad is approved.
             </p>
