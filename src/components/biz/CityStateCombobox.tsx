@@ -6,9 +6,10 @@ type Props = {
   value: UsCity | null;
   onChange: (v: UsCity | null) => void;
   disabled?: boolean;
+  zip?: string | null;
 };
 
-export function CityStateCombobox({ value, onChange, disabled }: Props) {
+export function CityStateCombobox({ value, onChange, disabled, zip }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UsCity[]>([]);
