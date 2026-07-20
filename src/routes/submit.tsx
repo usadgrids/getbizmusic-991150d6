@@ -10,6 +10,7 @@ import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
+import { zipsForCity } from "@/lib/us-zips";
 import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
