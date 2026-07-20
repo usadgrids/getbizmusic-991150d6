@@ -10,6 +10,7 @@ import { getPaymentByToken } from "@/lib/payments.functions";
 import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, type AdPlan } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
+import { zipsForCity } from "@/lib/us-zips";
 import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
@@ -55,6 +56,7 @@ function SubmitPage() {
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [city, setCity] = useState<UsCity | null>(null);
+  const [cityZip, setCityZip] = useState<string | null>(null);
   const [voicePhone, setVoicePhone] = useState("");
   const [smsPhone, setSmsPhone] = useState("");
   const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
@@ -93,6 +95,15 @@ function SubmitPage() {
     })();
     return () => { cancelled = true; };
   }, [token, lookup]);
+
+  useEffect(() => {
+    if (!city) { setCityZip(null); return; }
+    let cancelled = false;
+    zipsForCity(city.name, city.stateCode).then((zips) => {
+      if (!cancelled) setCityZip(zips[0] ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [city]);
 
   const onFile = (f: File | null) => {
     setDimWarning(null);
@@ -404,7 +415,7 @@ function SubmitPage() {
             <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
               Where should your ad appear? <span className="text-red-500">*</span>
             </label>
-            <CityStateCombobox value={city} onChange={setCity} />
+            <CityStateCombobox value={city} onChange={setCity} zip={cityZip} />
             <p className="mt-1.5 text-xs text-gray-500">
               Pick any US city + state. If we don't have a page for it yet, we'll create one when your ad is approved.
             </p>

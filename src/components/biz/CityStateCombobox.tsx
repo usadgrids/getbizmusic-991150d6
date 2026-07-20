@@ -6,16 +6,21 @@ type Props = {
   value: UsCity | null;
   onChange: (v: UsCity | null) => void;
   disabled?: boolean;
+  zip?: string | null;
 };
 
-export function CityStateCombobox({ value, onChange, disabled }: Props) {
+export function CityStateCombobox({ value, onChange, disabled, zip }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UsCity[]>([]);
   const [loading, setLoading] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const display = useMemo(() => (value ? `${value.name}, ${value.stateCode}` : ""), [value]);
+  const display = useMemo(() => {
+    if (!value) return "";
+    const suffix = zip?.trim();
+    return suffix ? `${value.name}, ${value.stateCode} ${suffix}` : `${value.name}, ${value.stateCode}`;
+  }, [value, zip]);
 
   useEffect(() => {
     if (!open) return;
