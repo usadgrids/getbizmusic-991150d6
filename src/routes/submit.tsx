@@ -56,6 +56,7 @@ function SubmitPage() {
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [city, setCity] = useState<UsCity | null>(null);
+  const [cityZip, setCityZip] = useState<string | null>(null);
   const [voicePhone, setVoicePhone] = useState("");
   const [smsPhone, setSmsPhone] = useState("");
   const [smsSameAsVoice, setSmsSameAsVoice] = useState(true);
