@@ -113,6 +113,9 @@ export function PlaylistMarquee() {
     // Only handle primary touch/mouse; ignore if starting on an arrow button.
     const target = e.target as HTMLElement;
     if (target.closest("[data-marquee-arrow]")) return;
+    // Only enable drag-swipe for touch/pen. On mouse, let clicks pass through
+    // normally so desktop users can click a track to play it.
+    if (e.pointerType === "mouse") return;
     draggingRef.current = true;
     dragMovedRef.current = false;
     dragStartXRef.current = e.clientX;
