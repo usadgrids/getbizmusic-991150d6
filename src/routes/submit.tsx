@@ -96,6 +96,15 @@ function SubmitPage() {
     return () => { cancelled = true; };
   }, [token, lookup]);
 
+  useEffect(() => {
+    if (!city) { setCityZip(null); return; }
+    let cancelled = false;
+    zipsForCity(city.name, city.stateCode).then((zips) => {
+      if (!cancelled) setCityZip(zips[0] ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [city]);
+
   const onFile = (f: File | null) => {
     setDimWarning(null);
     if (!f) { setFile(null); return; }
