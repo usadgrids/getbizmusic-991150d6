@@ -160,25 +160,12 @@ export function AdSlider({ ads, title, featured = false }: Props) {
     setVideoActive(false);
   }, [idx]);
 
-  // Auto-pause the background music while a religious-category ad is showing;
-  // auto-resume when the slider moves off it (only if music was playing before).
-  const wasPlayingBeforeReligiousRef = useRef(false);
+  // When a religious-category ad is showing, duck the background music volume
+  // to 40% instead of pausing; restore to 100% when the slider moves off it.
   const isReligious = !!current && isReligiousIndustry(current.industry);
   useEffect(() => {
     if (!current) return;
-    if (isReligious) {
-      if (player.playing) {
-        wasPlayingBeforeReligiousRef.current = true;
-        player.pause();
-      }
-      emit(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, { paused: true });
-    } else {
-      if (wasPlayingBeforeReligiousRef.current) {
-        wasPlayingBeforeReligiousRef.current = false;
-        player.resume();
-      }
-      emit(MINIPLAYER_RELIGIOUS_PAUSE_EVENT, { paused: false });
-    }
+    emit(MINIPLAYER_VOLUME_EVENT, { volume: isReligious ? 40 : 100 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, isReligious]);
 
