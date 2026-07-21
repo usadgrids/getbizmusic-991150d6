@@ -20,7 +20,7 @@ import { PlaylistMarquee } from "./PlaylistMarquee";
 import { MusicWaveform } from "./MusicWaveform";
 import { parseYoutubeId } from "./YoutubeHoverOverlay";
 import { emit, useMiniPlayerController } from "@/hooks/useMiniPlayerController";
-import { MINIPLAYER_RELIGIOUS_PAUSE_EVENT } from "@/components/biz/MiniPlayer";
+import { MINIPLAYER_VOLUME_EVENT } from "@/components/biz/MiniPlayer";
 
 function SlideTimer({
   duration,
