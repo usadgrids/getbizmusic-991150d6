@@ -529,13 +529,13 @@ export function AdSlider({ ads, title, featured = false }: Props) {
           {/* Music player — flush to slider borders */}
           {featured && (
             <section
-              aria-label="Background music player"
+              aria-label="GetBizMusic streaming player"
               className="mt-3 w-full rounded-2xl border-2 border-[#D4A24C] bg-white shadow-lg overflow-hidden"
             >
               <div className="flex items-center gap-2 bg-[#0F2A4A] px-4 py-2 text-[#D4A24C]">
                 <Music size={18} />
                 <h3 className="font-serif text-base sm:text-lg font-bold">
-                  Background Music Player
+                  GetBizMusic Streaming Player
                 </h3>
                 <span className="ml-auto text-[11px] font-medium uppercase tracking-wider opacity-80">
                   <MusicWaveform playing={musicPlaying} />
