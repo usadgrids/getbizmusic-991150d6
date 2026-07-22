@@ -15,6 +15,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
@@ -28,6 +29,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -64,6 +66,11 @@ const EditAdRoute = EditAdRouteImport.update({
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -134,6 +141,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -179,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
@@ -193,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
@@ -206,6 +220,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
@@ -220,6 +235,7 @@ export interface FileRoutesByTo {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city': typeof CityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
@@ -235,6 +251,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/mcp': typeof McpRoute
@@ -249,6 +266,7 @@ export interface FileRoutesById {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
@@ -265,6 +283,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$city'
     | '/admin'
+    | '/auth'
     | '/design'
     | '/edit-ad'
     | '/mcp'
@@ -279,6 +298,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
@@ -292,6 +312,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/auth'
     | '/design'
     | '/edit-ad'
     | '/mcp'
@@ -306,6 +327,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
@@ -320,6 +342,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$city'
     | '/admin'
+    | '/auth'
     | '/design'
     | '/edit-ad'
     | '/mcp'
@@ -334,6 +357,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
@@ -349,6 +373,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
   McpRoute: typeof McpRoute
@@ -360,6 +385,7 @@ export interface RootRouteChildren {
   AdAdNumberRoute: typeof AdAdNumberRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
@@ -413,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -506,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -593,6 +633,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
   McpRoute: McpRoute,
@@ -605,6 +646,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdAdNumberRoute: AdAdNumberRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
