@@ -188,7 +188,29 @@ function Index() {
         </div>
 
         {zipHasNoActiveCity && zipMatch ? (
-          <RequestCityForm city={zipMatch.city} stateCode={zipMatch.stateCode} zip={q.trim()} />
+          <div className="mx-auto max-w-2xl rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#FFF8E9] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#0F2A4A] mb-3">
+              <Sparkles size={14} className="text-[#D4A24C]" />
+              First Advertiser Opportunity
+            </div>
+            <h4 className="text-xl sm:text-2xl font-black text-[#0F2A4A]">
+              Be the first music streaming novelty advertiser in {zipMatch.city}, {zipMatch.stateCode}
+            </h4>
+            <p className="mt-3 text-sm text-gray-600">
+              We'll automatically launch the {zipMatch.city} city page when your ad is approved. Click Submit Ad to continue to checkout.
+            </p>
+            <div className="mt-5">
+              <Link
+                to="/pricing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+              >
+                Submit Ad
+                <Sparkles size={14} />
+              </Link>
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <p className="text-gray-600 text-center">No cities match "{q}".</p>
         ) : (
