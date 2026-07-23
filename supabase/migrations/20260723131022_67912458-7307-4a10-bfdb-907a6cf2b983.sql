@@ -1,0 +1,1 @@
+REVOKE SELECT (edit_token) ON public.ads FROM anon, authenticated;
