@@ -170,6 +170,32 @@ function Index() {
                 ZIP {q.trim()} → {zipMatch.city}, {zipMatch.stateCode}
               </p>
             )}
+
+            {zipHasNoActiveCity && zipMatch ? (
+              <div className="mt-5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur p-5 sm:p-6 text-center">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
+                  <Sparkles size={14} />
+                  First Advertiser Opportunity
+                </div>
+                <h4 className="text-lg sm:text-xl font-black text-white">
+                  Be the first music streaming novelty advertiser in {zipMatch.city}, {zipMatch.stateCode}
+                </h4>
+                <p className="mt-2 text-sm text-white/80">
+                  We'll automatically launch the {zipMatch.city} city page when your ad is approved.
+                </p>
+                <div className="mt-4">
+                  <Link
+                    to="/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+                  >
+                    Submit Ad
+                    <Sparkles size={14} />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
