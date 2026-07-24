@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
 import { getAdByNumber, getActiveAds } from "@/lib/ads.functions";
 import { INDUSTRIES } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
