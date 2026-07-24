@@ -225,14 +225,27 @@ function AdLanding() {
           <div className="mt-6">
             <PlaylistMarquee />
           </div>
-          <div className="mt-4 text-center">
+          <section className="mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
+              <Sparkles size={14} />
+              {ad.city_name ?? "Local"} Business Spotlight
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">
+              Submit Your Business Novelty Ad
+            </h2>
+            <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
+              Get your {ad.city_name ?? "local"} business featured in the rotation
+              above and reach local listeners for just $12/year. Limited-time intro
+              offer.
+            </p>
             <Link
-              to="/submit"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-[#D4A24C] px-5 py-2.5 text-sm font-semibold hover:bg-[#0F2A4A]/90"
+              to="/pricing"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
             >
-              Submit Your Own National City Business Ad →
+              Submit Your Ad
+              <Sparkles size={14} />
             </Link>
-          </div>
+          </section>
         </div>
       </main>
       <BizFooter />
