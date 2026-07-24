@@ -55,13 +55,18 @@ export function usePlaylistTracks() {
     for (const t of feedQuery.data ?? []) titleById.set(t.videoId, t.title);
     for (const t of titlesQuery.data ?? []) titleById.set(t.videoId, t.title);
 
-    if (videoIds.length > 0) {
-      return videoIds.map((id) => ({
-        videoId: id,
-        title: titleById.get(id) ?? "Loading…",
-      }));
+    const base: PlaylistTrack[] =
+      videoIds.length > 0
+        ? videoIds.map((id) => ({ videoId: id, title: titleById.get(id) ?? "Loading…" }))
+        : (feedQuery.data ?? []);
+
+    // Fisher-Yates shuffle so the crawler doesn't always show the same head of the list.
+    const shuffled = base.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return feedQuery.data ?? [];
+    return shuffled;
   }, [videoIds, feedQuery.data, titlesQuery.data]);
 
   return {
