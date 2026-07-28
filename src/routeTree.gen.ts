@@ -24,6 +24,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -112,6 +113,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdAdNumberRoute = AdAdNumberRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -364,6 +375,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -518,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDisputesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/campaigns': {
+      id: '/admin/campaigns'
+      path: '/campaigns'
+      fullPath: '/admin/campaigns'
+      preLoaderRoute: typeof AdminCampaignsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/ad/$adNumber': {
       id: '/ad/$adNumber'
       path: '/ad/$adNumber'
@@ -630,10 +649,12 @@ const CityRouteChildren: CityRouteChildren = {
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
 
 interface AdminRouteChildren {
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminDisputesRoute: typeof AdminDisputesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCampaignsRoute: AdminCampaignsRoute,
   AdminDisputesRoute: AdminDisputesRoute,
 }
 
