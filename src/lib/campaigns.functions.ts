@@ -158,7 +158,7 @@ export const importApolloLeads = createServerFn({ method: "POST" })
             const org = p.organization ?? {};
             return {
               business_name: org.name ?? null,
-              owner_name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(" ") || null,
+              owner_name: p.name ?? ([p.first_name, p.last_name].filter(Boolean).join(" ") || null),
               email: (p.email as string).toLowerCase(),
               industry: org.industry ?? null,
               industry_category: categorize(org.industry),
