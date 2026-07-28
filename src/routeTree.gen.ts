@@ -24,6 +24,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -36,6 +37,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
 
 const SubmitRoute = SubmitRouteImport.update({
@@ -113,6 +115,11 @@ const AdminDisputesRoute = AdminDisputesRouteImport.update({
   path: '/disputes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdAdNumberRoute = AdAdNumberRouteImport.update({
   id: '/ad/$adNumber',
   path: '/ad/$adNumber',
@@ -180,6 +187,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCampaignsBrevoWebhookRoute =
+  ApiPublicCampaignsBrevoWebhookRouteImport.update({
+    id: '/api/public/campaigns/brevo-webhook',
+    path: '/api/public/campaigns/brevo-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAdImageAdNumberRoute =
   ApiPublicAdImageAdNumberRouteImport.update({
     id: '/api/public/ad-image/$adNumber',
@@ -201,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -210,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
+  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -230,6 +245,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -239,6 +255,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
+  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -261,6 +278,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
@@ -270,6 +288,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
+  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -293,6 +312,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -302,6 +322,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
+    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -322,6 +343,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -331,6 +353,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
+    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -352,6 +375,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ad/$adNumber'
+    | '/admin/campaigns'
     | '/admin/disputes'
     | '/checkout/return'
     | '/design/return'
@@ -361,6 +385,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
+    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -389,6 +414,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
+  ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -504,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDisputesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/campaigns': {
+      id: '/admin/campaigns'
+      path: '/campaigns'
+      fullPath: '/admin/campaigns'
+      preLoaderRoute: typeof AdminCampaignsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/ad/$adNumber': {
       id: '/ad/$adNumber'
       path: '/ad/$adNumber'
@@ -588,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/campaigns/brevo-webhook': {
+      id: '/api/public/campaigns/brevo-webhook'
+      path: '/api/public/campaigns/brevo-webhook'
+      fullPath: '/api/public/campaigns/brevo-webhook'
+      preLoaderRoute: typeof ApiPublicCampaignsBrevoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ad-image/$adNumber': {
       id: '/api/public/ad-image/$adNumber'
       path: '/api/public/ad-image/$adNumber'
@@ -609,10 +649,12 @@ const CityRouteChildren: CityRouteChildren = {
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
 
 interface AdminRouteChildren {
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminDisputesRoute: typeof AdminDisputesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCampaignsRoute: AdminCampaignsRoute,
   AdminDisputesRoute: AdminDisputesRoute,
 }
 
@@ -650,6 +692,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
+  ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

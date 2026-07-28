@@ -620,6 +620,63 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          brevo_contact_id: number | null
+          business_name: string | null
+          campaign_status: string
+          city: string | null
+          created_at: string
+          email: string
+          founded_year: number | null
+          id: string
+          industry: string | null
+          industry_category: string | null
+          last_event_at: string | null
+          owner_name: string | null
+          source: string
+          source_detail: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          brevo_contact_id?: number | null
+          business_name?: string | null
+          campaign_status?: string
+          city?: string | null
+          created_at?: string
+          email: string
+          founded_year?: number | null
+          id?: string
+          industry?: string | null
+          industry_category?: string | null
+          last_event_at?: string | null
+          owner_name?: string | null
+          source?: string
+          source_detail?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          brevo_contact_id?: number | null
+          business_name?: string | null
+          campaign_status?: string
+          city?: string | null
+          created_at?: string
+          email?: string
+          founded_year?: number | null
+          id?: string
+          industry?: string | null
+          industry_category?: string | null
+          last_event_at?: string | null
+          owner_name?: string | null
+          source?: string
+          source_detail?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
