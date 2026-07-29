@@ -194,7 +194,7 @@ export function PlaylistMarquee() {
         <button
           key={`${keyPrefix}-${t.videoId}-${i}`}
           type="button"
-          onClick={() => handleTrackClick(i)}
+          onClick={() => handleTrackClick(i, t.videoId)}
           className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
             isCurrent
               ? "bg-[#0F2A4A] text-[#D4A24C]"
