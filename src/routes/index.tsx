@@ -156,11 +156,7 @@ function Index() {
             create the city page automatically.
           </p>
 
-          <div className="mt-6 max-w-3xl mx-auto">
-            <CityPickerPanel tone="dark" />
-          </div>
-
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 text-[#FFD700]">
               <Music className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
             </div>
@@ -171,8 +167,13 @@ function Index() {
               <Megaphone className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
             </div>
           </div>
+
+          <div className="mt-6 max-w-3xl mx-auto">
+            <CityPickerPanel tone="dark" />
+          </div>
         </div>
       </section>
+
 
       <BizFooter />
       {defaultCity && defaultCity.is_active ? <MiniPlayer /> : null}
