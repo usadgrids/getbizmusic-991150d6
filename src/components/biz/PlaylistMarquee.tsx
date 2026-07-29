@@ -85,11 +85,12 @@ export function PlaylistMarquee() {
     return <div className="mt-1 h-7 w-full rounded-full bg-white/40 animate-pulse" />;
   }
 
-  const handleTrackClick = (index: number) => {
+  const handleTrackClick = (index: number, videoId: string) => {
     // Suppress click that ended a drag.
     if (dragMovedRef.current) return;
-    player.playIndex(index);
+    player.playIndex(index, videoId);
   };
+
 
   const burst = (dir: 1 | -1) => {
     speedRef.current = "fast";
