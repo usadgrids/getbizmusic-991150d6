@@ -84,8 +84,12 @@ export function useMiniPlayerController(): MiniPlayerController {
   return {
     playing,
     track,
-    playIndex: (index) =>
-      emit<{ index: number }>(MINIPLAYER_PLAY_INDEX_EVENT, { index }),
+    playIndex: (index, videoId) =>
+      emit<{ index: number; videoId?: string }>(MINIPLAYER_PLAY_INDEX_EVENT, {
+        index,
+        videoId,
+      }),
+
     pause: () => emit(MINIPLAYER_PAUSE_EVENT),
     resume: () => emit(MINIPLAYER_PLAY_EVENT),
     next: () => emit(MINIPLAYER_NEXT_EVENT),
