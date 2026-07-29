@@ -97,6 +97,13 @@ function SubmitPage() {
     return () => { cancelled = true; };
   }, [token, lookup]);
 
+  // Prefill the city chosen in the city picker before checkout.
+  useEffect(() => {
+    const target = readCityTarget();
+    if (target) setCity({ name: target.city, stateCode: target.state });
+  }, []);
+
+
   useEffect(() => {
     if (!city) { setCityZip(null); return; }
     let cancelled = false;
