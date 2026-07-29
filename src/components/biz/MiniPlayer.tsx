@@ -613,12 +613,22 @@ export function MiniPlayer() {
       scheduleTrackRefresh();
     };
     const onPlayIndex = (event: Event) => {
-      const detail = (event as CustomEvent<{ index: number }>).detail;
-      if (typeof detail?.index !== "number") return;
+      const detail = (event as CustomEvent<{ index: number; videoId?: string }>).detail;
+      if (typeof detail?.index !== "number" && !detail?.videoId) return;
       try {
         const player = playerRef.current;
         if (!player) return;
-        player.playVideoAt(detail.index);
+        // Prefer resolving by videoId: the crawler shuffles its display order,
+        // so its array index does not match the YouTube playlist index.
+        let targetIndex = typeof detail.index === "number" ? detail.index : -1;
+        if (detail.videoId) {
+          const ids: string[] = player.getPlaylist?.() ?? [];
+          const found = ids.indexOf(detail.videoId);
+          if (found >= 0) targetIndex = found;
+        }
+        if (targetIndex < 0) return;
+        player.playVideoAt(targetIndex);
+
         player.unMute();
         player.setVolume(clampVolume(volumeRef.current));
       } catch {
