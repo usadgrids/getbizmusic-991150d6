@@ -13,6 +13,12 @@ import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/bi
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
+const pricingSearchSchema = z.object({
+  city: z.string().trim().max(120).optional(),
+  state: z.string().trim().max(10).optional(),
+  zip: z.string().trim().max(10).optional(),
+});
+
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
@@ -20,8 +26,10 @@ export const Route = createFileRoute("/pricing")({
       { name: "description", content: "Choose your annual ad plan: $24/year for 7-second rotation or $48/year for 10-second feature. Rep codes give 50% off." },
     ],
   }),
+  validateSearch: (search) => pricingSearchSchema.parse(search),
   component: PricingPage,
 });
+
 
 function PricingPage() {
   const navigate = useNavigate();
