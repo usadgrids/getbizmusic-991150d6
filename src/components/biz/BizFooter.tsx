@@ -13,6 +13,10 @@ export function BizFooter() {
             Get Biz Music — National City, CA · Nationwide USA Business Advertising
           </div>
           <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-white/70">
+            <CityPickerButton
+              className="inline-flex items-center gap-1 hover:text-[#D4A24C] underline-offset-2 hover:underline"
+              label="Change city"
+            />
             <Link to="/" hash="terms" className="hover:text-[#D4A24C]">Terms</Link>
             <Link to="/" hash="privacy" className="hover:text-[#D4A24C]">Privacy</Link>
             <Link to="/" hash="can-spam" className="hover:text-[#D4A24C]">CAN-SPAM</Link>
