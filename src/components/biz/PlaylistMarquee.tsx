@@ -28,6 +28,12 @@ export function PlaylistMarquee() {
   const dragStartOffsetRef = useRef(0);
   const dragMovedRef = useRef(false);
   const dragPointerIdRef = useRef<number | null>(null);
+  // Track that was directly under the finger when the touch began. On touch
+  // devices the marquee keeps moving between pointerdown and the synthesized
+  // click, so the click can land on a different song than the one tapped.
+  const pendingTrackRef = useRef<{ index: number; videoId: string } | null>(null);
+  const suppressClickRef = useRef(false);
+
 
   useEffect(() => {
     setCurrentTitle(player.track?.title ?? "");
