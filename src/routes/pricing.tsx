@@ -35,6 +35,15 @@ export const Route = createFileRoute("/pricing")({
 
 function PricingPage() {
   const navigate = useNavigate();
+  const { city: targetCity, state: targetState, zip: targetZip } = Route.useSearch();
+
+  // Carry the city chosen in the city picker through checkout to /submit.
+  useEffect(() => {
+    if (targetCity && targetState) {
+      saveCityTarget({ city: targetCity, state: targetState, zip: targetZip });
+    }
+  }, [targetCity, targetState, targetZip]);
+
   const [industry, setIndustry] = useState<string>("");
   const [plan, setPlan] = useState<AdPlan>("image_5");
   const [email, setEmail] = useState("");
