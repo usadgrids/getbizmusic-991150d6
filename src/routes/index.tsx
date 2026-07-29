@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Music, Megaphone, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getCityBySlug } from "@/lib/cities.functions";
+import { getActiveCities, getCityBySlug } from "@/lib/cities.functions";
 import { getActiveAds } from "@/lib/ads.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
