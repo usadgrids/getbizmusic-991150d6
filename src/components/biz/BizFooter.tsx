@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { openCookiePreferences } from "./CookieConsent";
+import { CityPickerButton } from "./CityPickerModal";
 
 export function BizFooter() {
   const year = new Date().getFullYear();
