@@ -50,14 +50,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const fetchCities = useServerFn(getActiveCities);
   const fetchCity = useServerFn(getCityBySlug);
   const fetchAds = useServerFn(getActiveAds);
 
-  const { data: cities = [] } = useSuspenseQuery({
-    queryKey: ["active-cities"],
-    queryFn: () => fetchCities(),
-  });
   const { data: defaultCity } = useQuery({
     queryKey: ["default-city", DEFAULT_CITY_SLUG],
     queryFn: () => fetchCity({ data: { slug: DEFAULT_CITY_SLUG } }),
@@ -67,33 +62,6 @@ function Index() {
     queryFn: () => fetchAds({ data: { city_slug: DEFAULT_CITY_SLUG } }),
   });
 
-  const [q, setQ] = useState("");
-  const [zipMatch, setZipMatch] = useState<{ city: string; stateCode: string } | null>(null);
-
-  useEffect(() => {
-    const digits = q.trim();
-    if (/^\d{5}$/.test(digits)) {
-      let cancelled = false;
-      lookupZip(digits).then((r) => { if (!cancelled) setZipMatch(r); });
-      return () => { cancelled = true; };
-    }
-    setZipMatch(null);
-  }, [q]);
-
-  const citiesWithAds = cities.filter((c) => c.ad_count > 0);
-  const filtered = citiesWithAds.filter((c) => {
-    const s = q.trim().toLowerCase();
-    if (!s) return true;
-    if (zipMatch) {
-      return c.name.toLowerCase() === zipMatch.city.toLowerCase() &&
-             c.state.toUpperCase() === zipMatch.stateCode.toUpperCase();
-    }
-    if (/^\d+$/.test(s)) return false;
-    return c.name.toLowerCase().includes(s) || c.state.toLowerCase().includes(s);
-  });
-
-  const zipHasNoActiveCity =
-    zipMatch !== null && filtered.length === 0 && /^\d{5}$/.test(q.trim());
 
   const cityName = defaultCity?.name ?? "San Diego";
   const cityState = defaultCity?.state ?? "CA";
