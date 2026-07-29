@@ -16,9 +16,9 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
@@ -75,11 +75,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CityRoute = CityRouteImport.update({
   id: '/$city',
   path: '/$city',
@@ -88,6 +83,11 @@ const CityRoute = CityRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CityIndexRoute = CityIndexRouteImport.update({
@@ -111,14 +111,14 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
-  id: '/disputes',
-  path: '/disputes',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/disputes',
+  path: '/admin/disputes',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
-  id: '/campaigns',
-  path: '/campaigns',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/campaigns',
+  path: '/admin/campaigns',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdAdNumberRoute = AdAdNumberRouteImport.update({
   id: '/ad/$adNumber',
@@ -203,7 +203,6 @@ const ApiPublicAdImageAdNumberRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -220,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -234,7 +234,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -251,6 +250,7 @@ export interface FileRoutesByTo {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city': typeof CityIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -267,7 +267,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -284,6 +283,7 @@ export interface FileRoutesById {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -301,7 +301,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$city'
-    | '/admin'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -318,6 +317,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
+    | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -332,7 +332,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -349,6 +348,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city'
+    | '/admin'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -364,7 +364,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$city'
-    | '/admin'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -381,6 +380,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/$city/'
+    | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -397,7 +397,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
-  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
@@ -408,8 +407,11 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdAdNumberRoute: typeof AdAdNumberRoute
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
+  AdminDisputesRoute: typeof AdminDisputesRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -474,13 +476,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$city': {
       id: '/$city'
       path: '/$city'
@@ -493,6 +488,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$city/': {
@@ -525,17 +527,17 @@ declare module '@tanstack/react-router' {
     }
     '/admin/disputes': {
       id: '/admin/disputes'
-      path: '/disputes'
+      path: '/admin/disputes'
       fullPath: '/admin/disputes'
       preLoaderRoute: typeof AdminDisputesRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/campaigns': {
       id: '/admin/campaigns'
-      path: '/campaigns'
+      path: '/admin/campaigns'
       fullPath: '/admin/campaigns'
       preLoaderRoute: typeof AdminCampaignsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
     '/ad/$adNumber': {
       id: '/ad/$adNumber'
@@ -648,18 +650,6 @@ const CityRouteChildren: CityRouteChildren = {
 
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
 
-interface AdminRouteChildren {
-  AdminCampaignsRoute: typeof AdminCampaignsRoute
-  AdminDisputesRoute: typeof AdminDisputesRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminCampaignsRoute: AdminCampaignsRoute,
-  AdminDisputesRoute: AdminDisputesRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
 interface DesignRouteChildren {
   DesignReturnRoute: typeof DesignReturnRoute
 }
@@ -674,7 +664,6 @@ const DesignRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
-  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
@@ -686,8 +675,11 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdAdNumberRoute: AdAdNumberRoute,
+  AdminCampaignsRoute: AdminCampaignsRoute,
+  AdminDisputesRoute: AdminDisputesRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  AdminIndexRoute: AdminIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

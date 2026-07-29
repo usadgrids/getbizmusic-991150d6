@@ -23,7 +23,7 @@ import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow }
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, type ZelleOrderAdminRow } from "@/lib/payments.functions";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
       { title: "Admin — Get Biz Music - National City, CA" },
