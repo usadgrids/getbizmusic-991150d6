@@ -129,6 +129,11 @@ export function PlaylistMarquee() {
     dragStartXRef.current = e.clientX;
     dragStartOffsetRef.current = offsetRef.current;
     dragPointerIdRef.current = e.pointerId;
+    // Remember the exact chip under the finger at touch-down.
+    const chip = target.closest<HTMLElement>("[data-track-id]");
+    pendingTrackRef.current = chip
+      ? { index: Number(chip.dataset.trackIndex ?? "0"), videoId: chip.dataset.trackId ?? "" }
+      : null;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
@@ -154,6 +159,17 @@ export function PlaylistMarquee() {
       (e.currentTarget as HTMLElement).releasePointerCapture?.(dragPointerIdRef.current);
       dragPointerIdRef.current = null;
     }
+    const tapped = pendingTrackRef.current;
+    pendingTrackRef.current = null;
+    // A tap (no movement) plays the chip captured at touch-down, not whatever
+    // scrolled under the finger by the time the click fires.
+    if (!dragMovedRef.current && tapped?.videoId) {
+      suppressClickRef.current = true;
+      player.playIndex(tapped.index, tapped.videoId);
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 400);
+    }
     // Reset a moved-drag flag shortly after so the synthesized click is swallowed.
     if (dragMovedRef.current) {
       window.setTimeout(() => {
@@ -161,6 +177,7 @@ export function PlaylistMarquee() {
       }, 50);
     }
   };
+
 
   const arrowBtn = (side: "left" | "right") => {
     const dir: 1 | -1 = side === "left" ? -1 : 1;
