@@ -41,7 +41,9 @@ export interface MiniPlayerController {
   /** Latest track reported by the mini-player. */
   track: MiniPlayerTrack | null;
   /** Play a specific playlist index. */
-  playIndex: (index: number) => void;
+  /** Play a specific playlist entry (videoId preferred over index). */
+  playIndex: (index: number, videoId?: string) => void;
+
   /** Pause the mini-player. */
   pause: () => void;
   /** Resume the current mini-player track. */
