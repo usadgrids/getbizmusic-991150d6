@@ -28,6 +28,12 @@ export function PlaylistMarquee() {
   const dragStartOffsetRef = useRef(0);
   const dragMovedRef = useRef(false);
   const dragPointerIdRef = useRef<number | null>(null);
+  // Track that was directly under the finger when the touch began. On touch
+  // devices the marquee keeps moving between pointerdown and the synthesized
+  // click, so the click can land on a different song than the one tapped.
+  const pendingTrackRef = useRef<{ index: number; videoId: string } | null>(null);
+  const suppressClickRef = useRef(false);
+
 
   useEffect(() => {
     setCurrentTitle(player.track?.title ?? "");
@@ -86,10 +92,11 @@ export function PlaylistMarquee() {
   }
 
   const handleTrackClick = (index: number, videoId: string) => {
-    // Suppress click that ended a drag.
-    if (dragMovedRef.current) return;
+    // Suppress click that ended a drag, or a click already handled on touch-up.
+    if (dragMovedRef.current || suppressClickRef.current) return;
     player.playIndex(index, videoId);
   };
+
 
 
   const burst = (dir: 1 | -1) => {
@@ -122,6 +129,11 @@ export function PlaylistMarquee() {
     dragStartXRef.current = e.clientX;
     dragStartOffsetRef.current = offsetRef.current;
     dragPointerIdRef.current = e.pointerId;
+    // Remember the exact chip under the finger at touch-down.
+    const chip = target.closest<HTMLElement>("[data-track-id]");
+    pendingTrackRef.current = chip
+      ? { index: Number(chip.dataset.trackIndex ?? "0"), videoId: chip.dataset.trackId ?? "" }
+      : null;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
@@ -147,6 +159,17 @@ export function PlaylistMarquee() {
       (e.currentTarget as HTMLElement).releasePointerCapture?.(dragPointerIdRef.current);
       dragPointerIdRef.current = null;
     }
+    const tapped = pendingTrackRef.current;
+    pendingTrackRef.current = null;
+    // A tap (no movement) plays the chip captured at touch-down, not whatever
+    // scrolled under the finger by the time the click fires.
+    if (!dragMovedRef.current && tapped?.videoId) {
+      suppressClickRef.current = true;
+      player.playIndex(tapped.index, tapped.videoId);
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 400);
+    }
     // Reset a moved-drag flag shortly after so the synthesized click is swallowed.
     if (dragMovedRef.current) {
       window.setTimeout(() => {
@@ -154,6 +177,7 @@ export function PlaylistMarquee() {
       }, 50);
     }
   };
+
 
   const arrowBtn = (side: "left" | "right") => {
     const dir: 1 | -1 = side === "left" ? -1 : 1;
@@ -194,7 +218,10 @@ export function PlaylistMarquee() {
         <button
           key={`${keyPrefix}-${t.videoId}-${i}`}
           type="button"
+          data-track-id={t.videoId}
+          data-track-index={i}
           onClick={() => handleTrackClick(i, t.videoId)}
+
           className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
             isCurrent
               ? "bg-[#0F2A4A] text-[#D4A24C]"
