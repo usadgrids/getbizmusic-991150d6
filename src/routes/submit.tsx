@@ -11,6 +11,7 @@ import { INDUSTRIES, AD_PLANS, RELIGIOUS_INDUSTRY_VALUES, type AdPlan } from "@/
 import { BizFooter } from "@/components/biz/BizFooter";
 import { CityStateCombobox } from "@/components/biz/CityStateCombobox";
 import { zipsForCity } from "@/lib/us-zips";
+import { readCityTarget } from "@/lib/city-target";
 import type { UsCity } from "@/lib/us-cities";
 
 const searchSchema = z.object({
@@ -95,6 +96,13 @@ function SubmitPage() {
     })();
     return () => { cancelled = true; };
   }, [token, lookup]);
+
+  // Prefill the city chosen in the city picker before checkout.
+  useEffect(() => {
+    const target = readCityTarget();
+    if (target) setCity({ name: target.city, stateCode: target.state });
+  }, []);
+
 
   useEffect(() => {
     if (!city) { setCityZip(null); return; }

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Music, Megaphone, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getActiveCities, getCityBySlug } from "@/lib/cities.functions";
 import { getActiveAds } from "@/lib/ads.functions";
@@ -9,7 +8,8 @@ import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
-import { lookupZip, zipsForCity } from "@/lib/us-zips";
+import { CityPickerPanel } from "@/components/biz/CityPickerModal";
+
 
 
 const DEFAULT_CITY_SLUG = "san-diego-ca";
@@ -50,14 +50,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const fetchCities = useServerFn(getActiveCities);
   const fetchCity = useServerFn(getCityBySlug);
   const fetchAds = useServerFn(getActiveAds);
 
-  const { data: cities = [] } = useSuspenseQuery({
-    queryKey: ["active-cities"],
-    queryFn: () => fetchCities(),
-  });
   const { data: defaultCity } = useQuery({
     queryKey: ["default-city", DEFAULT_CITY_SLUG],
     queryFn: () => fetchCity({ data: { slug: DEFAULT_CITY_SLUG } }),
@@ -67,33 +62,6 @@ function Index() {
     queryFn: () => fetchAds({ data: { city_slug: DEFAULT_CITY_SLUG } }),
   });
 
-  const [q, setQ] = useState("");
-  const [zipMatch, setZipMatch] = useState<{ city: string; stateCode: string } | null>(null);
-
-  useEffect(() => {
-    const digits = q.trim();
-    if (/^\d{5}$/.test(digits)) {
-      let cancelled = false;
-      lookupZip(digits).then((r) => { if (!cancelled) setZipMatch(r); });
-      return () => { cancelled = true; };
-    }
-    setZipMatch(null);
-  }, [q]);
-
-  const citiesWithAds = cities.filter((c) => c.ad_count > 0);
-  const filtered = citiesWithAds.filter((c) => {
-    const s = q.trim().toLowerCase();
-    if (!s) return true;
-    if (zipMatch) {
-      return c.name.toLowerCase() === zipMatch.city.toLowerCase() &&
-             c.state.toUpperCase() === zipMatch.stateCode.toUpperCase();
-    }
-    if (/^\d+$/.test(s)) return false;
-    return c.name.toLowerCase().includes(s) || c.state.toLowerCase().includes(s);
-  });
-
-  const zipHasNoActiveCity =
-    zipMatch !== null && filtered.length === 0 && /^\d{5}$/.test(q.trim());
 
   const cityName = defaultCity?.name ?? "San Diego";
   const cityState = defaultCity?.state ?? "CA";
@@ -142,7 +110,7 @@ function Index() {
         </>
       ) : null}
 
-      {/* City switcher */}
+      {/* City switcher — shared module */}
       <section id="explore-cities" className="bg-[#0F2A4A] text-white scroll-mt-4">
         <div className="mx-auto max-w-[1400px] px-4 py-10 sm:py-14 text-center">
           <p className="text-xs sm:text-sm uppercase tracking-[0.25em] text-[#FFD700] font-semibold">
@@ -152,98 +120,28 @@ function Index() {
             {defaultCity ? `Not in ${cityName}? Pick your city` : "Pick your city"}
           </h2>
           <p className="mt-3 text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
-            Enter your ZIP or search by city name. Don't see yours? Request it and we'll launch it.
+            Enter your ZIP or search by city name. Don't see yours? You can still submit an ad — we'll
+            create the city page automatically.
           </p>
 
-          <div className="mt-6 max-w-xl mx-auto">
-            <input
-              type="search"
-              inputMode="numeric"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Enter Your Zip Code"
-              className="w-full rounded-full border border-white/20 bg-white/10 backdrop-blur px-5 py-3 text-base sm:text-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              aria-label="Search cities by ZIP code"
-            />
-            {zipMatch && (
-              <p className="mt-2 text-sm text-white/70">
-                ZIP {q.trim()} → {zipMatch.city}, {zipMatch.stateCode}
-              </p>
-            )}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 text-[#FFD700]">
+              <Music className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+            </div>
+            <h3 className="text-center text-lg sm:text-2xl font-black tracking-tight text-white">
+              Listen To Music &amp; View Ads In These Cities
+            </h3>
+            <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#FFD700] text-[#0F2A4A]">
+              <Megaphone className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+            </div>
+          </div>
 
-            {zipHasNoActiveCity && zipMatch ? (
-              <div className="mt-5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur p-5 sm:p-6 text-center">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
-                  <Sparkles size={14} />
-                  First Advertiser Opportunity
-                </div>
-                <h4 className="text-lg sm:text-xl font-black text-white">
-                  Be the first music streaming novelty advertiser in {zipMatch.city}, {zipMatch.stateCode}
-                </h4>
-                <p className="mt-2 text-sm text-white/80">
-                  We'll automatically launch the {zipMatch.city} city page when your ad is approved.
-                </p>
-                <div className="mt-4">
-                  <Link
-                    to="/pricing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
-                  >
-                    Submit Ad
-                    <Sparkles size={14} />
-                  </Link>
-                </div>
-              </div>
-            ) : null}
+          <div className="mt-6 max-w-3xl mx-auto">
+            <CityPickerPanel tone="dark" />
           </div>
         </div>
       </section>
 
-      <main className="w-full max-w-[1400px] mx-auto px-4 py-10 sm:py-14">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#0F2A4A] text-[#FFD700] shadow-md">
-            <Music className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-          </div>
-          <h3 className="text-center text-xl sm:text-3xl font-black tracking-tight text-[#0F2A4A]">
-            Listen To Music & View Ads In These Cities
-          </h3>
-          <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#FFD700] text-[#0F2A4A] shadow-md">
-            <Megaphone className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-          </div>
-        </div>
-
-        {filtered.length === 0 ? (
-          <p className="text-gray-600 text-center">No cities match "{q}".</p>
-        ) : (
-          <div className="flex flex-wrap justify-center gap-4">
-            {filtered.map((c) => (
-              <Link
-                key={c.id}
-                to="/$city"
-                params={{ city: c.slug }}
-                className="group w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] max-w-sm rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                      {c.state}
-                    </div>
-                    <div className="mt-1 text-xl font-bold text-[#0F2A4A] group-hover:text-blue-600">
-                      {c.name}
-                    </div>
-                    <CityZips city={c.name} state={c.state} />
-                  </div>
-                  <span className="text-[#FFB300] group-hover:translate-x-1 transition-transform text-xl">→</span>
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  {c.ad_count} active {c.ad_count === 1 ? "ad" : "ads"}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
 
       <BizFooter />
       {defaultCity && defaultCity.is_active ? <MiniPlayer /> : null}
@@ -251,19 +149,3 @@ function Index() {
   );
 }
 
-function CityZips({ city, state }: { city: string; state: string }) {
-  const [zips, setZips] = useState<string[]>([]);
-  useEffect(() => {
-    let cancelled = false;
-    zipsForCity(city, state).then((r) => { if (!cancelled) setZips(r); });
-    return () => { cancelled = true; };
-  }, [city, state]);
-  if (zips.length === 0) return null;
-  const shown = zips.slice(0, 4);
-  const extra = zips.length - shown.length;
-  return (
-    <div className="mt-1 text-xs text-gray-500 font-mono">
-      {shown.join(", ")}{extra > 0 ? ` +${extra} more` : ""}
-    </div>
-  );
-}

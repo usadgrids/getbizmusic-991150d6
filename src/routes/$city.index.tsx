@@ -8,6 +8,8 @@ import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
+import { CityPickerButton } from "@/components/biz/CityPickerModal";
+
 
 export const Route = createFileRoute("/$city/")({
   loader: async ({ params, context }) => {
@@ -90,12 +92,10 @@ function CityHome() {
                 Submit Your Ad
                 <Sparkles size={14} />
               </Link>
-              <Link
-                to="/"
+              <CityPickerButton
                 className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 px-6 py-2.5 text-sm font-bold text-white transition-transform hover:scale-105 hover:bg-white/10 hover:border-white/60 shadow-sm"
-              >
-                Select Another City
-              </Link>
+              />
+
             </div>
           </section>
         </div>

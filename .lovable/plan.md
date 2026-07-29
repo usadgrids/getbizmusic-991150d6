@@ -1,46 +1,37 @@
-
 ## Goal
 
-When a visitor lands on `/`, they immediately see and hear the Get Biz Music experience (ad slider + music mini-player) using **San Diego, CA** as the default city — instead of the current cities directory. A city switcher lives below the experience so they can jump to another active city or request a new one if theirs isn't live.
+Replace the several inconsistent city-switch CTAs with a single reusable module: a modal city picker that works identically on every page, keeps the music playing (no navigation, no new tabs), and always offers the "be the first advertiser" path when no city page exists yet.
 
-## Behavior
+## The one module
 
-1. `/` loads the San Diego ad slider (`AdSlider`) and `MiniPlayer` immediately — same components as `/san-diego-ca`, with the yellow city banner reading "San Diego, CA".
-2. Below the ad slider, a **"Not in San Diego? Pick your city"** section renders:
-   - The existing ZIP search input.
-   - The active-cities grid (filtered by ZIP or free-text search, cities with `ad_count > 0` only).
-   - If the visitor's ZIP maps to a city that isn't live yet, the existing `RequestCityForm` shows (current behavior preserved).
-3. Existing `/san-diego-ca` route continues to work unchanged (still linkable, still has its own SEO metadata).
-4. Home page SEO metadata stays generic ("Get Biz Music — Local Business Ads in Your City") so `/` doesn't compete with the San Diego city page.
+New component `src/components/biz/CityPickerModal.tsx` — a dialog containing all city-switch logic:
 
-## Layout
+1. **Search input** — accepts a 5-digit ZIP or a city name (same behavior currently living in `src/routes/index.tsx`: `lookupZip` / ZIP→city resolution, plus name/state text matching).
+2. **Results** — active cities that have at least one running ad, each shown with state and ZIP list, linking to `/$city` in the same tab.
+3. **No match / new city** — the "First Advertiser Opportunity" panel appears immediately under the search box: headline naming the resolved city and state, and a **Submit Ad** button going to `/pricing` with the city, state, and ZIP passed along so checkout and `/submit` prefill it. No separate "request a city" form in this path — paying creates the city page automatically, which is the behavior already wired through submission.
+4. **Fallback** — if the text typed matches nothing and isn't a valid ZIP, show a short "enter a ZIP or city name" hint rather than a dead end.
 
-```text
-[ BizHero — "SAN DIEGO, CA" yellow band + flyer ]
-[ AdSlider — featured San Diego ads ]
-[ Submit Your Ad spotlight (existing city-page CTA, worded for San Diego) ]
-------------------------------------------------------
-[ "Not in San Diego? Explore other cities" heading ]
-[ ZIP / city search input ]
-[ City grid  OR  RequestCityForm (when ZIP has no active city) ]
-------------------------------------------------------
-[ BizFooter ]
-[ MiniPlayer (sticky) ]
-```
+A small `useCityPicker` trigger (or exported `<CityPickerButton>`) so any CTA can open it with one prop.
 
-## Files touched
+## Where it gets wired
 
-- `src/routes/index.tsx` — rewrite `Index`:
-  - Loader also calls `getCityBySlug({ slug: "san-diego-ca" })` and `getActiveAds({ city_slug: "san-diego-ca" })` (in addition to `getActiveCities`).
-  - Render `BizHero` + `AdSlider` + Submit CTA block at the top (mirroring `$city.index.tsx`).
-  - Move the current ZIP search + city grid + `RequestCityForm` into a "Explore other cities" section below.
-  - Add `<MiniPlayer />` at the bottom so music autoplay UX matches city pages.
-  - Keep existing `head()` metadata (generic home-page copy). Do not copy the San Diego title/description.
-- No changes to `$city.tsx`, `$city.index.tsx`, `BizHero`, `AdSlider`, `MiniPlayer`, or any server functions.
+| Location | Today | After |
+|---|---|---|
+| `src/routes/$city.index.tsx` — "Select Another City" | Link to `/` | Opens the modal |
+| `src/routes/index.tsx` — "Not in San Diego? Pick your city" section | Inline bespoke search + first-advertiser panel | Section keeps its heading and search box, but rendered by the shared module so behavior matches |
+| `src/components/biz/BizFooter.tsx` | No city switcher | Add a "Change city" link that opens the same modal |
+| Ad detail page `src/routes/ad.$adNumber.tsx` | No switcher | Add the same trigger next to the existing spotlight CTA |
 
-## Edge cases
+The home page keeps its full "Listen To Music & View Ads In These Cities" grid; only the search + first-advertiser logic is deduplicated into the module.
 
-- If San Diego has zero active ads at load time, the ad slider renders empty state as it does on the city page; the switcher below still works.
-- If the San Diego city row is missing/inactive in the DB, the loader falls back to the current cities-only home page (no crash).
-- Fallback keeps the request-city flow intact for ZIPs outside our active cities.
+## Cleanups
 
+- Delete the now-unused `src/components/biz/RequestCityForm.tsx` (nothing imports it), unless you want to keep a request form as a secondary option — say the word and I'll leave it as a "just notify me instead" link inside the modal.
+- Remove the duplicated ZIP/filter state from `src/routes/index.tsx` once it consumes the module.
+
+## Technical notes
+
+- Modal built on the existing shadcn `Dialog`; no route change, so `MiniPlayer` never unmounts and audio continues.
+- City list comes from the existing `getActiveCities` server function via the already-cached `["active-cities"]` query key — no new backend work, no schema change.
+- ZIP lookups keep using the lazy `src/lib/us-zips.ts` dataset, so the dataset is only fetched when the modal opens.
+- All navigation uses `<Link to="/$city" params={...}>` in the same tab (no `target="_blank"`), matching the recent change you asked for.

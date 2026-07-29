@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
+import { saveCityTarget } from "@/lib/city-target";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { ArrowLeft, Check, Shield, Info, Tag, Loader2, Sparkles, Music, BadgeCheck, Ban, FileText, Heart, CreditCard, Send, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +15,12 @@ import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/bi
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
+const pricingSearchSchema = z.object({
+  city: z.string().trim().max(120).optional(),
+  state: z.string().trim().max(10).optional(),
+  zip: z.string().trim().max(10).optional(),
+});
+
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
@@ -20,11 +28,22 @@ export const Route = createFileRoute("/pricing")({
       { name: "description", content: "Choose your annual ad plan: $24/year for 7-second rotation or $48/year for 10-second feature. Rep codes give 50% off." },
     ],
   }),
+  validateSearch: (search) => pricingSearchSchema.parse(search),
   component: PricingPage,
 });
 
+
 function PricingPage() {
   const navigate = useNavigate();
+  const { city: targetCity, state: targetState, zip: targetZip } = Route.useSearch();
+
+  // Carry the city chosen in the city picker through checkout to /submit.
+  useEffect(() => {
+    if (targetCity && targetState) {
+      saveCityTarget({ city: targetCity, state: targetState, zip: targetZip });
+    }
+  }, [targetCity, targetState, targetZip]);
+
   const [industry, setIndustry] = useState<string>("");
   const [plan, setPlan] = useState<AdPlan>("image_5");
   const [email, setEmail] = useState("");

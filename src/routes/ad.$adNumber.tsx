@@ -10,6 +10,7 @@ import { ShareBar } from "@/components/biz/ShareBar";
 import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
+import { CityPickerButton } from "@/components/biz/CityPickerModal";
 
 const SITE = "https://www.getbizmusic.com";
 
@@ -238,13 +239,17 @@ function AdLanding() {
               above and reach local listeners for just $12/year. Limited-time intro
               offer.
             </p>
-            <Link
-              to="/pricing"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
-            >
-              Submit Your Ad
-              <Sparkles size={14} />
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/pricing"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+              >
+                Submit Your Ad
+                <Sparkles size={14} />
+              </Link>
+              <CityPickerButton className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 px-6 py-2.5 text-sm font-bold text-white transition-transform hover:scale-105 hover:bg-white/10 hover:border-white/60 shadow-sm" />
+            </div>
+
           </section>
         </div>
       </main>
