@@ -222,8 +222,6 @@ function Index() {
                 key={c.id}
                 to="/$city"
                 params={{ city: c.slug }}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="group w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] max-w-sm rounded-2xl bg-white p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100"
               >
                 <div className="flex items-start justify-between gap-2">
