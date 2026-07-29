@@ -92,10 +92,11 @@ export function PlaylistMarquee() {
   }
 
   const handleTrackClick = (index: number, videoId: string) => {
-    // Suppress click that ended a drag.
-    if (dragMovedRef.current) return;
+    // Suppress click that ended a drag, or a click already handled on touch-up.
+    if (dragMovedRef.current || suppressClickRef.current) return;
     player.playIndex(index, videoId);
   };
+
 
 
   const burst = (dir: 1 | -1) => {
