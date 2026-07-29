@@ -40,9 +40,9 @@ export interface MiniPlayerController {
   playing: boolean;
   /** Latest track reported by the mini-player. */
   track: MiniPlayerTrack | null;
-  /** Play a specific playlist index. */
   /** Play a specific playlist entry (videoId preferred over index). */
   playIndex: (index: number, videoId?: string) => void;
+
 
   /** Pause the mini-player. */
   pause: () => void;
