@@ -103,6 +103,10 @@ function Dashboard() {
   <p>Talk soon,<br/>The GetBizMusic team</p>
 </div>`,
   );
+  const [testEmail, setTestEmail] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
   const sendMut = useMutation({
     mutationFn: () => send({ data: { subject, htmlContent: html } }),
     onSuccess: (r) => {
@@ -112,9 +116,18 @@ function Dashboard() {
       }
       toast.success(`Campaign queued — recipients: ${r.recipients}`);
       setShowSend(false);
+      setConfirmed(false);
       qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Send failed"),
+  });
+
+  const testMut = useMutation({
+    mutationFn: () => sendTest({ data: { toEmail: testEmail, subject, htmlContent: html } }),
+    onSuccess: (r) => {
+      toast.success(`Test email sent to ${r.to}`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Test send failed"),
   });
 
   const s = q.data?.stats;
