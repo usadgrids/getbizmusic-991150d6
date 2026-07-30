@@ -246,9 +246,26 @@ function Dashboard() {
         {/* Send composer */}
         {showSend && (
           <section className="bg-white p-4 rounded shadow-sm border space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+                {savedAt && (
+                  <p className="text-[11px] text-gray-500">Saved template loaded · {new Date(savedAt).toLocaleString()}</p>
+                )}
+              </div>
               <div className="flex gap-2">
+                <button
+                  onClick={saveTemplate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                >
+                  <Save className="w-3.5 h-3.5" /> Save template
+                </button>
+                <button
+                  onClick={resetTemplate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border bg-white hover:bg-gray-50 text-gray-600"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset to default
+                </button>
                 <button
                   onClick={() => setShowPreview((v) => !v)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${showPreview ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white hover:bg-gray-50"}`}
@@ -257,6 +274,7 @@ function Dashboard() {
                 </button>
               </div>
             </div>
+
             <input
               className="w-full border px-3 py-2 rounded text-sm"
               value={subject}
