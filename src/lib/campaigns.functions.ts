@@ -218,7 +218,9 @@ async function brevoFetch(path: string, init: RequestInit = {}) {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const brevoKey = process.env.BREVO_API_KEY;
   if (!lovableKey || !brevoKey) throw new Error("Brevo credentials missing.");
-  const res = await fetch(`${BREVO_GATEWAY}${path}`, {
+  // The connector gateway already targets Brevo's v3 API root, so strip any /v3 prefix.
+  const normalizedPath = path.startsWith("/v3/") ? path.slice(3) : path;
+  const res = await fetch(`${BREVO_GATEWAY}${normalizedPath}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${lovableKey}`,
