@@ -560,5 +560,5 @@ export const getCampaignDashboard = createServerFn({ method: "GET" })
     const categories = Array.from(new Set(list.map((r) => r.industry_category).filter((c): c is string => !!c))).sort();
     const years = Array.from(new Set(list.map((r) => r.founded_year).filter((y): y is number => !!y))).sort();
 
-    return { stats, leads: list, filters: { cities, categories, years } };
+    return { stats, monitoring, leads: list, filters: { cities, categories, years } };
   });
