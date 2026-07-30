@@ -433,6 +433,41 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
     };
   });
 
+// ---------- Server fn: send test email ----------
+export const sendTestCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { toEmail: string; subject: string; htmlContent: string }) => {
+    if (!input?.toEmail?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.toEmail.trim())) {
+      throw new Error("A valid test email address is required.");
+    }
+    if (!input?.subject?.trim()) throw new Error("Subject required.");
+    if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
+    return {
+      toEmail: input.toEmail.trim().toLowerCase(),
+      subject: input.subject.trim(),
+      htmlContent: input.htmlContent,
+    };
+  })
+  .handler(async ({ data, context }) => {
+    await requireAdminEmail(context);
+
+    const finalHtml = buildFinalHtml(data.htmlContent);
+    const res = await brevoFetch(`/v3/smtp/email`, {
+      method: "POST",
+      body: JSON.stringify({
+        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+        to: [{ email: data.toEmail }],
+        subject: `[TEST] ${data.subject}`,
+        htmlContent: finalHtml,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Brevo test send failed (${res.status}): ${body}`);
+    }
+    return { ok: true as const, to: data.toEmail };
+  });
+
 // ---------- Server fn: dashboard stats ----------
 export const getCampaignDashboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
