@@ -383,16 +383,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
       }
     }
 
-    // Append CAN-SPAM footer + unsubscribe token.
-    const footer = `
-      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;line-height:1.5;">
-        <p style="margin:0 0 6px;">You are receiving this because your business was identified as a newly founded ${PRIMARY_CITY}-area business.</p>
-        <p style="margin:0 0 6px;"><strong>${SENDER_NAME}</strong> · ${MAILING_ADDRESS}</p>
-        <p style="margin:0;"><a href="{{ unsubscribe }}" style="color:#2563eb;">Unsubscribe</a></p>
-      </div>`;
-    const finalHtml = /\{\{\s*unsubscribe\s*\}\}/i.test(data.htmlContent)
-      ? data.htmlContent
-      : `${data.htmlContent}${footer}`;
+    const finalHtml = buildFinalHtml(data.htmlContent);
 
     // Create the campaign.
     const createCampaign = await brevoFetch(`/v3/emailCampaigns`, {
