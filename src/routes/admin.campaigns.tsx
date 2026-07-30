@@ -200,7 +200,7 @@ function Dashboard() {
                 <div className="bg-gray-50 px-3 py-1.5 text-xs text-gray-500 border-b">Preview with footer</div>
                 <iframe
                   title="Email preview"
-                  srcDoc={buildFinalHtml(html)}
+                  srcDoc={html}
                   className="w-full h-80 bg-white"
                   sandbox="allow-same-origin"
                 />
