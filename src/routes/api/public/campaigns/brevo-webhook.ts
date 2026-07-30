@@ -73,7 +73,16 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
           if (!existing) continue;
 
           const when = evt.date ?? new Date().toISOString();
-          const patch: Record<string, unknown> = { last_event_at: when };
+          const patch: {
+            last_event_at: string;
+            campaign_status?: string;
+            sent_at?: string;
+            delivered_at?: string;
+            first_opened_at?: string;
+            last_opened_at?: string;
+            open_count?: number;
+            click_count?: number;
+          } = { last_event_at: when };
 
           const currentRank = RANK[existing.campaign_status] ?? 0;
           const nextRank = RANK[nextStatus] ?? 0;
