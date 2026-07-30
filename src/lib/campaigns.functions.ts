@@ -345,13 +345,19 @@ export const syncLeadsToBrevo = createServerFn({ method: "POST" })
 // ---------- Server fn: send campaign ----------
 export const sendBrevoCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { subject: string; htmlContent: string; campaignName?: string }) => {
+  .inputValidator((input: { subject: string; htmlContent: string; campaignName?: string; scheduledAt?: string }) => {
     if (!input?.subject?.trim()) throw new Error("Subject required.");
     if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
+    const scheduledAt = input.scheduledAt?.trim() || undefined;
+    if (scheduledAt && Number.isNaN(Date.parse(scheduledAt))) throw new Error("Invalid scheduled date/time.");
+    if (scheduledAt && Date.parse(scheduledAt) < Date.now() + 60_000) {
+      throw new Error("Scheduled time must be at least a minute in the future.");
+    }
     return {
       subject: input.subject.trim(),
       htmlContent: input.htmlContent,
       campaignName: input.campaignName?.trim() || `NC 2026 — ${new Date().toISOString().slice(0, 10)}`,
+      scheduledAt,
     };
   })
   .handler(async ({ data, context }) => {
@@ -397,7 +403,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
 
     const finalHtml = buildFinalHtml(data.htmlContent);
 
-    // Create the campaign.
+    // Create the campaign (scheduled if a date/time was provided).
     const createCampaign = await brevoFetch(`/v3/emailCampaigns`, {
       method: "POST",
       body: JSON.stringify({
@@ -407,6 +413,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
         htmlContent: finalHtml,
         recipients: { listIds: [sendListId] },
         inlineImageActivation: false,
+        ...(data.scheduledAt ? { scheduledAt: data.scheduledAt } : {}),
       }),
     });
     if (!createCampaign.ok) {
@@ -414,10 +421,20 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
     }
     const { id: campaignId } = (await createCampaign.json()) as { id: number };
 
-    // Send it now.
-    const sendNow = await brevoFetch(`/v3/emailCampaigns/${campaignId}/sendNow`, { method: "POST" });
-    if (!sendNow.ok && sendNow.status !== 204) {
-      throw new Error(`Brevo sendNow failed (${sendNow.status}): ${await sendNow.text()}`);
+    if (data.scheduledAt) {
+      // Move the draft into the scheduled queue.
+      const queue = await brevoFetch(`/v3/emailCampaigns/${campaignId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status: "queued" }),
+      });
+      if (!queue.ok && queue.status !== 204) {
+        throw new Error(`Brevo schedule failed (${queue.status}): ${await queue.text()}`);
+      }
+    } else {
+      const sendNow = await brevoFetch(`/v3/emailCampaigns/${campaignId}/sendNow`, { method: "POST" });
+      if (!sendNow.ok && sendNow.status !== 204) {
+        throw new Error(`Brevo sendNow failed (${sendNow.status}): ${await sendNow.text()}`);
+      }
     }
 
     // Optimistically mark as sent.
@@ -432,6 +449,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
       campaign_id: campaignId,
       send_list_id: sendListId,
       recipients: leads.length,
+      scheduled_at: data.scheduledAt ?? null,
     };
   });
 

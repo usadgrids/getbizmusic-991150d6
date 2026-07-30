@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
@@ -107,20 +107,53 @@ function Dashboard() {
   const [showPreview, setShowPreview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
+  // Scheduling
+  const [sendMode, setSendMode] = useState<"now" | "schedule">("now");
+  const [day, setDay] = useState<string>("1"); // 0=Sun … 6=Sat
+  const [hour12, setHour12] = useState("9");
+  const [minute, setMinute] = useState("00");
+  const [meridiem, setMeridiem] = useState<"AM" | "PM">("AM");
+
+  const scheduledDate = useMemo(() => {
+    if (sendMode !== "schedule") return null;
+    let h = Number(hour12) % 12;
+    if (meridiem === "PM") h += 12;
+    const now = new Date();
+    const d = new Date(now);
+    const target = Number(day);
+    let delta = (target - now.getDay() + 7) % 7;
+    d.setDate(now.getDate() + delta);
+    d.setHours(h, Number(minute), 0, 0);
+    if (d.getTime() <= now.getTime() + 60_000) d.setDate(d.getDate() + 7);
+    return d;
+  }, [sendMode, day, hour12, minute, meridiem]);
+
   const sendMut = useMutation({
-    mutationFn: () => send({ data: { subject, htmlContent: html } }),
+    mutationFn: () =>
+      send({
+        data: {
+          subject,
+          htmlContent: html,
+          scheduledAt: scheduledDate ? scheduledDate.toISOString() : undefined,
+        },
+      }),
     onSuccess: (r) => {
       if ("ok" in r && r.ok === false) {
         toast.error(r.reason ?? "Send failed");
         return;
       }
-      toast.success(`Campaign queued — recipients: ${r.recipients}`);
+      toast.success(
+        scheduledDate
+          ? `Campaign scheduled for ${scheduledDate.toLocaleString()} — recipients: ${r.recipients}`
+          : `Campaign queued — recipients: ${r.recipients}`,
+      );
       setShowSend(false);
       setConfirmed(false);
       qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Send failed"),
   });
+
 
   const testMut = useMutation({
     mutationFn: () => sendTest({ data: { toEmail: testEmail, subject, htmlContent: html } }),
@@ -235,6 +268,44 @@ function Dashboard() {
               </div>
             </div>
 
+            {/* Time to send */}
+            <div className="pt-2 border-t space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Clock className="w-4 h-4" /> Time to send
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <label className="flex items-center gap-1.5">
+                  <input type="radio" checked={sendMode === "now"} onChange={() => setSendMode("now")} /> Send now
+                </label>
+                <label className="flex items-center gap-1.5">
+                  <input type="radio" checked={sendMode === "schedule"} onChange={() => setSendMode("schedule")} /> Schedule
+                </label>
+                {sendMode === "schedule" && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select value={day} onChange={(e) => setDay(e.target.value)} className="border rounded px-2 py-1">
+                      {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d, i) => (
+                        <option key={d} value={String(i)}>{d}</option>
+                      ))}
+                    </select>
+                    <select value={hour12} onChange={(e) => setHour12(e.target.value)} className="border rounded px-2 py-1">
+                      {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                    <span>:</span>
+                    <select value={minute} onChange={(e) => setMinute(e.target.value)} className="border rounded px-2 py-1">
+                      {["00", "15", "30", "45"].map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <select value={meridiem} onChange={(e) => setMeridiem(e.target.value as "AM" | "PM")} className="border rounded px-2 py-1">
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              {scheduledDate && (
+                <p className="text-xs text-gray-500">Will send {scheduledDate.toLocaleString()} (your local time).</p>
+              )}
+            </div>
+
             {/* Launch controls */}
             <div className="flex flex-col gap-3 pt-2 border-t">
               <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -252,7 +323,9 @@ function Dashboard() {
                   disabled={sendMut.isPending || !confirmed}
                   className="px-4 py-2 bg-emerald-600 text-white text-sm rounded disabled:opacity-50"
                 >
-                  {sendMut.isPending ? "Launching…" : "Launch campaign"}
+                  {sendMut.isPending
+                    ? (scheduledDate ? "Scheduling…" : "Launching…")
+                    : (scheduledDate ? "Schedule campaign" : "Launch campaign")}
                 </button>
                 <button onClick={() => { setShowSend(false); setShowPreview(false); setConfirmed(false); }} className="px-4 py-2 bg-gray-100 text-sm rounded">Cancel</button>
               </div>
