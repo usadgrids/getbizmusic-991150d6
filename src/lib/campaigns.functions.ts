@@ -403,7 +403,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
 
     const finalHtml = buildFinalHtml(data.htmlContent);
 
-    // Create the campaign.
+    // Create the campaign (scheduled if a date/time was provided).
     const createCampaign = await brevoFetch(`/v3/emailCampaigns`, {
       method: "POST",
       body: JSON.stringify({
@@ -413,6 +413,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
         htmlContent: finalHtml,
         recipients: { listIds: [sendListId] },
         inlineImageActivation: false,
+        ...(data.scheduledAt ? { scheduledAt: data.scheduledAt } : {}),
       }),
     });
     if (!createCampaign.ok) {
@@ -420,10 +421,20 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
     }
     const { id: campaignId } = (await createCampaign.json()) as { id: number };
 
-    // Send it now.
-    const sendNow = await brevoFetch(`/v3/emailCampaigns/${campaignId}/sendNow`, { method: "POST" });
-    if (!sendNow.ok && sendNow.status !== 204) {
-      throw new Error(`Brevo sendNow failed (${sendNow.status}): ${await sendNow.text()}`);
+    if (data.scheduledAt) {
+      // Move the draft into the scheduled queue.
+      const queue = await brevoFetch(`/v3/emailCampaigns/${campaignId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status: "queued" }),
+      });
+      if (!queue.ok && queue.status !== 204) {
+        throw new Error(`Brevo schedule failed (${queue.status}): ${await queue.text()}`);
+      }
+    } else {
+      const sendNow = await brevoFetch(`/v3/emailCampaigns/${campaignId}/sendNow`, { method: "POST" });
+      if (!sendNow.ok && sendNow.status !== 204) {
+        throw new Error(`Brevo sendNow failed (${sendNow.status}): ${await sendNow.text()}`);
+      }
     }
 
     // Optimistically mark as sent.
@@ -438,6 +449,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
       campaign_id: campaignId,
       send_list_id: sendListId,
       recipients: leads.length,
+      scheduled_at: data.scheduledAt ?? null,
     };
   });
 
