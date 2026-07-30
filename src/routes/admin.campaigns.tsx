@@ -13,6 +13,17 @@ import {
   getCampaignDashboard,
 } from "@/lib/campaigns.functions";
 
+const TEMPLATE_KEY = "gbm-campaign-template-v1";
+const DEFAULT_SUBJECT = "Welcome to National City — GetBizMusic wants to feature your new business";
+const DEFAULT_HTML = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111827;">
+  <h1 style="font-size:22px;margin:0 0 12px;">Congrats on launching in ${new Date().getFullYear()}!</h1>
+  <p>Hi there,</p>
+  <p>We're <strong>GetBizMusic</strong>, National City's free-to-play music streaming site with a rotating business ad slider. Local shoppers listen in for hours — and see local businesses like yours the whole time.</p>
+  <p>As a newly founded 2026 business, you're invited to run a rotating spotlight ad starting at <strong>$24</strong>.</p>
+  <p><a href="https://getbizmusic.com/pricing" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">See pricing</a></p>
+  <p>Talk soon,<br/>The GetBizMusic team</p>
+</div>`;
+
 export const Route = createFileRoute("/admin/campaigns")({
   head: () => ({
     meta: [
