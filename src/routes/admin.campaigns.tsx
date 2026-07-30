@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
@@ -12,6 +12,17 @@ import {
   sendTestCampaign,
   getCampaignDashboard,
 } from "@/lib/campaigns.functions";
+
+const TEMPLATE_KEY = "gbm-campaign-template-v1";
+const DEFAULT_SUBJECT = "Welcome to National City — GetBizMusic wants to feature your new business";
+const DEFAULT_HTML = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111827;">
+  <h1 style="font-size:22px;margin:0 0 12px;">Congrats on launching in ${new Date().getFullYear()}!</h1>
+  <p>Hi there,</p>
+  <p>We're <strong>GetBizMusic</strong>, National City's free-to-play music streaming site with a rotating business ad slider. Local shoppers listen in for hours — and see local businesses like yours the whole time.</p>
+  <p>As a newly founded 2026 business, you're invited to run a rotating spotlight ad starting at <strong>$24</strong>.</p>
+  <p><a href="https://getbizmusic.com/pricing" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">See pricing</a></p>
+  <p>Talk soon,<br/>The GetBizMusic team</p>
+</div>`;
 
 export const Route = createFileRoute("/admin/campaigns")({
   head: () => ({
@@ -92,20 +103,50 @@ function Dashboard() {
   });
 
   const [showSend, setShowSend] = useState(false);
-  const [subject, setSubject] = useState("Welcome to National City — GetBizMusic wants to feature your new business");
-  const [html, setHtml] = useState(
-    `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111827;">
-  <h1 style="font-size:22px;margin:0 0 12px;">Congrats on launching in ${new Date().getFullYear()}!</h1>
-  <p>Hi there,</p>
-  <p>We're <strong>GetBizMusic</strong>, National City's free-to-play music streaming site with a rotating business ad slider. Local shoppers listen in for hours — and see local businesses like yours the whole time.</p>
-  <p>As a newly founded 2026 business, you're invited to run a rotating spotlight ad starting at <strong>$24</strong>.</p>
-  <p><a href="https://getbizmusic.com/pricing" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">See pricing</a></p>
-  <p>Talk soon,<br/>The GetBizMusic team</p>
-</div>`,
-  );
+  const [subject, setSubject] = useState(DEFAULT_SUBJECT);
+  const [html, setHtml] = useState(DEFAULT_HTML);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  // Load saved template (client-only)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TEMPLATE_KEY);
+      if (!raw) return;
+      const t = JSON.parse(raw) as { subject?: string; html?: string; savedAt?: string };
+      if (typeof t.subject === "string") setSubject(t.subject);
+      if (typeof t.html === "string") setHtml(t.html);
+      if (t.savedAt) setSavedAt(t.savedAt);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const saveTemplate = () => {
+    const stamp = new Date().toISOString();
+    try {
+      localStorage.setItem(TEMPLATE_KEY, JSON.stringify({ subject, html, savedAt: stamp }));
+      setSavedAt(stamp);
+      toast.success("Template saved — it will load automatically next time");
+    } catch {
+      toast.error("Could not save template in this browser");
+    }
+  };
+
+  const resetTemplate = () => {
+    try {
+      localStorage.removeItem(TEMPLATE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setSubject(DEFAULT_SUBJECT);
+    setHtml(DEFAULT_HTML);
+    setSavedAt(null);
+    toast.success("Reverted to the default template");
+  };
+
 
   // Scheduling
   const [sendMode, setSendMode] = useState<"now" | "schedule">("now");
@@ -205,9 +246,26 @@ function Dashboard() {
         {/* Send composer */}
         {showSend && (
           <section className="bg-white p-4 rounded shadow-sm border space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+                {savedAt && (
+                  <p className="text-[11px] text-gray-500">Saved template loaded · {new Date(savedAt).toLocaleString()}</p>
+                )}
+              </div>
               <div className="flex gap-2">
+                <button
+                  onClick={saveTemplate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                >
+                  <Save className="w-3.5 h-3.5" /> Save template
+                </button>
+                <button
+                  onClick={resetTemplate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border bg-white hover:bg-gray-50 text-gray-600"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset to default
+                </button>
                 <button
                   onClick={() => setShowPreview((v) => !v)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${showPreview ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white hover:bg-gray-50"}`}
@@ -216,6 +274,7 @@ function Dashboard() {
                 </button>
               </div>
             </div>
+
             <input
               className="w-full border px-3 py-2 rounded text-sm"
               value={subject}
