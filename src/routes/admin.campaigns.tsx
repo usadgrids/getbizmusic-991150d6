@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
@@ -205,6 +205,7 @@ function Dashboard() {
   });
 
   const s = q.data?.stats;
+  const m = q.data?.monitoring;
   const leads = q.data?.leads ?? [];
   const fOpts = q.data?.filters;
 
@@ -488,7 +489,7 @@ function Dashboard() {
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: number; tone?: "green" | "red" | "amber" | "blue" }) {
+function Stat({ label, value, tone, sub }: { label: string; value: number; tone?: "green" | "red" | "amber" | "blue"; sub?: string }) {
   const toneClass =
     tone === "green" ? "text-emerald-700 bg-emerald-50"
     : tone === "red" ? "text-red-700 bg-red-50"
@@ -499,6 +500,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: "gr
     <div className={`rounded border p-3 ${toneClass}`}>
       <div className="text-xs uppercase opacity-70">{label}</div>
       <div className="text-2xl font-semibold">{value}</div>
+      {sub && <div className="text-[11px] opacity-70 mt-0.5">{sub}</div>}
     </div>
   );
 }
