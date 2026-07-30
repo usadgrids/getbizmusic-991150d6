@@ -107,20 +107,53 @@ function Dashboard() {
   const [showPreview, setShowPreview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
+  // Scheduling
+  const [sendMode, setSendMode] = useState<"now" | "schedule">("now");
+  const [day, setDay] = useState<string>("1"); // 0=Sun … 6=Sat
+  const [hour12, setHour12] = useState("9");
+  const [minute, setMinute] = useState("00");
+  const [meridiem, setMeridiem] = useState<"AM" | "PM">("AM");
+
+  const scheduledDate = useMemo(() => {
+    if (sendMode !== "schedule") return null;
+    let h = Number(hour12) % 12;
+    if (meridiem === "PM") h += 12;
+    const now = new Date();
+    const d = new Date(now);
+    const target = Number(day);
+    let delta = (target - now.getDay() + 7) % 7;
+    d.setDate(now.getDate() + delta);
+    d.setHours(h, Number(minute), 0, 0);
+    if (d.getTime() <= now.getTime() + 60_000) d.setDate(d.getDate() + 7);
+    return d;
+  }, [sendMode, day, hour12, minute, meridiem]);
+
   const sendMut = useMutation({
-    mutationFn: () => send({ data: { subject, htmlContent: html } }),
+    mutationFn: () =>
+      send({
+        data: {
+          subject,
+          htmlContent: html,
+          scheduledAt: scheduledDate ? scheduledDate.toISOString() : undefined,
+        },
+      }),
     onSuccess: (r) => {
       if ("ok" in r && r.ok === false) {
         toast.error(r.reason ?? "Send failed");
         return;
       }
-      toast.success(`Campaign queued — recipients: ${r.recipients}`);
+      toast.success(
+        scheduledDate
+          ? `Campaign scheduled for ${scheduledDate.toLocaleString()} — recipients: ${r.recipients}`
+          : `Campaign queued — recipients: ${r.recipients}`,
+      );
       setShowSend(false);
       setConfirmed(false);
       qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Send failed"),
   });
+
 
   const testMut = useMutation({
     mutationFn: () => sendTest({ data: { toEmail: testEmail, subject, htmlContent: html } }),
