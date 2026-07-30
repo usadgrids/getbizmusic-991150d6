@@ -67,20 +67,38 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
 
           const { data: existing } = await supabaseAdmin
             .from("leads")
-            .select("id, campaign_status")
+            .select("id, campaign_status, open_count, click_count, sent_at, delivered_at, first_opened_at")
             .eq("email", email)
             .maybeSingle();
           if (!existing) continue;
 
+          const when = evt.date ?? new Date().toISOString();
+          const patch: Record<string, unknown> = { last_event_at: when };
+
           const currentRank = RANK[existing.campaign_status] ?? 0;
           const nextRank = RANK[nextStatus] ?? 0;
-          if (nextRank < currentRank) continue;
+          if (nextRank >= currentRank) patch.campaign_status = nextStatus;
 
-          await supabaseAdmin
-            .from("leads")
-            .update({ campaign_status: nextStatus, last_event_at: evt.date ?? new Date().toISOString() })
-            .eq("id", existing.id);
+          if (eventName === "sent" || eventName === "delivered" || eventName === "list_addition") {
+            if (!existing.sent_at) patch.sent_at = when;
+          }
+          if (eventName === "delivered" && !existing.delivered_at) patch.delivered_at = when;
+
+          if (eventName === "opened" || eventName === "unique_opened") {
+            patch.open_count = (existing.open_count ?? 0) + 1;
+            patch.last_opened_at = when;
+            if (!existing.first_opened_at) patch.first_opened_at = when;
+            // An open implies delivery even if the delivered event was missed.
+            if (!existing.delivered_at) patch.delivered_at = when;
+            if (!existing.sent_at) patch.sent_at = when;
+          }
+          if (eventName === "click" || eventName === "clicks") {
+            patch.click_count = (existing.click_count ?? 0) + 1;
+          }
+
+          await supabaseAdmin.from("leads").update(patch).eq("id", existing.id);
           updated++;
+
         }
 
         return Response.json({ ok: true, updated });
