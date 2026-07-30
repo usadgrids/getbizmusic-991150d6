@@ -9,6 +9,7 @@ import {
   importApolloLeads,
   syncLeadsToBrevo,
   sendBrevoCampaign,
+  sendTestCampaign,
   getCampaignDashboard,
 } from "@/lib/campaigns.functions";
 
