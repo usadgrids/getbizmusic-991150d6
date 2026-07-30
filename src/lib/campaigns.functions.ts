@@ -111,6 +111,16 @@ async function apolloSearch(params: {
   });
   if (!res.ok) {
     const body = await res.text();
+    if (res.status === 403 || /API_INACCESSIBLE|not accessible|free plan/i.test(body)) {
+      throw new Error(
+        "Apollo blocked this request: People Search isn't available on your current Apollo plan/API key. " +
+          "Fix it in Apollo → Settings → Integrations → API: use a master API key and enable the " +
+          "'People Search' (mixed_people/search) endpoint, or upgrade the Apollo plan. Then retry the import.",
+      );
+    }
+    if (res.status === 401) {
+      throw new Error("Apollo rejected the credentials (401). Reconnect the Apollo connection with a valid API key.");
+    }
     throw new Error(`Apollo search failed (${res.status}): ${body}`);
   }
   return (await res.json()) as ApolloSearchResponse;
