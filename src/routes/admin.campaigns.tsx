@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
@@ -205,6 +205,7 @@ function Dashboard() {
   });
 
   const s = q.data?.stats;
+  const m = q.data?.monitoring;
   const leads = q.data?.leads ?? [];
   const fOpts = q.data?.filters;
 
@@ -242,6 +243,32 @@ function Dashboard() {
           <Stat label="Clicked" value={s?.clicked ?? 0} tone="green" />
           <Stat label="Bounced" value={s?.bounced ?? 0} tone="red" />
         </section>
+
+        {/* Email monitoring */}
+        <section className="bg-white p-4 rounded shadow-sm border space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-emerald-600" /> Email monitoring
+            </h2>
+            <p className="text-xs text-gray-500">
+              {m?.last_event_at ? `Last event ${new Date(m.last_event_at).toLocaleString()}` : "No events yet"}
+              {" · live from Brevo webhooks"}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <Stat label="Sent successfully" value={m?.sent_ok ?? 0} sub={`${m?.attempted ?? 0} attempted`} tone="green" />
+            <Stat label="Received (delivered)" value={m?.delivered ?? 0} sub={`${m?.delivery_rate ?? 0}% delivery rate`} tone="green" />
+            <Stat label="Opened (unique)" value={m?.opened_unique ?? 0} sub={`${m?.open_rate ?? 0}% open rate`} tone="blue" />
+            <Stat label="Reopened" value={m?.reopened ?? 0} sub={`${m?.reopen_rate ?? 0}% of openers`} tone="blue" />
+            <Stat label="Total opens" value={m?.total_opens ?? 0} sub="incl. repeat opens" />
+            <Stat label="Bounced / failed" value={m?.bounced ?? 0} tone="red" />
+          </div>
+          <p className="text-xs text-gray-500">
+            "Received" counts Brevo <code>delivered</code> events (an open also implies delivery). "Reopened" counts
+            recipients who opened more than once.
+          </p>
+        </section>
+
 
         {/* Send composer */}
         {showSend && (
@@ -462,7 +489,7 @@ function Dashboard() {
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: number; tone?: "green" | "red" | "amber" | "blue" }) {
+function Stat({ label, value, tone, sub }: { label: string; value: number; tone?: "green" | "red" | "amber" | "blue"; sub?: string }) {
   const toneClass =
     tone === "green" ? "text-emerald-700 bg-emerald-50"
     : tone === "red" ? "text-red-700 bg-red-50"
@@ -473,6 +500,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: "gr
     <div className={`rounded border p-3 ${toneClass}`}>
       <div className="text-xs uppercase opacity-70">{label}</div>
       <div className="text-2xl font-semibold">{value}</div>
+      {sub && <div className="text-[11px] opacity-70 mt-0.5">{sub}</div>}
     </div>
   );
 }

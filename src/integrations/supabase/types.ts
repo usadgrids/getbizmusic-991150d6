@@ -626,14 +626,20 @@ export type Database = {
           business_name: string | null
           campaign_status: string
           city: string | null
+          click_count: number
           created_at: string
+          delivered_at: string | null
           email: string
+          first_opened_at: string | null
           founded_year: number | null
           id: string
           industry: string | null
           industry_category: string | null
           last_event_at: string | null
+          last_opened_at: string | null
+          open_count: number
           owner_name: string | null
+          sent_at: string | null
           source: string
           source_detail: string | null
           state: string
@@ -644,14 +650,20 @@ export type Database = {
           business_name?: string | null
           campaign_status?: string
           city?: string | null
+          click_count?: number
           created_at?: string
+          delivered_at?: string | null
           email: string
+          first_opened_at?: string | null
           founded_year?: number | null
           id?: string
           industry?: string | null
           industry_category?: string | null
           last_event_at?: string | null
+          last_opened_at?: string | null
+          open_count?: number
           owner_name?: string | null
+          sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string
@@ -662,14 +674,20 @@ export type Database = {
           business_name?: string | null
           campaign_status?: string
           city?: string | null
+          click_count?: number
           created_at?: string
+          delivered_at?: string | null
           email?: string
+          first_opened_at?: string | null
           founded_year?: number | null
           id?: string
           industry?: string | null
           industry_category?: string | null
           last_event_at?: string | null
+          last_opened_at?: string | null
+          open_count?: number
           owner_name?: string | null
+          sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string

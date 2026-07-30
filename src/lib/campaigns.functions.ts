@@ -502,7 +502,9 @@ export const getCampaignDashboard = createServerFn({ method: "GET" })
 
     let query = supabaseAdmin
       .from("leads")
-      .select("id, campaign_status, source_detail, city, industry_category, founded_year, business_name, owner_name, email, created_at, last_event_at")
+      .select(
+        "id, campaign_status, source_detail, city, industry_category, founded_year, business_name, owner_name, email, created_at, last_event_at, sent_at, delivered_at, first_opened_at, last_opened_at, open_count, click_count",
+      )
       .order("created_at", { ascending: false })
       .limit(500);
     if (data.city) query = query.eq("city", data.city);
@@ -512,6 +514,14 @@ export const getCampaignDashboard = createServerFn({ method: "GET" })
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
     const list = rows ?? [];
+
+    const attempted = list.filter((r) => r.campaign_status !== "not_sent");
+    const deliveredRows = list.filter((r) => !!r.delivered_at);
+    const openedRows = list.filter((r) => (r.open_count ?? 0) > 0 || !!r.first_opened_at);
+    const reopenedRows = list.filter((r) => (r.open_count ?? 0) > 1);
+    const totalOpens = list.reduce((n, r) => n + (r.open_count ?? 0), 0);
+
+    const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 10 : 0);
 
     const stats = {
       total: list.length,
@@ -525,9 +535,30 @@ export const getCampaignDashboard = createServerFn({ method: "GET" })
       unsubscribed: list.filter((r) => r.campaign_status === "unsubscribed").length,
     };
 
+    const monitoring = {
+      attempted: attempted.length,
+      sent_ok: attempted.filter((r) => r.campaign_status !== "bounced").length,
+      delivered: deliveredRows.length,
+      bounced: list.filter((r) => r.campaign_status === "bounced").length,
+      opened_unique: openedRows.length,
+      reopened: reopenedRows.length,
+      total_opens: totalOpens,
+      clicked: list.filter((r) => (r.click_count ?? 0) > 0 || r.campaign_status === "clicked").length,
+      delivery_rate: pct(deliveredRows.length, attempted.length),
+      open_rate: pct(openedRows.length, deliveredRows.length || attempted.length),
+      reopen_rate: pct(reopenedRows.length, openedRows.length),
+      last_event_at:
+        list
+          .map((r) => r.last_event_at)
+          .filter((d): d is string => !!d)
+          .sort()
+          .pop() ?? null,
+    };
+
+
     const cities = Array.from(new Set(list.map((r) => r.city).filter((c): c is string => !!c))).sort();
     const categories = Array.from(new Set(list.map((r) => r.industry_category).filter((c): c is string => !!c))).sort();
     const years = Array.from(new Set(list.map((r) => r.founded_year).filter((y): y is number => !!y))).sort();
 
-    return { stats, leads: list, filters: { cities, categories, years } };
+    return { stats, monitoring, leads: list, filters: { cities, categories, years } };
   });
