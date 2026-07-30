@@ -92,20 +92,50 @@ function Dashboard() {
   });
 
   const [showSend, setShowSend] = useState(false);
-  const [subject, setSubject] = useState("Welcome to National City — GetBizMusic wants to feature your new business");
-  const [html, setHtml] = useState(
-    `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111827;">
-  <h1 style="font-size:22px;margin:0 0 12px;">Congrats on launching in ${new Date().getFullYear()}!</h1>
-  <p>Hi there,</p>
-  <p>We're <strong>GetBizMusic</strong>, National City's free-to-play music streaming site with a rotating business ad slider. Local shoppers listen in for hours — and see local businesses like yours the whole time.</p>
-  <p>As a newly founded 2026 business, you're invited to run a rotating spotlight ad starting at <strong>$24</strong>.</p>
-  <p><a href="https://getbizmusic.com/pricing" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">See pricing</a></p>
-  <p>Talk soon,<br/>The GetBizMusic team</p>
-</div>`,
-  );
+  const [subject, setSubject] = useState(DEFAULT_SUBJECT);
+  const [html, setHtml] = useState(DEFAULT_HTML);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  // Load saved template (client-only)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TEMPLATE_KEY);
+      if (!raw) return;
+      const t = JSON.parse(raw) as { subject?: string; html?: string; savedAt?: string };
+      if (typeof t.subject === "string") setSubject(t.subject);
+      if (typeof t.html === "string") setHtml(t.html);
+      if (t.savedAt) setSavedAt(t.savedAt);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const saveTemplate = () => {
+    const stamp = new Date().toISOString();
+    try {
+      localStorage.setItem(TEMPLATE_KEY, JSON.stringify({ subject, html, savedAt: stamp }));
+      setSavedAt(stamp);
+      toast.success("Template saved — it will load automatically next time");
+    } catch {
+      toast.error("Could not save template in this browser");
+    }
+  };
+
+  const resetTemplate = () => {
+    try {
+      localStorage.removeItem(TEMPLATE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setSubject(DEFAULT_SUBJECT);
+    setHtml(DEFAULT_HTML);
+    setSavedAt(null);
+    toast.success("Reverted to the default template");
+  };
+
 
   // Scheduling
   const [sendMode, setSendMode] = useState<"now" | "schedule">("now");
