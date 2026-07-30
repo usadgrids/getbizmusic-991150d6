@@ -231,6 +231,16 @@ async function brevoFetch(path: string, init: RequestInit = {}) {
   return res;
 }
 
+function buildFinalHtml(htmlContent: string): string {
+  const footer = `
+      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;line-height:1.5;">
+        <p style="margin:0 0 6px;">You are receiving this because your business was identified as a newly founded ${PRIMARY_CITY}-area business.</p>
+        <p style="margin:0 0 6px;"><strong>${SENDER_NAME}</strong> · ${MAILING_ADDRESS}</p>
+        <p style="margin:0;"><a href="{{ unsubscribe }}" style="color:#2563eb;">Unsubscribe</a></p>
+      </div>`;
+  return /\{\{\s*unsubscribe\s*\}\}/i.test(htmlContent) ? htmlContent : `${htmlContent}${footer}`;
+}
+
 async function ensureBrevoList(): Promise<number> {
   // List existing lists (paginated). Look for our name.
   let offset = 0;
@@ -383,16 +393,7 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
       }
     }
 
-    // Append CAN-SPAM footer + unsubscribe token.
-    const footer = `
-      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;line-height:1.5;">
-        <p style="margin:0 0 6px;">You are receiving this because your business was identified as a newly founded ${PRIMARY_CITY}-area business.</p>
-        <p style="margin:0 0 6px;"><strong>${SENDER_NAME}</strong> · ${MAILING_ADDRESS}</p>
-        <p style="margin:0;"><a href="{{ unsubscribe }}" style="color:#2563eb;">Unsubscribe</a></p>
-      </div>`;
-    const finalHtml = /\{\{\s*unsubscribe\s*\}\}/i.test(data.htmlContent)
-      ? data.htmlContent
-      : `${data.htmlContent}${footer}`;
+    const finalHtml = buildFinalHtml(data.htmlContent);
 
     // Create the campaign.
     const createCampaign = await brevoFetch(`/v3/emailCampaigns`, {
@@ -430,6 +431,41 @@ export const sendBrevoCampaign = createServerFn({ method: "POST" })
       send_list_id: sendListId,
       recipients: leads.length,
     };
+  });
+
+// ---------- Server fn: send test email ----------
+export const sendTestCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { toEmail: string; subject: string; htmlContent: string }) => {
+    if (!input?.toEmail?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.toEmail.trim())) {
+      throw new Error("A valid test email address is required.");
+    }
+    if (!input?.subject?.trim()) throw new Error("Subject required.");
+    if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
+    return {
+      toEmail: input.toEmail.trim().toLowerCase(),
+      subject: input.subject.trim(),
+      htmlContent: input.htmlContent,
+    };
+  })
+  .handler(async ({ data, context }) => {
+    await requireAdminEmail(context);
+
+    const finalHtml = buildFinalHtml(data.htmlContent);
+    const res = await brevoFetch(`/v3/smtp/email`, {
+      method: "POST",
+      body: JSON.stringify({
+        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+        to: [{ email: data.toEmail }],
+        subject: `[TEST] ${data.subject}`,
+        htmlContent: finalHtml,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Brevo test send failed (${res.status}): ${body}`);
+    }
+    return { ok: true as const, to: data.toEmail };
   });
 
 // ---------- Server fn: dashboard stats ----------

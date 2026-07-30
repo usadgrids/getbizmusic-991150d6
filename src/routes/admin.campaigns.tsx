@@ -3,12 +3,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
   syncLeadsToBrevo,
   sendBrevoCampaign,
+  sendTestCampaign,
   getCampaignDashboard,
 } from "@/lib/campaigns.functions";
 
@@ -54,6 +55,7 @@ function Dashboard() {
   const imp = useServerFn(importApolloLeads);
   const sync = useServerFn(syncLeadsToBrevo);
   const send = useServerFn(sendBrevoCampaign);
+  const sendTest = useServerFn(sendTestCampaign);
 
   const filters = useMemo(
     () => ({
@@ -101,6 +103,10 @@ function Dashboard() {
   <p>Talk soon,<br/>The GetBizMusic team</p>
 </div>`,
   );
+  const [testEmail, setTestEmail] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
   const sendMut = useMutation({
     mutationFn: () => send({ data: { subject, htmlContent: html } }),
     onSuccess: (r) => {
@@ -110,9 +116,18 @@ function Dashboard() {
       }
       toast.success(`Campaign queued — recipients: ${r.recipients}`);
       setShowSend(false);
+      setConfirmed(false);
       qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Send failed"),
+  });
+
+  const testMut = useMutation({
+    mutationFn: () => sendTest({ data: { toEmail: testEmail, subject, htmlContent: html } }),
+    onSuccess: (r) => {
+      toast.success(`Test email sent to ${r.to}`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Test send failed"),
   });
 
   const s = q.data?.stats;
@@ -157,7 +172,17 @@ function Dashboard() {
         {/* Send composer */}
         {showSend && (
           <section className="bg-white p-4 rounded shadow-sm border space-y-3">
-            <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-sm text-gray-700">Compose campaign</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowPreview((v) => !v)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${showPreview ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white hover:bg-gray-50"}`}
+                >
+                  <Eye className="w-3.5 h-3.5" /> {showPreview ? "Hide preview" : "Preview"}
+                </button>
+              </div>
+            </div>
             <input
               className="w-full border px-3 py-2 rounded text-sm"
               value={subject}
@@ -170,19 +195,67 @@ function Dashboard() {
               onChange={(e) => setHtml(e.target.value)}
               placeholder="HTML content — CAN-SPAM footer + unsubscribe are appended automatically"
             />
+            {showPreview && (
+              <div className="border rounded overflow-hidden">
+                <div className="bg-gray-50 px-3 py-1.5 text-xs text-gray-500 border-b">Preview with footer</div>
+                <iframe
+                  title="Email preview"
+                  srcDoc={html}
+                  className="w-full h-80 bg-white"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            )}
             <p className="text-xs text-gray-500">
               The system automatically appends the mailing address footer and the Brevo unsubscribe link.
               Sends only to leads with status = <code>not_sent</code>.
             </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => sendMut.mutate()}
-                disabled={sendMut.isPending}
-                className="px-4 py-2 bg-emerald-600 text-white text-sm rounded disabled:opacity-50"
-              >
-                {sendMut.isPending ? "Sending…" : "Send now"}
-              </button>
-              <button onClick={() => setShowSend(false)} className="px-4 py-2 bg-gray-100 text-sm rounded">Cancel</button>
+
+            {/* Test send */}
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center bg-indigo-50 p-3 rounded border border-indigo-100">
+              <MailCheck className="w-4 h-4 text-indigo-600 mt-0.5 sm:mt-0" />
+              <div className="flex-1 text-sm text-indigo-900">
+                <span className="font-medium">Test first:</span> send a preview to yourself before launching.
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <input
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  className="flex-1 sm:w-56 border px-3 py-2 rounded text-sm"
+                />
+                <button
+                  onClick={() => testMut.mutate()}
+                  disabled={testMut.isPending || !testEmail}
+                  className="px-4 py-2 bg-indigo-600 text-white text-sm rounded disabled:opacity-50 whitespace-nowrap"
+                >
+                  {testMut.isPending ? "Sending…" : "Send test"}
+                </button>
+              </div>
+            </div>
+
+            {/* Launch controls */}
+            <div className="flex flex-col gap-3 pt-2 border-t">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={confirmed}
+                  onChange={(e) => setConfirmed(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                I have previewed the email and sent a test. I'm ready to launch to all unsent leads.
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => sendMut.mutate()}
+                  disabled={sendMut.isPending || !confirmed}
+                  className="px-4 py-2 bg-emerald-600 text-white text-sm rounded disabled:opacity-50"
+                >
+                  {sendMut.isPending ? "Launching…" : "Launch campaign"}
+                </button>
+                <button onClick={() => { setShowSend(false); setShowPreview(false); setConfirmed(false); }} className="px-4 py-2 bg-gray-100 text-sm rounded">Cancel</button>
+              </div>
             </div>
           </section>
         )}
