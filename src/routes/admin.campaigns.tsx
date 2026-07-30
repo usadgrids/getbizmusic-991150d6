@@ -55,6 +55,7 @@ function Dashboard() {
   const imp = useServerFn(importApolloLeads);
   const sync = useServerFn(syncLeadsToBrevo);
   const send = useServerFn(sendBrevoCampaign);
+  const sendTest = useServerFn(sendTestCampaign);
 
   const filters = useMemo(
     () => ({
