@@ -522,6 +522,45 @@ export function MiniPlayer() {
               startPlayback(true, true);
               publishPlaylist(event.target);
 
+              // Resume the exact song (and position) the visitor was hearing
+              // before this page load, instead of a fresh shuffled track.
+              const resume = readResumeState();
+              if (resume) {
+                let tries = 0;
+                const tryResume = () => {
+                  if (disposed) return;
+                  tries += 1;
+                  const player = playerRef.current;
+                  if (!player) return;
+                  let ids: string[] | undefined;
+                  try {
+                    ids = player.getPlaylist();
+                  } catch {
+                    ids = undefined;
+                  }
+                  const index = ids?.indexOf(resume.videoId) ?? -1;
+                  if (index >= 0) {
+                    try {
+                      let currentId: string | undefined;
+                      try {
+                        currentId = player.getVideoData()?.video_id;
+                      } catch {
+                        currentId = undefined;
+                      }
+                      if (currentId !== resume.videoId) {
+                        player.playVideoAt(index);
+                      }
+                      if (resume.time > 3) player.seekTo(resume.time, true);
+                    } catch {
+                      // Ignore resume failures — normal playback continues.
+                    }
+                    return;
+                  }
+                  if (tries < 12) window.setTimeout(tryResume, 400);
+                };
+                window.setTimeout(tryResume, 400);
+              }
+
               clearAutoplayFallback();
               autoplayFallbackRef.current = window.setTimeout(() => {
                 if (disposed || startedRef.current) return;
