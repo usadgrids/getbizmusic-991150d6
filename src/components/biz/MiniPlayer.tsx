@@ -266,6 +266,10 @@ export function MiniPlayer() {
     try {
       const videoData = player.getVideoData();
 
+      if (videoData?.video_id) {
+        writeResumeState(videoData.video_id, lastPlaybackTimeRef.current);
+      }
+
       if (videoData?.video_id && videoData.video_id !== lastVideoIdRef.current) {
         lastVideoIdRef.current = videoData.video_id;
         window.dispatchEvent(
