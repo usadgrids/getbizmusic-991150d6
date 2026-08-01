@@ -49,6 +49,7 @@ type YouTubePlayer = {
   pauseVideo: () => void;
   playVideo: () => void;
   playVideoAt: (index: number) => void;
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
   previousVideo: () => void;
   setLoop: (loopPlaylists: boolean) => void;
   setShuffle: (shufflePlaylist: boolean) => void;
