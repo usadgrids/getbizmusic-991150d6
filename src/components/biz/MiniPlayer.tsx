@@ -49,6 +49,7 @@ type YouTubePlayer = {
   pauseVideo: () => void;
   playVideo: () => void;
   playVideoAt: (index: number) => void;
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
   previousVideo: () => void;
   setLoop: (loopPlaylists: boolean) => void;
   setShuffle: (shufflePlaylist: boolean) => void;
@@ -82,6 +83,38 @@ type WindowWithYT = Window & {
 };
 
 const clampVolume = (value: number) => Math.max(0, Math.min(100, value));
+
+// Keeps the same song playing across full page loads (e.g. hard navigations to
+// checkout) instead of restarting the shuffled playlist on a random track.
+const RESUME_KEY = "gbm:player-resume";
+const RESUME_MAX_AGE_MS = 30 * 60 * 1000;
+
+type ResumeState = { videoId: string; time: number; ts: number };
+
+const readResumeState = (): ResumeState | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(RESUME_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ResumeState;
+    if (!parsed?.videoId || Date.now() - (parsed.ts ?? 0) > RESUME_MAX_AGE_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const writeResumeState = (videoId: string, time: number) => {
+  if (typeof window === "undefined" || !videoId) return;
+  try {
+    window.sessionStorage.setItem(
+      RESUME_KEY,
+      JSON.stringify({ videoId, time: Math.max(0, time), ts: Date.now() }),
+    );
+  } catch {
+    // Ignore storage failures (private mode / quota).
+  }
+};
 
 function TapToPlayOverlay({
   visible,
@@ -233,6 +266,10 @@ export function MiniPlayer() {
 
     try {
       const videoData = player.getVideoData();
+
+      if (videoData?.video_id) {
+        writeResumeState(videoData.video_id, lastPlaybackTimeRef.current);
+      }
 
       if (videoData?.video_id && videoData.video_id !== lastVideoIdRef.current) {
         lastVideoIdRef.current = videoData.video_id;
@@ -485,6 +522,45 @@ export function MiniPlayer() {
               syncTrackData(event.target);
               startPlayback(true, true);
               publishPlaylist(event.target);
+
+              // Resume the exact song (and position) the visitor was hearing
+              // before this page load, instead of a fresh shuffled track.
+              const resume = readResumeState();
+              if (resume) {
+                let tries = 0;
+                const tryResume = () => {
+                  if (disposed) return;
+                  tries += 1;
+                  const player = playerRef.current;
+                  if (!player) return;
+                  let ids: string[] | undefined;
+                  try {
+                    ids = player.getPlaylist();
+                  } catch {
+                    ids = undefined;
+                  }
+                  const index = ids?.indexOf(resume.videoId) ?? -1;
+                  if (index >= 0) {
+                    try {
+                      let currentId: string | undefined;
+                      try {
+                        currentId = player.getVideoData()?.video_id;
+                      } catch {
+                        currentId = undefined;
+                      }
+                      if (currentId !== resume.videoId) {
+                        player.playVideoAt(index);
+                      }
+                      if (resume.time > 3) player.seekTo(resume.time, true);
+                    } catch {
+                      // Ignore resume failures — normal playback continues.
+                    }
+                    return;
+                  }
+                  if (tries < 12) window.setTimeout(tryResume, 400);
+                };
+                window.setTimeout(tryResume, 400);
+              }
 
               clearAutoplayFallback();
               autoplayFallbackRef.current = window.setTimeout(() => {
