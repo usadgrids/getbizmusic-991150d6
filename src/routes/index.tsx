@@ -7,7 +7,6 @@ import { getActiveAds } from "@/lib/ads.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
-import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { CityPickerPanel } from "@/components/biz/CityPickerModal";
 
 
@@ -144,7 +143,6 @@ function Index() {
 
 
       <BizFooter />
-      {defaultCity && defaultCity.is_active ? <MiniPlayer /> : null}
     </div>
   );
 }
