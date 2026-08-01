@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CookieConsent } from "../components/biz/CookieConsent";
+import { GlobalMiniPlayer } from "../components/biz/GlobalMiniPlayer";
 
 function NotFoundComponent() {
   return (
@@ -125,6 +126,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <GlobalMiniPlayer />
       <Toaster richColors position="top-center" />
       <CookieConsent />
     </QueryClientProvider>

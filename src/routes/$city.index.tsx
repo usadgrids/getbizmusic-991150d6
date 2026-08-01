@@ -7,7 +7,6 @@ import { getCityBySlug } from "@/lib/cities.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
-import { MiniPlayer } from "@/components/biz/MiniPlayer";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 
 
@@ -101,7 +100,6 @@ function CityHome() {
         </div>
       </main>
       <BizFooter />
-      <MiniPlayer />
     </div>
   );
 }
