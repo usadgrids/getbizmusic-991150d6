@@ -624,6 +624,15 @@ export const updateAd = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fetch existing ad + city so we can keep WINWINCAST in sync.
+    const { data: existing, error: fetchErr } = await supabaseAdmin
+      .from("ads")
+      .select("ad_number, business_name, tagline, city_id, winwincast_synced_at, cities:city_id(name)")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+
     const patch: {
       business_name: string;
       website_url: string | null;
@@ -647,6 +656,17 @@ export const updateAd = createServerFn({ method: "POST" })
     if (data.ministry_info !== undefined) patch.ministry_info = data.ministry_info;
     const { error } = await supabaseAdmin.from("ads").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    // Keep WINWINCAST in sync for any ad that was already published there.
+    if (existing?.winwincast_synced_at && existing.ad_number) {
+      void updateAdOnWinWinCast({
+        adNumber: existing.ad_number,
+        businessName: data.business_name,
+        tagline: data.tagline || existing.tagline,
+        cityName: (existing.cities as { name?: string } | null)?.name ?? null,
+      });
+    }
+
     return { ok: true as const };
   });
 
