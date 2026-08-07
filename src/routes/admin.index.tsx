@@ -410,7 +410,16 @@ function AdminConsole() {
                   const city = (a as unknown as { cities?: { name?: string; state?: string } | null }).cities;
                   return (
                   <tr key={a.id} className="border-t border-gray-100">
-                    <td className="px-4 py-2 font-medium text-[#0F2A4A]">{a.business_name}</td>
+                    <td className="px-4 py-2 font-medium text-[#0F2A4A]">
+                      <div className="flex items-center gap-2">
+                        {a.business_name}
+                        {(a as unknown as { winwincast_synced_at?: string | null }).winwincast_synced_at && (
+                          <span className="inline-flex items-center rounded-full bg-[#0F2A4A] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#D4A24C]">
+                            WINWINCAST
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-2 text-xs text-gray-700">{city?.name ?? "—"}</td>
                     <td className="px-4 py-2 text-xs text-gray-700">{city?.state ?? "—"}</td>
                     <td className="px-4 py-2 text-sm font-mono text-gray-700">#{a.ad_number ?? "—"}</td>
