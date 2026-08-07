@@ -465,7 +465,7 @@ export const listActiveAdsAdmin = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ads")
-      .select("*, cities:city_id(name, state, slug)")
+      .select("*, cities:city_id(name, state, slug), winwincast_synced_at")
       .neq("status", "removed")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
