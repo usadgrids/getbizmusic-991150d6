@@ -67,45 +67,41 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
-      {defaultCity && defaultCity.is_active ? (
-        <>
-          <BizHero cityName={cityName} state={cityState} />
-          <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-10 min-w-0">
-            <AdSlider
-              ads={ads}
-              title={`Featured ${cityName} Business of the Moment`}
-              featured
-            />
-            <div
-              className="mx-auto w-full"
-              style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
-            >
-              <section className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
-                  <Sparkles size={14} />
-                  {cityName} Business Spotlight
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                  Submit Your Business Novelty Ad
-                </h2>
-                <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
-                  Get your {cityName} business featured in the rotation above and reach local
-                  listeners for just $12/year. Limited-time intro offer.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <Link
-                    to="/pricing"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
-                  >
-                    Submit Your Ad
-                    <Sparkles size={14} />
-                  </Link>
-                </div>
-              </section>
+      <BizHero cityName={cityName} state={cityState} />
+      <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-10 min-w-0">
+        <AdSlider
+          ads={ads}
+          title={`Featured ${cityName} Business of the Moment`}
+          featured
+        />
+        <div
+          className="mx-auto w-full"
+          style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
+        >
+          <section className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
+              <Sparkles size={14} />
+              {cityName} Business Spotlight
             </div>
-          </main>
-        </>
-      ) : null}
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">
+              Submit Your Business Novelty Ad
+            </h2>
+            <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
+              Get your {cityName} business featured in the rotation above and reach local
+              listeners for just $12/year. Limited-time intro offer.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/pricing"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+              >
+                Submit Your Ad
+                <Sparkles size={14} />
+              </Link>
+            </div>
+          </section>
+        </div>
+      </main>
 
       {/* City switcher — shared module */}
       <section id="explore-cities" className="bg-[#0F2A4A] text-white scroll-mt-4">
