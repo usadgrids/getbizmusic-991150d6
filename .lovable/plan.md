@@ -1,37 +1,50 @@
-## Goal
+# Auto-post manual GetBizMusic ads to WINWINCAST
 
-Replace the several inconsistent city-switch CTAs with a single reusable module: a modal city picker that works identically on every page, keeps the music playing (no navigation, no new tabs), and always offers the "be the first advertiser" path when no city page exists yet.
+When you add an advertiser manually in `/admin`, the ad is also published on WINWINCAST as a curated link — automatically, with the link URL, image, business name, and description. Later edits and deletions keep the two in sync.
 
-## The one module
+No form merging is needed. The two forms collect different things (GetBizMusic: image, city, plan, contact info; WINWINCAST: URL, title, description, category, country). GetBizMusic already holds everything WINWINCAST needs, so we map fields instead of syncing forms.
 
-New component `src/components/biz/CityPickerModal.tsx` — a dialog containing all city-switch logic:
+## Field mapping
 
-1. **Search input** — accepts a 5-digit ZIP or a city name (same behavior currently living in `src/routes/index.tsx`: `lookupZip` / ZIP→city resolution, plus name/state text matching).
-2. **Results** — active cities that have at least one running ad, each shown with state and ZIP list, linking to `/$city` in the same tab.
-3. **No match / new city** — the "First Advertiser Opportunity" panel appears immediately under the search box: headline naming the resolved city and state, and a **Submit Ad** button going to `/pricing` with the city, state, and ZIP passed along so checkout and `/submit` prefill it. No separate "request a city" form in this path — paying creates the city page automatically, which is the behavior already wired through submission.
-4. **Fallback** — if the text typed matches nothing and isn't a valid ZIP, show a short "enter a ZIP or city name" hint rather than a dead end.
+| WINWINCAST | Comes from GetBizMusic |
+|---|---|
+| url | `https://getbizmusic.com/ad/{ad_number}` (the ad page) |
+| title | Business name |
+| description | Tagline (falls back to a short "Now streaming in {city}" line) |
+| image_url | `https://getbizmusic.com/api/public/ad-image/{ad_number}` |
+| category | Always **Local Business** (new category) |
+| country | United States |
+| added_by | `getbizmusic_sync` |
+| status | Approved (skips the safety review pipeline) |
 
-A small `useCityPicker` trigger (or exported `<CityPickerButton>`) so any CTA can open it with one prop.
+## Scope
 
-## Where it gets wired
+- Only ads created through **Manual Ad Submission** in `/admin` auto-post. Paid/customer submissions do not.
+- Editing a manual ad in `/admin` updates the WINWINCAST link.
+- Deleting or expiring a manual ad removes the WINWINCAST link.
+- If a manual ad is published to several cities, one WINWINCAST link is posted per ad number (one per city page created), matching the ad pages that exist.
 
-| Location | Today | After |
-|---|---|---|
-| `src/routes/$city.index.tsx` — "Select Another City" | Link to `/` | Opens the modal |
-| `src/routes/index.tsx` — "Not in San Diego? Pick your city" section | Inline bespoke search + first-advertiser panel | Section keeps its heading and search box, but rendered by the shared module so behavior matches |
-| `src/components/biz/BizFooter.tsx` | No city switcher | Add a "Change city" link that opens the same modal |
-| Ad detail page `src/routes/ad.$adNumber.tsx` | No switcher | Add the same trigger next to the existing spotlight CTA |
+## How it works (technical)
 
-The home page keeps its full "Listen To Music & View Ads In These Cities" grid; only the search + first-advertiser logic is deduplicated into the module.
+Two pieces, in two projects.
 
-## Cleanups
+**A. WINWINCAST (separate project — must be built there)**
+1. Add `local_business` ("Local Business") to `CATEGORIES` in `src/lib/links-shared.ts`, with a tag color.
+2. New server route `src/routes/api/public/ingest/getbizmusic.ts` accepting POST/PATCH/DELETE, authenticated with a shared bearer secret (`GETBIZMUSIC_SYNC_SECRET`), validated with Zod.
+   - Upsert on `external_ref` (new nullable text column + unique index on `links`) so repeat posts update rather than duplicate.
+   - Writes with `supabaseAdmin` after verifying the secret; status `approved`, `added_by: 'getbizmusic_sync'`, no metadata fetch (we supply title/description/image directly).
+   - DELETE removes the row by `external_ref`.
 
-- Delete the now-unused `src/components/biz/RequestCityForm.tsx` (nothing imports it), unless you want to keep a request form as a secondary option — say the word and I'll leave it as a "just notify me instead" link inside the modal.
-- Remove the duplicated ZIP/filter state from `src/routes/index.tsx` once it consumes the module.
+**B. GetBizMusic (this project)**
+1. Add secret `WINWINCAST_SYNC_SECRET` (same value as above) plus a `WINWINCAST_INGEST_URL` constant.
+2. New server-only helper `src/lib/winwincast-sync.server.ts` with `pushAd`, `updateAd`, `removeAd` — plain `fetch` to the ingest route with the bearer secret. Failures are logged and never block the admin action.
+3. Call it from the existing admin server functions in `src/lib/ads.functions.ts`:
+   - `createManualSubmission` → `pushAd` after the ad row is created (only when the submission is admin-manual and auto-approved).
+   - Admin ad update → `updateAd`.
+   - Admin ad delete → `removeAd`.
+4. Track sync state on `ads`: new nullable `winwincast_synced_at` timestamp so `/admin` can show a small "On WINWINCAST" badge on the Currently Running row.
 
-## Technical notes
+## Notes
 
-- Modal built on the existing shadcn `Dialog`; no route change, so `MiniPlayer` never unmounts and audio continues.
-- City list comes from the existing `getActiveCities` server function via the already-cached `["active-cities"]` query key — no new backend work, no schema change.
-- ZIP lookups keep using the lazy `src/lib/us-zips.ts` dataset, so the dataset is only fetched when the modal opens.
-- All navigation uses `<Link to="/$city" params={...}>` in the same tab (no `target="_blank"`), matching the recent change you asked for.
+- I can only edit this project directly. Part A must be applied in the WINWINCAST project — I'll give you the exact files and code to paste there (or you can run it as a prompt in that project), and the GetBizMusic side will be ready and waiting for it.
+- The shared secret is stored as a secret in both projects, never in code.
