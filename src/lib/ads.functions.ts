@@ -676,6 +676,17 @@ export const removeAd = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Remove from WINWINCAST first if it was synced.
+    const { data: existing } = await supabaseAdmin
+      .from("ads")
+      .select("ad_number, winwincast_synced_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (existing?.winwincast_synced_at && existing.ad_number) {
+      void removeAdFromWinWinCast(existing.ad_number);
+    }
+
     const { error } = await supabaseAdmin
       .from("ads")
       .delete()
