@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import {
+  pushAd,
+  updateAdOnWinWinCast,
+  removeAdFromWinWinCast,
+} from "@/lib/winwincast-sync.server";
 
 // Single source of truth for rotation seconds per plan. All server writes
 // MUST go through this so the slider's countdown always matches the plan.
