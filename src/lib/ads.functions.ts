@@ -737,6 +737,13 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     const emailValue = data.email || (isCommunityEvent ? "community-event@getbizmusic.com" : "");
     const phoneValue = data.phone || (isCommunityEvent ? "N/A" : "");
 
+    // Pre-load city names for WINWINCAST descriptions.
+    const { data: cities } = await supabaseAdmin
+      .from("cities")
+      .select("id, name")
+      .in("id", data.city_ids);
+    const cityNameById = new Map((cities ?? []).map((c) => [c.id, c.name]));
+
     let created = 0;
     for (const city_id of data.city_ids) {
       const { data: sub, error } = await supabaseAdmin
@@ -778,6 +785,22 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         }).select("ad_number").maybeSingle();
         if (adErr) throw new Error(adErr.message);
         void warmSocialPreview(adRow?.ad_number ?? null);
+
+        // Auto-post manual admin ads to WINWINCAST.
+        if (adRow?.ad_number) {
+          const synced = await pushAd({
+            adNumber: adRow.ad_number,
+            businessName,
+            tagline: data.tagline,
+            cityName: cityNameById.get(city_id) ?? null,
+          });
+          if (synced) {
+            await supabaseAdmin
+              .from("ads")
+              .update({ winwincast_synced_at: new Date().toISOString() })
+              .eq("ad_number", adRow.ad_number);
+          }
+        }
       }
       created += 1;
     }
