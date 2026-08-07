@@ -268,6 +268,7 @@ export type Database = {
           submission_id: string | null
           tagline: string | null
           website_url: string | null
+          winwincast_synced_at: string | null
           youtube_url: string | null
         }
         Insert: {
@@ -288,6 +289,7 @@ export type Database = {
           submission_id?: string | null
           tagline?: string | null
           website_url?: string | null
+          winwincast_synced_at?: string | null
           youtube_url?: string | null
         }
         Update: {
@@ -308,6 +310,7 @@ export type Database = {
           submission_id?: string | null
           tagline?: string | null
           website_url?: string | null
+          winwincast_synced_at?: string | null
           youtube_url?: string | null
         }
         Relationships: [

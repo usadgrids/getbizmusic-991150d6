@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { AD_PLANS, type AdPlan } from "@/lib/biz-utils";
+import {
+  pushAd,
+  updateAdOnWinWinCast,
+  removeAdFromWinWinCast,
+} from "@/lib/winwincast-sync.server";
 
 // Single source of truth for rotation seconds per plan. All server writes
 // MUST go through this so the slider's countdown always matches the plan.
@@ -460,7 +465,7 @@ export const listActiveAdsAdmin = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ads")
-      .select("*, cities:city_id(name, state, slug)")
+      .select("*, cities:city_id(name, state, slug), winwincast_synced_at")
       .neq("status", "removed")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -619,6 +624,15 @@ export const updateAd = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fetch existing ad + city so we can keep WINWINCAST in sync.
+    const { data: existing, error: fetchErr } = await supabaseAdmin
+      .from("ads")
+      .select("ad_number, business_name, tagline, city_id, winwincast_synced_at, cities:city_id(name)")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+
     const patch: {
       business_name: string;
       website_url: string | null;
@@ -642,6 +656,17 @@ export const updateAd = createServerFn({ method: "POST" })
     if (data.ministry_info !== undefined) patch.ministry_info = data.ministry_info;
     const { error } = await supabaseAdmin.from("ads").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    // Keep WINWINCAST in sync for any ad that was already published there.
+    if (existing?.winwincast_synced_at && existing.ad_number) {
+      void updateAdOnWinWinCast({
+        adNumber: existing.ad_number,
+        businessName: data.business_name,
+        tagline: data.tagline || existing.tagline,
+        cityName: (existing.cities as { name?: string } | null)?.name ?? null,
+      });
+    }
+
     return { ok: true as const };
   });
 
@@ -651,6 +676,17 @@ export const removeAd = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Remove from WINWINCAST first if it was synced.
+    const { data: existing } = await supabaseAdmin
+      .from("ads")
+      .select("ad_number, winwincast_synced_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (existing?.winwincast_synced_at && existing.ad_number) {
+      void removeAdFromWinWinCast(existing.ad_number);
+    }
+
     const { error } = await supabaseAdmin
       .from("ads")
       .delete()
@@ -701,6 +737,13 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     const emailValue = data.email || (isCommunityEvent ? "community-event@getbizmusic.com" : "");
     const phoneValue = data.phone || (isCommunityEvent ? "N/A" : "");
 
+    // Pre-load city names for WINWINCAST descriptions.
+    const { data: cities } = await supabaseAdmin
+      .from("cities")
+      .select("id, name")
+      .in("id", data.city_ids);
+    const cityNameById = new Map((cities ?? []).map((c) => [c.id, c.name]));
+
     let created = 0;
     for (const city_id of data.city_ids) {
       const { data: sub, error } = await supabaseAdmin
@@ -742,6 +785,22 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         }).select("ad_number").maybeSingle();
         if (adErr) throw new Error(adErr.message);
         void warmSocialPreview(adRow?.ad_number ?? null);
+
+        // Auto-post manual admin ads to WINWINCAST.
+        if (adRow?.ad_number) {
+          const synced = await pushAd({
+            adNumber: adRow.ad_number,
+            businessName,
+            tagline: data.tagline,
+            cityName: cityNameById.get(city_id) ?? null,
+          });
+          if (synced) {
+            await supabaseAdmin
+              .from("ads")
+              .update({ winwincast_synced_at: new Date().toISOString() })
+              .eq("ad_number", adRow.ad_number);
+          }
+        }
       }
       created += 1;
     }
