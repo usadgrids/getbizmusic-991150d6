@@ -1268,6 +1268,24 @@ function EditAdModal({
 
 /* ================= Ad Reps ================= */
 
+// Shareable checkout link for field reps: pre-fills + locks in their 50% code.
+function repLink(code: string, design: boolean) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.getbizmusic.com";
+  return `${origin}/pricing?rep=${encodeURIComponent(code)}${design ? "&design=1" : ""}`;
+}
+
+async function copyRepLink(code: string, design: boolean) {
+  const url = repLink(code, design);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copied", { description: url });
+  } catch {
+    toast.message(url);
+  }
+}
+
+
+
 
 
 function AdRepsSection() {
