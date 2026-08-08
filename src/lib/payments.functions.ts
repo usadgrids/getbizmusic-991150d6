@@ -40,6 +40,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
     agreedNoRefund: boolean;
     disclosureVersion?: string;
     repCode?: string;
+    designAddon?: boolean;
   }) => {
     const schema = z.object({
       plan: z.enum(["image_5", "slider_10"]),
@@ -50,6 +51,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
       disclosureVersion: z.string().optional(),
       repCode: z.string().trim().max(24).optional(),
+      designAddon: z.boolean().optional(),
     });
     return schema.parse(data);
   })
