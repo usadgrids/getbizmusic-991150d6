@@ -94,6 +94,11 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         ? Math.round(chargeAmount * (commissionPercent / 100))
         : 0;
 
+      // Optional done-for-you ad design add-on (flat rate, never discounted).
+      const designAddon = data.designAddon === true;
+      const designCents = designAddon ? DESIGN_PRICE_CENTS : 0;
+      const totalAmount = chargeAmount + designCents;
+
       // Duplicate-payment guard: if the same email+plan started a checkout very
       // recently and it's still pending, reuse that Stripe session's clientSecret
       // instead of creating another one.
@@ -109,7 +114,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (recent?.stripe_session_id && (recent.amount_cents ?? 0) === chargeAmount) {
+      if (recent?.stripe_session_id && (recent.amount_cents ?? 0) === totalAmount) {
         try {
           const existing = await stripe.checkout.sessions.retrieve(recent.stripe_session_id);
           if (existing.status === "open" && existing.client_secret) {
@@ -128,28 +133,42 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         disclosure_text: DISCLOSURE_SUMMARY,
+        design_addon: designAddon ? "true" : "false",
         ...(repCode ? { rep_code: repCode, rep_id: repId ?? "", commission_percent: String(commissionPercent ?? 0), commission_cents: String(commissionCents), discount_cents: String(discountCents) } : {}),
       };
 
-      const lineItem = {
-        price_data: {
-          currency: "usd",
-          product_data: { name: productName },
-          unit_amount: chargeAmount,
+      const lineItems = [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { name: productName },
+            unit_amount: chargeAmount,
+          },
+          quantity: 1,
         },
-        quantity: 1,
-      };
+        ...(designAddon
+          ? [{
+              price_data: {
+                currency: "usd",
+                product_data: { name: "Pro Ad Design — done-for-you artwork" },
+                unit_amount: designCents,
+              },
+              quantity: 1,
+            }]
+          : []),
+      ];
 
       const descriptionParts = [
         productName,
         `${planMeta.seconds}s rotation`,
+        ...(designAddon ? ["+ Pro Ad Design"] : []),
         data.customerEmail,
       ];
       if (repCode) descriptionParts.push(`rep:${repCode}`);
       const description = descriptionParts.join(" — ").slice(0, 350);
 
       const session = await stripe.checkout.sessions.create({
-        line_items: [lineItem],
+        line_items: lineItems,
         mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
@@ -168,7 +187,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         stripe_session_id: session.id,
         customer_email: data.customerEmail,
         plan: data.plan,
-        amount_cents: chargeAmount,
+        amount_cents: totalAmount,
         status: "pending",
         environment: data.environment,
         agreed_terms: true,
@@ -181,7 +200,9 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         discount_cents: discountCents,
         commission_cents: commissionCents,
         commission_percent: commissionPercent,
+        design_addon: designAddon,
       });
+
       if (insertError) {
         console.error("ad_payments pre-insert failed:", insertError);
       }
