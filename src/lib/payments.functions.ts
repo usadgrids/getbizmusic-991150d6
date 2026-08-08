@@ -422,6 +422,7 @@ const zelleInputSchema = z.object({
   agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
   environment: z.enum(["sandbox", "live"]),
   repCode: z.string().trim().max(24).optional(),
+  designAddon: z.boolean().optional(),
 });
 
 type ZelleOrderResult =
@@ -474,6 +475,11 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         ? Math.round(chargeAmount * (commissionPercent / 100))
         : 0;
 
+      // Optional done-for-you ad design add-on (flat rate, never discounted).
+      const designAddon = data.designAddon === true;
+      const designCents = designAddon ? DESIGN_PRICE_CENTS : 0;
+      const totalAmount = chargeAmount + designCents;
+
       // Duplicate-order guard: reuse an in-flight Zelle order from the same
       // email+plan within the last 15 minutes to prevent double-clicks
       // creating two pending orders.
@@ -491,14 +497,14 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (recent?.submission_token && (recent.amount_cents ?? 0) === chargeAmount) {
+      if (recent?.submission_token && (recent.amount_cents ?? 0) === totalAmount) {
         const memo = String(recent.stripe_session_id).replace(/^zelle-/, "").slice(0, 8).toUpperCase();
         return {
           ok: true,
           token: recent.submission_token as string,
           memoCode: memo,
-          amountCents: chargeAmount,
-          amountFormatted: `$${(chargeAmount / 100).toFixed(2)}`,
+          amountCents: totalAmount,
+          amountFormatted: `$${(totalAmount / 100).toFixed(2)}`,
           zellePhone: ZELLE_PHONE,
           submitUrl: `https://www.getbizmusic.com/submit?token=${recent.submission_token}`,
         };
@@ -513,8 +519,9 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
           stripe_session_id: syntheticSession,
           customer_email: data.customerEmail,
           plan: data.plan,
-          amount_cents: chargeAmount,
+          amount_cents: totalAmount,
           status: "awaiting_zelle",
+          design_addon: designAddon,
           environment: data.environment,
           payment_method: "zelle",
           owner_name: data.ownerName,
@@ -542,7 +549,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
       const token = inserted.submission_token as string;
       const submitUrl = `https://www.getbizmusic.com/submit?token=${token}`;
       const designUrl = `https://www.getbizmusic.com/design`;
-      const amountFormatted = `$${(chargeAmount / 100).toFixed(2)}`;
+      const amountFormatted = `$${(totalAmount / 100).toFixed(2)}`;
 
       // Fire-and-forget instructions email — never block order creation.
       try {
@@ -556,6 +563,8 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
             planLabel: productName,
             rotationSeconds: planMeta.seconds,
             amountFormatted,
+            designAddon,
+            adSpotFormatted: `$${(chargeAmount / 100).toFixed(2)}`,
             zellePhone: ZELLE_PHONE,
             memoCode,
             submitUrl,
@@ -578,7 +587,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         ok: true,
         token,
         memoCode,
-        amountCents: chargeAmount,
+        amountCents: totalAmount,
         amountFormatted,
         zellePhone: ZELLE_PHONE,
         submitUrl,
