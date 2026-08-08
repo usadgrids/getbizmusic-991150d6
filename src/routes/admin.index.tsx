@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, Users, Percent, DollarSign, Send } from "lucide-react";
+import { Lock, ArrowLeft, Check, X, Clock, Shield, ExternalLink, Trash2, Plus, CreditCard, Upload, Pencil, Users, Percent, DollarSign, Send, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   amIAdmin,
@@ -1268,6 +1268,24 @@ function EditAdModal({
 
 /* ================= Ad Reps ================= */
 
+// Shareable checkout link for field reps: pre-fills + locks in their 50% code.
+function repLink(code: string, design: boolean) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.getbizmusic.com";
+  return `${origin}/pricing?rep=${encodeURIComponent(code)}${design ? "&design=1" : ""}`;
+}
+
+async function copyRepLink(code: string, design: boolean) {
+  const url = repLink(code, design);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copied", { description: url });
+  } catch {
+    toast.message(url);
+  }
+}
+
+
+
 
 
 function AdRepsSection() {
@@ -1344,7 +1362,23 @@ function AdRepsSection() {
                     </button>
                     <div className="text-xs text-gray-500 font-normal">{r.email ?? "—"}{r.phone ? ` · ${r.phone}` : ""}</div>
                   </td>
-                  <td className="px-4 py-2 font-mono text-xs bg-gray-50">{r.code}</td>
+                  <td className="px-4 py-2 font-mono text-xs bg-gray-50">
+                    {r.code}
+                    <div className="mt-1 flex flex-col gap-0.5 font-sans">
+                      <button
+                        onClick={() => copyRepLink(r.code, false)}
+                        className="text-[11px] text-[#0F2A4A] hover:underline inline-flex items-center gap-1"
+                      >
+                        <Link2 size={10} /> Copy order link
+                      </button>
+                      <button
+                        onClick={() => copyRepLink(r.code, true)}
+                        className="text-[11px] text-[#B8860B] hover:underline inline-flex items-center gap-1"
+                      >
+                        <Link2 size={10} /> Copy + Pro Design
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-2 text-xs"><Percent size={10} className="inline" /> {r.commission_percent}%</td>
                   <td className="px-4 py-2 text-xs">{r.sales_count}</td>
                   <td className="px-4 py-2 text-xs text-gray-700">{fmt(r.discount_cents)}</td>
