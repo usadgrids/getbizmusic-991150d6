@@ -448,17 +448,6 @@ function PricingPage() {
         )}
 
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          {!isReligious && (
-            <div className="mb-5 rounded-lg border border-[#D4A24C]/80 bg-[#FFF8EC] px-4 py-3 text-center">
-              <p className="text-sm sm:text-base font-bold tracking-wide text-[#0F2A4A] uppercase">
-                Use Rep Code in Flyer to Get 50% Off
-              </p>
-              <p className="mt-1 text-xs sm:text-sm font-semibold text-[#0F2A4A]">
-                DON'T HAVE A REPCODE? TEXT 619-707-0467 to get one.
-              </p>
-            </div>
-          )}
-
           {/* Ad artwork: bring your own, or let us design it */}
           {!isReligious && (
             <div className="mb-5">
