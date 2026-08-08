@@ -455,6 +455,37 @@ function PricingPage() {
             </div>
           )}
 
+          {/* Ad artwork: bring your own, or let us design it */}
+          {!isReligious && (
+            <div className="mb-5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Your ad artwork</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDesignAddon(false)}
+                  className={`text-left px-4 py-3 rounded-md border-2 transition-colors ${
+                    !designAddon ? "border-[#0F2A4A] bg-[#0F2A4A]/5" : "border-gray-300 hover:border-gray-400 bg-white"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#0F2A4A]">I have my own ad image</div>
+                  <div className="text-xs text-gray-600 mt-0.5">Upload your 1216×896 image after checkout. No extra cost.</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDesignAddon(true)}
+                  className={`text-left px-4 py-3 rounded-md border-2 transition-colors ${
+                    designAddon ? "border-[#D4A24C] bg-[#FFF8EC]" : "border-gray-300 hover:border-gray-400 bg-white"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#0F2A4A] flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[#D4A24C]" /> Design it for me — add ${(DESIGN_PRICE_CENTS / 100).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-0.5">Our team designs it for you in 72 hours. Unlimited revisions.</div>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Payment-method tabs (paid, non-religious flow only) */}
           {!isReligious && (
             <div className="mb-5">
@@ -667,6 +698,28 @@ function PricingPage() {
               </div>
             </div>
           </div>
+
+          {!isReligious && (
+            <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm">
+              <div className="flex justify-between text-[#0F2A4A]">
+                <span>{AD_PLANS[plan].label} — {AD_PLANS[plan].seconds}s rotation (1 year)</span>
+                <span className="font-semibold">${adSpotPrice.toFixed(2).replace(/\.00$/, "")}</span>
+              </div>
+              {repState.status === "valid" && (
+                <div className="text-xs text-emerald-700 mt-0.5">Rep code {repState.code} applied — {repState.discountPercent}% off the ad spot</div>
+              )}
+              {designAddon && (
+                <div className="flex justify-between text-[#0F2A4A] mt-2">
+                  <span>Pro Ad Design (done-for-you artwork)</span>
+                  <span className="font-semibold">${(DESIGN_PRICE_CENTS / 100).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-gray-300 mt-3 pt-3 text-base font-bold text-[#0F2A4A]">
+                <span>Total today</span>
+                <span>${totalFormatted}</span>
+              </div>
+            </div>
+          )}
 
           {isReligious ? (
             <button
