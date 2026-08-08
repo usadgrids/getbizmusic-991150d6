@@ -1270,7 +1270,7 @@ function EditAdModal({
 
 // Shareable checkout link for field reps: pre-fills + locks in their 50% code.
 function repLink(code: string, design: boolean) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.getbizmusic.com";
+  const origin = "https://www.getbizmusic.com";
   return `${origin}/pricing?rep=${encodeURIComponent(code)}${design ? "&design=1" : ""}`;
 }
 
