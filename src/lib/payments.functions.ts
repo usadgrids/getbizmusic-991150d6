@@ -215,7 +215,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
   });
 
 type TokenLookupResult =
-  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; freeReligious: boolean }
+  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; freeReligious: boolean; designAddon: boolean }
   | { found: false; reason: string };
 
 export const getPaymentByToken = createServerFn({ method: "POST" })
@@ -224,7 +224,7 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ad_payments")
-      .select("submission_token, plan, customer_email, token_used, status, amount_cents")
+      .select("submission_token, plan, customer_email, token_used, status, amount_cents, design_addon")
       .eq("submission_token", data.token)
       .maybeSingle();
     if (error || !row) return { found: false, reason: "Invalid or unknown token" };
@@ -236,6 +236,7 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
       email: row.customer_email as string,
       tokenUsed: row.token_used as boolean,
       freeReligious: Number(row.amount_cents ?? 0) === 0,
+      designAddon: row.design_addon === true,
     };
   });
 
