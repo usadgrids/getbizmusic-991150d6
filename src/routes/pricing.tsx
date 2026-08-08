@@ -49,7 +49,7 @@ function PricingPage() {
   }, [targetCity, targetState, targetZip]);
 
   const [industry, setIndustry] = useState<string>("");
-  const [plan, setPlan] = useState<AdPlan>(planParam ?? "image_5");
+  const [plan, setPlan] = useState<AdPlan>(planParam ?? "slider_10");
   const [email, setEmail] = useState("");
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedNoRefund, setAgreedNoRefund] = useState(false);
@@ -57,7 +57,11 @@ function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [freeLoading, setFreeLoading] = useState(false);
   const [repInput, setRepInput] = useState(repParam ?? "");
-  const [designAddon, setDesignAddon] = useState(designParam === "1" || designParam === "true");
+  const [designAddon, setDesignAddon] = useState(() => {
+    if (designParam === "1" || designParam === "true") return true;
+    if (designParam === "0" || designParam === "false") return false;
+    return true; // default to professionally designed ad
+  });
   const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
   const [ownerName, setOwnerName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -478,7 +482,7 @@ function PricingPage() {
                   }`}
                 >
                   <div className="text-sm font-bold text-[#0F2A4A] flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-[#D4A24C]" /> Design it for me — add ${(DESIGN_PRICE_CENTS / 100).toFixed(2)}
+                    <Sparkles size={14} className="text-[#D4A24C]" /> Professionally design it for my business — add ${(DESIGN_PRICE_CENTS / 100).toFixed(2)}
                   </div>
                   <div className="text-xs text-gray-600 mt-0.5">Our team designs it for you in 72 hours. Unlimited revisions.</div>
                 </button>
