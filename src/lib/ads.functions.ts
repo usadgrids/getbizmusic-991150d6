@@ -745,6 +745,7 @@ export const createManualSubmission = createServerFn({ method: "POST" })
     const cityNameById = new Map((cities ?? []).map((c) => [c.id, c.name]));
 
     let created = 0;
+    let winwincastPosted = false;
     for (const city_id of data.city_ids) {
       const { data: sub, error } = await supabaseAdmin
         .from("ad_submissions")
