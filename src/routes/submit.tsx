@@ -46,7 +46,7 @@ function SubmitPage() {
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
 
-  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean }>(
+  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean; designAddon?: boolean }>(
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
@@ -88,7 +88,7 @@ function SubmitPage() {
         if (!res.found) {
           setVerify({ status: "bad", reason: res.reason });
         } else {
-          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious });
+          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious, designAddon: res.designAddon });
         }
       } catch (e) {
         if (!cancelled) setVerify({ status: "bad", reason: e instanceof Error ? e.message : "Verification failed" });
@@ -158,7 +158,8 @@ function SubmitPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!token || verify.status !== "ok") return;
-    if (!file) { toast.error("Please choose an image to upload"); return; }
+    const designPending = verify.designAddon === true;
+    if (!file && !designPending) { toast.error("Please choose an image to upload"); return; }
     if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
@@ -238,11 +239,14 @@ function SubmitPage() {
 
     setSubmitting(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const path = `submissions/${safeName}`;
-      const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw upErr;
+      let path = "pending-design";
+      if (file) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        path = `submissions/${safeName}`;
+        const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+      }
 
       await submit({ data: {
         ...parsed.data,
@@ -353,6 +357,7 @@ function SubmitPage() {
   const plan = verify.plan!;
   const p = AD_PLANS[plan];
   const isMinistry = !!verify.freeReligious;
+  const designPending = verify.designAddon === true;
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
@@ -372,7 +377,22 @@ function SubmitPage() {
 
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
+          {/* Design add-on: our team makes the artwork, no upload needed */}
+          {designPending && (
+            <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4">
+              <div className="text-[#0F2A4A] font-bold text-lg leading-tight">
+                Our design team is creating your ad — no image upload needed
+              </div>
+              <p className="text-sm text-[#0F2A4A]/80 mt-1">
+                You purchased Pro Ad Design. Just fill in your business details below and submit.
+                We'll email your first design for approval within 72 hours, with unlimited revisions.
+                You can optionally attach your logo or a rough idea below.
+              </p>
+            </div>
+          )}
+
           {/* Prominent size spec */}
+          {!designPending && (
           <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4">
             <div className="flex items-start gap-3">
               <div className="shrink-0 w-10 h-10 rounded-lg bg-[#D4A24C] text-[#0F2A4A] font-bold flex items-center justify-center">4:3</div>
@@ -391,9 +411,12 @@ function SubmitPage() {
               </div>
             </div>
           </div>
+          )}
 
           <div>
-            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">Your ad image</label>
+            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
+              {designPending ? "Logo or reference image (optional)" : "Your ad image"}
+            </label>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-[#D4A24C] transition-colors">
               <input
                 type="file"

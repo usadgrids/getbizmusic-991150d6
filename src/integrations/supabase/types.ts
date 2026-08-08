@@ -26,6 +26,7 @@ export type Database = {
           commission_percent: number | null
           created_at: string
           customer_email: string
+          design_addon: boolean
           disclosure_version: string | null
           discount_cents: number
           environment: string
@@ -54,6 +55,7 @@ export type Database = {
           commission_percent?: number | null
           created_at?: string
           customer_email: string
+          design_addon?: boolean
           disclosure_version?: string | null
           discount_cents?: number
           environment?: string
@@ -82,6 +84,7 @@ export type Database = {
           commission_percent?: number | null
           created_at?: string
           customer_email?: string
+          design_addon?: boolean
           disclosure_version?: string | null
           discount_cents?: number
           environment?: string
@@ -413,6 +416,7 @@ export type Database = {
       }
       design_orders: {
         Row: {
+          ad_payment_id: string | null
           agreed_at: string | null
           agreed_no_refund: boolean
           agreed_terms: boolean
@@ -427,11 +431,13 @@ export type Database = {
           intake_submitted_at: string | null
           ip_address: string | null
           paid_at: string | null
+          source: string
           status: string
           stripe_session_id: string
           updated_at: string
         }
         Insert: {
+          ad_payment_id?: string | null
           agreed_at?: string | null
           agreed_no_refund?: boolean
           agreed_terms?: boolean
@@ -446,11 +452,13 @@ export type Database = {
           intake_submitted_at?: string | null
           ip_address?: string | null
           paid_at?: string | null
+          source?: string
           status?: string
           stripe_session_id: string
           updated_at?: string
         }
         Update: {
+          ad_payment_id?: string | null
           agreed_at?: string | null
           agreed_no_refund?: boolean
           agreed_terms?: boolean
@@ -465,11 +473,20 @@ export type Database = {
           intake_submitted_at?: string | null
           ip_address?: string | null
           paid_at?: string | null
+          source?: string
           status?: string
           stripe_session_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "design_orders_ad_payment_id_fkey"
+            columns: ["ad_payment_id"]
+            isOneToOne: false
+            referencedRelation: "ad_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dispute_evidence_log: {
         Row: {

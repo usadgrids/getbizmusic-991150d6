@@ -40,6 +40,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
     agreedNoRefund: boolean;
     disclosureVersion?: string;
     repCode?: string;
+    designAddon?: boolean;
   }) => {
     const schema = z.object({
       plan: z.enum(["image_5", "slider_10"]),
@@ -50,6 +51,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
       agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
       disclosureVersion: z.string().optional(),
       repCode: z.string().trim().max(24).optional(),
+      designAddon: z.boolean().optional(),
     });
     return schema.parse(data);
   })
@@ -92,6 +94,11 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         ? Math.round(chargeAmount * (commissionPercent / 100))
         : 0;
 
+      // Optional done-for-you ad design add-on (flat rate, never discounted).
+      const designAddon = data.designAddon === true;
+      const designCents = designAddon ? DESIGN_PRICE_CENTS : 0;
+      const totalAmount = chargeAmount + designCents;
+
       // Duplicate-payment guard: if the same email+plan started a checkout very
       // recently and it's still pending, reuse that Stripe session's clientSecret
       // instead of creating another one.
@@ -107,7 +114,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (recent?.stripe_session_id && (recent.amount_cents ?? 0) === chargeAmount) {
+      if (recent?.stripe_session_id && (recent.amount_cents ?? 0) === totalAmount) {
         try {
           const existing = await stripe.checkout.sessions.retrieve(recent.stripe_session_id);
           if (existing.status === "open" && existing.client_secret) {
@@ -126,28 +133,42 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         agreed_at: agreedAt,
         disclosure_version: disclosureVersion,
         disclosure_text: DISCLOSURE_SUMMARY,
+        design_addon: designAddon ? "true" : "false",
         ...(repCode ? { rep_code: repCode, rep_id: repId ?? "", commission_percent: String(commissionPercent ?? 0), commission_cents: String(commissionCents), discount_cents: String(discountCents) } : {}),
       };
 
-      const lineItem = {
-        price_data: {
-          currency: "usd",
-          product_data: { name: productName },
-          unit_amount: chargeAmount,
+      const lineItems = [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { name: productName },
+            unit_amount: chargeAmount,
+          },
+          quantity: 1,
         },
-        quantity: 1,
-      };
+        ...(designAddon
+          ? [{
+              price_data: {
+                currency: "usd",
+                product_data: { name: "Pro Ad Design — done-for-you artwork" },
+                unit_amount: designCents,
+              },
+              quantity: 1,
+            }]
+          : []),
+      ];
 
       const descriptionParts = [
         productName,
         `${planMeta.seconds}s rotation`,
+        ...(designAddon ? ["+ Pro Ad Design"] : []),
         data.customerEmail,
       ];
       if (repCode) descriptionParts.push(`rep:${repCode}`);
       const description = descriptionParts.join(" — ").slice(0, 350);
 
       const session = await stripe.checkout.sessions.create({
-        line_items: [lineItem],
+        line_items: lineItems,
         mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
@@ -166,7 +187,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         stripe_session_id: session.id,
         customer_email: data.customerEmail,
         plan: data.plan,
-        amount_cents: chargeAmount,
+        amount_cents: totalAmount,
         status: "pending",
         environment: data.environment,
         agreed_terms: true,
@@ -179,7 +200,9 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         discount_cents: discountCents,
         commission_cents: commissionCents,
         commission_percent: commissionPercent,
+        design_addon: designAddon,
       });
+
       if (insertError) {
         console.error("ad_payments pre-insert failed:", insertError);
       }
@@ -192,7 +215,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
   });
 
 type TokenLookupResult =
-  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; freeReligious: boolean }
+  | { found: true; token: string; plan: "image_5" | "slider_10"; email: string; tokenUsed: boolean; freeReligious: boolean; designAddon: boolean }
   | { found: false; reason: string };
 
 export const getPaymentByToken = createServerFn({ method: "POST" })
@@ -201,7 +224,7 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("ad_payments")
-      .select("submission_token, plan, customer_email, token_used, status, amount_cents")
+      .select("submission_token, plan, customer_email, token_used, status, amount_cents, design_addon")
       .eq("submission_token", data.token)
       .maybeSingle();
     if (error || !row) return { found: false, reason: "Invalid or unknown token" };
@@ -213,6 +236,7 @@ export const getPaymentByToken = createServerFn({ method: "POST" })
       email: row.customer_email as string,
       tokenUsed: row.token_used as boolean,
       freeReligious: Number(row.amount_cents ?? 0) === 0,
+      designAddon: row.design_addon === true,
     };
   });
 
@@ -399,6 +423,7 @@ const zelleInputSchema = z.object({
   agreedNoRefund: z.literal(true, { message: "You must agree to the no-refund policy" }),
   environment: z.enum(["sandbox", "live"]),
   repCode: z.string().trim().max(24).optional(),
+  designAddon: z.boolean().optional(),
 });
 
 type ZelleOrderResult =
@@ -451,6 +476,11 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         ? Math.round(chargeAmount * (commissionPercent / 100))
         : 0;
 
+      // Optional done-for-you ad design add-on (flat rate, never discounted).
+      const designAddon = data.designAddon === true;
+      const designCents = designAddon ? DESIGN_PRICE_CENTS : 0;
+      const totalAmount = chargeAmount + designCents;
+
       // Duplicate-order guard: reuse an in-flight Zelle order from the same
       // email+plan within the last 15 minutes to prevent double-clicks
       // creating two pending orders.
@@ -468,14 +498,14 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (recent?.submission_token && (recent.amount_cents ?? 0) === chargeAmount) {
+      if (recent?.submission_token && (recent.amount_cents ?? 0) === totalAmount) {
         const memo = String(recent.stripe_session_id).replace(/^zelle-/, "").slice(0, 8).toUpperCase();
         return {
           ok: true,
           token: recent.submission_token as string,
           memoCode: memo,
-          amountCents: chargeAmount,
-          amountFormatted: `$${(chargeAmount / 100).toFixed(2)}`,
+          amountCents: totalAmount,
+          amountFormatted: `$${(totalAmount / 100).toFixed(2)}`,
           zellePhone: ZELLE_PHONE,
           submitUrl: `https://www.getbizmusic.com/submit?token=${recent.submission_token}`,
         };
@@ -490,8 +520,9 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
           stripe_session_id: syntheticSession,
           customer_email: data.customerEmail,
           plan: data.plan,
-          amount_cents: chargeAmount,
+          amount_cents: totalAmount,
           status: "awaiting_zelle",
+          design_addon: designAddon,
           environment: data.environment,
           payment_method: "zelle",
           owner_name: data.ownerName,
@@ -519,7 +550,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
       const token = inserted.submission_token as string;
       const submitUrl = `https://www.getbizmusic.com/submit?token=${token}`;
       const designUrl = `https://www.getbizmusic.com/design`;
-      const amountFormatted = `$${(chargeAmount / 100).toFixed(2)}`;
+      const amountFormatted = `$${(totalAmount / 100).toFixed(2)}`;
 
       // Fire-and-forget instructions email — never block order creation.
       try {
@@ -533,6 +564,8 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
             planLabel: productName,
             rotationSeconds: planMeta.seconds,
             amountFormatted,
+            designAddon,
+            adSpotFormatted: `$${(chargeAmount / 100).toFixed(2)}`,
             zellePhone: ZELLE_PHONE,
             memoCode,
             submitUrl,
@@ -555,7 +588,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         ok: true,
         token,
         memoCode,
-        amountCents: chargeAmount,
+        amountCents: totalAmount,
         amountFormatted,
         zellePhone: ZELLE_PHONE,
         submitUrl,
