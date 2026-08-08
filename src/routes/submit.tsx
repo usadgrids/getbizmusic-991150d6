@@ -376,7 +376,22 @@ function SubmitPage() {
 
 
         <form onSubmit={handleSubmit} className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
+          {/* Design add-on: our team makes the artwork, no upload needed */}
+          {designPending && (
+            <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4">
+              <div className="text-[#0F2A4A] font-bold text-lg leading-tight">
+                Our design team is creating your ad — no image upload needed
+              </div>
+              <p className="text-sm text-[#0F2A4A]/80 mt-1">
+                You purchased Pro Ad Design. Just fill in your business details below and submit.
+                We'll email your first design for approval within 72 hours, with unlimited revisions.
+                You can optionally attach your logo or a rough idea below.
+              </p>
+            </div>
+          )}
+
           {/* Prominent size spec */}
+          {!designPending && (
           <div className="rounded-xl border-2 border-[#D4A24C] bg-[#FFF8E9] p-4">
             <div className="flex items-start gap-3">
               <div className="shrink-0 w-10 h-10 rounded-lg bg-[#D4A24C] text-[#0F2A4A] font-bold flex items-center justify-center">4:3</div>
@@ -395,9 +410,12 @@ function SubmitPage() {
               </div>
             </div>
           </div>
+          )}
 
           <div>
-            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">Your ad image</label>
+            <label className="block text-sm font-semibold text-[#0F2A4A] mb-2">
+              {designPending ? "Logo or reference image (optional)" : "Your ad image"}
+            </label>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-[#D4A24C] transition-colors">
               <input
                 type="file"
