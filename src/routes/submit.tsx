@@ -46,7 +46,7 @@ function SubmitPage() {
   const lookup = useServerFn(getPaymentByToken);
   const reminder = useServerFn(scheduleSubmissionReminder);
 
-  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean }>(
+  const [verify, setVerify] = useState<{ status: "checking" | "ok" | "bad"; plan?: AdPlan; email?: string; tokenUsed?: boolean; reason?: string; freeReligious?: boolean; designAddon?: boolean }>(
     { status: token ? "checking" : "bad", reason: token ? undefined : "No payment token provided" }
   );
   const [file, setFile] = useState<File | null>(null);
@@ -88,7 +88,7 @@ function SubmitPage() {
         if (!res.found) {
           setVerify({ status: "bad", reason: res.reason });
         } else {
-          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious });
+          setVerify({ status: "ok", plan: res.plan, email: res.email, tokenUsed: res.tokenUsed, freeReligious: res.freeReligious, designAddon: res.designAddon });
         }
       } catch (e) {
         if (!cancelled) setVerify({ status: "bad", reason: e instanceof Error ? e.message : "Verification failed" });
@@ -158,7 +158,8 @@ function SubmitPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!token || verify.status !== "ok") return;
-    if (!file) { toast.error("Please choose an image to upload"); return; }
+    const designPending = verify.designAddon === true;
+    if (!file && !designPending) { toast.error("Please choose an image to upload"); return; }
     if (!city) { toast.error("Please pick the city + state where your ad should appear"); return; }
     if (!agree) { toast.error("Please agree to the content policy"); return; }
 
@@ -238,11 +239,14 @@ function SubmitPage() {
 
     setSubmitting(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const path = `submissions/${safeName}`;
-      const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw upErr;
+      let path = "pending-design";
+      if (file) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        path = `submissions/${safeName}`;
+        const { error: upErr } = await supabase.storage.from("ad-uploads").upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+      }
 
       await submit({ data: {
         ...parsed.data,
