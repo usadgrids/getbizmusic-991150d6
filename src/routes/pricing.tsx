@@ -14,11 +14,15 @@ import { validateRepCode } from "@/lib/reps.functions";
 import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
+import { DESIGN_PRICE_CENTS } from "@/lib/design.functions";
 
 const pricingSearchSchema = z.object({
   city: z.string().trim().max(120).optional(),
   state: z.string().trim().max(10).optional(),
   zip: z.string().trim().max(10).optional(),
+  rep: z.string().trim().max(24).optional(),
+  plan: z.enum(["image_5", "slider_10"]).optional(),
+  design: z.string().trim().max(4).optional(),
 });
 
 export const Route = createFileRoute("/pricing")({
@@ -35,7 +39,7 @@ export const Route = createFileRoute("/pricing")({
 
 function PricingPage() {
   const navigate = useNavigate();
-  const { city: targetCity, state: targetState, zip: targetZip } = Route.useSearch();
+  const { city: targetCity, state: targetState, zip: targetZip, rep: repParam, plan: planParam, design: designParam } = Route.useSearch();
 
   // Carry the city chosen in the city picker through checkout to /submit.
   useEffect(() => {
@@ -45,14 +49,15 @@ function PricingPage() {
   }, [targetCity, targetState, targetZip]);
 
   const [industry, setIndustry] = useState<string>("");
-  const [plan, setPlan] = useState<AdPlan>("image_5");
+  const [plan, setPlan] = useState<AdPlan>(planParam ?? "image_5");
   const [email, setEmail] = useState("");
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedNoRefund, setAgreedNoRefund] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [freeLoading, setFreeLoading] = useState(false);
-  const [repInput, setRepInput] = useState("");
+  const [repInput, setRepInput] = useState(repParam ?? "");
+  const [designAddon, setDesignAddon] = useState(designParam === "1" || designParam === "true");
   const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
   const [ownerName, setOwnerName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -100,7 +105,11 @@ function PricingPage() {
   }, [repInput]);
 
   const basePrice = AD_PLANS[plan].price;
-  const discounted = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
+  const adSpotPrice = repState.status === "valid" ? basePrice * (1 - repState.discountPercent / 100) : basePrice;
+  // Flat-rate pro design add-on — never discounted by rep codes.
+  const designPrice = designAddon ? DESIGN_PRICE_CENTS / 100 : 0;
+  const discounted = adSpotPrice + designPrice;
+  const totalFormatted = discounted.toFixed(2).replace(/\.00$/, "");
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const zelleFieldsOk = payMethod !== "zelle" || (
@@ -123,6 +132,7 @@ function PricingPage() {
           agreedTerms,
           agreedNoRefund,
           disclosureVersion: "v1",
+          designAddon,
           ...(repState.status === "valid" ? { repCode: repState.code } : {}),
         },
       });
@@ -182,6 +192,7 @@ function PricingPage() {
           agreedTerms: true,
           agreedNoRefund: true,
           environment: getStripeEnvironment(),
+          designAddon,
           ...(repState.status === "valid" ? { repCode: repState.code } : {}),
         },
       });
@@ -674,7 +685,7 @@ function PricingPage() {
               {zelleLoading ? (
                 <>Reserving your spot…</>
               ) : (
-                <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${discounted}</>
+                <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${totalFormatted}</>
               )}
             </button>
           ) : (
@@ -683,7 +694,7 @@ function PricingPage() {
               disabled={!canPay}
               className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#D4A24C]"
             >
-              {loading ? "Starting…" : `Complete Purchase — $${discounted}`}
+              {loading ? "Starting…" : `Complete Purchase — $${totalFormatted}`}
             </button>
           )}
           {!industry ? (
