@@ -1344,7 +1344,23 @@ function AdRepsSection() {
                     </button>
                     <div className="text-xs text-gray-500 font-normal">{r.email ?? "—"}{r.phone ? ` · ${r.phone}` : ""}</div>
                   </td>
-                  <td className="px-4 py-2 font-mono text-xs bg-gray-50">{r.code}</td>
+                  <td className="px-4 py-2 font-mono text-xs bg-gray-50">
+                    {r.code}
+                    <div className="mt-1 flex flex-col gap-0.5 font-sans">
+                      <button
+                        onClick={() => copyRepLink(r.code, false)}
+                        className="text-[11px] text-[#0F2A4A] hover:underline inline-flex items-center gap-1"
+                      >
+                        <Link2 size={10} /> Copy order link
+                      </button>
+                      <button
+                        onClick={() => copyRepLink(r.code, true)}
+                        className="text-[11px] text-[#B8860B] hover:underline inline-flex items-center gap-1"
+                      >
+                        <Link2 size={10} /> Copy + Pro Design
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-2 text-xs"><Percent size={10} className="inline" /> {r.commission_percent}%</td>
                   <td className="px-4 py-2 text-xs">{r.sales_count}</td>
                   <td className="px-4 py-2 text-xs text-gray-700">{fmt(r.discount_cents)}</td>
