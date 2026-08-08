@@ -680,18 +680,46 @@ export const removeAd = createServerFn({ method: "POST" })
     // Remove from WINWINCAST first if it was synced.
     const { data: existing } = await supabaseAdmin
       .from("ads")
-      .select("ad_number, winwincast_synced_at")
+      .select("ad_number, business_name, tagline, winwincast_synced_at")
       .eq("id", data.id)
       .maybeSingle();
-    if (existing?.winwincast_synced_at && existing.ad_number) {
-      void removeAdFromWinWinCast(existing.ad_number);
-    }
 
     const { error } = await supabaseAdmin
       .from("ads")
       .delete()
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    if (existing?.winwincast_synced_at && existing.ad_number) {
+      // The deleted ad owned the WINWINCAST link. If the same business still
+      // runs in other cities, move the single link to a surviving ad.
+      const { data: sibling } = await supabaseAdmin
+        .from("ads")
+        .select("ad_number, business_name, tagline, cities:city_id(name)")
+        .eq("business_name", existing.business_name)
+        .eq("status", "active")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      void removeAdFromWinWinCast(existing.ad_number);
+
+      if (sibling?.ad_number) {
+        const moved = await pushAd({
+          adNumber: sibling.ad_number,
+          businessName: sibling.business_name,
+          tagline: sibling.tagline,
+          cityName: (sibling.cities as { name?: string } | null)?.name ?? null,
+        });
+        if (moved) {
+          await supabaseAdmin
+            .from("ads")
+            .update({ winwincast_synced_at: new Date().toISOString() })
+            .eq("ad_number", sibling.ad_number);
+        }
+      }
+    }
+
     return { ok: true as const };
   });
 
