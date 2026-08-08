@@ -357,6 +357,7 @@ function SubmitPage() {
   const plan = verify.plan!;
   const p = AD_PLANS[plan];
   const isMinistry = !!verify.freeReligious;
+  const designPending = verify.designAddon === true;
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
