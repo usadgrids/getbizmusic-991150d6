@@ -142,6 +142,51 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     submissionToken = (upserted?.submission_token as string) ?? null;
   }
 
+  // Pro Ad Design add-on bought together with the ad spot → create the linked
+  // design order so it shows up in the admin design queue and the buyer gets
+  // the intake link.
+  if (session.metadata?.design_addon === "true") {
+    try {
+      const { DESIGN_PRICE_CENTS } = await import("@/lib/design.functions");
+      const { data: payRow } = await supabaseAdmin
+        .from("ad_payments")
+        .select("id")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+      await supabaseAdmin.from("design_orders").upsert(
+        {
+          stripe_session_id: session.id,
+          customer_email: recipientEmail,
+          amount_cents: DESIGN_PRICE_CENTS,
+          status: "paid",
+          environment: env,
+          paid_at: paidAtIso,
+          agreed_terms: true,
+          agreed_no_refund: true,
+          agreed_at: session.metadata?.agreed_at ?? paidAtIso,
+          disclosure_version: session.metadata?.disclosure_version ?? null,
+          ad_payment_id: payRow?.id ?? null,
+          source: "ad_addon",
+        },
+        { onConflict: "stripe_session_id" }
+      );
+
+      if (recipientEmail) {
+        const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+        await enqueueTransactionalEmailInternal({
+          templateName: "design-intake-link",
+          recipientEmail,
+          idempotencyKey: `design-addon-intake-${session.id}`,
+          templateData: {
+            intakeUrl: `${SITE_URL}/design/return?session_id=${session.id}`,
+          },
+        });
+      }
+    } catch (e) {
+      console.error("design add-on provisioning failed:", e);
+    }
+  }
+
   if (recipientEmail && submissionToken) {
     await sendPaymentReceipt({
       email: recipientEmail,
