@@ -786,19 +786,33 @@ export const createManualSubmission = createServerFn({ method: "POST" })
         if (adErr) throw new Error(adErr.message);
         void warmSocialPreview(adRow?.ad_number ?? null);
 
-        // Auto-post manual admin ads to WINWINCAST.
-        if (adRow?.ad_number) {
-          const synced = await pushAd({
-            adNumber: adRow.ad_number,
-            businessName,
-            tagline: data.tagline,
-            cityName: cityNameById.get(city_id) ?? null,
-          });
-          if (synced) {
-            await supabaseAdmin
-              .from("ads")
-              .update({ winwincast_synced_at: new Date().toISOString() })
-              .eq("ad_number", adRow.ad_number);
+        // Auto-post manual admin ads to WINWINCAST — ONE link per business,
+        // even when the same ad is published to several cities.
+        if (adRow?.ad_number && !winwincastPosted) {
+          const { data: alreadySynced } = await supabaseAdmin
+            .from("ads")
+            .select("id")
+            .eq("business_name", businessName)
+            .not("winwincast_synced_at", "is", null)
+            .limit(1)
+            .maybeSingle();
+
+          if (alreadySynced) {
+            winwincastPosted = true;
+          } else {
+            const synced = await pushAd({
+              adNumber: adRow.ad_number,
+              businessName,
+              tagline: data.tagline,
+              cityName: cityNameById.get(city_id) ?? null,
+            });
+            if (synced) {
+              winwincastPosted = true;
+              await supabaseAdmin
+                .from("ads")
+                .update({ winwincast_synced_at: new Date().toISOString() })
+                .eq("ad_number", adRow.ad_number);
+            }
           }
         }
       }
