@@ -353,6 +353,8 @@ function AdminConsole() {
 
         <DesignOrdersSection />
 
+        <ActivationCodesSection />
+
 
 
 
