@@ -7,7 +7,7 @@ const SIGNED_URL_TTL = 60 * 60;
 const SITE_URL = "https://www.getbizmusic.com";
 
 export const ZELLE_PHONE = "619-707-0467";
-export const VENMO_HANDLE = "@GetBizMusic";
+export const VENMO_HANDLE = "@RTPosadas";
 
 export type ActivationPaymentMethod = "stripe" | "zelle" | "venmo";
 

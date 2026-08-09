@@ -97,7 +97,7 @@ export const template = {
     memoCode: 'AMLEGA-4F2C',
     method: 'zelle',
     zellePhone: '619-707-0467',
-    venmoHandle: '@GetBizMusic',
+    venmoHandle: '@RTPosadas',
   },
 } satisfies TemplateEntry
 
