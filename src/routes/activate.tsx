@@ -115,11 +115,16 @@ function ActivatePage() {
 
   const submit = async () => {
     if (!proof) return;
+    if (!businessName.trim()) return toast.error("Please enter your business name.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+      return toast.error("Please enter a valid customer support email address.");
+    }
     if (!agreed) return toast.error("Please agree to the terms to continue.");
     if (correct === "no" && notes.trim().length < 5) {
       return toast.error("Please describe the corrections you'd like.");
     }
     setSubmitting(true);
+
     try {
       const res = await submitFn({
         data: {
