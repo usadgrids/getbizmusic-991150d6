@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import heroFlyer from "@/assets/biz-hero-flyer-v3.jpg.asset.json";
+import heroFlyer from "@/assets/biz-hero-b2b.png.asset.json";
 
 type Props = {
   cityName?: string;
