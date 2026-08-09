@@ -22,6 +22,7 @@ import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, type ZelleOrderAdminRow } from "@/lib/payments.functions";
+import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
