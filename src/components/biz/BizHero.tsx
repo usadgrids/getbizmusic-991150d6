@@ -32,8 +32,8 @@ export function BizHero({ cityName, state }: Props) {
             src={heroFlyer.url}
             alt={
               label
-                ? `Get Biz Music ${label} — Novelty Business Ads with Music Streaming. Get your business seen every day, all year long for just $12.`
-                : "Get Biz Music — Novelty Business Ads with Music Streaming. Get your business seen every day, all year long for just $12."
+                ? `Get Biz Music ${label} — Local B2B Business Network with Music Streaming. Get listed from $12/year.`
+                : "Get Biz Music — Local B2B Business Network with Music Streaming. Get listed from $12/year."
             }
             className="block w-full h-auto"
           />
