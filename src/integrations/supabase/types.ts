@@ -14,6 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_codes: {
+        Row: {
+          ad_id: string | null
+          ad_type: string
+          agreed_at: string | null
+          agreed_terms: boolean
+          business_address: string | null
+          business_name: string
+          city_id: string | null
+          code: string
+          confirmed_correct: boolean | null
+          contact_email: string | null
+          contact_name: string | null
+          correction_notes: string | null
+          created_at: string
+          created_by: string | null
+          customer_business_address: string | null
+          customer_business_name: string | null
+          customer_email: string | null
+          customer_phone_sms: string | null
+          customer_phone_voice: string | null
+          expires_at: string | null
+          id: string
+          image_path: string
+          industry: string
+          memo_code: string | null
+          paid_at: string | null
+          payment_method: string | null
+          phone_sms: string | null
+          phone_voice: string | null
+          price_cents: number
+          price_note: string | null
+          status: string
+          stripe_session_id: string | null
+          submitted_at: string | null
+          tagline: string | null
+          updated_at: string
+          viewed_at: string | null
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          ad_id?: string | null
+          ad_type?: string
+          agreed_at?: string | null
+          agreed_terms?: boolean
+          business_address?: string | null
+          business_name: string
+          city_id?: string | null
+          code: string
+          confirmed_correct?: boolean | null
+          contact_email?: string | null
+          contact_name?: string | null
+          correction_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_business_address?: string | null
+          customer_business_name?: string | null
+          customer_email?: string | null
+          customer_phone_sms?: string | null
+          customer_phone_voice?: string | null
+          expires_at?: string | null
+          id?: string
+          image_path: string
+          industry: string
+          memo_code?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          phone_sms?: string | null
+          phone_voice?: string | null
+          price_cents?: number
+          price_note?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitted_at?: string | null
+          tagline?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          ad_id?: string | null
+          ad_type?: string
+          agreed_at?: string | null
+          agreed_terms?: boolean
+          business_address?: string | null
+          business_name?: string
+          city_id?: string | null
+          code?: string
+          confirmed_correct?: boolean | null
+          contact_email?: string | null
+          contact_name?: string | null
+          correction_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_business_address?: string | null
+          customer_business_name?: string | null
+          customer_email?: string | null
+          customer_phone_sms?: string | null
+          customer_phone_voice?: string | null
+          expires_at?: string | null
+          id?: string
+          image_path?: string
+          industry?: string
+          memo_code?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          phone_sms?: string | null
+          phone_voice?: string | null
+          price_cents?: number
+          price_note?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitted_at?: string | null
+          tagline?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_codes_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_codes_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_payments: {
         Row: {
           agreed_at: string | null

@@ -17,6 +17,7 @@ import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -79,6 +80,11 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivateRoute = ActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CityRoute = CityRouteImport.update({
@@ -209,6 +215,7 @@ const ApiPublicAdImageAdNumberRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
+  '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activate': typeof ActivateRoute
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -274,6 +282,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
+  '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$city'
+    | '/activate'
     | '/admin'
     | '/auth'
     | '/design'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activate'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$city'
+    | '/activate'
     | '/admin'
     | '/auth'
     | '/design'
@@ -407,6 +419,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
+  ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activate': {
+      id: '/activate'
+      path: '/activate'
+      fullPath: '/activate'
+      preLoaderRoute: typeof ActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$city': {
@@ -693,6 +713,7 @@ const DesignRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
+  ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
