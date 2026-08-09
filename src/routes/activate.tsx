@@ -306,7 +306,7 @@ function ActivatePage() {
 
         {/* Confirmation */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
-          <h2 className="font-serif text-lg font-bold text-[#0F2A4A]">Is everything correct?</h2>
+          <h2 className="font-serif text-lg font-bold text-[#0F2A4A]">Look at your Advertising Proposal Flyer. Make sure everything is correct. If not click "I'd like some corrections or improvement".</h2>
           <div className="space-y-2 text-sm">
             <label className="flex items-start gap-2 cursor-pointer">
               <input type="radio" checked={correct === "yes"} onChange={() => setCorrect("yes")} className="mt-1 accent-emerald-600" />
