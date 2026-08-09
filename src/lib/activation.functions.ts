@@ -112,15 +112,15 @@ const submitSchema = z.object({
   code: z.string().trim().min(2).max(48),
   confirmedCorrect: z.boolean(),
   correctionNotes: z.string().trim().max(4000).optional(),
-  businessName: z.string().trim().min(1).max(160),
+  businessName: z.string().trim().min(1, "Please enter your business name.").max(160),
   businessAddress: z.string().trim().max(300).optional(),
-  email: z.string().trim().email().max(255),
+  email: z.string().trim().email("Please enter a valid email address.").max(255),
   phoneVoice: z.string().trim().max(40).optional(),
   phoneSms: z.string().trim().max(40).optional(),
   agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
   paymentMethod: z.enum(["stripe", "zelle", "venmo"]),
   environment: z.enum(["sandbox", "live"]),
-  returnUrl: z.string().url(),
+  returnUrl: z.string().url("Could not determine the page address. Please reload and try again."),
 });
 
 export type ActivationSubmitResult =
@@ -128,8 +128,24 @@ export type ActivationSubmitResult =
   | { ok: true; method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string }
   | { ok: false; error: string };
 
+const FIELD_LABELS: Record<string, string> = {
+  businessName: "Business name",
+  email: "Customer support email",
+  phoneVoice: "Customer support number (voice)",
+  phoneSms: "Text/SMS number",
+  businessAddress: "Business address",
+  returnUrl: "Page address",
+};
+
 export const submitActivation = createServerFn({ method: "POST" })
-  .inputValidator((d: z.input<typeof submitSchema>) => submitSchema.parse(d))
+  .inputValidator((d: z.input<typeof submitSchema>) => {
+    const parsed = submitSchema.safeParse(d);
+    if (parsed.success) return parsed.data;
+    const issue = parsed.error.issues[0];
+    const label = FIELD_LABELS[String(issue?.path?.[0] ?? "")];
+    throw new Error(label ? `${label}: ${issue.message}` : (issue?.message ?? "Please check your details and try again."));
+  })
+
   .handler(async ({ data }): Promise<ActivationSubmitResult> => {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

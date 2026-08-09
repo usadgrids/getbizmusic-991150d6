@@ -115,22 +115,28 @@ function ActivatePage() {
 
   const submit = async () => {
     if (!proof) return;
+    if (!businessName.trim()) return toast.error("Please enter your business name.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+      return toast.error("Please enter a valid customer support email address.");
+    }
     if (!agreed) return toast.error("Please agree to the terms to continue.");
     if (correct === "no" && notes.trim().length < 5) {
       return toast.error("Please describe the corrections you'd like.");
     }
     setSubmitting(true);
+
     try {
       const res = await submitFn({
         data: {
           code: proof.code,
           confirmedCorrect: correct === "yes",
           correctionNotes: correct === "no" ? notes.trim() : undefined,
-          businessName,
-          businessAddress: address || undefined,
-          email,
-          phoneVoice: voice || undefined,
-          phoneSms: (sameAsVoice ? voice : sms) || undefined,
+          businessName: businessName.trim(),
+          businessAddress: address.trim() || undefined,
+          email: email.trim(),
+          phoneVoice: voice.trim() || undefined,
+          phoneSms: (sameAsVoice ? voice : sms).trim() || undefined,
+
           agreedTerms: true,
           paymentMethod: method,
           environment: getStripeEnvironment(),
