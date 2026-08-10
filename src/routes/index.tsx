@@ -13,6 +13,9 @@ import { CityPickerPanel } from "@/components/biz/CityPickerModal";
 
 const DEFAULT_CITY_SLUG = "san-diego-ca";
 
+const OG_IMAGE_URL =
+  "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -26,6 +29,12 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Browse Get Biz Music cities and advertise your local business — $12/year intro offer." },
       { property: "og:url", content: "https://getbizmusic.com/" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:image:width", content: "1254" },
+      { property: "og:image:height", content: "1254" },
+      { property: "og:image:alt", content: "Get Biz Music — Local B2B Business Network with Music Streaming" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_IMAGE_URL },
     ],
     links: [{ rel: "canonical", href: "https://getbizmusic.com/" }],
   }),
