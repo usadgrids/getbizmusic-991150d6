@@ -134,6 +134,12 @@ function FoodCategoryPage() {
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
+  // Bumped on every code submission so re-entering the same code still snaps the slider back.
+  const [focusNonce, setFocusNonce] = useState(0);
+  const handleProof = (next: ActivationProof | null) => {
+    setProof(next);
+    if (next) setFocusNonce((n) => n + 1);
+  };
 
   // PRIVATE PREVIEW ONLY: this slide exists purely in this visitor's browser after they
   // entered their own activation code. It is never fetched by, or rendered for, anyone else.
