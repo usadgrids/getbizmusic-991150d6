@@ -79,8 +79,10 @@ function ActivatePage() {
   const [sms, setSms] = useState("");
   const [sameAsVoice, setSameAsVoice] = useState(true);
   const [agreed, setAgreed] = useState(false);
-  const [method, setMethod] = useState<"stripe" | "zelle" | "venmo">("stripe");
+  const [method, setMethod] = useState<PaymentChoice>("stripe");
   const [submitting, setSubmitting] = useState(false);
+  const [artwork, setArtwork] = useState<ArtworkChoice>("ours");
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
 
   const runLookup = async (raw: string) => {
     const code = raw.trim();
