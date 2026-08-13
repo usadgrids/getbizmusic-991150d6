@@ -4,9 +4,11 @@ import heroFlyer from "@/assets/biz-hero-b2b.png.asset.json";
 type Props = {
   cityName?: string;
   state?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
-export function BizHero({ cityName, state }: Props) {
+export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
   const label = cityName ? `${cityName}${state ? `, ${state}` : ""}` : null;
   return (
     <header className="relative bg-[#0F2A4A]">
