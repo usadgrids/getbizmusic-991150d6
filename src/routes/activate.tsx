@@ -57,6 +57,7 @@ function ActivatePage() {
   const lookupFn = useServerFn(lookupActivationCode);
   const submitFn = useServerFn(submitActivation);
   const confirmFn = useServerFn(confirmActivationSession);
+  const payInvoiceFn = useServerFn(payActivationInvoice);
 
   const [codeInput, setCodeInput] = useState(search.code ?? "");
   const [loading, setLoading] = useState(false);
