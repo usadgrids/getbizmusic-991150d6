@@ -1,26 +1,27 @@
 # AEO/GEO Restaurant Knowledge Base for /food
 
-Build a researched, structured database of San Diego County restaurants, publish one optimized page per restaurant under /food, and mark everything up so AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) can cite getbizmusic.com as the source.
+Build a researched, structured database of the restaurants that advertise with us, publish one optimized page per restaurant under /food, and mark everything up so AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) can cite getbizmusic.com as the source. Crawling is triggered automatically when an ad is approved and listed — no bulk scrape of all San Diego restaurants.
 
 ## What gets built
 
-**1. Research pipeline**
-- Web research (Firecrawl connector) pulls each restaurant's own site plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal),service options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
+**1. Research pipeline (auto-triggered on ad approval)**
+- When an ad is approved and goes live (status flip to published), a background job enqueues that restaurant for research. The job can also be triggered manually from /admin.
+- Web research (Firecrawl connector) pulls that restaurant's own site (from the `website_url` on the ad) plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal), service options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
 - An AI pass (Lovable AI Gateway) normalizes the messy scraped text into a clean, typed record and writes 6-10 natural-language Q&A pairs per restaurant ("Does X have vegan options?", "What are X's hours on Sunday?"). Q&A is what answer engines quote most.
-- Seed list: San Diego County cities/neighborhoods, discovered via search per city + cuisine.
+- Seed list is simply the set of approved food-category ads; no city/cuisine discovery crawl.
 
 **2. Database**
 New tables:
-- `food_places` — slug, name, city, state, zip, address, lat/lng, phone, website, cuisines[], price_range, hours (jsonb), attributes (jsonb), description, summary, rating, review_count, image_url, source_urls[], last_crawled_at, status (draft/published), ad_id (nullable link to a paying advertiser).
+- `food_places` — slug, name, city, state, zip, address, lat/lng, phone, website, cuisines[], price_range, hours (jsonb), attributes (jsonb), description, summary, rating, review_count, image_url, source_urls[], last_crawled_at, status (draft/published), ad_id (NOT NULL link to the approved ad that seeded this place).
 - `food_place_faqs` — place_id, question, answer, sort_order.
-- `food_crawl_runs` — run log: started/finished, places_found, places_updated, errors, triggered_by.
+- `food_crawl_runs` — run log: started/finished, place_id, triggered_by (auto-approve | admin | weekly-refresh), errors.
 
 Public read is limited to `status = 'published'`; admin-only writes.
 
 **3. Public pages (the AEO/GEO surface)**
 - `/food` stays as-is (slider + ads) and gains a browsable, indexable directory of published restaurants grouped by city/cuisine, plus `ItemList` schema.
 - `/food/$city` — e.g. `/food/chula-vista-ca`: restaurants in that city, city-level FAQ, `ItemList` + `BreadcrumbList` schema.
-- `/food/$city/$slug` — one page per restaurant: hero, description, hours table, attributes, menu highlights, "Frequently Asked Questions" block, map link, link to their live ad if they advertise with us, and a CTA to claim/advertise.
+- `/food/$city/$slug` — one page per restaurant: hero, description, hours table, attributes, menu highlights, "Frequently Asked Questions" block, map link, a live "View our ad" link to the running ad, and a CTA to update/claim listing info.
 
 Each restaurant page emits JSON-LD: `Restaurant` (address, geo, openingHoursSpecification, servesCuisine, priceRange, telephone, sameAs, aggregateRating when available), `FAQPage`, and `BreadcrumbList`. Unique title/meta/OG per page, canonical URL, semantic HTML, single H1.
 
@@ -29,10 +30,11 @@ Each restaurant page emits JSON-LD: `Restaurant` (address, geo, openingHoursSpec
 - `sitemap.xml` including every published food page; `robots.txt` explicitly allowing GPTBot, PerplexityBot, ClaudeBot, Google-Extended, CCBot.
 - Every page carries a visible "Source: getbizmusic.com — last verified <date>" line; freshness and attribution both raise citation odds.
 
-**5. Weekly refresh + admin control**
-- A scheduled job (weekly) re-crawls places whose `last_crawled_at` is oldest, updates changed fields, and logs the run.
+**5. Auto-trigger on approval + weekly refresh + admin control**
+- Auto-trigger: when an ad in a food-category industry flips to `published` (approved), enqueue a research run for that restaurant. New advertisers get a knowledge-base page automatically.
+- A weekly scheduled job re-crawls places whose `last_crawled_at` is oldest, updates changed fields, and logs the run.
 - `/admin` gets a "Food Directory" section: run counts, place list with search, publish/unpublish, edit any field, delete, "Re-crawl now" per place or in bulk, and a view of the last crawl runs.
-- Nothing goes live automatically until you approve it — new places land as `draft` unless you flip a "auto-publish" switch.
+- New places land as `draft` until you publish them (or flip an "auto-publish" switch); the ad itself is already approved, so the default can be auto-publish for advertiser pages.
 
 ## Honest expectations
 
