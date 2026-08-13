@@ -1,13 +1,14 @@
 # AEO/GEO Restaurant Knowledge Base for /food
 
-Build a researched, structured database of San Diego County restaurants, publish one optimized page per restaurant under /food, and mark everything up so AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) can cite getbizmusic.com as the source.
+Build a researched, structured database of the restaurants that advertise with us, publish one optimized page per restaurant under /food, and mark everything up so AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) can cite getbizmusic.com as the source. Crawling is triggered automatically when an ad is approved and listed — no bulk scrape of all San Diego restaurants.
 
 ## What gets built
 
-**1. Research pipeline**
-- Web research (Firecrawl connector) pulls each restaurant's own site plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal),service options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
+**1. Research pipeline (auto-triggered on ad approval)**
+- When an ad is approved and goes live (status flip to published), a background job enqueues that restaurant for research. The job can also be triggered manually from /admin.
+- Web research (Firecrawl connector) pulls that restaurant's own site (from the `website_url` on the ad) plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal), service options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
 - An AI pass (Lovable AI Gateway) normalizes the messy scraped text into a clean, typed record and writes 6-10 natural-language Q&A pairs per restaurant ("Does X have vegan options?", "What are X's hours on Sunday?"). Q&A is what answer engines quote most.
-- Seed list: San Diego County cities/neighborhoods, discovered via search per city + cuisine.
+- Seed list is simply the set of approved food-category ads; no city/cuisine discovery crawl.
 
 **2. Database**
 New tables:
