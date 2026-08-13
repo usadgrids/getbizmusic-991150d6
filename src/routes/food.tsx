@@ -192,6 +192,7 @@ function FoodCategoryPage() {
             title="Featured Food & Dining Business of the Moment"
             featured
             focusAdId={proofSlide?.id ?? null}
+            focusNonce={focusNonce}
           />
 
         ) : (
