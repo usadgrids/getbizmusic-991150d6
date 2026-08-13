@@ -126,14 +126,16 @@ function FoodCategoryPage() {
     queryKey: ["category-ads", "food"],
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
   });
+  const slides = [...ads, ...SHOWCASE_ADS];
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizHero cityName="Food & Dining In San Diego County" state="CA" />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <h1 className="sr-only">Food &amp; Dining business ads on Get Biz Music</h1>
-        {ads.length > 0 ? (
-          <AdSlider ads={ads} title="Featured Food &amp; Dining Business of the Moment" featured />
+        {slides.length > 0 ? (
+          <AdSlider ads={slides} title="Featured Food &amp; Dining Business of the Moment" featured />
+
         ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
             <UtensilsCrossed className="mx-auto mb-3 text-[#D4A24C]" size={28} />
