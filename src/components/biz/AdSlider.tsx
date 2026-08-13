@@ -60,7 +60,10 @@ interface Props {
   ads: PublicAd[];
   title: string;
   featured?: boolean;
+  /** When set, the slider jumps to this ad id and scrolls it into view. */
+  focusAdId?: string | null;
 }
+
 
 // Resolve the authoritative rotation seconds for an ad. Always prefer the
 // server-supplied duration_seconds; if missing/invalid, fall back to the
