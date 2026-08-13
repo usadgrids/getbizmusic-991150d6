@@ -12,6 +12,7 @@ import { template as paidOrderNotificationTemplate } from './paid-order-notifica
 import { template as zelleInstructionsTemplate } from './zelle-instructions'
 import { template as activationReceiptTemplate } from './activation-receipt'
 import { template as activationInstructionsTemplate } from './activation-instructions'
+import { template as activationInvoiceTemplate } from './activation-invoice'
 
 export interface TemplateEntry {
   component: ComponentType<any>
