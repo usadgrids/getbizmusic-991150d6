@@ -78,8 +78,9 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null }: Props) {
   const [idx, setIdx] = useState(0);
+
   const [paused, setPaused] = useState(false);
   const player = useMiniPlayerController();
   const musicPlaying = player.playing;
