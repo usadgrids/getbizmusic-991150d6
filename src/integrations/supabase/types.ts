@@ -796,6 +796,180 @@ export type Database = {
         }
         Relationships: []
       }
+      food_crawl_runs: {
+        Row: {
+          created_at: string
+          errors: string | null
+          finished_at: string | null
+          id: string
+          place_id: string | null
+          started_at: string
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          created_at?: string
+          errors?: string | null
+          finished_at?: string | null
+          id?: string
+          place_id?: string | null
+          started_at?: string
+          status?: string
+          triggered_by: string
+        }
+        Update: {
+          created_at?: string
+          errors?: string | null
+          finished_at?: string | null
+          id?: string
+          place_id?: string | null
+          started_at?: string
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_crawl_runs_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "food_places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_place_faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          place_id: string
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          place_id: string
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          place_id?: string
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_place_faqs_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "food_places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_places: {
+        Row: {
+          ad_id: string
+          address: string | null
+          attributes: Json
+          city: string | null
+          created_at: string
+          cuisines: string[]
+          description: string | null
+          hours: Json
+          id: string
+          image_url: string | null
+          last_crawled_at: string | null
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string | null
+          price_range: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          source_urls: string[]
+          state: string | null
+          status: string
+          summary: string | null
+          updated_at: string
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          ad_id: string
+          address?: string | null
+          attributes?: Json
+          city?: string | null
+          created_at?: string
+          cuisines?: string[]
+          description?: string | null
+          hours?: Json
+          id?: string
+          image_url?: string | null
+          last_crawled_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone?: string | null
+          price_range?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug: string
+          source_urls?: string[]
+          state?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          ad_id?: string
+          address?: string | null
+          attributes?: Json
+          city?: string | null
+          created_at?: string
+          cuisines?: string[]
+          description?: string | null
+          hours?: Json
+          id?: string
+          image_url?: string | null
+          last_crawled_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string | null
+          price_range?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string
+          source_urls?: string[]
+          state?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_places_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           brevo_contact_id: number | null
