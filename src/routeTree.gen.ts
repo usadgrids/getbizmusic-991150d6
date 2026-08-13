@@ -16,6 +16,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as FoodRouteImport } from './routes/food'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
+import { Route as BeautyRouteImport } from './routes/beauty'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivateRouteImport } from './routes/activate'
@@ -27,6 +28,7 @@ import { Route as FoodActivateRouteImport } from './routes/food_.activate'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as BeautyActivateRouteImport } from './routes/beauty_.activate'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
@@ -78,6 +80,11 @@ const EditAdRoute = EditAdRouteImport.update({
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeautyRoute = BeautyRouteImport.update({
+  id: '/beauty',
+  path: '/beauty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -133,6 +140,11 @@ const DesignReturnRoute = DesignReturnRouteImport.update({
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeautyActivateRoute = BeautyActivateRouteImport.update({
+  id: '/beauty_/activate',
+  path: '/beauty/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
@@ -236,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -249,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -271,6 +285,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -284,6 +299,7 @@ export interface FileRoutesByTo {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -309,6 +325,7 @@ export interface FileRoutesById {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -322,6 +339,7 @@ export interface FileRoutesById {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty_/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -348,6 +366,7 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -361,6 +380,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -383,6 +403,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -396,6 +417,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -420,6 +442,7 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -433,6 +456,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty_/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -458,6 +482,7 @@ export interface RootRouteChildren {
   ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BeautyRoute: typeof BeautyRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
   FoodRoute: typeof FoodRoute
@@ -469,6 +494,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ActivateArtworkRoute: typeof ActivateArtworkRoute
   AdAdNumberRoute: typeof AdAdNumberRoute
+  BeautyActivateRoute: typeof BeautyActivateRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   FoodActivateRoute: typeof FoodActivateRoute
@@ -534,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beauty': {
+      id: '/beauty'
+      path: '/beauty'
+      fullPath: '/beauty'
+      preLoaderRoute: typeof BeautyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -611,6 +644,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beauty_/activate': {
+      id: '/beauty_/activate'
+      path: '/beauty/activate'
+      fullPath: '/beauty/activate'
+      preLoaderRoute: typeof BeautyActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/disputes': {
@@ -776,6 +816,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  BeautyRoute: BeautyRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
   FoodRoute: FoodRoute,
@@ -788,6 +829,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ActivateArtworkRoute: ActivateArtworkRoute,
   AdAdNumberRoute: AdAdNumberRoute,
+  BeautyActivateRoute: BeautyActivateRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   FoodActivateRoute: FoodActivateRoute,
