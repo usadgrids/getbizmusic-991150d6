@@ -167,6 +167,13 @@ function FoodCategoryPage() {
           <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
         </div>
 
+        {proofSlide && (
+          <div className="mx-auto mt-3 w-full max-w-3xl rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-2.5 text-center text-xs font-semibold text-[#7a5410]">
+            Private preview — only you can see this ad. It goes public after payment and activation.
+          </div>
+        )}
+
+
         {slides.length > 0 ? (
           <AdSlider ads={slides} title="Featured Food & Dining Business of the Moment" featured />
         ) : (
