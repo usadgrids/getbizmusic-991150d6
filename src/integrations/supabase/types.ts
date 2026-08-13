@@ -20,8 +20,10 @@ export type Database = {
           ad_type: string
           agreed_at: string | null
           agreed_terms: boolean
+          artwork_choice: string
           business_address: string | null
           business_name: string
+          chosen_image: string
           city_id: string | null
           code: string
           confirmed_correct: boolean | null
@@ -33,12 +35,15 @@ export type Database = {
           customer_business_address: string | null
           customer_business_name: string | null
           customer_email: string | null
+          customer_image_path: string | null
           customer_phone_sms: string | null
           customer_phone_voice: string | null
+          due_at: string | null
           expires_at: string | null
           id: string
           image_path: string
           industry: string
+          invoice_number: string | null
           memo_code: string | null
           paid_at: string | null
           payment_method: string | null
@@ -51,6 +56,7 @@ export type Database = {
           submitted_at: string | null
           tagline: string | null
           updated_at: string
+          upload_token: string
           viewed_at: string | null
           website_url: string | null
           youtube_url: string | null
@@ -60,8 +66,10 @@ export type Database = {
           ad_type?: string
           agreed_at?: string | null
           agreed_terms?: boolean
+          artwork_choice?: string
           business_address?: string | null
           business_name: string
+          chosen_image?: string
           city_id?: string | null
           code: string
           confirmed_correct?: boolean | null
@@ -73,12 +81,15 @@ export type Database = {
           customer_business_address?: string | null
           customer_business_name?: string | null
           customer_email?: string | null
+          customer_image_path?: string | null
           customer_phone_sms?: string | null
           customer_phone_voice?: string | null
+          due_at?: string | null
           expires_at?: string | null
           id?: string
           image_path: string
           industry: string
+          invoice_number?: string | null
           memo_code?: string | null
           paid_at?: string | null
           payment_method?: string | null
@@ -91,6 +102,7 @@ export type Database = {
           submitted_at?: string | null
           tagline?: string | null
           updated_at?: string
+          upload_token?: string
           viewed_at?: string | null
           website_url?: string | null
           youtube_url?: string | null
@@ -100,8 +112,10 @@ export type Database = {
           ad_type?: string
           agreed_at?: string | null
           agreed_terms?: boolean
+          artwork_choice?: string
           business_address?: string | null
           business_name?: string
+          chosen_image?: string
           city_id?: string | null
           code?: string
           confirmed_correct?: boolean | null
@@ -113,12 +127,15 @@ export type Database = {
           customer_business_address?: string | null
           customer_business_name?: string | null
           customer_email?: string | null
+          customer_image_path?: string | null
           customer_phone_sms?: string | null
           customer_phone_voice?: string | null
+          due_at?: string | null
           expires_at?: string | null
           id?: string
           image_path?: string
           industry?: string
+          invoice_number?: string | null
           memo_code?: string | null
           paid_at?: string | null
           payment_method?: string | null
@@ -131,6 +148,7 @@ export type Database = {
           submitted_at?: string | null
           tagline?: string | null
           updated_at?: string
+          upload_token?: string
           viewed_at?: string | null
           website_url?: string | null
           youtube_url?: string | null
