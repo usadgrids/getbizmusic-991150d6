@@ -541,6 +541,7 @@ export const approveSubmission = createServerFn({ method: "POST" })
     let adNumber: number | null = null;
     let editToken: string | null = null;
     const isEdit = !!sub.ad_id;
+    let liveAdId: string | null = (sub.ad_id as string | null) ?? null;
 
     if (isEdit) {
       // Edit flow — update the existing live ad in place; keep ad_number & expires_at.
@@ -589,8 +590,9 @@ export const approveSubmission = createServerFn({ method: "POST" })
         status: "active",
         city_id: cityId,
         ministry_info: ((sub as { ministry_info?: unknown }).ministry_info ?? null) as never,
-      }).select("ad_number, edit_token").maybeSingle();
+      }).select("id, ad_number, edit_token").maybeSingle();
       if (insErr) throw new Error(insErr.message);
+      liveAdId = (inserted?.id as string | undefined) ?? null;
       adNumber = inserted?.ad_number ?? null;
       editToken = (inserted?.edit_token as string) ?? null;
     }
@@ -600,6 +602,25 @@ export const approveSubmission = createServerFn({ method: "POST" })
       .update({ status: "approved" })
       .eq("id", sub.id);
     void warmSocialPreview(adNumber);
+
+    // AEO/GEO knowledge base: research this business in the background when its
+    // category has a public directory (/food, /beauty).
+    if (liveAdId) {
+      try {
+        const { categoryForIndustry } = await import("@/lib/directory-categories");
+        const directoryCategory = categoryForIndustry(sub.industry as string);
+        if (directoryCategory) {
+          const { researchAd } = await import("@/lib/directory.server");
+          void researchAd({
+            adId: liveAdId,
+            category: directoryCategory,
+            triggeredBy: "auto-approve",
+          }).catch((err) => console.error("[directory] auto research failed", err));
+        }
+      } catch (err) {
+        console.error("[directory] auto research trigger failed", err);
+      }
+    }
 
     // "Your ad is live" email with unique shareable URL + Edit link.
     if (adNumber != null && sub.email) {
