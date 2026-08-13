@@ -126,7 +126,8 @@ function FoodCategoryPage() {
     queryKey: ["category-ads", "food"],
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
   });
-  const slides = [...ads, ...SHOWCASE_ADS];
+  // Showcase creatives lead the rotation, then real ads follow.
+  const slides = [...SHOWCASE_ADS, ...ads];
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
