@@ -12,6 +12,8 @@ import {
   deleteActivationCode,
   markActivationPaid,
   setActivationStatus,
+  setActivationChosenImage,
+  resendActivationInvoice,
   type ActivationCodeRow,
 } from "@/lib/activation.functions";
 
@@ -20,6 +22,8 @@ const STATUS_STYLES: Record<string, string> = {
   viewed: "bg-blue-100 text-blue-800 border-blue-300",
   awaiting_payment: "bg-amber-100 text-amber-800 border-amber-300",
   awaiting_manual: "bg-purple-100 text-purple-800 border-purple-300",
+  billed: "bg-orange-100 text-orange-800 border-orange-300",
+  awaiting_artwork: "bg-yellow-100 text-yellow-800 border-yellow-300",
   paid: "bg-emerald-100 text-emerald-800 border-emerald-300",
   deactivated: "bg-gray-200 text-gray-500 border-gray-300",
 };
