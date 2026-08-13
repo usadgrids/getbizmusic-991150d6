@@ -422,6 +422,184 @@ async function markActivationPaidInternal(id: string, method: string): Promise<v
   }
 }
 
+/* ============ Bill Me (Pay Later) helpers ============ */
+
+const ZELLE_QR_URL = "https://www.getbizmusic.com/__l5e/assets-v1/9a996bbf-8aeb-48a7-8ac5-1db406351740/zelle-qr.jpeg";
+
+async function sendActivationInvoiceEmails(params: {
+  code: string;
+  email: string;
+  businessName: string;
+  amountFormatted: string;
+  invoiceNumber: string;
+  dueDateFormatted: string;
+  artworkPending: boolean;
+  uploadToken: string | null;
+  correctionsRequested: boolean;
+  correctionNotes: string | null;
+}): Promise<void> {
+  try {
+    const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+    await enqueueTransactionalEmailInternal({
+      templateName: "activation-invoice",
+      recipientEmail: params.email,
+      idempotencyKey: `activation-invoice-${params.invoiceNumber}`,
+      templateData: {
+        businessName: params.businessName,
+        activationCode: params.code,
+        amountFormatted: params.amountFormatted,
+        invoiceNumber: params.invoiceNumber,
+        dueDateFormatted: params.dueDateFormatted,
+        payNowUrl: `${SITE_URL}/activate?code=${encodeURIComponent(params.code)}&pay=1`,
+        zellePhone: ZELLE_PHONE,
+        venmoHandle: VENMO_HANDLE,
+        zelleQrUrl: ZELLE_QR_URL,
+        artworkPending: params.artworkPending,
+        artworkUploadUrl: params.uploadToken ? `${SITE_URL}/activate/artwork?token=${params.uploadToken}` : undefined,
+        correctionsRequested: params.correctionsRequested,
+        correctionNotes: params.correctionNotes,
+      },
+    });
+
+    await enqueueTransactionalEmailInternal({
+      templateName: "paid-order-notification",
+      recipientEmail: "processing@getbizmusic.com",
+      idempotencyKey: `activation-billed-${params.invoiceNumber}`,
+      templateData: {
+        orderTypeLabel: `Activation ${params.code} — BILLED / UNPAID (due ${params.dueDateFormatted})`,
+        customerEmail: params.email,
+        planLabel: `${params.correctionsRequested ? "CORRECTIONS REQUESTED" : "Proof approved as-is"}${params.artworkPending ? " — ARTWORK OWED BY CUSTOMER" : ""}`,
+        amountFormatted: params.amountFormatted,
+        orderNumber: params.invoiceNumber,
+      },
+    });
+  } catch (e) {
+    console.error("activation invoice emails failed:", e);
+  }
+}
+
+/** Public: start a card payment for an already-billed activation code. */
+export const payActivationInvoice = createServerFn({ method: "POST" })
+  .inputValidator((d: { code: string; environment: StripeEnv; returnUrl: string }) =>
+    z
+      .object({
+        code: z.string().trim().min(2).max(48),
+        environment: z.enum(["sandbox", "live"]),
+        returnUrl: z.string().url(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<{ ok: true; clientSecret: string } | { ok: false; error: string }> => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const code = normalizeCode(data.code);
+      const { data: row } = await supabaseAdmin
+        .from("activation_codes")
+        .select("id, code, status, price_cents, customer_email, contact_email, customer_business_name, business_name")
+        .eq("code", code)
+        .maybeSingle();
+
+      if (!row) return { ok: false, error: "Activation code not found." };
+      if (row.status === "paid") return { ok: false, error: "This invoice has already been paid." };
+
+      const amount = Number(row.price_cents ?? 0);
+      if (amount < 50) return { ok: false, error: "This activation code has no valid price set." };
+
+      const email = (row.customer_email as string) || (row.contact_email as string) || undefined;
+      const businessName = (row.customer_business_name as string) || (row.business_name as string);
+      const productName = `Get Biz Music — Ad Activation ${row.code}`;
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          { price_data: { currency: "usd", product_data: { name: productName }, unit_amount: amount }, quantity: 1 },
+        ],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer_email: email,
+        metadata: { activation_code: row.code as string, business_name: businessName },
+        payment_intent_data: {
+          description: `${productName} — ${businessName}`.slice(0, 350),
+          receipt_email: email,
+          statement_descriptor_suffix: "GETBIZMUSIC AD",
+        },
+      });
+
+      await supabaseAdmin
+        .from("activation_codes")
+        .update({ stripe_session_id: session.id })
+        .eq("id", row.id);
+
+      return { ok: true, clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("payActivationInvoice error:", error);
+      return { ok: false, error: getStripeErrorMessage(error) };
+    }
+  });
+
+/* ============ Late artwork upload (token link) ============ */
+
+export const lookupActivationArtworkToken = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string }) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }): Promise<{ found: boolean; businessName?: string; code?: string; uploaded?: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("code, business_name, customer_business_name, customer_image_path")
+      .eq("upload_token", data.token)
+      .maybeSingle();
+    if (!row) return { found: false };
+    return {
+      found: true,
+      code: row.code as string,
+      businessName: (row.customer_business_name as string) || (row.business_name as string),
+      uploaded: Boolean(row.customer_image_path),
+    };
+  });
+
+export const saveActivationArtwork = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; imagePath: string }) =>
+    z.object({ token: z.string().uuid(), imagePath: z.string().trim().min(1).max(400) }).parse(d),
+  )
+  .handler(async ({ data }): Promise<{ ok: boolean; error?: string }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("id, code, status")
+      .eq("upload_token", data.token)
+      .maybeSingle();
+    if (!row) return { ok: false, error: "This upload link is no longer valid." };
+
+    const { error } = await supabaseAdmin
+      .from("activation_codes")
+      .update({
+        customer_image_path: data.imagePath,
+        artwork_choice: "customer",
+        chosen_image: "customer",
+        status: row.status === "awaiting_artwork" ? "billed" : (row.status as string),
+      })
+      .eq("id", row.id);
+    if (error) return { ok: false, error: error.message };
+
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "paid-order-notification",
+        recipientEmail: "processing@getbizmusic.com",
+        idempotencyKey: `activation-artwork-${row.id}-${Date.now()}`,
+        templateData: {
+          orderTypeLabel: `Activation ${row.code} — CUSTOMER ARTWORK UPLOADED`,
+          planLabel: "Customer sent their own ad image",
+          amountFormatted: "—",
+          orderNumber: row.code as string,
+        },
+      });
+    } catch (e) {
+      console.error("artwork notification failed:", e);
+    }
+    return { ok: true };
+  });
+
 /* ============ Admin ============ */
 
 async function assertAdmin(userId: string) {
