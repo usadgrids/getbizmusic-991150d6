@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DIRECTORY_CATEGORY_SLUGS } from "@/lib/directory-categories";
 
 const SITE = "https://www.getbizmusic.com";
 
@@ -23,8 +24,10 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const urls: Array<{ loc: string; lastmod?: string; priority: string }> = [
           { loc: `${SITE}/`, priority: "1.0" },
-          { loc: `${SITE}/food`, priority: "0.9" },
-          { loc: `${SITE}/beauty`, priority: "0.9" },
+          ...DIRECTORY_CATEGORY_SLUGS.map((slug) => ({
+            loc: `${SITE}/${slug}`,
+            priority: "0.9",
+          })),
           { loc: `${SITE}/pricing`, priority: "0.7" },
           { loc: `${SITE}/submit`, priority: "0.5" },
         ];

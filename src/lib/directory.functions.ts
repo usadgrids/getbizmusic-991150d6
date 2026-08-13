@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { DIRECTORY_CATEGORY_SLUGS } from "@/lib/directory-categories";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { DirectoryCategory, DirectoryFaq, DirectoryPlace } from "@/lib/directory-categories";
 
@@ -23,10 +24,13 @@ async function publicClient() {
   });
 }
 
+/** Registry-derived so new categories need no server code changes. */
+const categorySchema = z.enum(DIRECTORY_CATEGORY_SLUGS);
+
 // ---------------- Public reads ----------------
 
 export const listDirectoryPlaces = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ category: z.enum(["food", "beauty"]) }).parse(d))
+  .inputValidator((d) => z.object({ category: categorySchema }).parse(d))
   .handler(async ({ data }) => {
     const supabase = await publicClient();
     const { data: rows, error } = await supabase
@@ -44,7 +48,7 @@ export const listDirectoryPlaces = createServerFn({ method: "GET" })
 
 export const getDirectoryPlace = createServerFn({ method: "GET" })
   .inputValidator((d) =>
-    z.object({ category: z.enum(["food", "beauty"]), slug: z.string().min(1) }).parse(d),
+    z.object({ category: categorySchema, slug: z.string().min(1) }).parse(d),
   )
   .handler(async ({ data }) => {
     const supabase = await publicClient();
@@ -127,7 +131,7 @@ export const adminResearchAd = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
-      .object({ adId: z.string().uuid(), category: z.enum(["food", "beauty"]) })
+      .object({ adId: z.string().uuid(), category: categorySchema })
       .parse(d),
   )
   .handler(async ({ context, data }) => {

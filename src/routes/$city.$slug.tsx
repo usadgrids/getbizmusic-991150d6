@@ -1,21 +1,30 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { getDirectoryPlace } from "@/lib/directory.functions";
 import { DirectoryPlaceView } from "@/components/biz/DirectoryPlaceView";
+import { isDirectoryCategory, type DirectoryCategory } from "@/lib/directory-categories";
 
-export const Route = createFileRoute("/food_/$slug")({
+/**
+ * Master template for every BizMusic Knowledge Graph listing page.
+ * Serves /food/<slug>, /beauty/<slug> and any future category — one file,
+ * unlimited advertiser URLs, all rendered on demand from the database.
+ */
+export const Route = createFileRoute("/$city/$slug")({
   loader: async ({ params }) => {
-    const res = await getDirectoryPlace({ data: { category: "food", slug: params.slug } });
+    if (!isDirectoryCategory(params.city)) throw notFound();
+    const category = params.city as DirectoryCategory;
+    const res = await getDirectoryPlace({ data: { category, slug: params.slug } });
     if (!res.place) throw notFound();
-    return res;
+    return { ...res, category };
   },
   head: ({ loaderData }) => {
     const place = loaderData?.place;
-    if (!place) return {};
+    const category = loaderData?.category;
+    if (!place || !category) return {};
     const where = [place.city, place.state].filter(Boolean).join(", ");
-    const title = `${place.name}${where ? ` — ${where}` : ""} | Hours, Menu & FAQs`.slice(0, 60);
+    const title = `${place.name}${where ? ` — ${where}` : ""} | Hours, Services & FAQs`.slice(0, 60);
     const description = (
       place.summary ??
-      `${place.name} in ${where || "San Diego County"}: hours, cuisine, contact details and answers to common questions.`
+      `${place.name} in ${where || "San Diego County"}: hours, services, contact details and answers to common questions.`
     ).slice(0, 158);
     return {
       meta: [
@@ -33,7 +42,7 @@ export const Route = createFileRoute("/food_/$slug")({
           : []),
       ],
       links: [
-        { rel: "canonical", href: `https://www.getbizmusic.com/food/${place.slug}` },
+        { rel: "canonical", href: `https://www.getbizmusic.com/${category}/${place.slug}` },
       ],
     };
   },
@@ -43,11 +52,11 @@ export const Route = createFileRoute("/food_/$slug")({
   notFoundComponent: () => (
     <div className="p-10 text-center text-muted-foreground">Listing not found.</div>
   ),
-  component: FoodPlacePage,
+  component: DirectoryPlacePage,
 });
 
-function FoodPlacePage() {
-  const { place, faqs } = Route.useLoaderData();
+function DirectoryPlacePage() {
+  const { place, faqs, category } = Route.useLoaderData();
   if (!place) return null;
-  return <DirectoryPlaceView category="food" place={place} faqs={faqs} />;
+  return <DirectoryPlaceView category={category} place={place} faqs={faqs} />;
 }
