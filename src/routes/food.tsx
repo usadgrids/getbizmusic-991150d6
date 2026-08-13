@@ -1,17 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles, UtensilsCrossed } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
+import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
+import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import adAmerican from "@/assets/food-ad-american.jpg";
 import adFilipino from "@/assets/food-ad-filipino.jpg";
 import adMexican from "@/assets/food-ad-mexican.jpg";
 import adItalian from "@/assets/food-ad-italian.jpg";
 import adBuffet from "@/assets/food-ad-buffet.jpg";
+
 
 // Business categories that belong on the /food page.
 const FOOD_INDUSTRIES = [
@@ -99,6 +104,7 @@ const DESCRIPTION =
   "Discover local restaurants, food trucks, cafés, bakeries, caterers and markets advertising with Get Biz Music — with music streaming while you browse.";
 
 export const Route = createFileRoute("/food")({
+  validateSearch: z.object({ code: z.string().optional() }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
       queryKey: ["category-ads", "food"],
@@ -121,21 +127,44 @@ export const Route = createFileRoute("/food")({
 });
 
 function FoodCategoryPage() {
+  const search = Route.useSearch();
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useSuspenseQuery({
     queryKey: ["category-ads", "food"],
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
   });
-  // Showcase creatives lead the rotation, then real ads follow.
-  const slides = [...SHOWCASE_ADS, ...ads];
+  const [proof, setProof] = useState<ActivationProof | null>(null);
+
+  // Their own proof leads the rotation, then showcase creatives, then real ads.
+  const proofSlide: PublicAd | null =
+    proof && proof.imageUrl
+      ? {
+          id: `activation-${proof.code}`,
+          ad_number: null,
+          business_name: proof.businessName,
+          website_url: proof.websiteUrl,
+          youtube_url: proof.youtubeUrl,
+          tagline: proof.tagline,
+          industry: proof.industry,
+          ad_type: proof.adType === "slider_10" ? "slider_10" : "image_5",
+          image_url: proof.imageUrl,
+          duration_seconds: proof.adType === "slider_10" ? 10 : 7,
+        }
+      : null;
+  const slides = [...(proofSlide ? [proofSlide] : []), ...SHOWCASE_ADS, ...ads];
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizHero cityName="Food & Dining In San Diego County" state="CA" />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <h1 className="sr-only">Food &amp; Dining business ads on Get Biz Music</h1>
+        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
+          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
+        </div>
         {slides.length > 0 ? (
           <AdSlider ads={slides} title="Featured Food &amp; Dining Business of the Moment" featured />
+
+
 
         ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
