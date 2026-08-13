@@ -10,8 +10,10 @@ import {
   lookupActivationCode,
   submitActivation,
   confirmActivationSession,
+  payActivationInvoice,
   type ActivationProof,
 } from "@/lib/activation.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
