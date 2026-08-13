@@ -7,7 +7,7 @@ import { CheckCircle2, Loader2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lookupActivationArtworkToken, saveActivationArtwork } from "@/lib/activation.functions";
 
-export const Route = createFileRoute("/activate/artwork")({
+export const Route = createFileRoute("/activate_/artwork")({
   validateSearch: z.object({ token: z.string().optional() }),
   head: () => ({
     meta: [
