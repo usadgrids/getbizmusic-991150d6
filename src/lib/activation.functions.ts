@@ -238,6 +238,48 @@ export const submitActivation = createServerFn({ method: "POST" })
         return { ok: true, method: "stripe", clientSecret: session.client_secret ?? "" };
       }
 
+      // Pay later — bill me
+      if (data.paymentMethod === "bill_later") {
+        const invoiceNumber = `INV-${row.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await supabaseAdmin
+          .from("activation_codes")
+          .update({
+            ...baseUpdate,
+            status: data.artworkChoice === "later" ? "awaiting_artwork" : "billed",
+            memo_code: invoiceNumber,
+            invoice_number: invoiceNumber,
+            due_at: dueAt.toISOString(),
+          })
+          .eq("id", row.id);
+
+        const amountDue = `$${(amount / 100).toFixed(2)}`;
+        const dueDateFormatted = dueAt.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" });
+
+        await sendActivationInvoiceEmails({
+          code: row.code as string,
+          email: data.email,
+          businessName: data.businessName,
+          amountFormatted: amountDue,
+          invoiceNumber,
+          dueDateFormatted,
+          artworkPending: data.artworkChoice === "later",
+          uploadToken: (row.upload_token as string) ?? null,
+          correctionsRequested: !data.confirmedCorrect,
+          correctionNotes: data.correctionNotes?.trim() || null,
+        });
+
+        return {
+          ok: true,
+          method: "bill_later",
+          invoiceNumber,
+          amountFormatted: amountDue,
+          dueDateFormatted,
+          zellePhone: ZELLE_PHONE,
+          venmoHandle: VENMO_HANDLE,
+        };
+      }
+
       // Manual payment (Zelle / Venmo)
       const memoCode = (row.code as string).slice(0, 6) + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
       await supabaseAdmin
