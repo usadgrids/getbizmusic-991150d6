@@ -541,6 +541,8 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
             </div>
           )}
 
+          {belowShareBar}
+
           {/* Music player — flush to slider borders */}
           {featured && (
             <section
