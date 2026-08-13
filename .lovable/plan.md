@@ -5,7 +5,7 @@ Build a researched, structured database of San Diego County restaurants, publish
 ## What gets built
 
 **1. Research pipeline**
-- Web research (Firecrawl connector) pulls each restaurant's own site plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal),服务 options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
+- Web research (Firecrawl connector) pulls each restaurant's own site plus public listings: name, address, phone, hours, price range, cuisine types, menu highlights, dietary options (vegan/gluten-free/halal),service options (dine-in, takeout, delivery, catering, outdoor seating, parking), payment types, social links, review sentiment summary.
 - An AI pass (Lovable AI Gateway) normalizes the messy scraped text into a clean, typed record and writes 6-10 natural-language Q&A pairs per restaurant ("Does X have vegan options?", "What are X's hours on Sunday?"). Q&A is what answer engines quote most.
 - Seed list: San Diego County cities/neighborhoods, discovered via search per city + cuisine.
 
