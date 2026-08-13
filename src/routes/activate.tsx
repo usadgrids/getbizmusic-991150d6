@@ -239,6 +239,44 @@ function ActivatePage() {
     );
   }
 
+  /* ---------- Bill me later confirmation ---------- */
+  if (billed) {
+    return (
+      <Shell>
+        <div className="bg-white rounded-2xl border border-[#D4A24C] shadow-sm p-6 sm:p-8">
+          <CheckCircle2 className="mx-auto text-[#D4A24C] mb-3" size={44} />
+          <h1 className="font-serif text-2xl font-bold text-[#0F2A4A] text-center">Thank you for your order!</h1>
+          <p className="text-sm text-gray-600 mt-3 text-center max-w-md mx-auto">
+            You've been billed — no payment was taken today. We'll publish your ad and you can pay at your
+            earliest convenience. A copy of this invoice is on its way to your inbox.
+          </p>
+          <div className="mt-5 bg-[#FFFBF2] border border-[#D4A24C] rounded-xl p-5 space-y-2 text-sm">
+            <div><span className="font-semibold text-[#0F2A4A]">Invoice number:</span> <span className="font-mono font-bold">{billed.invoiceNumber}</span></div>
+            <div><span className="font-semibold text-[#0F2A4A]">Amount due:</span> {billed.amountFormatted}</div>
+            <div><span className="font-semibold text-[#0F2A4A]">Due by:</span> {billed.dueDateFormatted}</div>
+          </div>
+          {billed.artworkPending && (
+            <p className="mt-4 text-xs text-gray-600 text-center">
+              We also emailed you a private link to upload your ad image whenever it's ready.
+            </p>
+          )}
+          <div className="mt-6 text-sm text-gray-700">
+            <p className="font-semibold text-[#0F2A4A] mb-2">Ways to pay whenever you're ready:</p>
+            <ul className="space-y-1 text-xs">
+              <li>• Card, debit or credit — use the "Pay now" button in your invoice email.</li>
+              <li>• Zelle: {billed.zellePhone} (WINALL MEDIA LLC)</li>
+              <li>• Venmo: {billed.venmoHandle}</li>
+            </ul>
+            <p className="text-[11px] text-gray-500 mt-2">Include invoice {billed.invoiceNumber} in the memo.</p>
+          </div>
+          <Link to="/" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
+            Back to GetBizMusic
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
+
   /* ---------- Stripe embedded checkout ---------- */
   if (clientSecret) {
     return (
