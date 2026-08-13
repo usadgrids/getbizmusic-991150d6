@@ -19,7 +19,7 @@ import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
 const NAVY = "#0F2A4A";
 
-export const Route = createFileRoute("/food/activate")({
+export const Route = createFileRoute("/food_/activate")({
   validateSearch: z.object({
     code: z.string().optional(),
     session_id: z.string().optional(),
