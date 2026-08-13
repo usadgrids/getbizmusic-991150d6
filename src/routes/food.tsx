@@ -134,6 +134,12 @@ function FoodCategoryPage() {
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
+  // Bumped on every code submission so re-entering the same code still snaps the slider back.
+  const [focusNonce, setFocusNonce] = useState(0);
+  const handleProof = (next: ActivationProof | null) => {
+    setProof(next);
+    if (next) setFocusNonce((n) => n + 1);
+  };
 
   // PRIVATE PREVIEW ONLY: this slide exists purely in this visitor's browser after they
   // entered their own activation code. It is never fetched by, or rendered for, anyone else.
@@ -170,7 +176,7 @@ function FoodCategoryPage() {
         <h1 className="sr-only">Food & Dining business ads on Get Biz Music</h1>
 
         <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
-          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
+          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={handleProof} />
         </div>
 
         {proofSlide && (
@@ -186,6 +192,7 @@ function FoodCategoryPage() {
             title="Featured Food & Dining Business of the Moment"
             featured
             focusAdId={proofSlide?.id ?? null}
+            focusNonce={focusNonce}
           />
 
         ) : (

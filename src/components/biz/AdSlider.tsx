@@ -62,6 +62,8 @@ interface Props {
   featured?: boolean;
   /** When set, the slider jumps to this ad id and scrolls it into view. */
   focusAdId?: string | null;
+  /** Bump to re-trigger the jump even when focusAdId is unchanged. */
+  focusNonce?: number;
 }
 
 
@@ -78,7 +80,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, focusAdId = null }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0 }: Props) {
   const [idx, setIdx] = useState(0);
 
   const [paused, setPaused] = useState(false);
@@ -169,7 +171,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null }: Pro
       }, 80);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusAdId, ads.length]);
+  }, [focusAdId, focusNonce, ads.length]);
 
 
 
