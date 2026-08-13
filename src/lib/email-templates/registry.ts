@@ -40,4 +40,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'zelle-instructions': zelleInstructionsTemplate,
   'activation-receipt': activationReceiptTemplate,
   'activation-instructions': activationInstructionsTemplate,
+  'activation-invoice': activationInvoiceTemplate,
 }
