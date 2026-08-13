@@ -26,7 +26,9 @@ export function DirectoryList({
         {places.map((place) => (
           <li key={place.id}>
             <Link
-              to={`${label.basePath}/${place.slug}`}
+              to={category === "food" ? "/food/$slug" : "/beauty/$slug"}
+              params={{ slug: place.slug }}
+
               className="flex h-full flex-col rounded-xl border border-border bg-card p-4 transition hover:border-primary hover:shadow-md"
             >
               <span className="text-base font-semibold text-card-foreground">{place.name}</span>
