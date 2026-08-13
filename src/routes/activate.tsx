@@ -130,6 +130,27 @@ function ActivatePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.session_id]);
 
+  // "Pay now" link from the invoice email: open card checkout straight away.
+  useEffect(() => {
+    if (!search.pay || !search.code) return;
+    (async () => {
+      try {
+        const res = await payInvoiceFn({
+          data: {
+            code: search.code!,
+            environment: getStripeEnvironment(),
+            returnUrl: `${window.location.origin}/activate?code=${encodeURIComponent(search.code!)}&session_id={CHECKOUT_SESSION_ID}`,
+          },
+        });
+        if (res.ok) setClientSecret(res.clientSecret);
+        else toast.error(res.error);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Could not open checkout");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.pay, search.code]);
+
   const submit = async () => {
     if (!proof) return;
     if (!businessName.trim()) return toast.error("Please enter your business name.");
@@ -140,9 +161,24 @@ function ActivatePage() {
     if (correct === "no" && notes.trim().length < 5) {
       return toast.error("Please describe the corrections you'd like.");
     }
+    if (artwork === "customer" && !artworkFile) {
+      return toast.error("Please choose your ad image file, or pick another artwork option.");
+    }
     setSubmitting(true);
 
     try {
+      let customerImagePath: string | undefined;
+      if (artwork === "customer" && artworkFile) {
+        if (artworkFile.size > 10 * 1024 * 1024) throw new Error("Image must be 10MB or smaller.");
+        const ext = artworkFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `activation/${proof.code}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("ad-uploads")
+          .upload(path, artworkFile, { contentType: artworkFile.type, upsert: false });
+        if (upErr) throw new Error(`Upload failed: ${upErr.message}`);
+        customerImagePath = path;
+      }
+
       const res = await submitFn({
         data: {
           code: proof.code,
