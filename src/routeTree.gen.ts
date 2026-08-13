@@ -16,6 +16,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as FoodRouteImport } from './routes/food'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
+import { Route as BeautyRouteImport } from './routes/beauty'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivateRouteImport } from './routes/activate'
@@ -79,6 +80,11 @@ const EditAdRoute = EditAdRouteImport.update({
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeautyRoute = BeautyRouteImport.update({
+  id: '/beauty',
+  path: '/beauty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
   '/food': typeof FoodRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
+    | '/beauty'
     | '/design'
     | '/edit-ad'
     | '/food'
@@ -470,6 +482,7 @@ export interface RootRouteChildren {
   ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BeautyRoute: typeof BeautyRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
   FoodRoute: typeof FoodRoute
@@ -547,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beauty': {
+      id: '/beauty'
+      path: '/beauty'
+      fullPath: '/beauty'
+      preLoaderRoute: typeof BeautyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -796,6 +816,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  BeautyRoute: BeautyRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
   FoodRoute: FoodRoute,

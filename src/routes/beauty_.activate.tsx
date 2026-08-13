@@ -232,7 +232,7 @@ function BeautyActivatePage() {
             you'll get another email the moment your ad is live and activated. A receipt is on its way to your inbox.
           </p>
           <Link to="/beauty" className="inline-block mt-6 bg-[#0F2A4A] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#163864]">
-            Back to Food & Dining
+            Back to Beauty & Grooming
           </Link>
         </div>
       </Shell>
@@ -270,7 +270,7 @@ function BeautyActivatePage() {
             <p className="text-[11px] text-gray-500 mt-2">Include invoice {billed.invoiceNumber} in the memo.</p>
           </div>
           <Link to="/beauty" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
-            Back to Food & Dining
+            Back to Beauty & Grooming
           </Link>
         </div>
       </Shell>
@@ -328,7 +328,7 @@ function BeautyActivatePage() {
             </div>
           )}
           <Link to="/beauty" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
-            Back to Food & Dining
+            Back to Beauty & Grooming
           </Link>
         </div>
       </Shell>
