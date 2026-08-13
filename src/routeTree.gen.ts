@@ -28,6 +28,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
+import { Route as ActivateArtworkRouteImport } from './routes/activate.artwork'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -137,6 +138,11 @@ const AdAdNumberRoute = AdAdNumberRouteImport.update({
   path: '/ad/$adNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivateArtworkRoute = ActivateArtworkRouteImport.update({
+  id: '/artwork',
+  path: '/artwork',
+  getParentRoute: () => ActivateRoute,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -215,7 +221,7 @@ const ApiPublicAdImageAdNumberRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
-  '/activate': typeof ActivateRoute
+  '/activate': typeof ActivateRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -248,7 +255,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/activate': typeof ActivateRoute
+  '/activate': typeof ActivateRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -282,7 +290,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$city': typeof CityRouteWithChildren
-  '/activate': typeof ActivateRoute
+  '/activate': typeof ActivateRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -419,7 +431,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CityRoute: typeof CityRouteWithChildren
-  ActivateRoute: typeof ActivateRoute
+  ActivateRoute: typeof ActivateRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
@@ -581,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdAdNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activate/artwork': {
+      id: '/activate/artwork'
+      path: '/artwork'
+      fullPath: '/activate/artwork'
+      preLoaderRoute: typeof ActivateArtworkRouteImport
+      parentRoute: typeof ActivateRoute
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -685,6 +704,18 @@ const CityRouteChildren: CityRouteChildren = {
 
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
 
+interface ActivateRouteChildren {
+  ActivateArtworkRoute: typeof ActivateArtworkRoute
+}
+
+const ActivateRouteChildren: ActivateRouteChildren = {
+  ActivateArtworkRoute: ActivateArtworkRoute,
+}
+
+const ActivateRouteWithChildren = ActivateRoute._addFileChildren(
+  ActivateRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminDisputesRoute: typeof AdminDisputesRoute
@@ -713,7 +744,7 @@ const DesignRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
-  ActivateRoute: ActivateRoute,
+  ActivateRoute: ActivateRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
