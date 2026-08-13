@@ -30,10 +30,11 @@ Each restaurant page emits JSON-LD: `Restaurant` (address, geo, openingHoursSpec
 - `sitemap.xml` including every published food page; `robots.txt` explicitly allowing GPTBot, PerplexityBot, ClaudeBot, Google-Extended, CCBot.
 - Every page carries a visible "Source: getbizmusic.com — last verified <date>" line; freshness and attribution both raise citation odds.
 
-**5. Weekly refresh + admin control**
-- A scheduled job (weekly) re-crawls places whose `last_crawled_at` is oldest, updates changed fields, and logs the run.
+**5. Auto-trigger on approval + weekly refresh + admin control**
+- Auto-trigger: when an ad in a food-category industry flips to `published` (approved), enqueue a research run for that restaurant. New advertisers get a knowledge-base page automatically.
+- A weekly scheduled job re-crawls places whose `last_crawled_at` is oldest, updates changed fields, and logs the run.
 - `/admin` gets a "Food Directory" section: run counts, place list with search, publish/unpublish, edit any field, delete, "Re-crawl now" per place or in bulk, and a view of the last crawl runs.
-- Nothing goes live automatically until you approve it — new places land as `draft` unless you flip a "auto-publish" switch.
+- New places land as `draft` until you publish them (or flip an "auto-publish" switch); the ad itself is already approved, so the default can be auto-publish for advertiser pages.
 
 ## Honest expectations
 
