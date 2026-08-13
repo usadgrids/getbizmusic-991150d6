@@ -547,7 +547,13 @@ function ActivatePage() {
             disabled={submitting || !agreed}
             className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-lg hover:bg-[#e0b266] disabled:opacity-60 inline-flex items-center justify-center gap-2"
           >
-            {submitting ? <><Loader2 className="animate-spin" size={16} /> Working…</> : `Continue — $${(proof.priceCents / 100).toFixed(2)}`}
+            {submitting ? (
+              <><Loader2 className="animate-spin" size={16} /> Working…</>
+            ) : method === "bill_later" ? (
+              `Activate & bill me — $${(proof.priceCents / 100).toFixed(2)}`
+            ) : (
+              `Continue — $${(proof.priceCents / 100).toFixed(2)}`
+            )}
           </button>
           <p className="text-[11px] text-gray-500 text-center">
             {correct === "no"
