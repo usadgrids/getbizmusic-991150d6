@@ -34,6 +34,7 @@ import { Route as ActivateArtworkRouteImport } from './routes/activate_.artwork'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as CityActivateRouteImport } from './routes/$city.activate'
+import { Route as CitySlugRouteImport } from './routes/$city.$slug'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -176,6 +177,11 @@ const CityActivateRoute = CityActivateRouteImport.update({
   path: '/activate',
   getParentRoute: () => CityRoute,
 } as any)
+const CitySlugRoute = CitySlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CityRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -310,6 +317,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -352,6 +360,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -475,6 +486,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -715,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CityActivateRouteImport
       parentRoute: typeof CityRoute
     }
+    '/$city/$slug': {
+      id: '/$city/$slug'
+      path: '/$slug'
+      fullPath: '/$city/$slug'
+      preLoaderRoute: typeof CitySlugRouteImport
+      parentRoute: typeof CityRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -817,11 +836,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface CityRouteChildren {
+  CitySlugRoute: typeof CitySlugRoute
   CityActivateRoute: typeof CityActivateRoute
   CityIndexRoute: typeof CityIndexRoute
 }
 
 const CityRouteChildren: CityRouteChildren = {
+  CitySlugRoute: CitySlugRoute,
   CityActivateRoute: CityActivateRoute,
   CityIndexRoute: CityIndexRoute,
 }
