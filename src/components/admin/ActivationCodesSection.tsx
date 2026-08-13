@@ -122,6 +122,20 @@ export function ActivationCodesSection() {
     refetch();
   };
 
+  const chooseImage = async (r: ActivationCodeRow, chosen: "ours" | "customer") => {
+    const res = await chosenFn({ data: { id: r.id, chosen } });
+    if (!res.ok) return toast.error(res.error ?? "Failed");
+    toast.success(chosen === "ours" ? "Using our design" : "Using customer artwork");
+    refetch();
+  };
+
+  const resendInvoice = async (r: ActivationCodeRow) => {
+    if (!confirm(`Resend the invoice email for "${r.code}"?`)) return;
+    const res = await invoiceFn({ data: { id: r.id } });
+    if (!res.ok) return toast.error(res.error ?? "Failed");
+    toast.success("Invoice email sent");
+  };
+
   const toggleActive = async (r: ActivationCodeRow) => {
     const next = r.status === "deactivated" ? "unused" : "deactivated";
     const res = await statusFn({ data: { id: r.id, status: next } });
