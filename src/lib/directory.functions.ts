@@ -12,14 +12,12 @@ function toPlace(row: Record<string, unknown>): DirectoryPlace {
     cuisines: (row.cuisines as string[]) ?? [],
     source_urls: (row.source_urls as string[]) ?? [],
     hours: (row.hours as Record<string, string>) ?? {},
-    attributes: (row.attributes as Record<string, unknown>) ?? {},
+    attributes: (row.attributes as Record<string, import("@/lib/directory-categories").JsonValue>) ?? {},
   };
 }
 
 async function publicClient() {
   const { createClient } = await import("@supabase/supabase-js");
-  const { default: _ } = { default: null };
-  void _;
   return createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
   });

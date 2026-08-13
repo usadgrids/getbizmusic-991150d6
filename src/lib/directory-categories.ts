@@ -48,6 +48,8 @@ export function schemaTypeFor(category: DirectoryCategory, industry?: string | n
   return "HairSalon";
 }
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 export type DirectoryPlace = {
   id: string;
   slug: string;
@@ -65,7 +67,7 @@ export type DirectoryPlace = {
   cuisines: string[];
   price_range: string | null;
   hours: Record<string, string>;
-  attributes: Record<string, unknown>;
+  attributes: Record<string, JsonValue>;
   description: string | null;
   summary: string | null;
   rating: number | null;
