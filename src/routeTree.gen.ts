@@ -23,6 +23,7 @@ import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
+import { Route as FoodActivateRouteImport } from './routes/food.activate'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -113,6 +114,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CityRoute,
+} as any)
+const FoodActivateRoute = FoodActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => FoodRoute,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -232,7 +238,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
+  '/food': typeof FoodRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -266,7 +273,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
+  '/food': typeof FoodRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food/activate': typeof FoodActivateRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -303,7 +311,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
+  '/food': typeof FoodRouteWithChildren
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food/activate'
     | '/$city/'
     | '/admin/'
     | '/.lovable/oauth/consent'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food/activate'
     | '/$city'
     | '/admin'
     | '/.lovable/oauth/consent'
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food/activate'
     | '/$city/'
     | '/admin/'
     | '/.lovable/oauth/consent'
@@ -448,7 +460,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
-  FoodRoute: typeof FoodRoute
+  FoodRoute: typeof FoodRouteWithChildren
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -571,6 +583,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$city/'
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
+    }
+    '/food/activate': {
+      id: '/food/activate'
+      path: '/activate'
+      fullPath: '/food/activate'
+      preLoaderRoute: typeof FoodActivateRouteImport
+      parentRoute: typeof FoodRoute
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -750,6 +769,16 @@ const DesignRouteChildren: DesignRouteChildren = {
 const DesignRouteWithChildren =
   DesignRoute._addFileChildren(DesignRouteChildren)
 
+interface FoodRouteChildren {
+  FoodActivateRoute: typeof FoodActivateRoute
+}
+
+const FoodRouteChildren: FoodRouteChildren = {
+  FoodActivateRoute: FoodActivateRoute,
+}
+
+const FoodRouteWithChildren = FoodRoute._addFileChildren(FoodRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
@@ -758,7 +787,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
-  FoodRoute: FoodRoute,
+  FoodRoute: FoodRouteWithChildren,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
