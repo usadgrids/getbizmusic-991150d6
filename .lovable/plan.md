@@ -21,7 +21,7 @@ Public read is limited to `status = 'published'`; admin-only writes.
 **3. Public pages (the AEO/GEO surface)**
 - `/food` stays as-is (slider + ads) and gains a browsable, indexable directory of published restaurants grouped by city/cuisine, plus `ItemList` schema.
 - `/food/$city` — e.g. `/food/chula-vista-ca`: restaurants in that city, city-level FAQ, `ItemList` + `BreadcrumbList` schema.
-- `/food/$city/$slug` — one page per restaurant: hero, description, hours table, attributes, menu highlights, "Frequently Asked Questions" block, map link, link to their live ad if they advertise with us, and a CTA to claim/advertise.
+- `/food/$city/$slug` — one page per restaurant: hero, description, hours table, attributes, menu highlights, "Frequently Asked Questions" block, map link, a live "View our ad" link to the running ad, and a CTA to update/claim listing info.
 
 Each restaurant page emits JSON-LD: `Restaurant` (address, geo, openingHoursSpecification, servesCuisine, priceRange, telephone, sameAs, aggregateRating when available), `FAQPage`, and `BreadcrumbList`. Unique title/meta/OG per page, canonical URL, semantic HTML, single H1.
 
