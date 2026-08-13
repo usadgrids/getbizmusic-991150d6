@@ -126,6 +126,45 @@ export const getActiveAds = createServerFn({ method: "GET" })
     return fairShuffle(withUrls, seed);
   });
 
+// Public: active ads filtered by a set of business categories (industries),
+// optionally scoped to a city. Used by category landing pages like /food.
+export const getAdsByCategory = createServerFn({ method: "GET" })
+  .inputValidator((d) =>
+    z
+      .object({
+        industries: z.array(z.string().min(1).max(60)).min(1).max(60),
+        city_slug: z.string().min(1).max(120).optional(),
+        seed_key: z.string().min(1).max(60).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let cityId: string | null = null;
+    if (data.city_slug) {
+      const { data: city } = await supabaseAdmin
+        .from("cities")
+        .select("id")
+        .eq("slug", data.city_slug)
+        .maybeSingle();
+      if (!city) return [];
+      cityId = (city as { id: string }).id;
+    }
+    let query = supabaseAdmin
+      .from("ads")
+      .select("id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds")
+      .eq("status", "active")
+      .gt("expires_at", new Date().toISOString())
+      .in("industry", data.industries)
+      .order("created_at", { ascending: false });
+    if (cityId) query = query.eq("city_id", cityId);
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    const withUrls = (await attachUrls((rows ?? []) as PublicAd[])) as PublicAd[];
+    const seed = `${data.seed_key ?? "category"}-${data.city_slug ?? "national"}-${new Date().toISOString().slice(0, 13)}`;
+    return fairShuffle(withUrls, seed);
+  });
+
 
 // Public: fetch a single ad by its human-friendly ad_number (for share landing pages).
 export const getAdByNumber = createServerFn({ method: "GET" })
