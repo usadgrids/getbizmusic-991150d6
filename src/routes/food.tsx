@@ -235,6 +235,7 @@ function FoodCategoryPage() {
               ) : null
             }
           />
+        ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
             <UtensilsCrossed className="mx-auto mb-3 text-[#D4A24C]" size={28} />
             <h2 className="text-lg font-bold text-[#0F2A4A]">No food ads running yet</h2>
