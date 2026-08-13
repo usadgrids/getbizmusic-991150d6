@@ -34,6 +34,8 @@ export function ActivationCodesSection() {
   const deleteFn = useServerFn(deleteActivationCode);
   const paidFn = useServerFn(markActivationPaid);
   const statusFn = useServerFn(setActivationStatus);
+  const chosenFn = useServerFn(setActivationChosenImage);
+  const invoiceFn = useServerFn(resendActivationInvoice);
   const citiesFn = useServerFn(getActiveCities);
 
   const { data: rows = [], isLoading, refetch } = useQuery({
