@@ -23,6 +23,7 @@ import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow }
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, type ZelleOrderAdminRow } from "@/lib/payments.functions";
 import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
+import { DirectorySection } from "@/components/admin/DirectorySection";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -355,6 +356,8 @@ function AdminConsole() {
         <DesignOrdersSection />
 
         <ActivationCodesSection />
+
+        <DirectorySection />
 
 
 
