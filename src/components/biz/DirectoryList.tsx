@@ -16,11 +16,12 @@ export function DirectoryList({
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-10" aria-labelledby="directory-heading">
       <h2 id="directory-heading" className="text-2xl font-bold tracking-tight text-foreground">
-        {label.title} Guide — San Diego County
+        BizMusic Knowledge Graph — {label.title}, San Diego County
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Verified hours, services and answers for the businesses advertising on GetBizMusic.
       </p>
+
 
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {places.map((place) => (

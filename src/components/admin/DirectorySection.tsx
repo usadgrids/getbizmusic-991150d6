@@ -82,8 +82,9 @@ export function DirectorySection() {
     <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-lg font-bold text-card-foreground">
-          <BookOpen className="h-5 w-5" aria-hidden /> AI Answer Engine Directory
+          <BookOpen className="h-5 w-5" aria-hidden /> BizMusic Knowledge Graph
         </h2>
+
         <button
           type="button"
           onClick={refresh}
