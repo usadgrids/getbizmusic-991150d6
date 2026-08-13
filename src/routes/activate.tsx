@@ -192,13 +192,27 @@ function ActivatePage() {
 
           agreedTerms: true,
           paymentMethod: method,
+          artworkChoice: artwork,
+          customerImagePath,
           environment: getStripeEnvironment(),
           returnUrl: `${window.location.origin}/activate?code=${encodeURIComponent(proof.code)}&session_id={CHECKOUT_SESSION_ID}`,
         },
       });
       if (!res.ok) throw new Error(res.error);
-      if (res.method === "stripe") setClientSecret(res.clientSecret);
-      else setManual({ method: res.method, memoCode: res.memoCode, amountFormatted: res.amountFormatted, zellePhone: res.zellePhone, venmoHandle: res.venmoHandle });
+      if (res.method === "stripe") {
+        setClientSecret(res.clientSecret);
+      } else if (res.method === "bill_later") {
+        setBilled({
+          invoiceNumber: res.invoiceNumber,
+          amountFormatted: res.amountFormatted,
+          dueDateFormatted: res.dueDateFormatted,
+          zellePhone: res.zellePhone,
+          venmoHandle: res.venmoHandle,
+          artworkPending: artwork === "later",
+        });
+      } else {
+        setManual({ method: res.method, memoCode: res.memoCode, amountFormatted: res.amountFormatted, zellePhone: res.zellePhone, venmoHandle: res.venmoHandle });
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
