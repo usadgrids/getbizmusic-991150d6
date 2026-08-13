@@ -48,6 +48,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicDirectoryRefreshRouteImport } from './routes/api/public/directory/refresh'
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
 import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
@@ -255,6 +256,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDirectoryRefreshRoute =
+  ApiPublicDirectoryRefreshRouteImport.update({
+    id: '/api/public/directory/refresh',
+    path: '/api/public/directory/refresh',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDirectoryCategoryRoute =
   ApiPublicDirectoryCategoryRouteImport.update({
     id: '/api/public/directory/$category',
@@ -317,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -360,6 +368,7 @@ export interface FileRoutesByTo {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -406,6 +415,7 @@ export interface FileRoutesById {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -541,6 +553,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -582,6 +595,7 @@ export interface RootRouteChildren {
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
   ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
   ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
+  ApiPublicDirectoryRefreshRoute: typeof ApiPublicDirectoryRefreshRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -865,6 +879,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/directory/refresh': {
+      id: '/api/public/directory/refresh'
+      path: '/api/public/directory/refresh'
+      fullPath: '/api/public/directory/refresh'
+      preLoaderRoute: typeof ApiPublicDirectoryRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/directory/$category': {
       id: '/api/public/directory/$category'
       path: '/api/public/directory/$category'
@@ -978,6 +999,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
   ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
   ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
+  ApiPublicDirectoryRefreshRoute: ApiPublicDirectoryRefreshRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
