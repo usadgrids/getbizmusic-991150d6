@@ -25,6 +25,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
 import { Route as FoodActivateRouteImport } from './routes/food_.activate'
+import { Route as FoodSlugRouteImport } from './routes/food_.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -125,6 +126,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
 const FoodActivateRoute = FoodActivateRouteImport.update({
   id: '/food_/activate',
   path: '/food/activate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodSlugRoute = FoodSlugRouteImport.update({
+  id: '/food_/$slug',
+  path: '/food/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food/$slug': typeof FoodSlugRoute
   '/food/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food/$slug': typeof FoodSlugRoute
   '/food/activate': typeof FoodActivateRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/food_/$slug': typeof FoodSlugRoute
   '/food_/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food/$slug'
     | '/food/activate'
     | '/$city/'
     | '/admin/'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food/$slug'
     | '/food/activate'
     | '/$city'
     | '/admin'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/food_/$slug'
     | '/food_/activate'
     | '/$city/'
     | '/admin/'
@@ -497,6 +509,7 @@ export interface RootRouteChildren {
   BeautyActivateRoute: typeof BeautyActivateRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  FoodSlugRoute: typeof FoodSlugRoute
   FoodActivateRoute: typeof FoodActivateRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -623,6 +636,13 @@ declare module '@tanstack/react-router' {
       path: '/food/activate'
       fullPath: '/food/activate'
       preLoaderRoute: typeof FoodActivateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food_/$slug': {
+      id: '/food_/$slug'
+      path: '/food/$slug'
+      fullPath: '/food/$slug'
+      preLoaderRoute: typeof FoodSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -832,6 +852,7 @@ const rootRouteChildren: RootRouteChildren = {
   BeautyActivateRoute: BeautyActivateRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  FoodSlugRoute: FoodSlugRoute,
   FoodActivateRoute: FoodActivateRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
