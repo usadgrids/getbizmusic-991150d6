@@ -134,9 +134,13 @@ function FoodCategoryPage() {
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
 
-  // Their own proof leads the rotation, then showcase creatives, then real ads.
+  // PRIVATE PREVIEW ONLY: this slide exists purely in this visitor's browser after they
+  // entered their own activation code. It is never fetched by, or rendered for, anyone else.
+  // Once the listing is paid + activated by an admin it becomes a real `ads` row and shows
+  // up through the normal query, so we drop the preview slide at that point (no duplicate).
+  const isLivePreview = proof?.status === "activated" || proof?.status === "live";
   const proofSlide: PublicAd | null =
-    proof && proof.imageUrl
+    proof && proof.imageUrl && !isLivePreview
       ? {
           id: `activation-${proof.code}`,
           ad_number: null,
@@ -152,6 +156,7 @@ function FoodCategoryPage() {
       : null;
   const slides = [...(proofSlide ? [proofSlide] : []), ...SHOWCASE_ADS, ...ads];
 
+
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizHero cityName="Food & Dining In San Diego County" state="CA" />
@@ -161,6 +166,13 @@ function FoodCategoryPage() {
         <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
           <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
         </div>
+
+        {proofSlide && (
+          <div className="mx-auto mt-3 w-full max-w-3xl rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-2.5 text-center text-xs font-semibold text-[#7a5410]">
+            Private preview — only you can see this ad. It goes public after payment and activation.
+          </div>
+        )}
+
 
         {slides.length > 0 ? (
           <AdSlider ads={slides} title="Featured Food & Dining Business of the Moment" featured />
