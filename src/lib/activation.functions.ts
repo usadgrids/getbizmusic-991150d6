@@ -648,6 +648,14 @@ export type ActivationCodeRow = {
   expires_at: string | null;
   created_at: string;
   share_url: string;
+  artwork_choice: string;
+  customer_image_path: string | null;
+  customer_image_url: string | null;
+  chosen_image: string;
+  due_at: string | null;
+  invoice_number: string | null;
+  upload_token: string;
+  upload_url: string;
 };
 
 export const listActivationCodes = createServerFn({ method: "GET" })
