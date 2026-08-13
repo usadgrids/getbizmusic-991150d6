@@ -118,7 +118,9 @@ const submitSchema = z.object({
   phoneVoice: z.string().trim().max(40).optional(),
   phoneSms: z.string().trim().max(40).optional(),
   agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
-  paymentMethod: z.enum(["stripe", "zelle", "venmo"]),
+  paymentMethod: z.enum(["stripe", "zelle", "venmo", "bill_later"]),
+  artworkChoice: z.enum(["ours", "customer", "later"]).default("ours"),
+  customerImagePath: z.string().trim().max(400).optional(),
   environment: z.enum(["sandbox", "live"]),
   returnUrl: z.string().url("Could not determine the page address. Please reload and try again."),
 });
@@ -126,6 +128,15 @@ const submitSchema = z.object({
 export type ActivationSubmitResult =
   | { ok: true; method: "stripe"; clientSecret: string }
   | { ok: true; method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string }
+  | {
+      ok: true;
+      method: "bill_later";
+      invoiceNumber: string;
+      amountFormatted: string;
+      dueDateFormatted: string;
+      zellePhone: string;
+      venmoHandle: string;
+    }
   | { ok: false; error: string };
 
 const FIELD_LABELS: Record<string, string> = {
