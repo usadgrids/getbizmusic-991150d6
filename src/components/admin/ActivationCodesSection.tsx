@@ -260,6 +260,47 @@ export function ActivationCodesSection() {
                           {r.memo_code && <div className="text-[10px] font-mono text-gray-500 mt-1">Memo: {r.memo_code}</div>}
                         </td>
                         <td className="px-4 py-3 text-xs">
+                          <div className="font-semibold text-[#0F2A4A]">
+                            {r.artwork_choice === "customer"
+                              ? "Customer upload"
+                              : r.artwork_choice === "later"
+                                ? "Sending later"
+                                : "Our design"}
+                          </div>
+                          {r.customer_image_url && (
+                            <a href={r.customer_image_url} target="_blank" rel="noreferrer" className="text-[#0F2A4A] hover:underline">
+                              View upload
+                            </a>
+                          )}
+                          {r.customer_image_path && (
+                            <div className="mt-1 flex gap-1">
+                              <button
+                                onClick={() => chooseImage(r, "ours")}
+                                className={`text-[10px] px-1.5 py-0.5 rounded border ${r.chosen_image === "ours" ? "bg-[#0F2A4A] text-white border-[#0F2A4A]" : "border-gray-300 text-gray-600"}`}
+                              >
+                                Use ours
+                              </button>
+                              <button
+                                onClick={() => chooseImage(r, "customer")}
+                                className={`text-[10px] px-1.5 py-0.5 rounded border ${r.chosen_image === "customer" ? "bg-[#0F2A4A] text-white border-[#0F2A4A]" : "border-gray-300 text-gray-600"}`}
+                              >
+                                Use theirs
+                              </button>
+                            </div>
+                          )}
+                          {r.artwork_choice === "later" && !r.customer_image_path && (
+                            <button
+                              onClick={() => {
+                                void navigator.clipboard.writeText(r.upload_url);
+                                toast.success("Upload link copied");
+                              }}
+                              className="block text-[#0F2A4A] hover:underline mt-1"
+                            >
+                              Copy upload link
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs">
                           {r.confirmed_correct === null ? (
                             <span className="text-gray-400">Not reviewed yet</span>
                           ) : r.confirmed_correct ? (
