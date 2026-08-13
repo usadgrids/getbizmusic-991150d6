@@ -1,3 +1,5 @@
+import { DirectoryList } from "@/components/biz/DirectoryList";
+import { listDirectoryPlaces } from "@/lib/directory.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
@@ -100,6 +102,10 @@ export const Route = createFileRoute("/beauty")({
   validateSearch: z.object({ code: z.string().optional() }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
+      queryKey: ["directory-places", "beauty"],
+      queryFn: () => listDirectoryPlaces({ data: { category: "beauty" } }),
+    });
+    await context.queryClient.ensureQueryData({
       queryKey: ["category-ads", "beauty"],
       queryFn: () =>
         getAdsByCategory({ data: { industries: BEAUTY_INDUSTRIES, seed_key: "beauty" } }),
@@ -126,6 +132,11 @@ function BeautyCategoryPage() {
   const { data: ads = [] } = useSuspenseQuery({
     queryKey: ["category-ads", "beauty"],
     queryFn: () => fetchAds({ data: { industries: BEAUTY_INDUSTRIES, seed_key: "beauty" } }),
+  });
+  const fetchPlaces = useServerFn(listDirectoryPlaces);
+  const { data: directory } = useSuspenseQuery({
+    queryKey: ["directory-places", "beauty"],
+    queryFn: () => fetchPlaces({ data: { category: "beauty" } }),
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
   const [focusNonce, setFocusNonce] = useState(0);
@@ -238,6 +249,8 @@ function BeautyCategoryPage() {
             </p>
           </section>
         )}
+        <DirectoryList category="beauty" places={directory.places} />
+
       </main>
 
       <BizFooter />
