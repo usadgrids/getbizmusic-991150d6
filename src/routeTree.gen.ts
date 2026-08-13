@@ -49,6 +49,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
 import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
+import { Route as ApiPublicDirectoryCategorySlugRouteImport } from './routes/api/public/directory/$category.$slug'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -260,6 +261,12 @@ const ApiPublicAdImageAdNumberRoute =
     path: '/api/public/ad-image/$adNumber',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDirectoryCategorySlugRoute =
+  ApiPublicDirectoryCategorySlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => ApiPublicDirectoryCategoryRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -295,13 +302,14 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
-  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRoute
+  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/directory/$category/$slug': typeof ApiPublicDirectoryCategorySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -335,13 +343,14 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
-  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRoute
+  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/directory/$category/$slug': typeof ApiPublicDirectoryCategorySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -378,13 +387,14 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
-  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRoute
+  '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/directory/$category/$slug': typeof ApiPublicDirectoryCategorySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/directory/$category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/directory/$category/$slug'
   id:
     | '__root__'
     | '/'
@@ -511,6 +523,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/directory/$category/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -542,7 +555,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
   ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
-  ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRoute
+  ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -833,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAdImageAdNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/directory/$category/$slug': {
+      id: '/api/public/directory/$category/$slug'
+      path: '/$slug'
+      fullPath: '/api/public/directory/$category/$slug'
+      preLoaderRoute: typeof ApiPublicDirectoryCategorySlugRouteImport
+      parentRoute: typeof ApiPublicDirectoryCategoryRoute
+    }
   }
 }
 
@@ -871,6 +891,20 @@ const DesignRouteChildren: DesignRouteChildren = {
 const DesignRouteWithChildren =
   DesignRoute._addFileChildren(DesignRouteChildren)
 
+interface ApiPublicDirectoryCategoryRouteChildren {
+  ApiPublicDirectoryCategorySlugRoute: typeof ApiPublicDirectoryCategorySlugRoute
+}
+
+const ApiPublicDirectoryCategoryRouteChildren: ApiPublicDirectoryCategoryRouteChildren =
+  {
+    ApiPublicDirectoryCategorySlugRoute: ApiPublicDirectoryCategorySlugRoute,
+  }
+
+const ApiPublicDirectoryCategoryRouteWithChildren =
+  ApiPublicDirectoryCategoryRoute._addFileChildren(
+    ApiPublicDirectoryCategoryRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CityRoute: CityRouteWithChildren,
@@ -901,7 +935,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
   ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
-  ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRoute,
+  ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
