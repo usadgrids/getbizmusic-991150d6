@@ -191,7 +191,14 @@ export const submitActivation = createServerFn({ method: "POST" })
         agreed_at: now,
         submitted_at: now,
         payment_method: data.paymentMethod,
+        artwork_choice: data.artworkChoice,
+        customer_image_path: data.artworkChoice === "customer" ? (data.customerImagePath ?? null) : null,
+        chosen_image: data.artworkChoice === "customer" ? "customer" : "ours",
       };
+
+      if (data.artworkChoice === "customer" && !data.customerImagePath) {
+        return { ok: false, error: "Please upload your ad image, or choose to send it later." };
+      }
 
       if (data.paymentMethod === "stripe") {
         const stripe = createStripeClient(data.environment);
