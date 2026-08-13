@@ -62,6 +62,8 @@ interface Props {
   featured?: boolean;
   /** When set, the slider jumps to this ad id and scrolls it into view. */
   focusAdId?: string | null;
+  /** Bump to re-trigger the jump even when focusAdId is unchanged. */
+  focusNonce?: number;
 }
 
 
