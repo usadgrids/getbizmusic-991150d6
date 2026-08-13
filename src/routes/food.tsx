@@ -191,6 +191,46 @@ function FoodCategoryPage() {
             </p>
           </section>
         )}
+
+        {proofSlide && (
+          <div className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border-2 border-[#D4A24C] bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-7 text-center text-white shadow-md">
+            {isLivePreview || proof?.paid ? (
+              <>
+                <CheckCircle2 className="mx-auto mb-2 text-[#F4C430]" size={26} />
+                <h2 className="text-lg sm:text-xl font-bold mb-1">
+                  Your listing is already live
+                </h2>
+                <p className="text-sm text-white/80">
+                  This ad is active and running in the rotation. No further action is needed.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg sm:text-xl font-bold mb-1">
+                  That's your ad in the spotlight — ready to go live?
+                </h2>
+                <p className="text-sm text-white/80 mb-1">
+                  {proof?.priceNote
+                    ? `Activation: ${proof.priceNote}`
+                    : proof?.priceCents
+                      ? `Activation: $${(proof.priceCents / 100).toFixed(2)}`
+                      : "Activate your listing to make this ad public."}
+                </p>
+                <p className="text-xs text-white/60 mb-4">
+                  It stays a private preview until payment and activation are complete.
+                </p>
+                <Link
+                  to="/food/activate"
+                  search={{ code: proof!.code }}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
+                >
+                  Review & Activate My Listing
+                  <ArrowRight size={16} />
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </main>
 
       <BizFooter />
