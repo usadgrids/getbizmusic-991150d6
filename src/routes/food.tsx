@@ -181,7 +181,13 @@ function FoodCategoryPage() {
 
 
         {slides.length > 0 ? (
-          <AdSlider ads={slides} title="Featured Food & Dining Business of the Moment" featured />
+          <AdSlider
+            ads={slides}
+            title="Featured Food & Dining Business of the Moment"
+            featured
+            focusAdId={proofSlide?.id ?? null}
+          />
+
         ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
             <UtensilsCrossed className="mx-auto mb-3 text-[#D4A24C]" size={28} />
