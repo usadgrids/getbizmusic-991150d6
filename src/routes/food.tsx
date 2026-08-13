@@ -1,3 +1,5 @@
+import { DirectoryList } from "@/components/biz/DirectoryList";
+import { listDirectoryPlaces } from "@/lib/directory.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
@@ -107,6 +109,10 @@ export const Route = createFileRoute("/food")({
   validateSearch: z.object({ code: z.string().optional() }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
+      queryKey: ["directory-places", "food"],
+      queryFn: () => listDirectoryPlaces({ data: { category: "food" } }),
+    });
+    await context.queryClient.ensureQueryData({
       queryKey: ["category-ads", "food"],
       queryFn: () => getAdsByCategory({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
     });
@@ -132,6 +138,11 @@ function FoodCategoryPage() {
   const { data: ads = [] } = useSuspenseQuery({
     queryKey: ["category-ads", "food"],
     queryFn: () => fetchAds({ data: { industries: FOOD_INDUSTRIES, seed_key: "food" } }),
+  });
+  const fetchPlaces = useServerFn(listDirectoryPlaces);
+  const { data: directory } = useSuspenseQuery({
+    queryKey: ["directory-places", "food"],
+    queryFn: () => fetchPlaces({ data: { category: "food" } }),
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
   // Bumped on every code submission so re-entering the same code still snaps the slider back.
@@ -244,6 +255,8 @@ function FoodCategoryPage() {
             </p>
           </section>
         )}
+
+        <DirectoryList category="food" places={directory.places} />
 
       </main>
 
