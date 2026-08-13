@@ -27,6 +27,7 @@ import { Route as FoodActivateRouteImport } from './routes/food_.activate'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as BeautyActivateRouteImport } from './routes/beauty_.activate'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
@@ -133,6 +134,11 @@ const DesignReturnRoute = DesignReturnRouteImport.update({
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeautyActivateRoute = BeautyActivateRouteImport.update({
+  id: '/beauty_/activate',
+  path: '/beauty/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/beauty_/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/beauty_/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -469,6 +481,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ActivateArtworkRoute: typeof ActivateArtworkRoute
   AdAdNumberRoute: typeof AdAdNumberRoute
+  BeautyActivateRoute: typeof BeautyActivateRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   FoodActivateRoute: typeof FoodActivateRoute
@@ -611,6 +624,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beauty_/activate': {
+      id: '/beauty_/activate'
+      path: '/beauty/activate'
+      fullPath: '/beauty/activate'
+      preLoaderRoute: typeof BeautyActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/disputes': {
@@ -788,6 +808,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ActivateArtworkRoute: ActivateArtworkRoute,
   AdAdNumberRoute: AdAdNumberRoute,
+  BeautyActivateRoute: BeautyActivateRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   FoodActivateRoute: FoodActivateRoute,
