@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,27 +16,51 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
+import {
+  DIRECTORY_CATEGORIES,
+  isDirectoryCategory,
+  type DirectoryCategory,
+} from "@/lib/directory-categories";
 
 const NAVY = "#0F2A4A";
 
-export const Route = createFileRoute("/food_/activate")({
+export const Route = createFileRoute("/$city/activate")({
   validateSearch: z.object({
     code: z.string().optional(),
     session_id: z.string().optional(),
     pay: z.string().optional(),
   }),
-  head: () => ({
-    meta: [
-      { title: "Activate Your Food & Dining Ad — Get Biz Music" },
-      { name: "description", content: "Enter your activation code to review your food & dining ad proof, confirm the details, and activate your GetBizMusic listing." },
-      { property: "og:title", content: "Activate Your Food & Dining Ad — Get Biz Music" },
-      { property: "og:description", content: "Review your food & dining ad proof, confirm your details, and activate your GetBizMusic listing." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: FoodActivatePage,
+  beforeLoad: ({ params }) => {
+    // Shared activation template — only Knowledge Graph categories use it.
+    if (!isDirectoryCategory(params.city)) throw notFound();
+  },
+  head: ({ params }) => {
+    const config = isDirectoryCategory(params.city)
+      ? DIRECTORY_CATEGORIES[params.city as DirectoryCategory]
+      : null;
+    const title = `Activate Your ${config?.title ?? "Business"} Ad — Get Biz Music`;
+    return {
+      meta: [
+        { title },
+        {
+          name: "description",
+          content: `Enter your activation code to review your ${config?.phrase ?? "business"} ad proof, confirm the details, and activate your GetBizMusic listing.`,
+        },
+        { property: "og:title", content: title },
+        {
+          property: "og:description",
+          content: `Review your ${config?.phrase ?? "business"} ad proof, confirm your details, and activate your GetBizMusic listing.`,
+        },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "robots", content: "noindex" },
+      ],
+    };
+  },
+  notFoundComponent: () => (
+    <div className="p-10 text-center text-muted-foreground">Activation page not found.</div>
+  ),
+  component: CategoryActivatePage,
 });
 
 type ManualInfo = { method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string };
@@ -51,8 +75,11 @@ type BilledInfo = {
 type PaymentChoice = "stripe" | "zelle" | "venmo" | "bill_later";
 type ArtworkChoice = "ours" | "customer" | "later";
 
-function FoodActivatePage() {
+function CategoryActivatePage() {
   const search = Route.useSearch();
+  const { city } = Route.useParams();
+  const category = city as DirectoryCategory;
+  const config = DIRECTORY_CATEGORIES[category];
   const navigate = useNavigate();
   const lookupFn = useServerFn(lookupActivationCode);
   const submitFn = useServerFn(submitActivation);
@@ -139,7 +166,7 @@ function FoodActivatePage() {
           data: {
             code: search.code!,
             environment: getStripeEnvironment(),
-            returnUrl: `${window.location.origin}/food/activate?code=${encodeURIComponent(search.code!)}&session_id={CHECKOUT_SESSION_ID}`,
+            returnUrl: `${window.location.origin}/${category}/activate?code=${encodeURIComponent(search.code!)}&session_id={CHECKOUT_SESSION_ID}`,
           },
         });
         if (res.ok) setClientSecret(res.clientSecret);
@@ -195,7 +222,7 @@ function FoodActivatePage() {
           artworkChoice: artwork,
           customerImagePath,
           environment: getStripeEnvironment(),
-          returnUrl: `${window.location.origin}/food/activate?code=${encodeURIComponent(proof.code)}&session_id={CHECKOUT_SESSION_ID}`,
+          returnUrl: `${window.location.origin}/${category}/activate?code=${encodeURIComponent(proof.code)}&session_id={CHECKOUT_SESSION_ID}`,
         },
       });
       if (!res.ok) throw new Error(res.error);
@@ -231,8 +258,8 @@ function FoodActivatePage() {
             We're now working on your GetBizMusic.com ad to perfection. Please allow a few business days —
             you'll get another email the moment your ad is live and activated. A receipt is on its way to your inbox.
           </p>
-          <Link to="/food" className="inline-block mt-6 bg-[#0F2A4A] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#163864]">
-            Back to Food & Dining
+          <Link to="/$city" params={{ city: category }} className="inline-block mt-6 bg-[#0F2A4A] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#163864]">
+            Back to {config.title}
           </Link>
         </div>
       </Shell>
@@ -269,8 +296,8 @@ function FoodActivatePage() {
             </ul>
             <p className="text-[11px] text-gray-500 mt-2">Include invoice {billed.invoiceNumber} in the memo.</p>
           </div>
-          <Link to="/food" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
-            Back to Food & Dining
+          <Link to="/$city" params={{ city: category }} className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
+            Back to {config.title}
           </Link>
         </div>
       </Shell>
@@ -327,8 +354,8 @@ function FoodActivatePage() {
               <img src={zelleQr.url} alt="Zelle QR code for WINALL MEDIA LLC" className="mx-auto w-52 h-52 rounded-xl border-2 border-purple-300 bg-white p-2" />
             </div>
           )}
-          <Link to="/food" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
-            Back to Food & Dining
+          <Link to="/$city" params={{ city: category }} className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
+            Back to {config.title}
           </Link>
         </div>
       </Shell>
@@ -342,7 +369,7 @@ function FoodActivatePage() {
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 max-w-md mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <KeyRound className="text-[#D4A24C]" size={20} />
-            <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Activate your food & dining ad</h1>
+            <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Activate your {config.phrase} ad</h1>
           </div>
           <p className="text-sm text-gray-600">
             Enter the activation code from your flyer or email to review your ad before it goes live.
@@ -350,7 +377,7 @@ function FoodActivatePage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              void navigate({ to: "/food/activate", search: { code: codeInput.trim().toUpperCase() } });
+              void navigate({ to: "/$city/activate", params: { city: category }, search: { code: codeInput.trim().toUpperCase() } });
               void runLookup(codeInput);
             }}
             className="mt-5 space-y-3"
@@ -572,8 +599,8 @@ function Shell({ children }: { children: React.ReactNode }) {
       <PaymentTestModeBanner />
       <header className="bg-[#0F2A4A] text-white">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/food" className="font-serif text-lg">Get Biz Music</Link>
-          <span className="text-xs text-white/70">Food & Dining Ad Activation</span>
+          <Link to="/$city" params={{ city: category }} className="font-serif text-lg">Get Biz Music</Link>
+          <span className="text-xs text-white/70">{config.title} Ad Activation</span>
         </div>
       </header>
       <main className="max-w-3xl mx-auto px-4 py-8">{children}</main>

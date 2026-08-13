@@ -15,10 +15,8 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as McpRouteImport } from './routes/mcp'
-import { Route as FoodRouteImport } from './routes/food'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
-import { Route as BeautyRouteImport } from './routes/beauty'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivateRouteImport } from './routes/activate'
@@ -26,19 +24,16 @@ import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
-import { Route as FoodActivateRouteImport } from './routes/food_.activate'
-import { Route as FoodSlugRouteImport } from './routes/food_.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
-import { Route as BeautyActivateRouteImport } from './routes/beauty_.activate'
-import { Route as BeautySlugRouteImport } from './routes/beauty_.$slug'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
 import { Route as ActivateArtworkRouteImport } from './routes/activate_.artwork'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as CityActivateRouteImport } from './routes/$city.activate'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -84,11 +79,6 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FoodRoute = FoodRouteImport.update({
-  id: '/food',
-  path: '/food',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EditAdRoute = EditAdRouteImport.update({
   id: '/edit-ad',
   path: '/edit-ad',
@@ -97,11 +87,6 @@ const EditAdRoute = EditAdRouteImport.update({
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BeautyRoute = BeautyRouteImport.update({
-  id: '/beauty',
-  path: '/beauty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -139,16 +124,6 @@ const CityIndexRoute = CityIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CityRoute,
 } as any)
-const FoodActivateRoute = FoodActivateRouteImport.update({
-  id: '/food_/activate',
-  path: '/food/activate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FoodSlugRoute = FoodSlugRouteImport.update({
-  id: '/food_/$slug',
-  path: '/food/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -162,16 +137,6 @@ const DesignReturnRoute = DesignReturnRouteImport.update({
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BeautyActivateRoute = BeautyActivateRouteImport.update({
-  id: '/beauty_/activate',
-  path: '/beauty/activate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BeautySlugRoute = BeautySlugRouteImport.update({
-  id: '/beauty_/$slug',
-  path: '/beauty/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
@@ -206,6 +171,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CityActivateRoute = CityActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => CityRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -293,29 +263,24 @@ export interface FileRoutesByFullPath {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
-  '/beauty/$slug': typeof BeautySlugRoute
-  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/food/$slug': typeof FoodSlugRoute
-  '/food/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -337,29 +302,24 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/auth': typeof AuthRoute
-  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
-  '/beauty/$slug': typeof BeautySlugRoute
-  '/beauty/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/food/$slug': typeof FoodSlugRoute
-  '/food/activate': typeof FoodActivateRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -384,29 +344,24 @@ export interface FileRoutesById {
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/beauty': typeof BeautyRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
-  '/food': typeof FoodRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/activate_/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
-  '/beauty_/$slug': typeof BeautySlugRoute
-  '/beauty_/activate': typeof BeautyActivateRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/food_/$slug': typeof FoodSlugRoute
-  '/food_/activate': typeof FoodActivateRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -432,29 +387,24 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
-    | '/beauty'
     | '/design'
     | '/edit-ad'
-    | '/food'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
-    | '/beauty/$slug'
-    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
-    | '/food/$slug'
-    | '/food/activate'
     | '/$city/'
     | '/admin/'
     | '/.lovable/oauth/consent'
@@ -476,29 +426,24 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/auth'
-    | '/beauty'
     | '/design'
     | '/edit-ad'
-    | '/food'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
-    | '/beauty/$slug'
-    | '/beauty/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
-    | '/food/$slug'
-    | '/food/activate'
     | '/$city'
     | '/admin'
     | '/.lovable/oauth/consent'
@@ -522,29 +467,24 @@ export interface FileRouteTypes {
     | '/activate'
     | '/admin'
     | '/auth'
-    | '/beauty'
     | '/design'
     | '/edit-ad'
-    | '/food'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/$city/activate'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/activate_/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
-    | '/beauty_/$slug'
-    | '/beauty_/activate'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
-    | '/food_/$slug'
-    | '/food_/activate'
     | '/$city/'
     | '/admin/'
     | '/.lovable/oauth/consent'
@@ -569,10 +509,8 @@ export interface RootRouteChildren {
   ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
-  BeautyRoute: typeof BeautyRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
-  FoodRoute: typeof FoodRoute
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -583,12 +521,8 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ActivateArtworkRoute: typeof ActivateArtworkRoute
   AdAdNumberRoute: typeof AdAdNumberRoute
-  BeautySlugRoute: typeof BeautySlugRoute
-  BeautyActivateRoute: typeof BeautyActivateRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
-  FoodSlugRoute: typeof FoodSlugRoute
-  FoodActivateRoute: typeof FoodActivateRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -648,13 +582,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/food': {
-      id: '/food'
-      path: '/food'
-      fullPath: '/food'
-      preLoaderRoute: typeof FoodRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/edit-ad': {
       id: '/edit-ad'
       path: '/edit-ad'
@@ -667,13 +594,6 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof DesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/beauty': {
-      id: '/beauty'
-      path: '/beauty'
-      fullPath: '/beauty'
-      preLoaderRoute: typeof BeautyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -725,20 +645,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
     }
-    '/food_/activate': {
-      id: '/food_/activate'
-      path: '/food/activate'
-      fullPath: '/food/activate'
-      preLoaderRoute: typeof FoodActivateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/food_/$slug': {
-      id: '/food_/$slug'
-      path: '/food/$slug'
-      fullPath: '/food/$slug'
-      preLoaderRoute: typeof FoodSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -758,20 +664,6 @@ declare module '@tanstack/react-router' {
       path: '/checkout/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/beauty_/activate': {
-      id: '/beauty_/activate'
-      path: '/beauty/activate'
-      fullPath: '/beauty/activate'
-      preLoaderRoute: typeof BeautyActivateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/beauty_/$slug': {
-      id: '/beauty_/$slug'
-      path: '/beauty/$slug'
-      fullPath: '/beauty/$slug'
-      preLoaderRoute: typeof BeautySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/disputes': {
@@ -815,6 +707,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.mcp/list-tools'
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/$city/activate': {
+      id: '/$city/activate'
+      path: '/activate'
+      fullPath: '/$city/activate'
+      preLoaderRoute: typeof CityActivateRouteImport
+      parentRoute: typeof CityRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -918,10 +817,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface CityRouteChildren {
+  CityActivateRoute: typeof CityActivateRoute
   CityIndexRoute: typeof CityIndexRoute
 }
 
 const CityRouteChildren: CityRouteChildren = {
+  CityActivateRoute: CityActivateRoute,
   CityIndexRoute: CityIndexRoute,
 }
 
@@ -972,10 +873,8 @@ const rootRouteChildren: RootRouteChildren = {
   ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
-  BeautyRoute: BeautyRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
-  FoodRoute: FoodRoute,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -987,12 +886,8 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ActivateArtworkRoute: ActivateArtworkRoute,
   AdAdNumberRoute: AdAdNumberRoute,
-  BeautySlugRoute: BeautySlugRoute,
-  BeautyActivateRoute: BeautyActivateRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
-  FoodSlugRoute: FoodSlugRoute,
-  FoodActivateRoute: FoodActivateRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
