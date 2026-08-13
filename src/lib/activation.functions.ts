@@ -674,9 +674,68 @@ export const listActivationCodes = createServerFn({ method: "GET" })
       rows.map(async (r) => ({
         ...r,
         image_url: await signImage(r.image_path),
+        customer_image_url: await signImage(r.customer_image_path),
         share_url: `${SITE_URL}/activate?code=${encodeURIComponent(r.code)}`,
+        upload_url: `${SITE_URL}/activate/artwork?token=${r.upload_token}`,
       })),
     );
+  });
+
+/** Admin: choose which image goes live — ours or the customer's upload. */
+export const setActivationChosenImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; chosen: "ours" | "customer" }) =>
+    z.object({ id: z.string().uuid(), chosen: z.enum(["ours", "customer"]) }).parse(d),
+  )
+  .handler(async ({ context, data }): Promise<{ ok: boolean; error?: string }> => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("activation_codes")
+      .update({ chosen_image: data.chosen })
+      .eq("id", data.id);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  });
+
+/** Admin: resend the invoice email for a billed activation code. */
+export const resendActivationInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }): Promise<{ ok: boolean; error?: string }> => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!row) return { ok: false, error: "Not found" };
+    const email = (row.customer_email as string) || (row.contact_email as string);
+    if (!email) return { ok: false, error: "No customer email on this code." };
+
+    const invoiceNumber = (row.invoice_number as string) || (row.memo_code as string) || `INV-${row.code}`;
+    const dueAt = row.due_at ? new Date(row.due_at as string) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    if (!row.due_at || !row.invoice_number) {
+      await supabaseAdmin
+        .from("activation_codes")
+        .update({ invoice_number: invoiceNumber, due_at: dueAt.toISOString() })
+        .eq("id", row.id);
+    }
+
+    await sendActivationInvoiceEmails({
+      code: row.code as string,
+      email,
+      businessName: (row.customer_business_name as string) || (row.business_name as string),
+      amountFormatted: `$${(Number(row.price_cents ?? 0) / 100).toFixed(2)}`,
+      invoiceNumber: `${invoiceNumber}-R${Math.floor(100 + Math.random() * 900)}`,
+      dueDateFormatted: dueAt.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" }),
+      artworkPending: row.status === "awaiting_artwork",
+      uploadToken: (row.upload_token as string) ?? null,
+      correctionsRequested: row.confirmed_correct === false,
+      correctionNotes: (row.correction_notes as string) ?? null,
+    });
+    return { ok: true };
   });
 
 const saveSchema = z.object({
