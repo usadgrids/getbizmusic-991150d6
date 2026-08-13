@@ -171,7 +171,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
       }, 80);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusAdId, ads.length]);
+  }, [focusAdId, focusNonce, ads.length]);
 
 
 
