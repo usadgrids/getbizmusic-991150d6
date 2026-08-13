@@ -40,6 +40,16 @@ export const Route = createFileRoute("/activate")({
 });
 
 type ManualInfo = { method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string };
+type BilledInfo = {
+  invoiceNumber: string;
+  amountFormatted: string;
+  dueDateFormatted: string;
+  zellePhone: string;
+  venmoHandle: string;
+  artworkPending: boolean;
+};
+type PaymentChoice = "stripe" | "zelle" | "venmo" | "bill_later";
+type ArtworkChoice = "ours" | "customer" | "later";
 
 function ActivatePage() {
   const search = Route.useSearch();
