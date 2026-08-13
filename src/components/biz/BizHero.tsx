@@ -31,11 +31,12 @@ export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
           className="block"
         >
           <img
-            src={heroFlyer.url}
+            src={imageUrl ?? heroFlyer.url}
             alt={
-              label
+              imageAlt ??
+              (label
                 ? `Get Biz Music ${label} — Local B2B Business Network with Music Streaming. Get listed from $12/year.`
-                : "Get Biz Music — Local B2B Business Network with Music Streaming. Get listed from $12/year."
+                : "Get Biz Music — Local B2B Business Network with Music Streaming. Get listed from $12/year.")
             }
             className="block w-full h-auto"
           />
