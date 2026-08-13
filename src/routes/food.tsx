@@ -176,7 +176,7 @@ function FoodCategoryPage() {
         <h1 className="sr-only">Food & Dining business ads on Get Biz Music</h1>
 
         <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
-          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
+          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={handleProof} />
         </div>
 
         {proofSlide && (
