@@ -455,6 +455,48 @@ function ActivatePage() {
           {!sameAsVoice && <Field label="Customer support number (text/SMS)" value={sms} onChange={setSms} />}
         </div>
 
+        {/* Artwork choice */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-3">
+          <h2 className="font-serif text-lg font-bold text-[#0F2A4A]">Your ad artwork</h2>
+          {(
+            [
+              { key: "ours", title: "Use the ad we designed for you", desc: "The proof shown above goes live as-is (or with your corrections)." },
+              { key: "customer", title: "I'll upload my own ad image", desc: "Already have a professionally designed ad? Upload it now — we review every image." },
+              { key: "later", title: "I'll send my ad image later", desc: "Activate and pay now; we'll email you a private upload link." },
+            ] as { key: ArtworkChoice; title: string; desc: string }[]
+          ).map((o) => (
+            <label
+              key={o.key}
+              className={`flex items-start gap-3 border rounded-xl p-3 cursor-pointer ${
+                artwork === o.key ? "border-[#0F2A4A] bg-[#F5F8FC]" : "border-gray-200 hover:border-[#0F2A4A]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="artwork"
+                checked={artwork === o.key}
+                onChange={() => setArtwork(o.key)}
+                className="mt-1 accent-[#0F2A4A]"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-[#0F2A4A]">{o.title}</span>
+                <span className="block text-xs text-gray-600">{o.desc}</span>
+              </span>
+            </label>
+          ))}
+          {artwork === "customer" && (
+            <div className="pt-1">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setArtworkFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#0F2A4A] file:text-white file:text-xs file:font-semibold"
+              />
+              <p className="text-[11px] text-gray-500 mt-1">PNG, JPG or WEBP up to 10MB. Professional-grade images only.</p>
+            </div>
+          )}
+        </div>
+
         {/* Terms + payment */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
           <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
