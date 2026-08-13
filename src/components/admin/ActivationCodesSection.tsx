@@ -333,6 +333,11 @@ export function ActivationCodesSection() {
                                 <Check size={11} /> Mark paid
                               </button>
                             )}
+                            {r.status === "billed" && (
+                              <button onClick={() => resendInvoice(r)} className="text-[11px] text-orange-700 hover:underline">
+                                Resend invoice
+                              </button>
+                            )}
                             <button onClick={() => toggleActive(r)} className="text-[11px] text-gray-600 hover:underline">
                               {r.status === "deactivated" ? "Re-activate" : "Deactivate"}
                             </button>
