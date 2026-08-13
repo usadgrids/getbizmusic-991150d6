@@ -1,17 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles, UtensilsCrossed } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
+import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
+import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import adAmerican from "@/assets/food-ad-american.jpg";
 import adFilipino from "@/assets/food-ad-filipino.jpg";
 import adMexican from "@/assets/food-ad-mexican.jpg";
 import adItalian from "@/assets/food-ad-italian.jpg";
 import adBuffet from "@/assets/food-ad-buffet.jpg";
+
 
 // Business categories that belong on the /food page.
 const FOOD_INDUSTRIES = [
