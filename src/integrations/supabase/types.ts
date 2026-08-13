@@ -798,6 +798,7 @@ export type Database = {
       }
       food_crawl_runs: {
         Row: {
+          category: string
           created_at: string
           errors: string | null
           finished_at: string | null
@@ -808,6 +809,7 @@ export type Database = {
           triggered_by: string
         }
         Insert: {
+          category?: string
           created_at?: string
           errors?: string | null
           finished_at?: string | null
@@ -818,6 +820,7 @@ export type Database = {
           triggered_by: string
         }
         Update: {
+          category?: string
           created_at?: string
           errors?: string | null
           finished_at?: string | null
@@ -880,6 +883,8 @@ export type Database = {
           ad_id: string
           address: string | null
           attributes: Json
+          booking_url: string | null
+          category: string
           city: string | null
           created_at: string
           cuisines: string[]
@@ -908,6 +913,8 @@ export type Database = {
           ad_id: string
           address?: string | null
           attributes?: Json
+          booking_url?: string | null
+          category?: string
           city?: string | null
           created_at?: string
           cuisines?: string[]
@@ -936,6 +943,8 @@ export type Database = {
           ad_id?: string
           address?: string | null
           attributes?: Json
+          booking_url?: string | null
+          category?: string
           city?: string | null
           created_at?: string
           cuisines?: string[]
