@@ -3,7 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed, ArrowRight, CheckCircle2 } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
 import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
