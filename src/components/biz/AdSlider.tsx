@@ -153,6 +153,26 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null }: Pro
     remainingRef.current = timeLeft;
   }, [timeLeft]);
 
+  // Jump straight to a requested ad (e.g. the visitor's own activation preview)
+  // and bring it into view, no matter where the rotation currently is.
+  useEffect(() => {
+    if (!focusAdId) return;
+    const i = ads.findIndex((a) => a.id === focusAdId);
+    if (i < 0) return;
+    setIdx(i);
+    resumeRemainingRef.current = null;
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        document
+          .getElementById("ad-slideshow")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusAdId, ads.length]);
+
+
+
   // When the ad changes, clear any saved resume time so the new ad starts fresh.
   useEffect(() => {
     resumeRemainingRef.current = null;
