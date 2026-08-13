@@ -3,6 +3,7 @@
 // clean typed record + Q&A pairs in the database.
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 
 export type DirectoryCategory = "food" | "beauty";
 
@@ -308,8 +309,8 @@ export async function researchAd(opts: {
       booking_url: normalized.booking_url,
       cuisines: normalized.cuisines,
       price_range: normalized.price_range,
-      hours: normalized.hours,
-      attributes: normalized.attributes,
+      hours: normalized.hours as unknown as Json,
+      attributes: normalized.attributes as unknown as Json,
       description: normalized.description,
       summary: normalized.summary,
       rating: normalized.rating,
