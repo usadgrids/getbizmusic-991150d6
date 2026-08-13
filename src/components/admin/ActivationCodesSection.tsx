@@ -12,6 +12,8 @@ import {
   deleteActivationCode,
   markActivationPaid,
   setActivationStatus,
+  setActivationChosenImage,
+  resendActivationInvoice,
   type ActivationCodeRow,
 } from "@/lib/activation.functions";
 
@@ -20,6 +22,8 @@ const STATUS_STYLES: Record<string, string> = {
   viewed: "bg-blue-100 text-blue-800 border-blue-300",
   awaiting_payment: "bg-amber-100 text-amber-800 border-amber-300",
   awaiting_manual: "bg-purple-100 text-purple-800 border-purple-300",
+  billed: "bg-orange-100 text-orange-800 border-orange-300",
+  awaiting_artwork: "bg-yellow-100 text-yellow-800 border-yellow-300",
   paid: "bg-emerald-100 text-emerald-800 border-emerald-300",
   deactivated: "bg-gray-200 text-gray-500 border-gray-300",
 };
@@ -30,6 +34,8 @@ export function ActivationCodesSection() {
   const deleteFn = useServerFn(deleteActivationCode);
   const paidFn = useServerFn(markActivationPaid);
   const statusFn = useServerFn(setActivationStatus);
+  const chosenFn = useServerFn(setActivationChosenImage);
+  const invoiceFn = useServerFn(resendActivationInvoice);
   const citiesFn = useServerFn(getActiveCities);
 
   const { data: rows = [], isLoading, refetch } = useQuery({
@@ -116,6 +122,20 @@ export function ActivationCodesSection() {
     if (!res.ok) return toast.error(res.error ?? "Failed");
     toast.success("Marked paid — receipt sent");
     refetch();
+  };
+
+  const chooseImage = async (r: ActivationCodeRow, chosen: "ours" | "customer") => {
+    const res = await chosenFn({ data: { id: r.id, chosen } });
+    if (!res.ok) return toast.error(res.error ?? "Failed");
+    toast.success(chosen === "ours" ? "Using our design" : "Using customer artwork");
+    refetch();
+  };
+
+  const resendInvoice = async (r: ActivationCodeRow) => {
+    if (!confirm(`Resend the invoice email for "${r.code}"?`)) return;
+    const res = await invoiceFn({ data: { id: r.id } });
+    if (!res.ok) return toast.error(res.error ?? "Failed");
+    toast.success("Invoice email sent");
   };
 
   const toggleActive = async (r: ActivationCodeRow) => {
@@ -216,6 +236,7 @@ export function ActivationCodesSection() {
                   <th className="px-4 py-2">Business</th>
                   <th className="px-4 py-2">Price</th>
                   <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Artwork</th>
                   <th className="px-4 py-2">Customer response</th>
                   <th className="px-4 py-2">Actions</th>
                 </tr>
@@ -237,6 +258,47 @@ export function ActivationCodesSection() {
                             {r.status.replace(/_/g, " ")}
                           </span>
                           {r.memo_code && <div className="text-[10px] font-mono text-gray-500 mt-1">Memo: {r.memo_code}</div>}
+                        </td>
+                        <td className="px-4 py-3 text-xs">
+                          <div className="font-semibold text-[#0F2A4A]">
+                            {r.artwork_choice === "customer"
+                              ? "Customer upload"
+                              : r.artwork_choice === "later"
+                                ? "Sending later"
+                                : "Our design"}
+                          </div>
+                          {r.customer_image_url && (
+                            <a href={r.customer_image_url} target="_blank" rel="noreferrer" className="text-[#0F2A4A] hover:underline">
+                              View upload
+                            </a>
+                          )}
+                          {r.customer_image_path && (
+                            <div className="mt-1 flex gap-1">
+                              <button
+                                onClick={() => chooseImage(r, "ours")}
+                                className={`text-[10px] px-1.5 py-0.5 rounded border ${r.chosen_image === "ours" ? "bg-[#0F2A4A] text-white border-[#0F2A4A]" : "border-gray-300 text-gray-600"}`}
+                              >
+                                Use ours
+                              </button>
+                              <button
+                                onClick={() => chooseImage(r, "customer")}
+                                className={`text-[10px] px-1.5 py-0.5 rounded border ${r.chosen_image === "customer" ? "bg-[#0F2A4A] text-white border-[#0F2A4A]" : "border-gray-300 text-gray-600"}`}
+                              >
+                                Use theirs
+                              </button>
+                            </div>
+                          )}
+                          {r.artwork_choice === "later" && !r.customer_image_path && (
+                            <button
+                              onClick={() => {
+                                void navigator.clipboard.writeText(r.upload_url);
+                                toast.success("Upload link copied");
+                              }}
+                              className="block text-[#0F2A4A] hover:underline mt-1"
+                            >
+                              Copy upload link
+                            </button>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-xs">
                           {r.confirmed_correct === null ? (
@@ -271,6 +333,11 @@ export function ActivationCodesSection() {
                                 <Check size={11} /> Mark paid
                               </button>
                             )}
+                            {r.status === "billed" && (
+                              <button onClick={() => resendInvoice(r)} className="text-[11px] text-orange-700 hover:underline">
+                                Resend invoice
+                              </button>
+                            )}
                             <button onClick={() => toggleActive(r)} className="text-[11px] text-gray-600 hover:underline">
                               {r.status === "deactivated" ? "Re-activate" : "Deactivate"}
                             </button>
@@ -282,7 +349,7 @@ export function ActivationCodesSection() {
                       </tr>
                       {isOpen && (
                         <tr className="bg-slate-50/70">
-                          <td colSpan={6} className="px-4 py-3 text-xs text-gray-700 whitespace-pre-wrap">
+                          <td colSpan={7} className="px-4 py-3 text-xs text-gray-700 whitespace-pre-wrap">
                             <strong className="text-[#0F2A4A]">Customer notes:</strong>
                             <div className="mt-1">{r.correction_notes}</div>
                           </td>

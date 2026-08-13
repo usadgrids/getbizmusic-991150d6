@@ -10,8 +10,10 @@ import {
   lookupActivationCode,
   submitActivation,
   confirmActivationSession,
+  payActivationInvoice,
   type ActivationProof,
 } from "@/lib/activation.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/activate")({
   validateSearch: z.object({
     code: z.string().optional(),
     session_id: z.string().optional(),
+    pay: z.string().optional(),
   }),
   head: () => ({
     meta: [
@@ -37,6 +40,16 @@ export const Route = createFileRoute("/activate")({
 });
 
 type ManualInfo = { method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string };
+type BilledInfo = {
+  invoiceNumber: string;
+  amountFormatted: string;
+  dueDateFormatted: string;
+  zellePhone: string;
+  venmoHandle: string;
+  artworkPending: boolean;
+};
+type PaymentChoice = "stripe" | "zelle" | "venmo" | "bill_later";
+type ArtworkChoice = "ours" | "customer" | "later";
 
 function ActivatePage() {
   const search = Route.useSearch();
@@ -44,6 +57,7 @@ function ActivatePage() {
   const lookupFn = useServerFn(lookupActivationCode);
   const submitFn = useServerFn(submitActivation);
   const confirmFn = useServerFn(confirmActivationSession);
+  const payInvoiceFn = useServerFn(payActivationInvoice);
 
   const [codeInput, setCodeInput] = useState(search.code ?? "");
   const [loading, setLoading] = useState(false);
@@ -52,6 +66,7 @@ function ActivatePage() {
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [manual, setManual] = useState<ManualInfo | null>(null);
+  const [billed, setBilled] = useState<BilledInfo | null>(null);
   const [paidName, setPaidName] = useState<string | null>(null);
 
   // Form state
@@ -64,8 +79,10 @@ function ActivatePage() {
   const [sms, setSms] = useState("");
   const [sameAsVoice, setSameAsVoice] = useState(true);
   const [agreed, setAgreed] = useState(false);
-  const [method, setMethod] = useState<"stripe" | "zelle" | "venmo">("stripe");
+  const [method, setMethod] = useState<PaymentChoice>("stripe");
   const [submitting, setSubmitting] = useState(false);
+  const [artwork, setArtwork] = useState<ArtworkChoice>("ours");
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
 
   const runLookup = async (raw: string) => {
     const code = raw.trim();
@@ -113,6 +130,27 @@ function ActivatePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.session_id]);
 
+  // "Pay now" link from the invoice email: open card checkout straight away.
+  useEffect(() => {
+    if (!search.pay || !search.code) return;
+    (async () => {
+      try {
+        const res = await payInvoiceFn({
+          data: {
+            code: search.code!,
+            environment: getStripeEnvironment(),
+            returnUrl: `${window.location.origin}/activate?code=${encodeURIComponent(search.code!)}&session_id={CHECKOUT_SESSION_ID}`,
+          },
+        });
+        if (res.ok) setClientSecret(res.clientSecret);
+        else toast.error(res.error);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Could not open checkout");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.pay, search.code]);
+
   const submit = async () => {
     if (!proof) return;
     if (!businessName.trim()) return toast.error("Please enter your business name.");
@@ -123,9 +161,24 @@ function ActivatePage() {
     if (correct === "no" && notes.trim().length < 5) {
       return toast.error("Please describe the corrections you'd like.");
     }
+    if (artwork === "customer" && !artworkFile) {
+      return toast.error("Please choose your ad image file, or pick another artwork option.");
+    }
     setSubmitting(true);
 
     try {
+      let customerImagePath: string | undefined;
+      if (artwork === "customer" && artworkFile) {
+        if (artworkFile.size > 10 * 1024 * 1024) throw new Error("Image must be 10MB or smaller.");
+        const ext = artworkFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `activation/${proof.code}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("ad-uploads")
+          .upload(path, artworkFile, { contentType: artworkFile.type, upsert: false });
+        if (upErr) throw new Error(`Upload failed: ${upErr.message}`);
+        customerImagePath = path;
+      }
+
       const res = await submitFn({
         data: {
           code: proof.code,
@@ -139,13 +192,27 @@ function ActivatePage() {
 
           agreedTerms: true,
           paymentMethod: method,
+          artworkChoice: artwork,
+          customerImagePath,
           environment: getStripeEnvironment(),
           returnUrl: `${window.location.origin}/activate?code=${encodeURIComponent(proof.code)}&session_id={CHECKOUT_SESSION_ID}`,
         },
       });
       if (!res.ok) throw new Error(res.error);
-      if (res.method === "stripe") setClientSecret(res.clientSecret);
-      else setManual({ method: res.method, memoCode: res.memoCode, amountFormatted: res.amountFormatted, zellePhone: res.zellePhone, venmoHandle: res.venmoHandle });
+      if (res.method === "stripe") {
+        setClientSecret(res.clientSecret);
+      } else if (res.method === "bill_later") {
+        setBilled({
+          invoiceNumber: res.invoiceNumber,
+          amountFormatted: res.amountFormatted,
+          dueDateFormatted: res.dueDateFormatted,
+          zellePhone: res.zellePhone,
+          venmoHandle: res.venmoHandle,
+          artworkPending: artwork === "later",
+        });
+      } else {
+        setManual({ method: res.method, memoCode: res.memoCode, amountFormatted: res.amountFormatted, zellePhone: res.zellePhone, venmoHandle: res.venmoHandle });
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -166,6 +233,44 @@ function ActivatePage() {
           </p>
           <Link to="/" className="inline-block mt-6 bg-[#0F2A4A] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#163864]">
             Listen to the music &amp; view ads
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
+
+  /* ---------- Bill me later confirmation ---------- */
+  if (billed) {
+    return (
+      <Shell>
+        <div className="bg-white rounded-2xl border border-[#D4A24C] shadow-sm p-6 sm:p-8">
+          <CheckCircle2 className="mx-auto text-[#D4A24C] mb-3" size={44} />
+          <h1 className="font-serif text-2xl font-bold text-[#0F2A4A] text-center">Thank you for your order!</h1>
+          <p className="text-sm text-gray-600 mt-3 text-center max-w-md mx-auto">
+            You've been billed — no payment was taken today. We'll publish your ad and you can pay at your
+            earliest convenience. A copy of this invoice is on its way to your inbox.
+          </p>
+          <div className="mt-5 bg-[#FFFBF2] border border-[#D4A24C] rounded-xl p-5 space-y-2 text-sm">
+            <div><span className="font-semibold text-[#0F2A4A]">Invoice number:</span> <span className="font-mono font-bold">{billed.invoiceNumber}</span></div>
+            <div><span className="font-semibold text-[#0F2A4A]">Amount due:</span> {billed.amountFormatted}</div>
+            <div><span className="font-semibold text-[#0F2A4A]">Due by:</span> {billed.dueDateFormatted}</div>
+          </div>
+          {billed.artworkPending && (
+            <p className="mt-4 text-xs text-gray-600 text-center">
+              We also emailed you a private link to upload your ad image whenever it's ready.
+            </p>
+          )}
+          <div className="mt-6 text-sm text-gray-700">
+            <p className="font-semibold text-[#0F2A4A] mb-2">Ways to pay whenever you're ready:</p>
+            <ul className="space-y-1 text-xs">
+              <li>• Card, debit or credit — use the "Pay now" button in your invoice email.</li>
+              <li>• Zelle: {billed.zellePhone} (WINALL MEDIA LLC)</li>
+              <li>• Venmo: {billed.venmoHandle}</li>
+            </ul>
+            <p className="text-[11px] text-gray-500 mt-2">Include invoice {billed.invoiceNumber} in the memo.</p>
+          </div>
+          <Link to="/" className="block text-center mt-6 text-sm text-[#0F2A4A] hover:underline">
+            Back to GetBizMusic
           </Link>
         </div>
       </Shell>
@@ -350,6 +455,48 @@ function ActivatePage() {
           {!sameAsVoice && <Field label="Customer support number (text/SMS)" value={sms} onChange={setSms} />}
         </div>
 
+        {/* Artwork choice */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-3">
+          <h2 className="font-serif text-lg font-bold text-[#0F2A4A]">Your ad artwork</h2>
+          {(
+            [
+              { key: "ours", title: "Use the ad we designed for you", desc: "The proof shown above goes live as-is (or with your corrections)." },
+              { key: "customer", title: "I'll upload my own ad image", desc: "Already have a professionally designed ad? Upload it now — we review every image." },
+              { key: "later", title: "I'll send my ad image later", desc: "Activate and pay now; we'll email you a private upload link." },
+            ] as { key: ArtworkChoice; title: string; desc: string }[]
+          ).map((o) => (
+            <label
+              key={o.key}
+              className={`flex items-start gap-3 border rounded-xl p-3 cursor-pointer ${
+                artwork === o.key ? "border-[#0F2A4A] bg-[#F5F8FC]" : "border-gray-200 hover:border-[#0F2A4A]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="artwork"
+                checked={artwork === o.key}
+                onChange={() => setArtwork(o.key)}
+                className="mt-1 accent-[#0F2A4A]"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-[#0F2A4A]">{o.title}</span>
+                <span className="block text-xs text-gray-600">{o.desc}</span>
+              </span>
+            </label>
+          ))}
+          {artwork === "customer" && (
+            <div className="pt-1">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setArtworkFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#0F2A4A] file:text-white file:text-xs file:font-semibold"
+              />
+              <p className="text-[11px] text-gray-500 mt-1">PNG, JPG or WEBP up to 10MB. Professional-grade images only.</p>
+            </div>
+          )}
+        </div>
+
         {/* Terms + payment */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
           <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
@@ -377,6 +524,22 @@ function ActivatePage() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setMethod("bill_later")}
+              className={`mt-2 w-full border rounded-lg py-2.5 text-sm font-semibold ${
+                method === "bill_later"
+                  ? "border-[#D4A24C] bg-[#D4A24C] text-[#0F2A4A]"
+                  : "border-[#D4A24C] text-[#0F2A4A] hover:bg-[#FFFBF2]"
+              }`}
+            >
+              Pay Later (Bill Me)
+            </button>
+            {method === "bill_later" && (
+              <p className="text-[11px] text-gray-600 mt-2">
+                We'll publish your ad now and email you an invoice — pay by card, Zelle or Venmo at your convenience.
+              </p>
+            )}
           </div>
 
           <button
@@ -384,7 +547,13 @@ function ActivatePage() {
             disabled={submitting || !agreed}
             className="w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-lg hover:bg-[#e0b266] disabled:opacity-60 inline-flex items-center justify-center gap-2"
           >
-            {submitting ? <><Loader2 className="animate-spin" size={16} /> Working…</> : `Continue — $${(proof.priceCents / 100).toFixed(2)}`}
+            {submitting ? (
+              <><Loader2 className="animate-spin" size={16} /> Working…</>
+            ) : method === "bill_later" ? (
+              `Activate & bill me — $${(proof.priceCents / 100).toFixed(2)}`
+            ) : (
+              `Continue — $${(proof.priceCents / 100).toFixed(2)}`
+            )}
           </button>
           <p className="text-[11px] text-gray-500 text-center">
             {correct === "no"

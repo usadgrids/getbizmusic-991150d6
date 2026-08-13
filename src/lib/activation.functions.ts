@@ -118,7 +118,9 @@ const submitSchema = z.object({
   phoneVoice: z.string().trim().max(40).optional(),
   phoneSms: z.string().trim().max(40).optional(),
   agreedTerms: z.literal(true, { message: "You must agree to the terms" }),
-  paymentMethod: z.enum(["stripe", "zelle", "venmo"]),
+  paymentMethod: z.enum(["stripe", "zelle", "venmo", "bill_later"]),
+  artworkChoice: z.enum(["ours", "customer", "later"]).default("ours"),
+  customerImagePath: z.string().trim().max(400).optional(),
   environment: z.enum(["sandbox", "live"]),
   returnUrl: z.string().url("Could not determine the page address. Please reload and try again."),
 });
@@ -126,6 +128,15 @@ const submitSchema = z.object({
 export type ActivationSubmitResult =
   | { ok: true; method: "stripe"; clientSecret: string }
   | { ok: true; method: "zelle" | "venmo"; memoCode: string; amountFormatted: string; zellePhone: string; venmoHandle: string }
+  | {
+      ok: true;
+      method: "bill_later";
+      invoiceNumber: string;
+      amountFormatted: string;
+      dueDateFormatted: string;
+      zellePhone: string;
+      venmoHandle: string;
+    }
   | { ok: false; error: string };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -153,7 +164,7 @@ export const submitActivation = createServerFn({ method: "POST" })
 
       const { data: row } = await supabaseAdmin
         .from("activation_codes")
-        .select("id, code, status, price_cents, ad_type, business_name, expires_at")
+        .select("id, code, status, price_cents, ad_type, business_name, expires_at, upload_token")
         .eq("code", code)
         .maybeSingle();
 
@@ -180,7 +191,14 @@ export const submitActivation = createServerFn({ method: "POST" })
         agreed_at: now,
         submitted_at: now,
         payment_method: data.paymentMethod,
+        artwork_choice: data.artworkChoice,
+        customer_image_path: data.artworkChoice === "customer" ? (data.customerImagePath ?? null) : null,
+        chosen_image: data.artworkChoice === "customer" ? "customer" : "ours",
       };
+
+      if (data.artworkChoice === "customer" && !data.customerImagePath) {
+        return { ok: false, error: "Please upload your ad image, or choose to send it later." };
+      }
 
       if (data.paymentMethod === "stripe") {
         const stripe = createStripeClient(data.environment);
@@ -218,6 +236,48 @@ export const submitActivation = createServerFn({ method: "POST" })
           .eq("id", row.id);
 
         return { ok: true, method: "stripe", clientSecret: session.client_secret ?? "" };
+      }
+
+      // Pay later — bill me
+      if (data.paymentMethod === "bill_later") {
+        const invoiceNumber = `INV-${row.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await supabaseAdmin
+          .from("activation_codes")
+          .update({
+            ...baseUpdate,
+            status: data.artworkChoice === "later" ? "awaiting_artwork" : "billed",
+            memo_code: invoiceNumber,
+            invoice_number: invoiceNumber,
+            due_at: dueAt.toISOString(),
+          })
+          .eq("id", row.id);
+
+        const amountDue = `$${(amount / 100).toFixed(2)}`;
+        const dueDateFormatted = dueAt.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" });
+
+        await sendActivationInvoiceEmails({
+          code: row.code as string,
+          email: data.email,
+          businessName: data.businessName,
+          amountFormatted: amountDue,
+          invoiceNumber,
+          dueDateFormatted,
+          artworkPending: data.artworkChoice === "later",
+          uploadToken: (row.upload_token as string) ?? null,
+          correctionsRequested: !data.confirmedCorrect,
+          correctionNotes: data.correctionNotes?.trim() || null,
+        });
+
+        return {
+          ok: true,
+          method: "bill_later",
+          invoiceNumber,
+          amountFormatted: amountDue,
+          dueDateFormatted,
+          zellePhone: ZELLE_PHONE,
+          venmoHandle: VENMO_HANDLE,
+        };
       }
 
       // Manual payment (Zelle / Venmo)
@@ -362,6 +422,184 @@ async function markActivationPaidInternal(id: string, method: string): Promise<v
   }
 }
 
+/* ============ Bill Me (Pay Later) helpers ============ */
+
+const ZELLE_QR_URL = "https://www.getbizmusic.com/__l5e/assets-v1/9a996bbf-8aeb-48a7-8ac5-1db406351740/zelle-qr.jpeg";
+
+async function sendActivationInvoiceEmails(params: {
+  code: string;
+  email: string;
+  businessName: string;
+  amountFormatted: string;
+  invoiceNumber: string;
+  dueDateFormatted: string;
+  artworkPending: boolean;
+  uploadToken: string | null;
+  correctionsRequested: boolean;
+  correctionNotes: string | null;
+}): Promise<void> {
+  try {
+    const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+    await enqueueTransactionalEmailInternal({
+      templateName: "activation-invoice",
+      recipientEmail: params.email,
+      idempotencyKey: `activation-invoice-${params.invoiceNumber}`,
+      templateData: {
+        businessName: params.businessName,
+        activationCode: params.code,
+        amountFormatted: params.amountFormatted,
+        invoiceNumber: params.invoiceNumber,
+        dueDateFormatted: params.dueDateFormatted,
+        payNowUrl: `${SITE_URL}/activate?code=${encodeURIComponent(params.code)}&pay=1`,
+        zellePhone: ZELLE_PHONE,
+        venmoHandle: VENMO_HANDLE,
+        zelleQrUrl: ZELLE_QR_URL,
+        artworkPending: params.artworkPending,
+        artworkUploadUrl: params.uploadToken ? `${SITE_URL}/activate/artwork?token=${params.uploadToken}` : undefined,
+        correctionsRequested: params.correctionsRequested,
+        correctionNotes: params.correctionNotes,
+      },
+    });
+
+    await enqueueTransactionalEmailInternal({
+      templateName: "paid-order-notification",
+      recipientEmail: "processing@getbizmusic.com",
+      idempotencyKey: `activation-billed-${params.invoiceNumber}`,
+      templateData: {
+        orderTypeLabel: `Activation ${params.code} — BILLED / UNPAID (due ${params.dueDateFormatted})`,
+        customerEmail: params.email,
+        planLabel: `${params.correctionsRequested ? "CORRECTIONS REQUESTED" : "Proof approved as-is"}${params.artworkPending ? " — ARTWORK OWED BY CUSTOMER" : ""}`,
+        amountFormatted: params.amountFormatted,
+        orderNumber: params.invoiceNumber,
+      },
+    });
+  } catch (e) {
+    console.error("activation invoice emails failed:", e);
+  }
+}
+
+/** Public: start a card payment for an already-billed activation code. */
+export const payActivationInvoice = createServerFn({ method: "POST" })
+  .inputValidator((d: { code: string; environment: StripeEnv; returnUrl: string }) =>
+    z
+      .object({
+        code: z.string().trim().min(2).max(48),
+        environment: z.enum(["sandbox", "live"]),
+        returnUrl: z.string().url(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<{ ok: true; clientSecret: string } | { ok: false; error: string }> => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const code = normalizeCode(data.code);
+      const { data: row } = await supabaseAdmin
+        .from("activation_codes")
+        .select("id, code, status, price_cents, customer_email, contact_email, customer_business_name, business_name")
+        .eq("code", code)
+        .maybeSingle();
+
+      if (!row) return { ok: false, error: "Activation code not found." };
+      if (row.status === "paid") return { ok: false, error: "This invoice has already been paid." };
+
+      const amount = Number(row.price_cents ?? 0);
+      if (amount < 50) return { ok: false, error: "This activation code has no valid price set." };
+
+      const email = (row.customer_email as string) || (row.contact_email as string) || undefined;
+      const businessName = (row.customer_business_name as string) || (row.business_name as string);
+      const productName = `Get Biz Music — Ad Activation ${row.code}`;
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          { price_data: { currency: "usd", product_data: { name: productName }, unit_amount: amount }, quantity: 1 },
+        ],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer_email: email,
+        metadata: { activation_code: row.code as string, business_name: businessName },
+        payment_intent_data: {
+          description: `${productName} — ${businessName}`.slice(0, 350),
+          receipt_email: email,
+          statement_descriptor_suffix: "GETBIZMUSIC AD",
+        },
+      });
+
+      await supabaseAdmin
+        .from("activation_codes")
+        .update({ stripe_session_id: session.id })
+        .eq("id", row.id);
+
+      return { ok: true, clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("payActivationInvoice error:", error);
+      return { ok: false, error: getStripeErrorMessage(error) };
+    }
+  });
+
+/* ============ Late artwork upload (token link) ============ */
+
+export const lookupActivationArtworkToken = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string }) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }): Promise<{ found: boolean; businessName?: string; code?: string; uploaded?: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("code, business_name, customer_business_name, customer_image_path")
+      .eq("upload_token", data.token)
+      .maybeSingle();
+    if (!row) return { found: false };
+    return {
+      found: true,
+      code: row.code as string,
+      businessName: (row.customer_business_name as string) || (row.business_name as string),
+      uploaded: Boolean(row.customer_image_path),
+    };
+  });
+
+export const saveActivationArtwork = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; imagePath: string }) =>
+    z.object({ token: z.string().uuid(), imagePath: z.string().trim().min(1).max(400) }).parse(d),
+  )
+  .handler(async ({ data }): Promise<{ ok: boolean; error?: string }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("id, code, status")
+      .eq("upload_token", data.token)
+      .maybeSingle();
+    if (!row) return { ok: false, error: "This upload link is no longer valid." };
+
+    const { error } = await supabaseAdmin
+      .from("activation_codes")
+      .update({
+        customer_image_path: data.imagePath,
+        artwork_choice: "customer",
+        chosen_image: "customer",
+        status: row.status === "awaiting_artwork" ? "billed" : (row.status as string),
+      })
+      .eq("id", row.id);
+    if (error) return { ok: false, error: error.message };
+
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "paid-order-notification",
+        recipientEmail: "processing@getbizmusic.com",
+        idempotencyKey: `activation-artwork-${row.id}-${Date.now()}`,
+        templateData: {
+          orderTypeLabel: `Activation ${row.code} — CUSTOMER ARTWORK UPLOADED`,
+          planLabel: "Customer sent their own ad image",
+          amountFormatted: "—",
+          orderNumber: row.code as string,
+        },
+      });
+    } catch (e) {
+      console.error("artwork notification failed:", e);
+    }
+    return { ok: true };
+  });
+
 /* ============ Admin ============ */
 
 async function assertAdmin(userId: string) {
@@ -410,6 +648,14 @@ export type ActivationCodeRow = {
   expires_at: string | null;
   created_at: string;
   share_url: string;
+  artwork_choice: string;
+  customer_image_path: string | null;
+  customer_image_url: string | null;
+  chosen_image: string;
+  due_at: string | null;
+  invoice_number: string | null;
+  upload_token: string;
+  upload_url: string;
 };
 
 export const listActivationCodes = createServerFn({ method: "GET" })
@@ -428,9 +674,68 @@ export const listActivationCodes = createServerFn({ method: "GET" })
       rows.map(async (r) => ({
         ...r,
         image_url: await signImage(r.image_path),
+        customer_image_url: await signImage(r.customer_image_path),
         share_url: `${SITE_URL}/activate?code=${encodeURIComponent(r.code)}`,
+        upload_url: `${SITE_URL}/activate/artwork?token=${r.upload_token}`,
       })),
     );
+  });
+
+/** Admin: choose which image goes live — ours or the customer's upload. */
+export const setActivationChosenImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; chosen: "ours" | "customer" }) =>
+    z.object({ id: z.string().uuid(), chosen: z.enum(["ours", "customer"]) }).parse(d),
+  )
+  .handler(async ({ context, data }): Promise<{ ok: boolean; error?: string }> => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("activation_codes")
+      .update({ chosen_image: data.chosen })
+      .eq("id", data.id);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  });
+
+/** Admin: resend the invoice email for a billed activation code. */
+export const resendActivationInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }): Promise<{ ok: boolean; error?: string }> => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("activation_codes")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!row) return { ok: false, error: "Not found" };
+    const email = (row.customer_email as string) || (row.contact_email as string);
+    if (!email) return { ok: false, error: "No customer email on this code." };
+
+    const invoiceNumber = (row.invoice_number as string) || (row.memo_code as string) || `INV-${row.code}`;
+    const dueAt = row.due_at ? new Date(row.due_at as string) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    if (!row.due_at || !row.invoice_number) {
+      await supabaseAdmin
+        .from("activation_codes")
+        .update({ invoice_number: invoiceNumber, due_at: dueAt.toISOString() })
+        .eq("id", row.id);
+    }
+
+    await sendActivationInvoiceEmails({
+      code: row.code as string,
+      email,
+      businessName: (row.customer_business_name as string) || (row.business_name as string),
+      amountFormatted: `$${(Number(row.price_cents ?? 0) / 100).toFixed(2)}`,
+      invoiceNumber: `${invoiceNumber}-R${Math.floor(100 + Math.random() * 900)}`,
+      dueDateFormatted: dueAt.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" }),
+      artworkPending: row.status === "awaiting_artwork",
+      uploadToken: (row.upload_token as string) ?? null,
+      correctionsRequested: row.confirmed_correct === false,
+      correctionNotes: (row.correction_notes as string) ?? null,
+    });
+    return { ok: true };
   });
 
 const saveSchema = z.object({

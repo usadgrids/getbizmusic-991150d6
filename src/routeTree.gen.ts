@@ -28,6 +28,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
+import { Route as ActivateArtworkRouteImport } from './routes/activate_.artwork'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -137,6 +138,11 @@ const AdAdNumberRoute = AdAdNumberRouteImport.update({
   path: '/ad/$adNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivateArtworkRoute = ActivateArtworkRouteImport.update({
+  id: '/activate_/artwork',
+  path: '/activate/artwork',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/submit': typeof SubmitRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate_/artwork': typeof ActivateArtworkRoute
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/activate_/artwork'
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
@@ -430,6 +442,7 @@ export interface RootRouteChildren {
   SubmitRoute: typeof SubmitRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ActivateArtworkRoute: typeof ActivateArtworkRoute
   AdAdNumberRoute: typeof AdAdNumberRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -581,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdAdNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activate_/artwork': {
+      id: '/activate_/artwork'
+      path: '/activate/artwork'
+      fullPath: '/activate/artwork'
+      preLoaderRoute: typeof ActivateArtworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -725,6 +745,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ActivateArtworkRoute: ActivateArtworkRoute,
   AdAdNumberRoute: AdAdNumberRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
