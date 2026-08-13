@@ -1,16 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
 import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
-import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import adAmerican from "@/assets/food-ad-american.jpg";
 import adFilipino from "@/assets/food-ad-filipino.jpg";
 import adMexican from "@/assets/food-ad-mexican.jpg";
@@ -158,14 +157,8 @@ function FoodCategoryPage() {
       <BizHero cityName="Food & Dining In San Diego County" state="CA" />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <h1 className="sr-only">Food &amp; Dining business ads on Get Biz Music</h1>
-        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
-          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
-        </div>
         {slides.length > 0 ? (
           <AdSlider ads={slides} title="Featured Food &amp; Dining Business of the Moment" featured />
-
-
-
         ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
             <UtensilsCrossed className="mx-auto mb-3 text-[#D4A24C]" size={28} />
@@ -177,29 +170,10 @@ function FoodCategoryPage() {
         )}
 
         <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
-          <section className="mt-6 sm:mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
-              <Sparkles size={14} />
-              Food &amp; Dining Spotlight
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">Submit Your Business Novelty Ad</h2>
-            <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
-              Get your restaurant, food truck, café or market featured in the rotation above and reach
-              hungry local listeners for just $12/year. Limited-time intro offer.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/pricing"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#e0b566] shadow-sm"
-              >
-                Submit Your Ad
-                <Sparkles size={14} />
-              </Link>
-              <CityPickerButton className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 px-6 py-2.5 text-sm font-bold text-white transition-transform hover:scale-105 hover:bg-white/10 hover:border-white/60 shadow-sm" />
-            </div>
-          </section>
+          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
         </div>
       </main>
+
       <BizFooter />
     </div>
   );
