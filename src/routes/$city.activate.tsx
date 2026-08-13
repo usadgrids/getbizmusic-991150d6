@@ -594,6 +594,9 @@ function CategoryActivatePage() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const { city } = Route.useParams();
+  const category = city as DirectoryCategory;
+  const config = DIRECTORY_CATEGORIES[category];
   return (
     <div className="min-h-screen bg-[#f5f6f8]">
       <PaymentTestModeBanner />
