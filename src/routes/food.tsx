@@ -58,7 +58,7 @@ function FoodCategoryPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
-      <BizHero cityName="Food & Dining" />
+      <BizHero cityName="Food & Dining In San Diego County" state="CA" />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <h1 className="sr-only">Food &amp; Dining business ads on Get Biz Music</h1>
         {ads.length > 0 ? (
