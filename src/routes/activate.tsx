@@ -23,6 +23,7 @@ export const Route = createFileRoute("/activate")({
   validateSearch: z.object({
     code: z.string().optional(),
     session_id: z.string().optional(),
+    pay: z.string().optional(),
   }),
   head: () => ({
     meta: [
