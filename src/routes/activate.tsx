@@ -66,6 +66,7 @@ function ActivatePage() {
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [manual, setManual] = useState<ManualInfo | null>(null);
+  const [billed, setBilled] = useState<BilledInfo | null>(null);
   const [paidName, setPaidName] = useState<string | null>(null);
 
   // Form state
