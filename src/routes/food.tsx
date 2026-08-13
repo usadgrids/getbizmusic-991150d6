@@ -15,6 +15,7 @@ import adFilipino from "@/assets/food-ad-filipino.jpg";
 import adMexican from "@/assets/food-ad-mexican.jpg";
 import adItalian from "@/assets/food-ad-italian.jpg";
 import adBuffet from "@/assets/food-ad-buffet.jpg";
+import foodHero from "@/assets/food-hero.png.asset.json";
 
 
 // Business categories that belong on the /food page.
