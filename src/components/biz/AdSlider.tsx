@@ -65,7 +65,7 @@ interface Props {
   /** Bump to re-trigger the jump even when focusAdId is unchanged. */
   focusNonce?: number;
   /** Optional node rendered between the Share bar and the music player. */
-  belowShareBar?: React.ReactNode;
+  belowShareBar?: ReactNode;
 }
 
 
