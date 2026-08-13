@@ -40,6 +40,18 @@ export function ActivationCodeBar({ initialCode, onProof }: Props) {
       } catch {
         /* ignore */
       }
+      // Keep the preview private to this browser: remove ?code= from the address bar so a
+      // shared/copied link or screenshot doesn't hand the proof to anyone else.
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("code")) {
+          url.searchParams.delete("code");
+          window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+        }
+      } catch {
+        /* ignore */
+      }
+
     } catch (e) {
       setError(e instanceof Error ? e.message : "We couldn't check that code. Please try again.");
     } finally {
