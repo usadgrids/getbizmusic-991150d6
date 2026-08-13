@@ -164,7 +164,7 @@ export const submitActivation = createServerFn({ method: "POST" })
 
       const { data: row } = await supabaseAdmin
         .from("activation_codes")
-        .select("id, code, status, price_cents, ad_type, business_name, expires_at")
+        .select("id, code, status, price_cents, ad_type, business_name, expires_at, upload_token")
         .eq("code", code)
         .maybeSingle();
 
