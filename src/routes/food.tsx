@@ -156,9 +156,14 @@ function FoodCategoryPage() {
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
       <BizHero cityName="Food & Dining In San Diego County" state="CA" />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
-        <h1 className="sr-only">Food &amp; Dining business ads on Get Biz Music</h1>
+        <h1 className="sr-only">Food & Dining business ads on Get Biz Music</h1>
+
+        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
+          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
+        </div>
+
         {slides.length > 0 ? (
-          <AdSlider ads={slides} title="Featured Food &amp; Dining Business of the Moment" featured />
+          <AdSlider ads={slides} title="Featured Food & Dining Business of the Moment" featured />
         ) : (
           <section className="mt-8 rounded-2xl bg-white px-5 py-10 text-center shadow-sm">
             <UtensilsCrossed className="mx-auto mb-3 text-[#D4A24C]" size={28} />
@@ -168,10 +173,6 @@ function FoodCategoryPage() {
             </p>
           </section>
         )}
-
-        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}>
-          <ActivationCodeBar initialCode={search.code} proof={proof} onProof={setProof} />
-        </div>
       </main>
 
       <BizFooter />
