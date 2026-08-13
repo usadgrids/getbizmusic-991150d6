@@ -12,9 +12,9 @@ Build a researched, structured database of the restaurants that advertise with u
 
 **2. Database**
 New tables:
-- `food_places` — slug, name, city, state, zip, address, lat/lng, phone, website, cuisines[], price_range, hours (jsonb), attributes (jsonb), description, summary, rating, review_count, image_url, source_urls[], last_crawled_at, status (draft/published), ad_id (nullable link to a paying advertiser).
+- `food_places` — slug, name, city, state, zip, address, lat/lng, phone, website, cuisines[], price_range, hours (jsonb), attributes (jsonb), description, summary, rating, review_count, image_url, source_urls[], last_crawled_at, status (draft/published), ad_id (NOT NULL link to the approved ad that seeded this place).
 - `food_place_faqs` — place_id, question, answer, sort_order.
-- `food_crawl_runs` — run log: started/finished, places_found, places_updated, errors, triggered_by.
+- `food_crawl_runs` — run log: started/finished, place_id, triggered_by (auto-approve | admin | weekly-refresh), errors.
 
 Public read is limited to `status = 'published'`; admin-only writes.
 
