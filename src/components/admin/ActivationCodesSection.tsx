@@ -349,7 +349,7 @@ export function ActivationCodesSection() {
                       </tr>
                       {isOpen && (
                         <tr className="bg-slate-50/70">
-                          <td colSpan={6} className="px-4 py-3 text-xs text-gray-700 whitespace-pre-wrap">
+                          <td colSpan={7} className="px-4 py-3 text-xs text-gray-700 whitespace-pre-wrap">
                             <strong className="text-[#0F2A4A]">Customer notes:</strong>
                             <div className="mt-1">{r.correction_notes}</div>
                           </td>
