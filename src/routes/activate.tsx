@@ -524,6 +524,22 @@ function ActivatePage() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setMethod("bill_later")}
+              className={`mt-2 w-full border rounded-lg py-2.5 text-sm font-semibold ${
+                method === "bill_later"
+                  ? "border-[#D4A24C] bg-[#D4A24C] text-[#0F2A4A]"
+                  : "border-[#D4A24C] text-[#0F2A4A] hover:bg-[#FFFBF2]"
+              }`}
+            >
+              Pay Later (Bill Me)
+            </button>
+            {method === "bill_later" && (
+              <p className="text-[11px] text-gray-600 mt-2">
+                We'll publish your ad now and email you an invoice — pay by card, Zelle or Venmo at your convenience.
+              </p>
+            )}
           </div>
 
           <button
