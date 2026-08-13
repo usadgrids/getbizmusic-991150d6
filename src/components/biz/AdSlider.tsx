@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Sparkles,
   Music,
@@ -64,6 +64,8 @@ interface Props {
   focusAdId?: string | null;
   /** Bump to re-trigger the jump even when focusAdId is unchanged. */
   focusNonce?: number;
+  /** Optional node rendered between the Share bar and the music player. */
+  belowShareBar?: ReactNode;
 }
 
 
@@ -80,7 +82,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0 }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar }: Props) {
   const [idx, setIdx] = useState(0);
 
   const [paused, setPaused] = useState(false);
@@ -538,6 +540,8 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
               />
             </div>
           )}
+
+          {belowShareBar}
 
           {/* Music player — flush to slider borders */}
           {featured && (
