@@ -146,7 +146,7 @@ function FoodCategoryPage() {
           youtube_url: proof.youtubeUrl,
           tagline: proof.tagline,
           industry: proof.industry,
-          ad_type: proof.adType,
+          ad_type: proof.adType === "slider_10" ? "slider_10" : "image_5",
           image_url: proof.imageUrl,
           duration_seconds: proof.adType === "slider_10" ? 10 : 7,
         }
