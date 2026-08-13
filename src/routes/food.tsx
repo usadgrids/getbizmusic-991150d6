@@ -134,9 +134,13 @@ function FoodCategoryPage() {
   });
   const [proof, setProof] = useState<ActivationProof | null>(null);
 
-  // Their own proof leads the rotation, then showcase creatives, then real ads.
+  // PRIVATE PREVIEW ONLY: this slide exists purely in this visitor's browser after they
+  // entered their own activation code. It is never fetched by, or rendered for, anyone else.
+  // Once the listing is paid + activated by an admin it becomes a real `ads` row and shows
+  // up through the normal query, so we drop the preview slide at that point (no duplicate).
+  const isLivePreview = proof?.status === "activated" || proof?.status === "live";
   const proofSlide: PublicAd | null =
-    proof && proof.imageUrl
+    proof && proof.imageUrl && !isLivePreview
       ? {
           id: `activation-${proof.code}`,
           ad_number: null,
@@ -151,6 +155,7 @@ function FoodCategoryPage() {
         }
       : null;
   const slides = [...(proofSlide ? [proofSlide] : []), ...SHOWCASE_ADS, ...ads];
+
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
