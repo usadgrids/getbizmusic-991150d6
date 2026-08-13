@@ -236,6 +236,7 @@ export function ActivationCodesSection() {
                   <th className="px-4 py-2">Business</th>
                   <th className="px-4 py-2">Price</th>
                   <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Artwork</th>
                   <th className="px-4 py-2">Customer response</th>
                   <th className="px-4 py-2">Actions</th>
                 </tr>
