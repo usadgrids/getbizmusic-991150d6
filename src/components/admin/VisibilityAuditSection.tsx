@@ -12,7 +12,7 @@ const DEFAULT_PROMPT =
   "Judge how likely AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) are to find, trust and cite this business " +
   "when someone asks an unbranded question about their product or service in their city. " +
   "Score web presence, reviews and reputation, structured data / schema markup, content and Q&A answerability, " +
-  "local NAP consistency, and overall AI citability. Be strict and realistic — most small local businesses score between 25 and 65.";
+  "local NAP consistency, and overall AI citability. Be fair and encouraging — every business has room to grow, so highlight what's already working and frame gaps as opportunities rather than failures. Most small local businesses score between 30 and 70.";
 
 type Audit = {
   business: string;
@@ -277,7 +277,7 @@ export function VisibilityAuditSection() {
             {audit.strengths.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Strengths
+                  What&rsquo;s already working
                 </h4>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.strengths.map((s, i) => (
@@ -290,10 +290,10 @@ export function VisibilityAuditSection() {
             {audit.recommendations.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  What you & your webmaster can do
+                  Growth opportunities for you & your web team
                 </h4>
                 <p className="mt-1 text-xs italic text-muted-foreground">
-                  Improvements you or your own web team can make on your website and profiles. GetBizMusic does not need to implement these — they are yours to act on.
+                  Simple steps you or your own web team can take to help more customers find you — think of them as a helpful checklist.
                 </p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.recommendations.map((s, i) => (
@@ -306,10 +306,10 @@ export function VisibilityAuditSection() {
             {(audit.gbmStandalone?.length ?? 0) > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  What GetBizMusic.com can do for you — no website access needed
+                  How GetBizMusic.com can help you — no website access needed
                 </h4>
                 <p className="mt-1 text-xs italic text-muted-foreground">
-                  Delivered entirely on GetBizMusic.com; no login or changes to your own website or profiles.
+                  We handle these entirely on GetBizMusic.com — no login or changes to your own website or profiles needed.
                 </p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.gbmStandalone!.map((s, i) => (
@@ -322,10 +322,10 @@ export function VisibilityAuditSection() {
             {(audit.gbmKnowledgeGraph?.length ?? 0) > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  What GetBizMusic.com can integrate in your Knowledge Graph page
+                  What we&rsquo;ll build into your Knowledge Graph page
                 </h4>
                 <p className="mt-1 text-xs italic text-muted-foreground">
-                  Implemented inside your unique GetBizMusic Knowledge Graph URL so AI answer engines find, trust, and cite you.
+                  Woven into your unique GetBizMusic Knowledge Graph URL so AI answer engines can discover, trust, and recommend you.
                 </p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.gbmKnowledgeGraph!.map((s, i) => (

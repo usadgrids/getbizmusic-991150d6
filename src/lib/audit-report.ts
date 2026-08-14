@@ -63,7 +63,7 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
   .bar { height:6px; border-radius:6px; background:#e8eaee; margin:8px 0; overflow:hidden; }
   .bar i { display:block; height:6px; background:var(--band); }
   .sub p { margin:0; font-size:12px; color:#555; line-height:1.5; }
-  .hl { background:#FFF59D; box-shadow:0 0 0 1px #F0DE8A inset; border-radius:2px; padding:1px 3px; }
+  .hl { background:#FFF8D6; box-shadow:0 0 0 1px #F0E2A0 inset; border-radius:2px; padding:1px 3px; }
   ul { padding-left:20px; } li { font-size:14px; line-height:1.6; margin-bottom:6px; }
   .gbm-intro { font-size:13px; color:#555; font-style:italic; margin:0 0 10px; }
   .sources li { font-size:12px; word-break:break-all; }
@@ -87,30 +87,30 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
 
   ${audit.summary ? `<h2>Summary</h2><p>${esc(audit.summary)}</p>` : ""}
 
-  ${audit.subscores.length ? `<h2>Score breakdown</h2><div class="subs">${subs}</div>` : ""}
+  ${audit.subscores.length ? `<h2>How you&rsquo;re doing today</h2><div class="subs">${subs}</div>` : ""}
 
-  ${audit.strengths.length ? `<h2>Strengths</h2><ul>${list(audit.strengths)}</ul>` : ""}
+  ${audit.strengths.length ? `<h2>What&rsquo;s already working</h2><ul>${list(audit.strengths)}</ul>` : ""}
 
   ${
     audit.recommendations.length
-      ? `<h2>What you & your webmaster can do</h2>
-         <p class="gbm-intro">These are improvements you or your own web team can make on your website and business profiles. GetBizMusic does not need to implement these — they are yours to act on.</p>
+      ? `<h2>Growth opportunities for you & your web team</h2>
+         <p class="gbm-intro">These are simple steps you or your own web team can take on your website and business profiles to help more customers find you. Think of them as a helpful checklist — every item you act on moves the needle.</p>
          <ul>${list(audit.recommendations)}</ul>`
       : ""
   }
 
   ${
     audit.gbmStandalone && audit.gbmStandalone.length
-      ? `<h2>What GetBizMusic.com can do for you — no website access needed</h2>
-         <p class="gbm-intro">These improvements are delivered entirely on GetBizMusic.com. GetBizMusic can implement them without any login, access, or changes to your own website or business profiles.</p>
+      ? `<h2>How GetBizMusic.com can help you — no website access needed</h2>
+         <p class="gbm-intro">We handle these entirely on GetBizMusic.com, so there&rsquo;s no login, access, or changes needed to your own website or business profiles. Sit back while we put them to work for you.</p>
          <ul>${list(audit.gbmStandalone)}</ul>`
       : ""
   }
 
   ${
     audit.gbmKnowledgeGraph && audit.gbmKnowledgeGraph.length
-      ? `<h2>What GetBizMusic.com can integrate in your Knowledge Graph page</h2>
-         <p class="gbm-intro">These are implemented inside your unique GetBizMusic Knowledge Graph URL (e.g. www.getbizmusic.com/beauty/your-business) so AI answer engines find, trust, and cite your business.</p>
+      ? `<h2>What we&rsquo;ll build into your Knowledge Graph page</h2>
+         <p class="gbm-intro">These are woven into your unique GetBizMusic Knowledge Graph URL (e.g. www.getbizmusic.com/beauty/your-business) so AI answer engines can discover, trust, and recommend your business to potential customers.</p>
          <ul>${list(audit.gbmKnowledgeGraph)}</ul>`
       : ""
   }

@@ -10,7 +10,7 @@ export const DEFAULT_AUDIT_PROMPT =
   "Judge how likely AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) are to find, trust and cite this business " +
   "when someone asks an unbranded question about their product or service in their city. " +
   "Score web presence, reviews and reputation, structured data / schema markup, content and Q&A answerability, " +
-  "local NAP consistency, and overall AI citability. Be strict and realistic — most small local businesses score between 25 and 65.";
+  "local NAP consistency, and overall AI citability. Be fair and encouraging — every business has room to grow, so highlight what's already working and frame gaps as opportunities rather than failures. Most small local businesses score between 30 and 70.";
 
 export type AuditSubscore = { label: string; score: number; note: string };
 
@@ -162,7 +162,8 @@ export async function runVisibilityAudit(opts: {
   const system = [
     opts.prompt?.trim() || DEFAULT_AUDIT_PROMPT,
     "You are auditing for AEO/GEO (AI answer engine optimization).",
-    "Never invent facts. If evidence for a dimension is missing from the sources, that itself lowers the score — say so in the note.",
+    "Never invent facts. If evidence for a dimension is limited, note it as a growth opportunity rather than a failure, and keep the score proportional.",
+    "Frame every note constructively — acknowledge what the business is doing well first, then describe what could help them grow.",
     "Respond with JSON only, no markdown fences.",
   ].join(" ");
 
