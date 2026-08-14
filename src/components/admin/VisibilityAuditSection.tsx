@@ -93,11 +93,37 @@ export function VisibilityAuditSection() {
     if (!audit) return;
     try {
       const blob = await scoreBadgePng(audit.overall, 1000);
-      const slug = audit.business.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      downloadBlob(blob, `${slug || "business"}-ai-visibility-${audit.overall}.png`);
+      downloadBlob(blob, `${slugify(audit.business) || "business"}-ai-visibility-${audit.overall}.png`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed.");
     }
+  };
+
+  const downloadReport = () => {
+    if (!audit) return;
+    try {
+      const html = buildAuditReportHtml(audit);
+      downloadBlob(
+        new Blob([html], { type: "text/html;charset=utf-8" }),
+        `${slugify(audit.business) || "business"}-ai-visibility-report-${audit.overall}.html`,
+      );
+      toast.success("Report downloaded — open it and print to PDF to share.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Download failed.");
+    }
+  };
+
+  const printReport = () => {
+    if (!audit) return;
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast.error("Allow pop-ups to print the report.");
+      return;
+    }
+    w.document.write(buildAuditReportHtml(audit));
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 400);
   };
 
   return (
