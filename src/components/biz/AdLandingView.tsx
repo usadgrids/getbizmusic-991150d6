@@ -92,11 +92,11 @@ export function AdLandingView({
         </nav>
 
         <section
-          className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto"
+          className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
           style={{
             border: "3px solid #D4A24C",
             aspectRatio: "4 / 3",
-            maxHeight: "min(80svh, 800px)",
+            maxHeight: "min(92svh, 1000px)",
           }}
         >
           <div className="absolute inset-0 bg-gray-100">
