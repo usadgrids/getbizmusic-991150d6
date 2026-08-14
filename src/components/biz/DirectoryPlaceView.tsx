@@ -119,10 +119,12 @@ export function DirectoryPlaceView({
   category,
   place,
   faqs,
+  adNumber = null,
 }: {
   category: DirectoryCategory;
   place: DirectoryPlace;
   faqs: DirectoryFaq[];
+  adNumber?: number | null;
 }) {
   const label = DIRECTORY_LABELS[category];
   const attrs = attributeEntries(place.attributes ?? {});
