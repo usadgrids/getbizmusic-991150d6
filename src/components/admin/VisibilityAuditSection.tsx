@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Gauge, Download, Sparkles } from "lucide-react";
+import { Gauge, Download, Sparkles, FileText, Printer } from "lucide-react";
+import { buildAuditReportHtml, slugify } from "@/lib/audit-report";
 import { adminListAuditTargets, adminRunVisibilityAudit } from "@/lib/ai-audit.functions";
 import { buildScoreBadgeSvg, svgDataUrl, scoreBadgePng, downloadBlob } from "@/lib/score-badge";
 
