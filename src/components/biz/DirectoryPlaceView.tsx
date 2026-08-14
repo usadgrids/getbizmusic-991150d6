@@ -146,6 +146,53 @@ export function DirectoryPlaceView({
         }}
       />
 
+      <section
+        aria-label="GetBizMusic Knowledge Graph introduction"
+        className="border-b border-border bg-muted/40"
+      >
+        <div className="mx-auto w-full max-w-4xl px-4 py-6 text-sm text-foreground">
+          <h2 className="text-lg font-bold tracking-tight text-foreground">
+            Your GetBizMusic Knowledge Graph is Live
+          </h2>
+          <p className="mt-2 leading-relaxed">Dear Business Owner,</p>
+          <p className="mt-1 leading-relaxed">
+            Thank you for joining GetBizMusic.com!
+          </p>
+          <p className="mt-2 leading-relaxed">
+            We&rsquo;ve collected and organized your business information—taken and
+            scanned directly from the internet—into a custom Knowledge Graph page.
+            This page serves as a machine-readable &ldquo;data hub&rdquo; that enables AI
+            engines like ChatGPT to accurately cite and recommend your business to
+            prospective clients.
+          </p>
+          <p className="mt-2 leading-relaxed">
+            Please note: This page is optimized for AI algorithms rather than human
+            browsing, so it focuses purely on data structure rather than visual design.
+          </p>
+          <p className="mt-2 leading-relaxed">
+            Need a custom, AI-optimized website for human customers? Email us anytime at{" "}
+            <a
+              href="mailto:info@getbizmusic.com"
+              className="font-medium text-primary underline underline-offset-2"
+            >
+              info@getbizmusic.com
+            </a>
+            .
+          </p>
+          <p className="mt-2 leading-relaxed">
+            Want to view or share your Knowledge Graph link? Use your unique URL here:{" "}
+            <a
+              href={`${SITE}${base}/${place.slug}`}
+              className="break-all font-medium text-primary underline underline-offset-2"
+            >
+              {`${SITE}${base}/${place.slug}`}
+            </a>
+          </p>
+          <p className="mt-3 leading-relaxed">Best regards,</p>
+          <p className="font-medium">GetBizMusic.com</p>
+        </div>
+      </section>
+
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <Link
           to="/$city"
