@@ -137,6 +137,8 @@ export function DirectoryPlaceView({
     [place.name, place.address, place.city, place.state].filter(Boolean).join(" "),
   );
 
+  const base = label.basePath;
+
   return (
     <div className="min-h-screen bg-background">
       <script
