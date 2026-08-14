@@ -152,50 +152,66 @@ export function DirectoryPlaceView({
 
       <section
         aria-label="GetBizMusic Knowledge Graph introduction"
-        className="border-b border-border bg-muted/40"
+        className="border-b border-border bg-muted/30"
       >
-        <div className="mx-auto w-full max-w-4xl px-4 py-6 text-sm text-foreground">
-          <h2 className="text-lg font-bold tracking-tight text-foreground">
-            Your GetBizMusic Knowledge Graph is Live
-          </h2>
-          <p className="mt-2 leading-relaxed">Dear Business Owner,</p>
-          <p className="mt-1 leading-relaxed">
-            Thank you for joining GetBizMusic.com!
-          </p>
-          <p className="mt-2 leading-relaxed">
-            We&rsquo;ve collected and organized your business information—taken and
-            scanned directly from the internet—into a custom Knowledge Graph page.
-            This page serves as a machine-readable &ldquo;data hub&rdquo; that enables AI
-            engines like ChatGPT to accurately cite and recommend your business to
-            prospective clients.
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Please note: This page is optimized for AI algorithms rather than human
-            browsing, so it focuses purely on data structure rather than visual design.
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Need a custom, AI-optimized website for human customers? Email us anytime at{" "}
-            <a
-              href="mailto:info@getbizmusic.com"
-              className="font-medium text-primary underline underline-offset-2"
-            >
-              info@getbizmusic.com
-            </a>
-            .
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Want to view or share your Knowledge Graph link? Use your unique URL here:{" "}
-            <a
-              href={`${SITE}${base}/${place.slug}`}
-              className="break-all font-medium text-primary underline underline-offset-2"
-            >
-              {`${SITE}${base}/${place.slug}`}
-            </a>
-          </p>
-          <p className="mt-3 leading-relaxed">Best regards,</p>
-          <p className="font-medium">GetBizMusic.com</p>
+        <div className="mx-auto w-full max-w-3xl px-4 py-8">
+          <article className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              GetBizMusic.com
+            </p>
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              Your GetBizMusic Knowledge Graph is Live
+            </h2>
+            <div className="mt-5 space-y-4 text-[15px] leading-7 text-foreground/90">
+              <p>Dear Business Owner,</p>
+              <p>Thank you for joining GetBizMusic.com!</p>
+              <p>
+                We&rsquo;ve collected and organized your business information &mdash; taken
+                and scanned directly from the internet &mdash; into a custom Knowledge Graph
+                page. This page serves as a machine-readable &ldquo;data hub&rdquo; that
+                enables AI engines like ChatGPT to accurately cite and recommend your
+                business to prospective clients.
+              </p>
+              <p className="rounded-lg border-l-4 border-primary/60 bg-muted/50 px-4 py-3 text-sm">
+                <span className="font-semibold">Please note:</span> This page is optimized
+                for AI algorithms rather than human browsing, so it focuses purely on data
+                structure rather than visual design.
+              </p>
+              <p>
+                Need a custom, AI-optimized website for human customers? Email us anytime at{" "}
+                <a
+                  href="mailto:info@getbizmusic.com"
+                  className="font-medium text-primary underline underline-offset-2"
+                >
+                  info@getbizmusic.com
+                </a>
+                .
+              </p>
+              {shareUrl && (
+                <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
+                  <p className="text-sm font-semibold text-foreground">
+                    Want to view or share your unique social media link?
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Use your unique URL here:
+                  </p>
+                  <a
+                    href={shareUrl}
+                    className="mt-1 block break-all font-medium text-primary underline underline-offset-2"
+                  >
+                    {shareUrl}
+                  </a>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 border-t border-border pt-4 text-[15px] leading-7">
+              <p>Best regards,</p>
+              <p className="font-semibold text-foreground">GetBizMusic.com</p>
+            </div>
+          </article>
         </div>
       </section>
+
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <Link
