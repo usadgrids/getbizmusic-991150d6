@@ -22,13 +22,19 @@ function XIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = false }: Props) {
+export function ShareBar({ adNumber, businessName, tagline, onOpen, compact = false, shareUrl }: Props) {
   const [copied, setCopied] = useState(false);
   const [nativeImageFile, setNativeImageFile] = useState<File | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [hasWebShare, setHasWebShare] = useState(false);
 
-  const url = adNumber == null ? SITE : `${SITE}/ad/${adNumber}`;
+  const url = shareUrl
+    ? shareUrl.startsWith("http")
+      ? shareUrl
+      : `${SITE}${shareUrl.startsWith("/") ? "" : "/"}${shareUrl}`
+    : adNumber == null
+      ? SITE
+      : `${SITE}/ad/${adNumber}`;
   const text = tagline ? `${businessName} — ${tagline}` : businessName;
   const shareImageUrl = adNumber == null ? null : `/api/public/ad-image/${adNumber}`;
 
