@@ -200,7 +200,9 @@ async function normalizeWithAI(
     };
   } catch (err) {
     console.error("[directory] AI normalization error", err);
-    return null;
+    throw new Error(
+      `AI normalization failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
