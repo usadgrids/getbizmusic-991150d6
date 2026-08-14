@@ -68,6 +68,8 @@ interface Props {
   belowShareBar?: ReactNode;
   /** Hide the per-ad "Share this ad image" bar (use when a page-level share bar is shown instead). */
   hideAdShareBar?: boolean;
+  /** Shrink the slider so it sits below a larger featured ad image. */
+  compact?: boolean;
 }
 
 
@@ -84,7 +86,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar, hideAdShareBar = false }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar, hideAdShareBar = false, compact = false }: Props) {
   const [idx, setIdx] = useState(0);
 
   const [paused, setPaused] = useState(false);
@@ -301,7 +303,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
     <section id="ad-slideshow" className="my-8 min-w-0">
       <div
         className="relative mx-auto mb-3 w-full"
-        style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
+        style={{ maxWidth: compact ? "min(100%, 820px, calc(56svh * 4 / 3))" : "min(100%, 1400px, calc(90svh * 4 / 3))" }}
       >
         <div className="flex flex-col items-center gap-3">
           <h2 className="flex items-center justify-center gap-2 whitespace-nowrap text-center font-serif text-lg font-bold text-[#0F2A4A] sm:text-xl">
@@ -431,7 +433,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
           <div
             className="mx-auto w-full"
             style={{
-              maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
+              maxWidth: compact ? "min(100%, 820px, calc(56svh * 4 / 3))" : "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
           >
           <div
@@ -439,7 +441,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
-              maxHeight: "min(90svh, 900px)",
+              maxHeight: compact ? "min(56svh, 560px)" : "min(90svh, 900px)",
             }}
 
             onMouseLeave={() => {
