@@ -66,6 +66,8 @@ interface Props {
   focusNonce?: number;
   /** Optional node rendered between the Share bar and the music player. */
   belowShareBar?: ReactNode;
+  /** Hide the per-ad "Share this ad image" bar (use when a page-level share bar is shown instead). */
+  hideAdShareBar?: boolean;
 }
 
 
