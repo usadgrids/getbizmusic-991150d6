@@ -150,6 +150,7 @@ async function normalizeWithAI(
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: AI_MODEL,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           {
