@@ -11,6 +11,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { DirectoryList } from "@/components/biz/DirectoryList";
+import { PageShareBar } from "@/components/biz/PageShareBar";
 import { DIRECTORY_CATEGORIES, type DirectoryCategory } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 
@@ -97,7 +98,14 @@ export function CategoryHubPage({
             focusAdId={proofSlide?.id ?? null}
             focusNonce={focusNonce}
             belowShareBar={
-              proofSlide ? (
+              <>
+                <PageShareBar
+                  url={`https://www.getbizmusic.com/${category}`}
+                  title={config.heroTitle}
+                  text={config.srHeading}
+                  label={`Share ${config.heroTitle}`}
+                />
+                {proofSlide ? (
                 <div className="mt-4 mx-auto w-full max-w-3xl rounded-2xl border-2 border-[#D4A24C] bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-7 text-center text-white shadow-md">
                   {isLivePreview || proof?.paid ? (
                     <>
@@ -136,7 +144,8 @@ export function CategoryHubPage({
                     </>
                   )}
                 </div>
-              ) : null
+                ) : null}
+              </>
             }
           />
         ) : (
