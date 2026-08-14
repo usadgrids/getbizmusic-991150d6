@@ -91,7 +91,13 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
 
   ${audit.strengths.length ? `<h2>Strengths</h2><ul>${list(audit.strengths)}</ul>` : ""}
 
-  ${audit.recommendations.length ? `<h2>Recommendations</h2><ul>${list(audit.recommendations)}</ul>` : ""}
+  ${
+    audit.recommendations.length
+      ? `<h2>What you & your webmaster can do</h2>
+         <p class="gbm-intro">These are improvements you or your own web team can make on your website and business profiles. GetBizMusic does not need to implement these — they are yours to act on.</p>
+         <ul>${list(audit.recommendations)}</ul>`
+      : ""
+  }
 
   ${
     audit.gbmStandalone && audit.gbmStandalone.length
