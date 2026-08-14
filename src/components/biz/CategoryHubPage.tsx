@@ -35,11 +35,6 @@ export function CategoryHubPage({
     queryKey: ["category-ads", category],
     queryFn: () => fetchAds({ data: { industries: config.industries, seed_key: category } }),
   });
-  const fetchPlaces = useServerFn(listDirectoryPlaces);
-  const { data: directory } = useSuspenseQuery({
-    queryKey: ["directory-places", category],
-    queryFn: () => fetchPlaces({ data: { category } }),
-  });
 
   const [proof, setProof] = useState<ActivationProof | null>(null);
   // Bumped on every code submission so re-entering the same code still snaps the slider back.
