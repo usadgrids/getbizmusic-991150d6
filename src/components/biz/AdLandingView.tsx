@@ -91,6 +91,10 @@ export function AdLandingView({
           <span>Ad #{ad.ad_number}</span>
         </nav>
 
+        <h2 className="font-serif text-lg sm:text-xl font-bold text-[#0F2A4A] mb-2 text-center tracking-wide">
+          Featured Business
+        </h2>
+
         <section
           className="relative rounded-2xl overflow-hidden shadow-xl bg-white mx-auto w-full"
           style={{
