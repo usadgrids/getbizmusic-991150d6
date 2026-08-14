@@ -433,7 +433,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
           <div
             className="mx-auto w-full"
             style={{
-              maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))",
+              maxWidth: compact ? "min(100%, 820px, calc(56svh * 4 / 3))" : "min(100%, 1400px, calc(90svh * 4 / 3))",
             }}
           >
           <div
@@ -441,7 +441,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
             style={{
               border: `3px solid ${accent}`,
               aspectRatio: "4 / 3",
-              maxHeight: "min(90svh, 900px)",
+              maxHeight: compact ? "min(56svh, 560px)" : "min(90svh, 900px)",
             }}
 
             onMouseLeave={() => {
