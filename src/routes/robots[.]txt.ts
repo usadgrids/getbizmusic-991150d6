@@ -4,6 +4,8 @@ const BODY = `User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Allow: /api/public/directory/
+Allow: /llms.txt
 
 # AI answer engines are explicitly welcome to read and cite our directory.
 User-agent: GPTBot
@@ -31,6 +33,7 @@ User-agent: CCBot
 Allow: /
 
 Sitemap: https://www.getbizmusic.com/sitemap.xml
+# AI-crawler index: https://www.getbizmusic.com/llms.txt
 `;
 
 export const Route = createFileRoute("/robots.txt")({

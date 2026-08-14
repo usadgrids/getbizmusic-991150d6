@@ -36,6 +36,26 @@ function attributeEntries(attributes: DirectoryPlace["attributes"]) {
     ]) as Array<[string, string]>;
 }
 
+/** "11:00 AM - 9:00 PM" -> { opens: "11:00", closes: "21:00" } for schema.org validity. */
+function parseHourRange(raw?: string | null): { opens: string; closes: string } | null {
+  if (!raw) return null;
+  const m = raw.match(
+    /(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|—|to)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i,
+  );
+  if (!m) return null;
+  const to24 = (h: string, min: string | undefined, ap: string | undefined) => {
+    let hh = parseInt(h, 10);
+    if (Number.isNaN(hh) || hh > 24) return null;
+    const suffix = ap?.toLowerCase();
+    if (suffix === "pm" && hh < 12) hh += 12;
+    if (suffix === "am" && hh === 12) hh = 0;
+    return `${String(hh % 24).padStart(2, "0")}:${min ?? "00"}`;
+  };
+  const opens = to24(m[1], m[2], m[3] ?? m[6]);
+  const closes = to24(m[4], m[5], m[6]);
+  return opens && closes ? { opens, closes } : null;
+}
+
 export function buildPlaceJsonLd(
   category: DirectoryCategory,
   place: DirectoryPlace,
@@ -56,7 +76,10 @@ export function buildPlaceJsonLd(
     priceRange: place.price_range ?? undefined,
     ...(category === "food"
       ? { servesCuisine: place.cuisines.length ? place.cuisines : undefined }
-      : { makesOffer: place.cuisines.map((s) => ({ "@type": "Offer", name: s })) }),
+      : {}),
+    ...(place.cuisines.length
+      ? { makesOffer: place.cuisines.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s } })) }
+      : {}),
     address: place.address
       ? {
           "@type": "PostalAddress",
@@ -71,11 +94,16 @@ export function buildPlaceJsonLd(
       place.lat != null && place.lng != null
         ? { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lng }
         : undefined,
-    openingHoursSpecification: DAY_ORDER.filter((d) => place.hours?.[d]).map((d) => ({
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: `https://schema.org/${titleCase(d)}`,
-      description: place.hours[d],
-    })),
+    openingHoursSpecification: DAY_ORDER.filter((d) => place.hours?.[d]).map((d) => {
+      const range = parseHourRange(place.hours[d]);
+      return {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: `https://schema.org/${titleCase(d)}`,
+        ...(range ? { opens: range.opens, closes: range.closes } : {}),
+        description: place.hours[d],
+      };
+    }),
+
     sameAs: place.source_urls?.length ? place.source_urls : undefined,
     aggregateRating:
       place.rating != null
