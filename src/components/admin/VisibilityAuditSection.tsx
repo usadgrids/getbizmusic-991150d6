@@ -277,7 +277,7 @@ export function VisibilityAuditSection() {
             {audit.strengths.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Strengths
+                  What&rsquo;s already working
                 </h4>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.strengths.map((s, i) => (
