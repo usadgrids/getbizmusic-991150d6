@@ -9,7 +9,7 @@ export type DirectoryCategory = "food" | "beauty";
 
 const FIRECRAWL_V2 = "https://api.firecrawl.dev/v2";
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const AI_MODEL = "google/gemini-3-flash";
+const AI_MODEL = "google/gemini-3-flash-preview";
 
 export function slugify(input: string): string {
   return input
