@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Gauge, Download, Sparkles } from "lucide-react";
+import { Gauge, Download, Sparkles, FileText, Printer } from "lucide-react";
+import { buildAuditReportHtml, slugify } from "@/lib/audit-report";
 import { adminListAuditTargets, adminRunVisibilityAudit } from "@/lib/ai-audit.functions";
 import { buildScoreBadgeSvg, svgDataUrl, scoreBadgePng, downloadBlob } from "@/lib/score-badge";
 
@@ -93,11 +94,37 @@ export function VisibilityAuditSection() {
     if (!audit) return;
     try {
       const blob = await scoreBadgePng(audit.overall, 1000);
-      const slug = audit.business.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      downloadBlob(blob, `${slug || "business"}-ai-visibility-${audit.overall}.png`);
+      downloadBlob(blob, `${slugify(audit.business) || "business"}-ai-visibility-${audit.overall}.png`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed.");
     }
+  };
+
+  const downloadReport = () => {
+    if (!audit) return;
+    try {
+      const html = buildAuditReportHtml(audit);
+      downloadBlob(
+        new Blob([html], { type: "text/html;charset=utf-8" }),
+        `${slugify(audit.business) || "business"}-ai-visibility-report-${audit.overall}.html`,
+      );
+      toast.success("Report downloaded — open it and print to PDF to share.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Download failed.");
+    }
+  };
+
+  const printReport = () => {
+    if (!audit) return;
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast.error("Allow pop-ups to print the report.");
+      return;
+    }
+    w.document.write(buildAuditReportHtml(audit));
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 400);
   };
 
   return (
@@ -204,6 +231,20 @@ export function VisibilityAuditSection() {
               className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
             >
               <Download className="h-4 w-4" aria-hidden /> Download badge PNG
+            </button>
+            <button
+              type="button"
+              onClick={downloadReport}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              <FileText className="h-4 w-4" aria-hidden /> Download full report
+            </button>
+            <button
+              type="button"
+              onClick={printReport}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              <Printer className="h-4 w-4" aria-hidden /> Print / Save as PDF
             </button>
           </div>
 
