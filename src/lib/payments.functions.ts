@@ -656,7 +656,10 @@ export const markZelleOrderPaid = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (fetchErr || !row) return { ok: false, error: fetchErr?.message ?? "Order not found" };
-    if (row.payment_method !== "zelle") return { ok: false, error: "Not a Zelle order" };
+    if (row.payment_method !== "zelle" && row.payment_method !== "venmo") {
+      return { ok: false, error: "Not a manual (Zelle/Venmo) order" };
+    }
+    const methodLabel = row.payment_method === "venmo" ? "Venmo" : "Zelle";
     if (row.status === "paid") return { ok: true };
 
     const paidAtIso = new Date().toISOString();
@@ -697,7 +700,7 @@ export const markZelleOrderPaid = createServerFn({ method: "POST" })
           currency: "usd",
           orderNumber: row.stripe_session_id as string,
           paymentDate,
-          cardBrand: "Zelle",
+          cardBrand: methodLabel,
           billingEmail: customerEmail,
           submitUrl: `https://www.getbizmusic.com/submit?token=${row.submission_token}`,
         },
@@ -711,7 +714,7 @@ export const markZelleOrderPaid = createServerFn({ method: "POST" })
         currency: "usd",
         sessionId: row.stripe_session_id as string,
         submissionToken: row.submission_token as string,
-        cardBrand: "Zelle",
+        cardBrand: methodLabel,
         paidAtIso,
       });
     } catch (e) {
@@ -731,8 +734,90 @@ export const cancelZelleOrder = createServerFn({ method: "POST" })
       .from("ad_payments")
       .update({ status: "cancelled", token_used: true })
       .eq("id", data.id)
-      .eq("payment_method", "zelle");
+      .in("payment_method", ["zelle", "venmo"]);
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   });
 
+
+/* ================= Venmo orders (admin) ================= */
+
+export type VenmoOrderAdminRow = {
+  /** Row id in its source table. */
+  id: string;
+  /** Which table the order came from. */
+  source: "ad" | "activation";
+  reference: string;
+  business_name: string | null;
+  owner_name: string | null;
+  customer_email: string;
+  phone: string | null;
+  plan_label: string;
+  amount_cents: number;
+  status: string;
+  rep_code: string | null;
+  submit_url: string | null;
+  created_at: string;
+  paid_at: string | null;
+};
+
+export const listVenmoOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<VenmoOrderAdminRow[]> => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: payments }, { data: activations }] = await Promise.all([
+      supabaseAdmin
+        .from("ad_payments")
+        .select("id, stripe_session_id, customer_email, owner_name, business_name, phone, plan, amount_cents, status, rep_code, submission_token, created_at, paid_at")
+        .eq("payment_method", "venmo")
+        .order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("activation_codes")
+        .select("id, code, memo_code, business_name, customer_business_name, contact_name, contact_email, customer_email, phone_voice, customer_phone_voice, ad_type, price_cents, status, created_at, paid_at")
+        .eq("payment_method", "venmo")
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const planLabel = (plan: string | null) =>
+      plan === "slider_10" ? "Featured Slider (10s)" : plan === "image_5" ? "Standard Image (7s)" : plan || "—";
+
+    const rows: VenmoOrderAdminRow[] = [
+      ...(payments ?? []).map((p) => ({
+        id: p.id as string,
+        source: "ad" as const,
+        reference: String(p.stripe_session_id ?? "").replace(/^venmo-/, "").slice(0, 8).toUpperCase(),
+        business_name: (p.business_name as string) ?? null,
+        owner_name: (p.owner_name as string) ?? null,
+        customer_email: (p.customer_email as string) ?? "",
+        phone: (p.phone as string) ?? null,
+        plan_label: planLabel(p.plan as string),
+        amount_cents: (p.amount_cents as number) ?? 0,
+        status: (p.status as string) ?? "",
+        rep_code: (p.rep_code as string) ?? null,
+        submit_url: p.submission_token ? `/submit?token=${p.submission_token}` : null,
+        created_at: p.created_at as string,
+        paid_at: (p.paid_at as string) ?? null,
+      })),
+      ...(activations ?? []).map((a) => ({
+        id: a.id as string,
+        source: "activation" as const,
+        reference: (a.memo_code as string) || (a.code as string) || "",
+        business_name: (a.customer_business_name as string) || (a.business_name as string) || null,
+        owner_name: (a.contact_name as string) ?? null,
+        customer_email: (a.customer_email as string) || (a.contact_email as string) || "",
+        phone: (a.customer_phone_voice as string) || (a.phone_voice as string) || null,
+        plan_label: planLabel(a.ad_type as string),
+        amount_cents: (a.price_cents as number) ?? 0,
+        status: (a.status as string) ?? "",
+        rep_code: null,
+        submit_url: a.code ? `/activate?code=${encodeURIComponent(a.code as string)}` : null,
+        created_at: a.created_at as string,
+        paid_at: (a.paid_at as string) ?? null,
+      })),
+    ];
+
+    rows.sort((x, y) => (x.created_at < y.created_at ? 1 : -1));
+    return rows;
+  });
