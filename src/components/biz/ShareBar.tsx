@@ -9,6 +9,8 @@ interface Props {
   tagline?: string | null;
   onOpen?: () => void; // called when a share action starts (e.g. pause the slider)
   compact?: boolean;
+  /** Override the shared URL (e.g. a category-scoped ad page). Absolute or site-relative. */
+  shareUrl?: string;
 }
 
 // X (Twitter) glyph — lucide has no X icon, tiny inline SVG.
