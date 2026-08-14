@@ -38,6 +38,7 @@ import { Route as CitySlugRouteImport } from './routes/$city.$slug'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as CityAdAdNumberRouteImport } from './routes/$city.ad.$adNumber'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -198,6 +199,11 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CityAdAdNumberRoute = CityAdAdNumberRouteImport.update({
+  id: '/ad/$adNumber',
+  path: '/ad/$adNumber',
+  getParentRoute: () => CityRoute,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/$city/'
     | '/admin/'
+    | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/$city'
     | '/admin'
+    | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/$city/'
     | '/admin/'
+    | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
@@ -755,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$city/ad/$adNumber': {
+      id: '/$city/ad/$adNumber'
+      path: '/ad/$adNumber'
+      fullPath: '/$city/ad/$adNumber'
+      preLoaderRoute: typeof CityAdAdNumberRouteImport
+      parentRoute: typeof CityRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -839,12 +858,14 @@ interface CityRouteChildren {
   CitySlugRoute: typeof CitySlugRoute
   CityActivateRoute: typeof CityActivateRoute
   CityIndexRoute: typeof CityIndexRoute
+  CityAdAdNumberRoute: typeof CityAdAdNumberRoute
 }
 
 const CityRouteChildren: CityRouteChildren = {
   CitySlugRoute: CitySlugRoute,
   CityActivateRoute: CityActivateRoute,
   CityIndexRoute: CityIndexRoute,
+  CityAdAdNumberRoute: CityAdAdNumberRoute,
 }
 
 const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
