@@ -96,6 +96,79 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
   });
 
 
+// ---------------- Topic (unbranded answer) pages ----------------
+
+/** Every topic page that currently has at least one published listing. */
+export const listDirectoryTopics = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ category: categorySchema }).parse(d))
+  .handler(async ({ data }) => {
+    const { buildTopics, topicQuestion } = await import("@/lib/directory-topics");
+    const supabase = await publicClient();
+    const { data: rows } = await supabase
+      .from("food_places")
+      .select(PLACE_COLUMNS)
+      .eq("category", data.category)
+      .eq("status", "published");
+    const places = (rows ?? []).map((r) => toPlace(r as Record<string, unknown>));
+    const category = data.category as DirectoryCategory;
+    return {
+      topics: buildTopics(category, places).map((t) => ({
+        slug: t.slug,
+        label: t.label,
+        question: topicQuestion(category, t.label),
+        count: t.places.length,
+      })),
+    };
+  });
+
+/** One topic answer page: direct answer, matching businesses, unbranded FAQs. */
+export const getDirectoryTopic = createServerFn({ method: "GET" })
+  .inputValidator((d) =>
+    z.object({ category: categorySchema, slug: z.string().min(1) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { buildTopics, topicQuestion, topicTitle } = await import("@/lib/directory-topics");
+    const category = data.category as DirectoryCategory;
+    const supabase = await publicClient();
+    const { data: rows } = await supabase
+      .from("food_places")
+      .select(PLACE_COLUMNS)
+      .eq("category", category)
+      .eq("status", "published");
+    const places = (rows ?? []).map((r) => toPlace(r as Record<string, unknown>));
+    const topic = buildTopics(category, places).find((t) => t.slug === data.slug);
+    if (!topic) return { topic: null };
+
+    const { data: cached } = await supabase
+      .from("directory_topic_pages")
+      .select("question, answer, faqs, updated_at")
+      .eq("category", category)
+      .eq("topic_slug", topic.slug)
+      .maybeSingle();
+
+    const names = topic.places.map((p) => p.name);
+    const fallbackAnswer = `${names.slice(0, 3).join(", ")}${
+      names.length > 3 ? ` and ${names.length - 3} more` : ""
+    } ${names.length === 1 ? "is a" : "are"} verified ${
+      category === "food" ? "food" : "beauty"
+    } business${names.length === 1 ? "" : "es"} on GetBizMusic offering ${topic.label}. Hours, pricing and contact details for each are listed below and re-verified regularly.`;
+
+    return {
+      topic: {
+        slug: topic.slug,
+        label: topic.label,
+        title: topicTitle(topic.label),
+        question: cached?.question ?? topicQuestion(category, topic.label),
+        answer: cached?.answer ?? fallbackAnswer,
+        faqs: ((cached?.faqs as DirectoryFaq[] | null) ?? []).filter(
+          (f) => f && f.question && f.answer,
+        ),
+        updatedAt: (cached?.updated_at as string | null) ?? null,
+        places: topic.places,
+      },
+    };
+  });
+
 // ---------------- Admin ----------------
 
 async function assertAdmin(userId: string) {
@@ -169,6 +242,16 @@ export const adminResearchAd = createServerFn({ method: "POST" })
       category: data.category as DirectoryCategory,
       triggeredBy: "admin",
     });
+  });
+
+export const adminRefreshTopicPages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ category: categorySchema }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.userId);
+    const { refreshTopicPages } = await import("@/lib/directory.server");
+    const results = await refreshTopicPages(data.category as DirectoryCategory);
+    return { ok: true, written: results.filter((r) => r.ok).length, results };
   });
 
 export const adminUpdatePlace = createServerFn({ method: "POST" })

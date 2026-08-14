@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Sparkles, ArrowRight, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -72,13 +73,19 @@ function Index() {
       fetchBeautyAds({ data: { industries: DIRECTORY_CATEGORIES.beauty.industries, seed_key: "beauty" } }),
   });
 
+  // Live ad thumbnails come from randomized, signed-URL data, so they can differ
+  // between the server render and the first client render. Only add them after
+  // hydration to keep the markup identical on both passes.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   // Build the marquee thumbnail pool: real category ads + showcase placeholders
   // so the strip is never empty even before advertisers sign up.
   const thumbnails: string[] = [
     ...DIRECTORY_CATEGORY_UI.food.showcaseAds.map((a) => a.image_url),
     ...DIRECTORY_CATEGORY_UI.beauty.showcaseAds.map((a) => a.image_url),
-    ...foodAds.map((a) => a.image_url),
-    ...beautyAds.map((a) => a.image_url),
+    ...(hydrated ? foodAds.map((a) => a.image_url) : []),
+    ...(hydrated ? beautyAds.map((a) => a.image_url) : []),
   ].filter(Boolean);
   // Duplicate for a seamless loop.
   const marqueeTiles = thumbnails.length > 0 ? [...thumbnails, ...thumbnails] : [];

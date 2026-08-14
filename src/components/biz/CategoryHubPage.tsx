@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
+import { listDirectoryTopics } from "@/lib/directory.functions";
 
 import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
@@ -35,6 +36,13 @@ export function CategoryHubPage({
     queryKey: ["category-ads", category],
     queryFn: () => fetchAds({ data: { industries: config.industries, seed_key: category } }),
   });
+
+  const fetchTopics = useServerFn(listDirectoryTopics);
+  const { data: topicData } = useSuspenseQuery({
+    queryKey: ["directory-topics", category],
+    queryFn: () => fetchTopics({ data: { category } }),
+  });
+  const topics = topicData?.topics ?? [];
 
   const [proof, setProof] = useState<ActivationProof | null>(null);
   // Bumped on every code submission so re-entering the same code still snaps the slider back.
@@ -149,6 +157,34 @@ export function CategoryHubPage({
             <EmptyIcon className="mx-auto mb-3 text-[#D4A24C]" size={28} />
             <h2 className="text-lg font-bold text-[#0F2A4A]">{config.emptyHeadline}</h2>
             <p className="mt-2 text-sm text-gray-600">{config.emptyBody}</p>
+          </section>
+        )}
+        {!!topics.length && (
+          <section
+            aria-label="Popular questions"
+            className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
+          >
+            <h2 className="text-lg font-bold text-[#0F2A4A]">
+              Popular questions we answer about {config.phrase}
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Verified answers built from our listed businesses&rsquo; real hours, services and
+              pricing — the pages AI answer engines cite.
+            </p>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {topics.slice(0, 24).map((t) => (
+                <li key={t.slug}>
+                  <Link
+                    to="/$city/$slug"
+                    params={{ city: category, slug: t.slug }}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-[#0F2A4A] hover:border-[#D4A24C] hover:bg-[#fdf7ec]"
+                  >
+                    <span>{t.question}</span>
+                    <span className="shrink-0 text-xs text-gray-500">{t.count}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </main>

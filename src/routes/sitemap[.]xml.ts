@@ -14,12 +14,13 @@ export const Route = createFileRoute("/sitemap.xml")({
           { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
         );
 
-        const [{ data: places }, { data: cities }] = await Promise.all([
+        const [{ data: places }, { data: cities }, { data: topics }] = await Promise.all([
           supabase
             .from("food_places")
             .select("slug, category, updated_at, ad_id")
             .eq("status", "published"),
           supabase.from("cities").select("slug, updated_at").eq("is_active", true),
+          supabase.from("directory_topic_pages").select("category, topic_slug, updated_at"),
         ]);
 
         const urls: Array<{ loc: string; lastmod?: string; priority: string }> = [
@@ -27,6 +28,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           ...DIRECTORY_CATEGORY_SLUGS.map((slug) => ({
             loc: `${SITE}/${slug}`,
             priority: "0.9",
+          })),
+          ...(topics ?? []).map((t) => ({
+            loc: `${SITE}/${t.category}/${t.topic_slug}`,
+            lastmod: (t.updated_at as string | null) ?? undefined,
+            priority: "0.85",
           })),
           { loc: `${SITE}/pricing`, priority: "0.7" },
           { loc: `${SITE}/submit`, priority: "0.5" },
