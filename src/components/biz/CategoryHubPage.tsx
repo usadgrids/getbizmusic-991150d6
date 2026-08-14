@@ -4,13 +4,13 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { getAdsByCategory, type PublicAd } from "@/lib/ads.functions";
-import { listDirectoryPlaces } from "@/lib/directory.functions";
+
 import type { ActivationProof } from "@/lib/activation.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
-import { DirectoryList } from "@/components/biz/DirectoryList";
+
 import { PageShareBar } from "@/components/biz/PageShareBar";
 import { DIRECTORY_CATEGORIES, type DirectoryCategory } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
@@ -34,11 +34,6 @@ export function CategoryHubPage({
   const { data: ads = [] } = useSuspenseQuery({
     queryKey: ["category-ads", category],
     queryFn: () => fetchAds({ data: { industries: config.industries, seed_key: category } }),
-  });
-  const fetchPlaces = useServerFn(listDirectoryPlaces);
-  const { data: directory } = useSuspenseQuery({
-    queryKey: ["directory-places", category],
-    queryFn: () => fetchPlaces({ data: { category } }),
   });
 
   const [proof, setProof] = useState<ActivationProof | null>(null);
@@ -156,8 +151,6 @@ export function CategoryHubPage({
             <p className="mt-2 text-sm text-gray-600">{config.emptyBody}</p>
           </section>
         )}
-
-        <DirectoryList category={category} places={directory.places} />
       </main>
 
       <BizFooter />
