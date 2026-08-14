@@ -41,6 +41,12 @@ export function AdLandingView({
     queryFn: () =>
       citySlug ? fetchAds({ data: { city_slug: citySlug } }) : fetchAds(),
   });
+  // On category pages, also pull the nationwide pool so the slider still has
+  // other ads to rotate through when the city has only one.
+  const { data: allAds = [] } = useSuspenseQuery({
+    queryKey: ["active-ads", "__all__"],
+    queryFn: () => fetchAds(),
+  });
 
   if (!ad) return <AdLandingNotFound />;
 
@@ -49,9 +55,12 @@ export function AdLandingView({
   // On category-scoped pages (/beauty/ad/123) only ever show ads that belong
   // to that category; elsewhere fall back to all ads in the city.
   const categoryIndustries = category ? DIRECTORY_CATEGORIES[category].industries : null;
-  const scopedAds = categoryIndustries
-    ? ads.filter((a) => categoryIndustries.includes((a.industry ?? "").toLowerCase()))
+  const pool = categoryIndustries
+    ? [...ads, ...allAds.filter((a) => !ads.some((b) => b.id === a.id))]
     : ads;
+  const scopedAds = categoryIndustries
+    ? pool.filter((a) => categoryIndustries.includes((a.industry ?? "").toLowerCase()))
+    : pool;
   const otherAds = scopedAds.filter((a) => a.id !== ad.id);
   const relatedAds = otherAds.filter((a) => a.industry === ad.industry);
   const sliderAds = relatedAds.length > 0 ? relatedAds : otherAds;
