@@ -56,7 +56,9 @@ export const Route = createFileRoute("/$city/$slug")({
 });
 
 function DirectoryPlacePage() {
-  const { place, faqs, category } = Route.useLoaderData();
+  const { place, faqs, category, adNumber } = Route.useLoaderData();
   if (!place) return null;
-  return <DirectoryPlaceView category={category} place={place} faqs={faqs} />;
+  return (
+    <DirectoryPlaceView category={category} place={place} faqs={faqs} adNumber={adNumber ?? null} />
+  );
 }

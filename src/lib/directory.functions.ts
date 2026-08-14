@@ -74,13 +74,27 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
       if (data?.signedUrl) place.image_url = data.signedUrl;
     }
 
+    // Look up the linked ad's public number so the page can show the
+    // shareable social link (/ad/<number>) instead of the KG URL.
+    let adNumber: number | null = null;
+    if (place.ad_id) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: adRow } = await supabaseAdmin
+        .from("ads")
+        .select("ad_number")
+        .eq("id", place.ad_id)
+        .maybeSingle();
+      adNumber = (adRow?.ad_number as number | null) ?? null;
+    }
+
     const { data: faqs } = await supabase
       .from("food_place_faqs")
       .select("question, answer")
       .eq("place_id", place.id)
       .order("sort_order", { ascending: true });
-    return { place, faqs: (faqs ?? []) as DirectoryFaq[] };
+    return { place, adNumber, faqs: (faqs ?? []) as DirectoryFaq[] };
   });
+
 
 // ---------------- Admin ----------------
 
