@@ -290,8 +290,11 @@ export function VisibilityAuditSection() {
             {audit.recommendations.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Recommendations
+                  What you & your webmaster can do
                 </h4>
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  Improvements you or your own web team can make on your website and profiles. GetBizMusic does not need to implement these — they are yours to act on.
+                </p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.recommendations.map((s, i) => (
                     <li key={i}>{s}</li>
