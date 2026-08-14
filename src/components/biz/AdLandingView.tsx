@@ -10,6 +10,10 @@ import { ShareBar } from "@/components/biz/ShareBar";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
+import {
+  DIRECTORY_CATEGORIES,
+  type DirectoryCategory,
+} from "@/lib/directory-categories";
 
 /**
  * Shared public "unique ad page" body. Rendered by /ad/$adNumber and by the
@@ -18,9 +22,11 @@ import { CityPickerButton } from "@/components/biz/CityPickerModal";
 export function AdLandingView({
   adNumber,
   breadcrumb,
+  category,
 }: {
   adNumber: number;
   breadcrumb?: { label: string; to: string };
+  category?: DirectoryCategory;
 }) {
   const fetchAd = useServerFn(getAdByNumber);
   const fetchAds = useServerFn(getActiveAds);
