@@ -9,7 +9,7 @@ export type DirectoryCategory = "food" | "beauty";
 
 const FIRECRAWL_V2 = "https://api.firecrawl.dev/v2";
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const AI_MODEL = "google/gemini-3-flash";
+const AI_MODEL = "google/gemini-3-flash-preview";
 
 export function slugify(input: string): string {
   return input
@@ -150,6 +150,7 @@ async function normalizeWithAI(
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: AI_MODEL,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           {
@@ -199,7 +200,9 @@ async function normalizeWithAI(
     };
   } catch (err) {
     console.error("[directory] AI normalization error", err);
-    return null;
+    throw new Error(
+      `AI normalization failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
