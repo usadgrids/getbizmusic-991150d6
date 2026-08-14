@@ -183,6 +183,7 @@ export function AdLandingView({
             <div className="h-px flex-1 bg-gray-300" />
           </div>
           <AdSlider
+            featured
             ads={sliderAds.length > 0 ? sliderAds : [ad]}
             title={
               relatedAds.length > 0
