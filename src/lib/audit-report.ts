@@ -63,7 +63,7 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
   .bar { height:6px; border-radius:6px; background:#e8eaee; margin:8px 0; overflow:hidden; }
   .bar i { display:block; height:6px; background:var(--band); }
   .sub p { margin:0; font-size:12px; color:#555; line-height:1.5; }
-  .hl { background:#FFF59D; box-shadow:0 0 0 1px #F0DE8A inset; border-radius:2px; padding:1px 3px; }
+  .hl { background:#FFF8D6; box-shadow:0 0 0 1px #F0E2A0 inset; border-radius:2px; padding:1px 3px; }
   ul { padding-left:20px; } li { font-size:14px; line-height:1.6; margin-bottom:6px; }
   .gbm-intro { font-size:13px; color:#555; font-style:italic; margin:0 0 10px; }
   .sources li { font-size:12px; word-break:break-all; }
