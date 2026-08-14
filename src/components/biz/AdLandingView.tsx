@@ -193,9 +193,6 @@ export function AdLandingView({
                   : `More ${ad.city_name ?? "Local"} Businesses`
             }
           />
-          <div className="mt-6">
-            <PlaylistMarquee />
-          </div>
           <section className="mt-8 rounded-2xl bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
               <Sparkles size={14} />
