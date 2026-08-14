@@ -528,7 +528,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
           </div>
 
           {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
-          {current && current.ad_number != null && (
+          {current && current.ad_number != null && !hideAdShareBar && (
             <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
               <div className="text-sm font-semibold text-[#0F2A4A]">
                 Share this ad image
