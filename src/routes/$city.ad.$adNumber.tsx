@@ -84,6 +84,7 @@ function CategoryAdPage() {
     <AdLandingView
       adNumber={Number(params.adNumber)}
       breadcrumb={{ label: label.title, to: label.basePath }}
+      category={category}
     />
   );
 }

@@ -10,6 +10,10 @@ import { ShareBar } from "@/components/biz/ShareBar";
 import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
+import {
+  DIRECTORY_CATEGORIES,
+  type DirectoryCategory,
+} from "@/lib/directory-categories";
 
 /**
  * Shared public "unique ad page" body. Rendered by /ad/$adNumber and by the
@@ -18,9 +22,11 @@ import { CityPickerButton } from "@/components/biz/CityPickerModal";
 export function AdLandingView({
   adNumber,
   breadcrumb,
+  category,
 }: {
   adNumber: number;
   breadcrumb?: { label: string; to: string };
+  category?: DirectoryCategory;
 }) {
   const fetchAd = useServerFn(getAdByNumber);
   const fetchAds = useServerFn(getActiveAds);
@@ -40,8 +46,15 @@ export function AdLandingView({
 
   const industry =
     INDUSTRIES.find((i) => i.value === ad.industry)?.label ?? ad.industry;
-  const relatedAds = ads.filter((a) => a.industry === ad.industry && a.id !== ad.id);
-  const sliderAds = relatedAds.length > 0 ? relatedAds : ads.filter((a) => a.id !== ad.id);
+  // On category-scoped pages (/beauty/ad/123) only ever show ads that belong
+  // to that category; elsewhere fall back to all ads in the city.
+  const categoryIndustries = category ? DIRECTORY_CATEGORIES[category].industries : null;
+  const scopedAds = categoryIndustries
+    ? ads.filter((a) => categoryIndustries.includes((a.industry ?? "").toLowerCase()))
+    : ads;
+  const otherAds = scopedAds.filter((a) => a.id !== ad.id);
+  const relatedAds = otherAds.filter((a) => a.industry === ad.industry);
+  const sliderAds = relatedAds.length > 0 ? relatedAds : otherAds;
 
   const Img = (
     <img
@@ -159,11 +172,13 @@ export function AdLandingView({
             <div className="h-px flex-1 bg-gray-300" />
           </div>
           <AdSlider
-            ads={sliderAds.length > 0 ? sliderAds : ads}
+            ads={sliderAds.length > 0 ? sliderAds : [ad]}
             title={
               relatedAds.length > 0
                 ? `More ${industry} in ${ad.city_name ?? "your area"}`
-                : `More ${ad.city_name ?? "Local"} Businesses`
+                : category
+                  ? `More ${DIRECTORY_CATEGORIES[category].title} Businesses`
+                  : `More ${ad.city_name ?? "Local"} Businesses`
             }
           />
           <div className="mt-6">
