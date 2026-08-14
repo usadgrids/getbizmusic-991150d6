@@ -95,6 +95,7 @@ export function CategoryHubPage({
             ads={slides}
             title={config.sliderTitle}
             featured
+            hideAdShareBar
             focusAdId={proofSlide?.id ?? null}
             focusNonce={focusNonce}
             belowShareBar={

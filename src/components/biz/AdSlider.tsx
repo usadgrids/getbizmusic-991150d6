@@ -66,6 +66,8 @@ interface Props {
   focusNonce?: number;
   /** Optional node rendered between the Share bar and the music player. */
   belowShareBar?: ReactNode;
+  /** Hide the per-ad "Share this ad image" bar (use when a page-level share bar is shown instead). */
+  hideAdShareBar?: boolean;
 }
 
 
@@ -82,7 +84,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar, hideAdShareBar = false }: Props) {
   const [idx, setIdx] = useState(0);
 
   const [paused, setPaused] = useState(false);
@@ -526,7 +528,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
           </div>
 
           {/* Share this ad image — persistent, pauses slider on click, resumes on tab return */}
-          {current && current.ad_number != null && (
+          {current && current.ad_number != null && !hideAdShareBar && (
             <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-[#0F2A4A]/15 bg-white px-3 py-2 shadow-sm">
               <div className="text-sm font-semibold text-[#0F2A4A]">
                 Share this ad image
