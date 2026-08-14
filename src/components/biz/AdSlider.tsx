@@ -303,7 +303,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
     <section id="ad-slideshow" className="my-8 min-w-0">
       <div
         className="relative mx-auto mb-3 w-full"
-        style={{ maxWidth: "min(100%, 1400px, calc(90svh * 4 / 3))" }}
+        style={{ maxWidth: compact ? "min(100%, 820px, calc(56svh * 4 / 3))" : "min(100%, 1400px, calc(90svh * 4 / 3))" }}
       >
         <div className="flex flex-col items-center gap-3">
           <h2 className="flex items-center justify-center gap-2 whitespace-nowrap text-center font-serif text-lg font-bold text-[#0F2A4A] sm:text-xl">
