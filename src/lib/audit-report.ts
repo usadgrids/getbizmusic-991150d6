@@ -7,6 +7,8 @@ export type ReportAudit = {
   subscores: Array<{ label: string; score: number; note: string }>;
   strengths: string[];
   recommendations: string[];
+  gbmStandalone?: string[];
+  gbmKnowledgeGraph?: string[];
   summary: string;
   sources: string[];
 };
