@@ -363,6 +363,8 @@ function AdminConsole() {
 
         <DirectorySection />
 
+        <VisibilityAuditSection />
+
 
 
 
