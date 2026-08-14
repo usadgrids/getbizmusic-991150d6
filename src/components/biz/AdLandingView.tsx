@@ -14,6 +14,7 @@ import {
   DIRECTORY_CATEGORIES,
   type DirectoryCategory,
 } from "@/lib/directory-categories";
+import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 
 /**
  * Shared public "unique ad page" body. Rendered by /ad/$adNumber and by the
