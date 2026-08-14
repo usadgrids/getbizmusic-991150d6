@@ -7,7 +7,6 @@ import { INDUSTRIES } from "@/lib/biz-utils";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
-import { PlaylistMarquee } from "@/components/biz/PlaylistMarquee";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import {
