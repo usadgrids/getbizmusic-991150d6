@@ -46,7 +46,6 @@ export function AdLandingView({
   const { data: allAds = [] } = useSuspenseQuery({
     queryKey: ["active-ads", "__all__"],
     queryFn: () => fetchAds(),
-    enabled: !!category,
   });
 
   if (!ad) return <AdLandingNotFound />;
