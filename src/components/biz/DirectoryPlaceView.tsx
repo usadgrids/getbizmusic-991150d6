@@ -199,6 +199,8 @@ export function DirectoryPlaceView({
                   </p>
                   <a
                     href={shareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-1 block break-all font-medium text-primary underline underline-offset-2"
                   >
                     {shareUrl}
