@@ -25,6 +25,7 @@ import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, listVenmoOrders,
 import { markActivationPaid } from "@/lib/activation.functions";
 import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
 import { DirectorySection } from "@/components/admin/DirectorySection";
+import { VisibilityAuditSection } from "@/components/admin/VisibilityAuditSection";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
