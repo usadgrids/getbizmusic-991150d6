@@ -87,6 +87,49 @@ function clamp(n: unknown, fallback = 0): number {
   return Math.max(0, Math.min(100, v));
 }
 
+// Safety net: drop any GetBizMusic action item that promises something we cannot deliver.
+const FORBIDDEN_CLAIMS = [
+  "syndicat",
+  "google business",
+  "google my business",
+  "yelp",
+  "apple maps",
+  "bing places",
+  "third-party director",
+  "third party director",
+  "citation network",
+  "backlink",
+  "link building",
+  "link-building",
+  "domain authority",
+  "their website",
+  "your website",
+  "own website",
+  "main site",
+  "main website",
+  "review response",
+  "respond to review",
+  "manage review",
+  "sentiment monitor",
+  "monitor and aggregate",
+  "menu schema",
+  "ingredient",
+  "ad spend",
+  "paid placement",
+];
+
+function filterGbmItems(items: unknown): string[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map(String)
+    .filter((s) => {
+      const low = s.toLowerCase();
+      return !FORBIDDEN_CLAIMS.some((bad) => low.includes(bad));
+    })
+    .slice(0, 8);
+}
+
+
 export async function runVisibilityAudit(opts: {
   businessName: string;
   city?: string | null;
@@ -135,7 +178,8 @@ export async function runVisibilityAudit(opts: {
         { role: "system", content: system },
         {
           role: "user",
-          content: `Business: ${label}${opts.website ? `\nWebsite: ${opts.website}` : ""}\n\nReturn JSON matching exactly this shape:\n${shape}\n\nWrite 3-6 strengths and 3-6 general recommendations in plain language a business owner can act on.\n\nIMPORTANT — split the actionable "what GetBizMusic.com can do for you" items into two arrays:\n"gbm_standalone": steps GetBizMusic.com can take WITHOUT needing access to the business's own website or business profiles (e.g. building Knowledge Graph pages, syndicating citations, publishing answer pages, schema on GetBizMusic.com).\n"gbm_knowledge_graph": steps GetBizMusic.com can implement inside the business's unique GetBizMusic Knowledge Graph page URL (e.g. LocalBusiness JSON-LD, FAQ schema, service/topic pages, review markup, internal linking, sitemap entries).\nPut 3-6 items in each array, each a single concise sentence.\n\n${
+          content: `Business: ${label}${opts.website ? `\nWebsite: ${opts.website}` : ""}\n\nReturn JSON matching exactly this shape:\n${shape}\n\nWrite 3-6 strengths and 3-6 general recommendations in plain language a business owner can act on. The "recommendations" array is ONLY for things the business and its own webmaster must do on their own website and business profiles.\n\nCRITICAL — the two GetBizMusic arrays must describe ONLY capabilities GetBizMusic actually delivers. You may ONLY select and phrase items drawn from these exact capability lists, choosing the ones most relevant to this business (rephrase for their industry, but never add capabilities outside the lists):\n\nALLOWED for "gbm_standalone" (no access to their site or profiles needed):\n- Build a business-specific GetBizMusic Knowledge Graph page as a second high-authority, machine-readable source about the business.\n- Publish unbranded "answer pages" for the services/dishes this business offers (e.g. "where to get <service> in <city>") that list this business with real facts.\n- Expose the business in GetBizMusic's AI-crawler feeds: /llms.txt, the public JSON directory feeds, and the XML sitemap.\n- Research and normalize the business's NAP, hours, services and pricing from public web sources, and keep a last-verified date on the page.\n- Internally link the Knowledge Graph page from GetBizMusic category hubs and answer pages so crawlers and AI engines reach it.\n- Create a shareable category ad page for the business for social distribution.\n\nALLOWED for "gbm_knowledge_graph" (implemented inside their unique GetBizMusic URL):\n- LocalBusiness JSON-LD with address, geo coordinates, phone, hours and price range.\n- FAQPage schema answering real customer questions, including unbranded ones.\n- BreadcrumbList schema and canonical metadata.\n- makesOffer / service listings built from their researched services or cuisines.\n- aggregateRating markup when a verified public rating and review count exist.\n- Open Graph / social share metadata plus the business's ad image on the page.\n\nSTRICTLY FORBIDDEN — never mention or imply any of these, because GetBizMusic cannot do them: syndicating or pushing NAP data to Google Business Profile, Yelp, Apple Maps, Bing or any third-party directory; building citation or backlink networks; improving the business's domain authority; editing, auditing or adding schema to the business's own website; managing or responding to reviews; ongoing multi-platform review sentiment monitoring; menu or per-dish ingredient schema; ad spend or paid placement on other platforms.\n\nPut 3-6 items in each array, each a single concise sentence.\n\n${
+
             corpus ? `SOURCES:\n${corpus}` : "NO WEB SOURCES COULD BE FOUND. Score accordingly (very low web presence)."
           }`,
         },
@@ -177,12 +221,9 @@ export async function runVisibilityAudit(opts: {
     recommendations: Array.isArray(out.recommendations)
       ? out.recommendations.slice(0, 8).map(String)
       : [],
-    gbmStandalone: Array.isArray((out as Record<string, unknown>).gbm_standalone)
-      ? ((out as Record<string, unknown>).gbm_standalone as unknown[]).slice(0, 8).map(String)
-      : [],
-    gbmKnowledgeGraph: Array.isArray((out as Record<string, unknown>).gbm_knowledge_graph)
-      ? ((out as Record<string, unknown>).gbm_knowledge_graph as unknown[]).slice(0, 8).map(String)
-      : [],
+    gbmStandalone: filterGbmItems((out as Record<string, unknown>).gbm_standalone),
+    gbmKnowledgeGraph: filterGbmItems((out as Record<string, unknown>).gbm_knowledge_graph),
+
     summary: typeof out.summary === "string" ? out.summary : "",
     sources: [...new Set(sources.map((s) => s.url))].slice(0, 12),
   };
