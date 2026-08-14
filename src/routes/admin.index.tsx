@@ -21,7 +21,8 @@ import { getActiveCities } from "@/lib/cities.functions";
 import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
-import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, type ZelleOrderAdminRow } from "@/lib/payments.functions";
+import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, listVenmoOrders, type ZelleOrderAdminRow, type VenmoOrderAdminRow } from "@/lib/payments.functions";
+import { markActivationPaid } from "@/lib/activation.functions";
 import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
 import { DirectorySection } from "@/components/admin/DirectorySection";
 
@@ -350,6 +351,8 @@ function AdminConsole() {
         <ManualSubmitSection onCreated={refreshAll} />
 
         <ZelleOrdersSection />
+
+        <VenmoOrdersSection />
 
         <AdRepsSection />
 
@@ -1968,3 +1971,180 @@ function ZelleOrdersSection() {
   );
 }
 
+
+/* ================= Venmo Orders ================= */
+
+function VenmoOrdersSection() {
+  const listFn = useServerFn(listVenmoOrders);
+  const markAdPaidFn = useServerFn(markZelleOrderPaid);
+  const markActivationPaidFn = useServerFn(markActivationPaid);
+  const cancelFn = useServerFn(cancelZelleOrder);
+  const { data: orders = [], isLoading, refetch } = useQuery({
+    queryKey: ["venmo-orders"],
+    queryFn: () => listFn(),
+  });
+
+  const isAwaiting = (o: VenmoOrderAdminRow) =>
+    o.status === "awaiting_venmo" || o.status === "awaiting_manual" || o.status === "pending";
+  const awaiting = orders.filter(isAwaiting);
+
+  const markPaid = async (o: VenmoOrderAdminRow) => {
+    const label = o.business_name || o.customer_email;
+    if (!confirm(`Confirm you received the Venmo payment from "${label}" ($${(o.amount_cents / 100).toFixed(2)})?`)) return;
+    try {
+      const res = o.source === "activation"
+        ? await markActivationPaidFn({ data: { id: o.id } })
+        : await markAdPaidFn({ data: { id: o.id } });
+      if (!res.ok) throw new Error(res.error);
+      toast.success("Marked paid — receipt and processing emails sent");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const cancel = async (o: VenmoOrderAdminRow) => {
+    const label = o.business_name || o.customer_email;
+    if (!confirm(`Cancel Venmo order for "${label}"? This invalidates their submission link.`)) return;
+    try {
+      const res = await cancelFn({ data: { id: o.id } });
+      if (!res.ok) throw new Error(res.error);
+      toast.success("Order cancelled");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const statusPill = (status: string) => {
+    const map: Record<string, string> = {
+      awaiting_venmo: "bg-sky-100 text-sky-800 border-sky-300",
+      awaiting_manual: "bg-sky-100 text-sky-800 border-sky-300",
+      paid: "bg-emerald-100 text-emerald-800 border-emerald-300",
+      cancelled: "bg-gray-200 text-gray-700 border-gray-300",
+    };
+    const cls = map[status] ?? "bg-gray-100 text-gray-700 border-gray-300";
+    return (
+      <span className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 border rounded-full ${cls}`}>
+        {(status === "awaiting_venmo" || status === "awaiting_manual") && <Clock size={10} />}
+        {status === "paid" && <Check size={10} />}
+        {status.replace(/_/g, " ")}
+      </span>
+    );
+  };
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Send size={18} className="text-sky-700" />
+        <h2 className="font-serif text-xl font-bold text-[#0F2A4A]">
+          Venmo Orders ({orders.length})
+          {awaiting.length > 0 && (
+            <span className="ml-2 text-xs text-sky-700 bg-sky-100 border border-sky-300 rounded-full px-2 py-0.5 uppercase tracking-wide font-bold align-middle">
+              {awaiting.length} awaiting payment
+            </span>
+          )}
+        </h2>
+        <button onClick={() => refetch()} className="ml-auto text-xs text-[#0F2A4A] hover:underline">
+          Refresh
+        </button>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        {isLoading ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">Loading…</div>
+        ) : orders.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">
+            No Venmo orders yet. Buyers who choose Venmo at checkout or on an activation link will appear here.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                  <th className="px-4 py-2">Business / Owner</th>
+                  <th className="px-4 py-2">Contact</th>
+                  <th className="px-4 py-2">Plan</th>
+                  <th className="px-4 py-2">Amount</th>
+                  <th className="px-4 py-2">Source</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Created</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {orders.map((o) => (
+                  <tr key={`${o.source}-${o.id}`} className="align-top">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-[#0F2A4A]">{o.business_name || "—"}</div>
+                      <div className="text-xs text-gray-500">{o.owner_name || "—"}</div>
+                      <div className="text-[10px] font-mono text-gray-400 mt-0.5">Memo: {o.reference || "—"}</div>
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      <div>
+                        {o.customer_email ? (
+                          <a href={`mailto:${o.customer_email}`} className="text-[#0F2A4A] hover:underline">{o.customer_email}</a>
+                        ) : "—"}
+                      </div>
+                      <div className="text-gray-600">{o.phone || "—"}</div>
+                    </td>
+                    <td className="px-4 py-3 text-xs">{o.plan_label}</td>
+                    <td className="px-4 py-3 text-xs">
+                      <div className="font-semibold text-[#0F2A4A]">${(o.amount_cents / 100).toFixed(2)}</div>
+                      {o.rep_code && (
+                        <div className="text-[10px] font-mono text-emerald-700">{o.rep_code}</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-600">
+                      {o.source === "activation" ? "Activation link" : "Checkout"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {statusPill(o.status)}
+                      {o.paid_at && (
+                        <div className="text-[10px] text-gray-500 mt-1">Paid {new Date(o.paid_at).toLocaleDateString()}</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500">
+                      {new Date(o.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1.5">
+                        {isAwaiting(o) && (
+                          <>
+                            <button
+                              onClick={() => markPaid(o)}
+                              className="text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2 py-1 rounded inline-flex items-center gap-1 justify-center"
+                            >
+                              <Check size={11} /> Mark Venmo Paid
+                            </button>
+                            {o.source === "ad" && (
+                              <button
+                                onClick={() => cancel(o)}
+                                className="text-[11px] border border-red-300 text-red-700 hover:bg-red-50 font-semibold px-2 py-1 rounded inline-flex items-center gap-1 justify-center"
+                              >
+                                <X size={11} /> Cancel
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {o.submit_url && (
+                          <a
+                            href={o.submit_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] text-[#0F2A4A] hover:underline inline-flex items-center gap-1 justify-center"
+                          >
+                            <ExternalLink size={11} /> {o.source === "activation" ? "Activation link" : "Submit link"}
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
