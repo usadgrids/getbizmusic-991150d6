@@ -68,6 +68,8 @@ interface Props {
   belowShareBar?: ReactNode;
   /** Hide the per-ad "Share this ad image" bar (use when a page-level share bar is shown instead). */
   hideAdShareBar?: boolean;
+  /** Shrink the slider so it sits below a larger featured ad image. */
+  compact?: boolean;
 }
 
 
