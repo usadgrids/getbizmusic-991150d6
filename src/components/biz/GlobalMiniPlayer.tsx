@@ -15,6 +15,7 @@ const HIDDEN_PREFIXES = [
   "/auth",
   "/reset-password",
   "/edit-ad",
+  "/activate",
   "/.lovable",
   "/lovable",
   "/api",
