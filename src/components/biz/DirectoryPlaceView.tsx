@@ -140,10 +140,12 @@ export function DirectoryPlaceView({
   );
 
   const base = label.basePath;
-  // Social sharing link = the category-specific Knowledge Graph page for this
-  // business (e.g. /beauty/cut-and-dye-salon), which is the shareable public
-  // URL visitors and owners promote on social media.
-  const shareUrl = `${SITE}${base}/${place.slug}`;
+  // Social sharing link = this business's category-scoped unique ad page
+  // (e.g. /beauty/ad/2978) — the visual, shareable page for humans/social,
+  // separate from this machine-readable Knowledge Graph page.
+  const shareUrl = adNumber
+    ? `${SITE}${base}/ad/${adNumber}`
+    : `${SITE}${base}/${place.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
