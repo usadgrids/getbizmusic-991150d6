@@ -20,6 +20,8 @@ export type VisibilityAudit = {
   subscores: AuditSubscore[];
   strengths: string[];
   recommendations: string[];
+  gbmStandalone: string[];
+  gbmKnowledgeGraph: string[];
   summary: string;
   sources: string[];
 };
@@ -121,7 +123,7 @@ export async function runVisibilityAudit(opts: {
     "Respond with JSON only, no markdown fences.",
   ].join(" ");
 
-  const shape = `{"overall":number,"summary":string,"subscores":[{"label":"Web Presence","score":number,"note":string},{"label":"Reviews & Reputation","score":number,"note":string},{"label":"Structured Data / Schema","score":number,"note":string},{"label":"Content & Q&A Answerability","score":number,"note":string},{"label":"Local Consistency (NAP)","score":number,"note":string},{"label":"AI Citability","score":number,"note":string}],"strengths":string[],"recommendations":string[]}`;
+  const shape = `{"overall":number,"summary":string,"subscores":[{"label":"Web Presence","score":number,"note":string},{"label":"Reviews & Reputation","score":number,"note":string},{"label":"Structured Data / Schema","score":number,"note":string},{"label":"Content & Q&A Answerability","score":number,"note":string},{"label":"Local Consistency (NAP)","score":number,"note":string},{"label":"AI Citability","score":number,"note":string}],"strengths":string[],"recommendations":string[],"gbm_standalone":string[],"gbm_knowledge_graph":string[]}`;
 
   const res = await fetch(AI_GATEWAY, {
     method: "POST",
@@ -133,7 +135,7 @@ export async function runVisibilityAudit(opts: {
         { role: "system", content: system },
         {
           role: "user",
-          content: `Business: ${label}${opts.website ? `\nWebsite: ${opts.website}` : ""}\n\nReturn JSON matching exactly this shape:\n${shape}\n\nWrite 3-6 strengths and 3-6 recommendations in plain language a business owner can act on.\n\n${
+          content: `Business: ${label}${opts.website ? `\nWebsite: ${opts.website}` : ""}\n\nReturn JSON matching exactly this shape:\n${shape}\n\nWrite 3-6 strengths and 3-6 general recommendations in plain language a business owner can act on.\n\nIMPORTANT — split the actionable "what GetBizMusic.com can do for you" items into two arrays:\n"gbm_standalone": steps GetBizMusic.com can take WITHOUT needing access to the business's own website or business profiles (e.g. building Knowledge Graph pages, syndicating citations, publishing answer pages, schema on GetBizMusic.com).\n"gbm_knowledge_graph": steps GetBizMusic.com can implement inside the business's unique GetBizMusic Knowledge Graph page URL (e.g. LocalBusiness JSON-LD, FAQ schema, service/topic pages, review markup, internal linking, sitemap entries).\nPut 3-6 items in each array, each a single concise sentence.\n\n${
             corpus ? `SOURCES:\n${corpus}` : "NO WEB SOURCES COULD BE FOUND. Score accordingly (very low web presence)."
           }`,
         },
@@ -174,6 +176,12 @@ export async function runVisibilityAudit(opts: {
     strengths: Array.isArray(out.strengths) ? out.strengths.slice(0, 8).map(String) : [],
     recommendations: Array.isArray(out.recommendations)
       ? out.recommendations.slice(0, 8).map(String)
+      : [],
+    gbmStandalone: Array.isArray((out as Record<string, unknown>).gbm_standalone)
+      ? ((out as Record<string, unknown>).gbm_standalone as unknown[]).slice(0, 8).map(String)
+      : [],
+    gbmKnowledgeGraph: Array.isArray((out as Record<string, unknown>).gbm_knowledge_graph)
+      ? ((out as Record<string, unknown>).gbm_knowledge_graph as unknown[]).slice(0, 8).map(String)
       : [],
     summary: typeof out.summary === "string" ? out.summary : "",
     sources: [...new Set(sources.map((s) => s.url))].slice(0, 12),

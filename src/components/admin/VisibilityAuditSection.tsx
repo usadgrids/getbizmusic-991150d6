@@ -20,6 +20,8 @@ type Audit = {
   subscores: Array<{ label: string; score: number; note: string }>;
   strengths: string[];
   recommendations: string[];
+  gbmStandalone?: string[];
+  gbmKnowledgeGraph?: string[];
   summary: string;
   sources: string[];
 };
@@ -292,6 +294,38 @@ export function VisibilityAuditSection() {
                 </h4>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {audit.recommendations.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(audit.gbmStandalone?.length ?? 0) > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  What GetBizMusic.com can do for you — no website access needed
+                </h4>
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  Delivered entirely on GetBizMusic.com; no login or changes to your own website or profiles.
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                  {audit.gbmStandalone!.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(audit.gbmKnowledgeGraph?.length ?? 0) > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  What GetBizMusic.com can integrate in your Knowledge Graph page
+                </h4>
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  Implemented inside your unique GetBizMusic Knowledge Graph URL so AI answer engines find, trust, and cite you.
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                  {audit.gbmKnowledgeGraph!.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
                 </ul>
