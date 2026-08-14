@@ -140,6 +140,8 @@ export function DirectoryPlaceView({
   );
 
   const base = label.basePath;
+  // Social sharing link = the advertiser's public ad page, not the KG URL.
+  const shareUrl = adNumber ? `${SITE}/ad/${adNumber}` : null;
 
   return (
     <div className="min-h-screen bg-background">
