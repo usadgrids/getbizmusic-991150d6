@@ -61,6 +61,19 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
       .maybeSingle();
     if (!row) return { place: null, faqs: [] as DirectoryFaq[] };
     const place = toPlace(row as Record<string, unknown>);
+
+    // Resolve the ad image (stored as a raw storage path) to a real URL so the
+    // ad image renders on the knowledge-graph listing page. Matches the pattern
+    // used by ads.functions attachUrls. Already-URL paths pass through unchanged.
+    const img = place.image_url?.trim();
+    if (img && !/^(https?:)?\//i.test(img)) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data } = await supabaseAdmin.storage
+        .from("ad-uploads")
+        .createSignedUrl(img, 60 * 60 * 24 * 7);
+      if (data?.signedUrl) place.image_url = data.signedUrl;
+    }
+
     const { data: faqs } = await supabase
       .from("food_place_faqs")
       .select("question, answer")
