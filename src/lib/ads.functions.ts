@@ -605,10 +605,10 @@ export const approveSubmission = createServerFn({ method: "POST" })
 
     // AEO/GEO knowledge base: research this business in the background when its
     // category has a public directory (/food, /beauty).
+    const { categoryForIndustry } = await import("@/lib/directory-categories");
+    const directoryCategory = categoryForIndustry(sub.industry as string);
     if (liveAdId) {
       try {
-        const { categoryForIndustry } = await import("@/lib/directory-categories");
-        const directoryCategory = categoryForIndustry(sub.industry as string);
         if (directoryCategory) {
           const { researchAd } = await import("@/lib/directory.server");
           void researchAd({
@@ -634,7 +634,10 @@ export const approveSubmission = createServerFn({ method: "POST" })
             contactName: sub.contact_name,
             businessName: sub.business_name,
             adNumber,
-            shareUrl: `https://www.getbizmusic.com/ad/${adNumber}`,
+            shareUrl: directoryCategory
+              ? `https://www.getbizmusic.com/${directoryCategory}/ad/${adNumber}`
+              : `https://www.getbizmusic.com/ad/${adNumber}`,
+
             editUrl: editToken ? `https://www.getbizmusic.com/edit-ad?token=${editToken}` : undefined,
             isEdit,
           },
