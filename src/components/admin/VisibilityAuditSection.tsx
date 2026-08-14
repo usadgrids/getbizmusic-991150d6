@@ -232,6 +232,20 @@ export function VisibilityAuditSection() {
             >
               <Download className="h-4 w-4" aria-hidden /> Download badge PNG
             </button>
+            <button
+              type="button"
+              onClick={downloadReport}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              <FileText className="h-4 w-4" aria-hidden /> Download full report
+            </button>
+            <button
+              type="button"
+              onClick={printReport}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              <Printer className="h-4 w-4" aria-hidden /> Print / Save as PDF
+            </button>
           </div>
 
           <div className="space-y-5">
