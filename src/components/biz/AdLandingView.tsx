@@ -46,8 +46,15 @@ export function AdLandingView({
 
   const industry =
     INDUSTRIES.find((i) => i.value === ad.industry)?.label ?? ad.industry;
-  const relatedAds = ads.filter((a) => a.industry === ad.industry && a.id !== ad.id);
-  const sliderAds = relatedAds.length > 0 ? relatedAds : ads.filter((a) => a.id !== ad.id);
+  // On category-scoped pages (/beauty/ad/123) only ever show ads that belong
+  // to that category; elsewhere fall back to all ads in the city.
+  const categoryIndustries = category ? DIRECTORY_CATEGORIES[category].industries : null;
+  const scopedAds = categoryIndustries
+    ? ads.filter((a) => categoryIndustries.includes((a.industry ?? "").toLowerCase()))
+    : ads;
+  const otherAds = scopedAds.filter((a) => a.id !== ad.id);
+  const relatedAds = otherAds.filter((a) => a.industry === ad.industry);
+  const sliderAds = relatedAds.length > 0 ? relatedAds : otherAds;
 
   const Img = (
     <img
