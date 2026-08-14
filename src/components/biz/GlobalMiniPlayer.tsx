@@ -25,6 +25,7 @@ function isKnowledgeGraphPage(pathname: string): boolean {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length < 2) return false;
   if (segments[1] === "activate") return false; // /<category>/activate is the activation flow
+  if (segments[1] === "ad") return false; // /<category>/ad/<number> is a public ad page
   return isDirectoryCategory(segments[0]);
 }
 

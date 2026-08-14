@@ -41,6 +41,13 @@ export function AdLandingView({
     queryFn: () =>
       citySlug ? fetchAds({ data: { city_slug: citySlug } }) : fetchAds(),
   });
+  // On category pages, also pull the nationwide pool so the slider still has
+  // other ads to rotate through when the city has only one.
+  const { data: allAds = [] } = useSuspenseQuery({
+    queryKey: ["active-ads", "__all__"],
+    queryFn: () => fetchAds(),
+    enabled: !!category,
+  });
 
   if (!ad) return <AdLandingNotFound />;
 
