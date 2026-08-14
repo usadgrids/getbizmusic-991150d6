@@ -63,6 +63,12 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
   .sub p { margin:0; font-size:12px; color:#555; line-height:1.5; }
   ul { padding-left:20px; } li { font-size:14px; line-height:1.6; margin-bottom:6px; }
   .sources li { font-size:12px; word-break:break-all; }
+  .contact-card { margin-top:40px; border:2px solid var(--navy); border-radius:12px; padding:24px; background:#f8fafd; text-align:center; }
+  .contact-card h2 { margin:0 0 8px; border:none; }
+  .contact-name { font-size:20px; font-weight:bold; color:var(--navy); margin:0; }
+  .contact-role { font-size:14px; color:#444; margin:4px 0 0; }
+  .contact-links { font-size:15px; margin:12px 0 0; }
+  .contact-links a { color:var(--navy); font-weight:bold; text-decoration:none; }
   footer { margin-top:40px; border-top:1px solid #e3e5ea; padding-top:14px; font-size:12px; color:#666; }
   @media print { body { background:#fff; } .page { padding:24px; max-width:none; } }
 </style></head>
