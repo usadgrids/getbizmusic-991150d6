@@ -162,7 +162,8 @@ export async function runVisibilityAudit(opts: {
   const system = [
     opts.prompt?.trim() || DEFAULT_AUDIT_PROMPT,
     "You are auditing for AEO/GEO (AI answer engine optimization).",
-    "Never invent facts. If evidence for a dimension is missing from the sources, that itself lowers the score — say so in the note.",
+    "Never invent facts. If evidence for a dimension is limited, note it as a growth opportunity rather than a failure, and keep the score proportional.",
+    "Frame every note constructively — acknowledge what the business is doing well first, then describe what could help them grow.",
     "Respond with JSON only, no markdown fences.",
   ].join(" ");
 
