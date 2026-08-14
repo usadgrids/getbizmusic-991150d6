@@ -172,11 +172,13 @@ export function AdLandingView({
             <div className="h-px flex-1 bg-gray-300" />
           </div>
           <AdSlider
-            ads={sliderAds.length > 0 ? sliderAds : ads}
+            ads={sliderAds.length > 0 ? sliderAds : [ad]}
             title={
               relatedAds.length > 0
                 ? `More ${industry} in ${ad.city_name ?? "your area"}`
-                : `More ${ad.city_name ?? "Local"} Businesses`
+                : category
+                  ? `More ${DIRECTORY_CATEGORIES[category].title} Businesses`
+                  : `More ${ad.city_name ?? "Local"} Businesses`
             }
           />
           <div className="mt-6">
