@@ -605,10 +605,10 @@ export const approveSubmission = createServerFn({ method: "POST" })
 
     // AEO/GEO knowledge base: research this business in the background when its
     // category has a public directory (/food, /beauty).
+    const { categoryForIndustry } = await import("@/lib/directory-categories");
+    const directoryCategory = categoryForIndustry(sub.industry as string);
     if (liveAdId) {
       try {
-        const { categoryForIndustry } = await import("@/lib/directory-categories");
-        const directoryCategory = categoryForIndustry(sub.industry as string);
         if (directoryCategory) {
           const { researchAd } = await import("@/lib/directory.server");
           void researchAd({
@@ -634,7 +634,10 @@ export const approveSubmission = createServerFn({ method: "POST" })
             contactName: sub.contact_name,
             businessName: sub.business_name,
             adNumber,
-            shareUrl: `https://www.getbizmusic.com/ad/${adNumber}`,
+            shareUrl: directoryCategory
+              ? `https://www.getbizmusic.com/${directoryCategory}/ad/${adNumber}`
+              : `https://www.getbizmusic.com/ad/${adNumber}`,
+
             editUrl: editToken ? `https://www.getbizmusic.com/edit-ad?token=${editToken}` : undefined,
             isEdit,
           },
@@ -871,9 +874,28 @@ export const createManualSubmission = createServerFn({ method: "POST" })
           expires_at: expires.toISOString(),
           status: "active",
           city_id,
-        }).select("ad_number").maybeSingle();
+        }).select("id, ad_number").maybeSingle();
         if (adErr) throw new Error(adErr.message);
         void warmSocialPreview(adRow?.ad_number ?? null);
+
+        // AEO/GEO: build the Knowledge Graph page + category ad page (/food, /beauty).
+        if (adRow?.id) {
+          try {
+            const { categoryForIndustry } = await import("@/lib/directory-categories");
+            const directoryCategory = categoryForIndustry(data.industry);
+            if (directoryCategory) {
+              const { researchAd } = await import("@/lib/directory.server");
+              void researchAd({
+                adId: adRow.id as string,
+                category: directoryCategory,
+                triggeredBy: "admin-manual",
+              }).catch((err) => console.error("[directory] manual research failed", err));
+            }
+          } catch (err) {
+            console.error("[directory] manual research trigger failed", err);
+          }
+        }
+
 
         // Auto-post manual admin ads to WINWINCAST — ONE link per business,
         // even when the same ad is published to several cities.
