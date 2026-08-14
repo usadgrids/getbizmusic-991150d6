@@ -20,6 +20,8 @@ export type VisibilityAudit = {
   subscores: AuditSubscore[];
   strengths: string[];
   recommendations: string[];
+  gbmStandalone: string[];
+  gbmKnowledgeGraph: string[];
   summary: string;
   sources: string[];
 };
@@ -121,7 +123,7 @@ export async function runVisibilityAudit(opts: {
     "Respond with JSON only, no markdown fences.",
   ].join(" ");
 
-  const shape = `{"overall":number,"summary":string,"subscores":[{"label":"Web Presence","score":number,"note":string},{"label":"Reviews & Reputation","score":number,"note":string},{"label":"Structured Data / Schema","score":number,"note":string},{"label":"Content & Q&A Answerability","score":number,"note":string},{"label":"Local Consistency (NAP)","score":number,"note":string},{"label":"AI Citability","score":number,"note":string}],"strengths":string[],"recommendations":string[]}`;
+  const shape = `{"overall":number,"summary":string,"subscores":[{"label":"Web Presence","score":number,"note":string},{"label":"Reviews & Reputation","score":number,"note":string},{"label":"Structured Data / Schema","score":number,"note":string},{"label":"Content & Q&A Answerability","score":number,"note":string},{"label":"Local Consistency (NAP)","score":number,"note":string},{"label":"AI Citability","score":number,"note":string}],"strengths":string[],"recommendations":string[],"gbm_standalone":string[],"gbm_knowledge_graph":string[]}`;
 
   const res = await fetch(AI_GATEWAY, {
     method: "POST",
