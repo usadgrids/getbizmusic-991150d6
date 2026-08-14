@@ -140,8 +140,10 @@ export function DirectoryPlaceView({
   );
 
   const base = label.basePath;
-  // Social sharing link = the advertiser's public ad page, not the KG URL.
-  const shareUrl = adNumber ? `${SITE}/ad/${adNumber}` : null;
+  // Social sharing link = the category-specific Knowledge Graph page for this
+  // business (e.g. /beauty/cut-and-dye-salon), which is the shareable public
+  // URL visitors and owners promote on social media.
+  const shareUrl = `${SITE}${base}/${place.slug}`;
 
   return (
     <div className="min-h-screen bg-background">
