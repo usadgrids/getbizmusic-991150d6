@@ -86,7 +86,7 @@ function resolveDuration(ad: PublicAd | undefined): number {
   return AD_PLANS[ad.ad_type as AdPlan]?.seconds ?? 0;
 }
 
-export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar, hideAdShareBar = false }: Props) {
+export function AdSlider({ ads, title, featured = false, focusAdId = null, focusNonce = 0, belowShareBar, hideAdShareBar = false, compact = false }: Props) {
   const [idx, setIdx] = useState(0);
 
   const [paused, setPaused] = useState(false);
