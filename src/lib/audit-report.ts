@@ -87,9 +87,9 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
 
   ${audit.summary ? `<h2>Summary</h2><p>${esc(audit.summary)}</p>` : ""}
 
-  ${audit.subscores.length ? `<h2>Score breakdown</h2><div class="subs">${subs}</div>` : ""}
+  ${audit.subscores.length ? `<h2>How you&rsquo;re doing today</h2><div class="subs">${subs}</div>` : ""}
 
-  ${audit.strengths.length ? `<h2>Strengths</h2><ul>${list(audit.strengths)}</ul>` : ""}
+  ${audit.strengths.length ? `<h2>What&rsquo;s already working</h2><ul>${list(audit.strengths)}</ul>` : ""}
 
   ${
     audit.recommendations.length
