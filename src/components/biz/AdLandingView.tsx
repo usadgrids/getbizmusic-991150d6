@@ -61,9 +61,10 @@ export function AdLandingView({
   const scopedAds = categoryIndustries
     ? pool.filter((a) => categoryIndustries.includes((a.industry ?? "").toLowerCase()))
     : pool;
-  const otherAds = scopedAds.filter((a) => a.id !== ad.id);
+  const showcaseAds = category ? DIRECTORY_CATEGORY_UI[category].showcaseAds : [];
+  const otherAds = [...scopedAds.filter((a) => a.id !== ad.id), ...showcaseAds];
   const relatedAds = otherAds.filter((a) => a.industry === ad.industry);
-  const sliderAds = relatedAds.length > 0 ? relatedAds : otherAds;
+  const sliderAds = otherAds.length > 0 ? otherAds : relatedAds;
 
   const Img = (
     <img
