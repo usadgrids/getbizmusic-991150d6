@@ -17,7 +17,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const [{ data: places }, { data: cities }] = await Promise.all([
           supabase
             .from("food_places")
-            .select("slug, category, updated_at")
+            .select("slug, category, updated_at, ad_id")
             .eq("status", "published"),
           supabase.from("cities").select("slug, updated_at").eq("is_active", true),
         ]);
@@ -35,12 +35,32 @@ export const Route = createFileRoute("/sitemap.xml")({
         for (const c of cities ?? []) {
           urls.push({ loc: `${SITE}/${c.slug}`, lastmod: c.updated_at ?? undefined, priority: "0.7" });
         }
+        const adIds = (places ?? []).map((p) => p.ad_id).filter(Boolean) as string[];
+        const adNumberById = new Map<string, number>();
+        if (adIds.length) {
+          const { data: ads } = await supabase
+            .from("ads")
+            .select("id, ad_number")
+            .in("id", adIds)
+            .eq("status", "active");
+          for (const a of ads ?? []) {
+            if (a.ad_number != null) adNumberById.set(a.id as string, a.ad_number as number);
+          }
+        }
         for (const p of places ?? []) {
           urls.push({
             loc: `${SITE}/${p.category}/${p.slug}`,
             lastmod: p.updated_at ?? undefined,
             priority: "0.8",
           });
+          const adNumber = p.ad_id ? adNumberById.get(p.ad_id as string) : undefined;
+          if (adNumber != null) {
+            urls.push({
+              loc: `${SITE}/${p.category}/ad/${adNumber}`,
+              lastmod: p.updated_at ?? undefined,
+              priority: "0.7",
+            });
+          }
         }
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
