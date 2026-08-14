@@ -177,6 +177,12 @@ export async function runVisibilityAudit(opts: {
     recommendations: Array.isArray(out.recommendations)
       ? out.recommendations.slice(0, 8).map(String)
       : [],
+    gbmStandalone: Array.isArray((out as Record<string, unknown>).gbm_standalone)
+      ? ((out as Record<string, unknown>).gbm_standalone as unknown[]).slice(0, 8).map(String)
+      : [],
+    gbmKnowledgeGraph: Array.isArray((out as Record<string, unknown>).gbm_knowledge_graph)
+      ? ((out as Record<string, unknown>).gbm_knowledge_graph as unknown[]).slice(0, 8).map(String)
+      : [],
     summary: typeof out.summary === "string" ? out.summary : "",
     sources: [...new Set(sources.map((s) => s.url))].slice(0, 12),
   };
