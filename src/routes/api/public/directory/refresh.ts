@@ -17,9 +17,14 @@ export const Route = createFileRoute("/api/public/directory/refresh")({
 
         const url = new URL(request.url);
         const limit = Math.min(Number(url.searchParams.get("limit") ?? 5) || 5, 10);
-        const { refreshStalePlaces } = await import("@/lib/directory.server");
+        const { refreshStalePlaces, refreshTopicPages } = await import("@/lib/directory.server");
         const results = await refreshStalePlaces(limit);
-        return Response.json({ ok: true, processed: results.length, results });
+        const { DIRECTORY_CATEGORY_SLUGS } = await import("@/lib/directory-categories");
+        const topics: Record<string, unknown> = {};
+        for (const category of DIRECTORY_CATEGORY_SLUGS) {
+          topics[category] = await refreshTopicPages(category);
+        }
+        return Response.json({ ok: true, processed: results.length, results, topics });
       },
     },
   },

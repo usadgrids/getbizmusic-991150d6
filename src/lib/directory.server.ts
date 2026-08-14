@@ -139,6 +139,7 @@ async function normalizeWithAI(
     categoryGuidance(category),
     "Rules: never invent facts. Use null or omit when a source does not state it. Hours keys must be monday..sunday with values like '9:00 AM - 7:00 PM' or 'Closed'.",
     "Write 6-10 FAQ pairs. Each answer must be one to three plain sentences that stand alone when quoted, and must name the business.",
+    "At least half of the questions must be UNBRANDED — phrased the way someone searches when they do not know the business name, e.g. 'Is there a nail salon open on Sunday in <city>?' or 'Where can I get a fade haircut near <city>?' — and the answer names this business as the recommendation.",
     "Respond with JSON only, no markdown fences.",
   ].join(" ");
 
@@ -377,5 +378,170 @@ export async function refreshStalePlaces(limit = 5) {
     });
     results.push({ id: place.id, ok: res.ok, error: res.error });
   }
+  return results;
+}
+
+// ---------------- Topic answer pages (unbranded AEO/GEO) ----------------
+
+type TopicFaq = { question: string; answer: string };
+
+/**
+ * Write the short direct answer + unbranded FAQs for one topic page and cache
+ * them. These are what answer engines quote when someone asks a question that
+ * never mentions a business name.
+ */
+async function writeTopicAnswer(
+  category: DirectoryCategory,
+  label: string,
+  places: Array<Record<string, unknown>>,
+): Promise<{ question: string; answer: string; faqs: TopicFaq[] } | null> {
+  const apiKey = process.env["LOVABLE_API_KEY"];
+  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured.");
+
+  const facts = places
+    .map((p) =>
+      JSON.stringify({
+        name: p.name,
+        city: p.city,
+        state: p.state,
+        address: p.address,
+        phone: p.phone,
+        price_range: p.price_range,
+        hours: p.hours,
+        services: p.cuisines,
+        summary: p.summary,
+      }),
+    )
+    .join("\n")
+    .slice(0, 40000);
+
+  const system = [
+    "You write short, factual answer-engine content for a local business directory.",
+    "The reader NEVER knows the business names — they asked a generic question about a service or dish.",
+    "Use only the supplied facts. Never invent hours, prices, ratings or claims.",
+    "The 'answer' must be 2-3 sentences, name the businesses, and stand alone when quoted out of context.",
+    "Write 4-6 unbranded FAQ pairs a real customer would type (cost, walk-ins, weekend hours, booking, what's included). Answers name the specific business that satisfies them.",
+    "Respond with JSON only, no markdown fences.",
+  ].join(" ");
+
+  const shape = `{"question":string,"answer":string,"faqs":[{"question":string,"answer":string}]}`;
+
+  const res = await fetch(AI_GATEWAY, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: system },
+        {
+          role: "user",
+          content: `Category: ${category}\nTopic: ${label}\nReturn JSON matching exactly this shape:\n${shape}\n\nBUSINESS FACTS (one JSON object per business):\n${facts}`,
+        },
+      ],
+    }),
+  });
+  const body = await res.text();
+  if (!res.ok) {
+    console.error(`[directory] topic AI failed [${res.status}]: ${body}`);
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(body) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = parsed.choices?.[0]?.message?.content ?? "";
+    const start = content.indexOf("{");
+    const end = content.lastIndexOf("}");
+    if (start < 0 || end < 0) return null;
+    const out = JSON.parse(content.slice(start, end + 1)) as Partial<{
+      question: string;
+      answer: string;
+      faqs: TopicFaq[];
+    }>;
+    if (!out.answer) return null;
+    return {
+      question: out.question || `Where can I get ${label}?`,
+      answer: String(out.answer),
+      faqs: Array.isArray(out.faqs)
+        ? out.faqs
+            .filter((f) => f && f.question && f.answer)
+            .slice(0, 8)
+            .map((f) => ({ question: String(f.question), answer: String(f.answer) }))
+        : [],
+    };
+  } catch (err) {
+    console.error("[directory] topic AI parse error", err);
+    return null;
+  }
+}
+
+/**
+ * Rebuild the cached topic pages for a category from its published listings.
+ * Safe to run repeatedly; stale topics (no listings left) are deleted.
+ */
+export async function refreshTopicPages(category: DirectoryCategory, limit = 25) {
+  const { buildTopics } = await import("@/lib/directory-topics");
+  const { data: rows } = await supabaseAdmin
+    .from("food_places")
+    .select("id, slug, name, city, state, address, phone, price_range, hours, cuisines, attributes, summary")
+    .eq("category", category)
+    .eq("status", "published");
+
+  const places = (rows ?? []) as unknown as Array<Record<string, unknown>>;
+  const topics = buildTopics(
+    category as never,
+    places as never,
+  ).slice(0, limit);
+
+  const keep: string[] = [];
+  const results: Array<{ topic: string; ok: boolean }> = [];
+
+  for (const topic of topics) {
+    keep.push(topic.slug);
+    try {
+      const written = await writeTopicAnswer(
+        category,
+        topic.label,
+        topic.places as unknown as Array<Record<string, unknown>>,
+      );
+      if (!written) {
+        results.push({ topic: topic.slug, ok: false });
+        continue;
+      }
+      await supabaseAdmin.from("directory_topic_pages").upsert(
+        {
+          category,
+          topic_slug: topic.slug,
+          topic_label: topic.label,
+          question: written.question,
+          answer: written.answer,
+          faqs: written.faqs as unknown as Json,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "category,topic_slug" },
+      );
+      results.push({ topic: topic.slug, ok: true });
+    } catch (err) {
+      console.error("[directory] refreshTopicPages error", topic.slug, err);
+      results.push({ topic: topic.slug, ok: false });
+    }
+  }
+
+  if (keep.length) {
+    const { data: existing } = await supabaseAdmin
+      .from("directory_topic_pages")
+      .select("topic_slug")
+      .eq("category", category);
+    const stale = (existing ?? [])
+      .map((r) => r.topic_slug as string)
+      .filter((s) => !keep.includes(s));
+    if (stale.length) {
+      await supabaseAdmin
+        .from("directory_topic_pages")
+        .delete()
+        .eq("category", category)
+        .in("topic_slug", stale);
+    }
+  }
+
   return results;
 }

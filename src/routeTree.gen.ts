@@ -15,6 +15,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -46,6 +47,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicDirectoryRefreshRouteImport } from './routes/api/public/directory/refresh'
+import { Route as ApiPublicDirectoryAnswersDotjsonRouteImport } from './routes/api/public/directory/answers[.]json'
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
 import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
@@ -79,6 +81,11 @@ const PricingRoute = PricingRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditAdRoute = EditAdRouteImport.update({
@@ -244,6 +251,12 @@ const ApiPublicDirectoryRefreshRoute =
     path: '/api/public/directory/refresh',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDirectoryAnswersDotjsonRoute =
+  ApiPublicDirectoryAnswersDotjsonRouteImport.update({
+    id: '/api/public/directory/answers.json',
+    path: '/api/public/directory/answers.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDirectoryCategoryRoute =
   ApiPublicDirectoryCategoryRouteImport.update({
     id: '/api/public/directory/$category',
@@ -277,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -303,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -318,6 +333,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -344,6 +360,7 @@ export interface FileRoutesByTo {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -362,6 +379,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -388,6 +406,7 @@ export interface FileRoutesById {
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
   '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
+  '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -407,6 +426,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design'
     | '/edit-ad'
+    | '/llms.txt'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
@@ -433,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -448,6 +469,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design'
     | '/edit-ad'
+    | '/llms.txt'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
@@ -474,6 +496,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -491,6 +514,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design'
     | '/edit-ad'
+    | '/llms.txt'
     | '/mcp'
     | '/pricing'
     | '/reset-password'
@@ -517,6 +541,7 @@ export interface FileRouteTypes {
     | '/api/public/ad-image/$adNumber'
     | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
+    | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -535,6 +560,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -553,6 +579,7 @@ export interface RootRouteChildren {
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
   ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
   ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
+  ApiPublicDirectoryAnswersDotjsonRoute: typeof ApiPublicDirectoryAnswersDotjsonRoute
   ApiPublicDirectoryRefreshRoute: typeof ApiPublicDirectoryRefreshRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -604,6 +631,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/edit-ad': {
@@ -823,6 +857,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDirectoryRefreshRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/directory/answers.json': {
+      id: '/api/public/directory/answers.json'
+      path: '/api/public/directory/answers.json'
+      fullPath: '/api/public/directory/answers.json'
+      preLoaderRoute: typeof ApiPublicDirectoryAnswersDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/directory/$category': {
       id: '/api/public/directory/$category'
       path: '/api/public/directory/$category'
@@ -917,6 +958,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -936,6 +978,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
   ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
   ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
+  ApiPublicDirectoryAnswersDotjsonRoute: ApiPublicDirectoryAnswersDotjsonRoute,
   ApiPublicDirectoryRefreshRoute: ApiPublicDirectoryRefreshRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

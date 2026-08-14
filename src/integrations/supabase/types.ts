@@ -644,6 +644,42 @@ export type Database = {
           },
         ]
       }
+      directory_topic_pages: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          faqs: Json
+          id: string
+          question: string
+          topic_label: string
+          topic_slug: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string
+          faqs?: Json
+          id?: string
+          question: string
+          topic_label: string
+          topic_slug: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          faqs?: Json
+          id?: string
+          question?: string
+          topic_label?: string
+          topic_slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dispute_evidence_log: {
         Row: {
           ad_payment_id: string | null

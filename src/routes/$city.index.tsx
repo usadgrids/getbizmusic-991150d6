@@ -10,7 +10,7 @@ import { AdSlider } from "@/components/biz/AdSlider";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import { z } from "zod";
 import { CategoryHubPage } from "@/components/biz/CategoryHubPage";
-import { listDirectoryPlaces } from "@/lib/directory.functions";
+import { listDirectoryPlaces, listDirectoryTopics } from "@/lib/directory.functions";
 import { getAdsByCategory } from "@/lib/ads.functions";
 import {
   DIRECTORY_CATEGORIES,
@@ -29,6 +29,10 @@ export const Route = createFileRoute("/$city/")({
       await context.queryClient.ensureQueryData({
         queryKey: ["directory-places", category],
         queryFn: () => listDirectoryPlaces({ data: { category } }),
+      });
+      await context.queryClient.ensureQueryData({
+        queryKey: ["directory-topics", category],
+        queryFn: () => listDirectoryTopics({ data: { category } }),
       });
       await context.queryClient.ensureQueryData({
         queryKey: ["category-ads", category],

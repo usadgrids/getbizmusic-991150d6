@@ -7,6 +7,7 @@ import {
   adminListDirectory,
   adminListResearchableAds,
   adminResearchAd,
+  adminRefreshTopicPages,
   adminUpdatePlace,
   adminDeletePlace,
 } from "@/lib/directory.functions";
@@ -16,6 +17,7 @@ export function DirectorySection() {
   const listFn = useServerFn(adminListDirectory);
   const pendingFn = useServerFn(adminListResearchableAds);
   const researchFn = useServerFn(adminResearchAd);
+  const topicsFn = useServerFn(adminRefreshTopicPages);
   const updateFn = useServerFn(adminUpdatePlace);
   const deleteFn = useServerFn(adminDeletePlace);
 
@@ -39,6 +41,21 @@ export function DirectorySection() {
       refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Research failed.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const rebuildTopics = async () => {
+    setBusy("topics");
+    try {
+      const [food, beauty] = await Promise.all([
+        topicsFn({ data: { category: "food" } }),
+        topicsFn({ data: { category: "beauty" } }),
+      ]);
+      toast.success(`Answer pages rebuilt: ${food.written + beauty.written} topics.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Topic rebuild failed.");
     } finally {
       setBusy(null);
     }
@@ -91,6 +108,15 @@ export function DirectorySection() {
           className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
         >
           <RefreshCw className="h-4 w-4" aria-hidden /> Reload
+        </button>
+        <button
+          type="button"
+          onClick={rebuildTopics}
+          disabled={busy === "topics"}
+          className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+        >
+          <BookOpen className="h-4 w-4" aria-hidden />
+          {busy === "topics" ? "Rebuilding…" : "Rebuild answer pages"}
         </button>
       </header>
       <p className="mt-1 text-sm text-muted-foreground">
