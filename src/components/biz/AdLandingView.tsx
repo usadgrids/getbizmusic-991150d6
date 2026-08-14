@@ -183,6 +183,7 @@ export function AdLandingView({
           </div>
           <AdSlider
             featured
+            compact
             ads={sliderAds.length > 0 ? sliderAds : [ad]}
             title={
               relatedAds.length > 0
