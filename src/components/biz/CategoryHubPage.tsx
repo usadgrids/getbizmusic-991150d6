@@ -11,6 +11,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { DirectoryList } from "@/components/biz/DirectoryList";
+import { PageShareBar } from "@/components/biz/PageShareBar";
 import { DIRECTORY_CATEGORIES, type DirectoryCategory } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 
@@ -143,7 +144,8 @@ export function CategoryHubPage({
                     </>
                   )}
                 </div>
-              ) : null
+                ) : null}
+              </>
             }
           />
         ) : (
