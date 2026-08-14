@@ -87,6 +87,49 @@ function clamp(n: unknown, fallback = 0): number {
   return Math.max(0, Math.min(100, v));
 }
 
+// Safety net: drop any GetBizMusic action item that promises something we cannot deliver.
+const FORBIDDEN_CLAIMS = [
+  "syndicat",
+  "google business",
+  "google my business",
+  "yelp",
+  "apple maps",
+  "bing places",
+  "third-party director",
+  "third party director",
+  "citation network",
+  "backlink",
+  "link building",
+  "link-building",
+  "domain authority",
+  "their website",
+  "your website",
+  "own website",
+  "main site",
+  "main website",
+  "review response",
+  "respond to review",
+  "manage review",
+  "sentiment monitor",
+  "monitor and aggregate",
+  "menu schema",
+  "ingredient",
+  "ad spend",
+  "paid placement",
+];
+
+function filterGbmItems(items: unknown): string[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map(String)
+    .filter((s) => {
+      const low = s.toLowerCase();
+      return !FORBIDDEN_CLAIMS.some((bad) => low.includes(bad));
+    })
+    .slice(0, 8);
+}
+
+
 export async function runVisibilityAudit(opts: {
   businessName: string;
   city?: string | null;
