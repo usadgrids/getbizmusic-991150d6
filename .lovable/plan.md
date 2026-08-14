@@ -2,50 +2,51 @@
 
 ## The gap
 
-Right now every Knowledge Graph page is branded: `/beauty/cut-and-dye-salon` answers "tell me about Cut and Dye Salon." But real users ask AI things like *"where can I get a gel manicure in National City on a Sunday?"* or *"best barbershop near Chula Vista for kids' cuts."* No page on the site is built to answer that shape of question, so nothing gets pulled into the answer.
+Right now every Knowledge Graph page is branded: `/beauty/cut-and-dye-salon` answers "tell me about Cut and Dye Salon." But real users ask AI things like *"where can I get a gel manicure?"* or *"best barbershop for kids' cuts."* No page on the site is built to answer that shape of question, so nothing gets pulled into the answer.
 
-Answer engines pick pages that (a) match the unbranded intent phrase, (b) contain a short direct answer near the top, and (c) contain a comparable list of named options with facts (hours, price, phone, address). We have the per-business data already — what's missing is the *question-shaped* pages that aggregate it.
+Answer engines pick pages that (a) match the unbranded intent phrase, (b) contain a short direct answer near the top, and (c) contain a comparable list of named options with facts. We have the per-business data already — what's missing is the *question-shaped* pages that aggregate it.
+
+## Scope
+
+Optimization stays at the category level (`/food`, `/beauty`) and the service/topic level under them. No city or ZIP URLs are created — location stays where it already lives, on each business's own Knowledge Graph page (address, city, state, ZIP, geo coordinates in JSON-LD). Intent pages still *show* each business's city in their comparison tables, so a location-flavored question can still land on the right business, but the URL structure never branches by city.
 
 ## What gets built
 
-**1. Intent pages — service + city ("answer pages")**
+**1. Topic answer pages under each category**
 New URLs generated automatically from existing data, no page files per topic:
-`/beauty/gel-manicure/national-city`, `/food/tacos/chula-vista`, etc.
+`/beauty/gel-manicure`, `/beauty/balayage`, `/food/tacos`, `/food/catering`.
 
 Each page contains, in this order:
-- An H1 written as the question ("Where to get a gel manicure in National City")
-- A 2-3 sentence direct answer paragraph naming the top listed businesses — this is the block AI quotes
-- A comparison table of every matching listed business: name, hours today, price range, phone, booking link, standout detail
-- An FAQ block of unbranded questions ("How much does a gel manicure cost in National City?", "Which salons take walk-ins on Sunday?"), answered from real listing data
+- An H1 written as the question ("Where to get a gel manicure")
+- A 2-3 sentence direct answer paragraph naming the listed businesses — this is the block AI quotes
+- A comparison table of every matching listed business: name, city, hours, price range, phone, booking link, standout detail
+- An FAQ block of unbranded questions ("How much does a gel manicure cost?", "Which salons take walk-ins on Sunday?"), answered from real listing data
 - Links to each business's Knowledge Graph page
 
 Schema per page: `FAQPage` + `ItemList` of `LocalBusiness` entries + `BreadcrumbList`.
 
-**2. Service/topic extraction**
-The research pass already produces a services/cuisines list per business. A topic registry derives the intent slugs from those values (normalized: "gel manicure", "balayage", "fade haircut", "birria tacos"), keeping only topics with at least one published listing in that city, so no empty pages ever exist.
+**2. Topic extraction**
+The research pass already produces a services/cuisines list per business. A topic registry derives the topic slugs from those values (normalized: "gel manicure", "balayage", "fade haircut", "birria tacos"), keeping only topics with at least one published listing, so no empty pages ever exist.
 
-**3. City hubs per category**
-`/beauty/national-city` style hub listing every published business in that city with the same answer-first structure, so broader questions ("nail salons in National City") also have a target.
+**3. Category hubs become answer hubs**
+`/food` and `/beauty` gain an answer-first intro block and a "Popular questions" section linking to every topic page, so broader questions ("nail salons that do dip powder") have a target and the new URLs are crawlable.
 
 **4. Unbranded FAQs on business pages**
-The research prompt gains a second FAQ set phrased without the business name ("Is there a nail salon in National City open Sunday?" answered "Yes — Cut and Dye Salon on ..."). These sit in the existing FAQ block and JSON-LD, giving even branded pages an unbranded hook.
+The research prompt gains a second FAQ set phrased without the business name ("Is there a nail salon open Sunday in National City?" answered "Yes — Cut and Dye Salon on ..."). These sit in the existing FAQ block and JSON-LD, giving even branded pages an unbranded hook — and this is where city/ZIP specificity keeps working.
 
 **5. Machine-readable surfaces**
-- `/llms.txt` — plain-text index of categories, cities, topics and their URLs, the format answer engines increasingly fetch
-- `/api/public/directory/answers.json` — every intent page's question, short answer and business list
-- Sitemap extended with all generated intent and city-hub URLs; existing robots.txt AI-bot allowances already cover them
-
-**6. Internal linking**
-Category hubs (`/food`, `/beauty`) get a "Popular questions" section linking to intent pages; each business page links back to the intent pages it appears in. This is what makes the new URLs discoverable and crawlable.
+- `/llms.txt` — plain-text index of categories, topics and their URLs, the format answer engines increasingly fetch
+- `/api/public/directory/answers.json` — every topic page's question, short answer and business list
+- Sitemap extended with all generated topic URLs; existing robots.txt AI-bot allowances already cover them
 
 ## Honest expectations
 
-Aggregation pages compete with Yelp and Google. What makes ours citable is freshness (last-verified date), specificity (real hours and prices, not "varies"), and answer-first writing. It works best where we have 3+ listed businesses in a city; with one listing per city the pages are thin and won't win. Practically that means concentrating research on a few cities first rather than spreading thin.
+Aggregation pages compete with Yelp and Google. What makes ours citable is freshness (last-verified date), specificity (real hours and prices, not "varies"), and answer-first writing. Topic pages work best with 3+ listed businesses; with one listing per topic the page is thin, so it's better to concentrate research on the services our advertisers actually share.
 
 ## Technical notes
 
-- New master templates: `src/routes/$city.$slug.tsx` sibling routes for `/$category/$topic/$city` and `/$category/$cityslug`, guarded by registry lookups so they never shadow `/beauty/ad/...` or existing business slugs; resolution order = ad route → business slug → topic → city hub, 404 otherwise.
-- Topic registry derived at request time from `food_places.cuisines` + `attributes`, with a normalization map in `src/lib/directory-topics.ts` (client-safe) so synonyms collapse ("gel nails" → "gel manicure").
-- Answer paragraph and unbranded FAQs generated by the existing Lovable AI pass in `directory.server.ts`, cached in new columns/table rather than generated per request.
-- Migration: `directory_answer_pages` table (category, topic, city, question, answer, faqs jsonb, updated_at) with public read on published rows and the standard GRANT block; refreshed by the existing weekly `/api/public/directory/refresh` job.
+- New master template route `/$category/$topic` (a topic branch inside the existing `$city.$slug` master template), resolved in order: ad route → published business slug → topic slug → 404. No new per-topic files.
+- Topic registry derived from `food_places.cuisines` + `attributes`, with a normalization map in `src/lib/directory-topics.ts` (client-safe) so synonyms collapse ("gel nails" → "gel manicure").
+- Answer paragraph and unbranded FAQs generated by the existing Lovable AI pass in `directory.server.ts`, cached in a new table rather than generated per request.
+- Migration: `directory_topic_pages` (category, topic_slug, topic_label, question, answer, faqs jsonb, updated_at) with public read and the standard GRANT block; refreshed by the existing weekly `/api/public/directory/refresh` job.
 - Sitemap and JSON feeds extended in place; no change to existing URLs, canonicals, or the letter block on business pages.
