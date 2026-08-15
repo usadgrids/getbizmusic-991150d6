@@ -6,9 +6,10 @@ type Props = {
   state?: string;
   imageUrl?: string;
   imageAlt?: string;
+  hideImage?: boolean;
 };
 
-export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
+export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Props) {
   const label = cityName ? `${cityName}${state ? `, ${state}` : ""}` : null;
   return (
     <header className="relative bg-[#0F2A4A]">
@@ -24,6 +25,7 @@ export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
           </div>
         </div>
       )}
+      {hideImage ? null : (
       <div className="relative mx-auto w-full max-w-[1400px]">
         <Link
           to="/pricing"
@@ -42,6 +44,7 @@ export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
           />
         </Link>
       </div>
+      )}
     </header>
   );
 }

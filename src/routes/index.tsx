@@ -166,7 +166,7 @@ function Index() {
                 className="group relative block aspect-[4/5] overflow-hidden rounded-3xl border border-[#D4A24C]/20 transition-all hover:-translate-y-2 hover:border-[#F4C430]"
               >
                 <img
-                  src={ui.heroImage}
+                  src={ui.thumbnail}
                   alt={config.heroAlt}
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"

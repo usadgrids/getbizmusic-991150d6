@@ -14,7 +14,8 @@ import adMexican from "@/assets/food-ad-mexican.jpg";
 import adItalian from "@/assets/food-ad-italian.jpg";
 import adBuffet from "@/assets/food-ad-buffet.jpg";
 
-import beautyHero from "@/assets/beauty-hero.jpg";
+import thumbFood from "@/assets/category-thumb-food.jpg";
+import thumbBeauty from "@/assets/category-thumb-beauty.jpg";
 import adCutDye from "@/assets/beauty-ad-cut-dye.jpg";
 import adNails from "@/assets/beauty-ad-nails.jpg";
 import adBarber from "@/assets/beauty-ad-barber.jpg";
@@ -39,7 +40,10 @@ function toShowcaseAds(items: Showcase[]): PublicAd[] {
 }
 
 export type DirectoryCategoryUi = {
-  heroImage: string;
+  /** Full-width promo banner at the top of the hub page. null = no banner image. */
+  heroImage: string | null;
+  /** Square-ish artwork used for the category card on the home page. */
+  thumbnail: string;
   icon: LucideIcon;
   showcaseAds: PublicAd[];
 };
@@ -47,6 +51,7 @@ export type DirectoryCategoryUi = {
 export const DIRECTORY_CATEGORY_UI: Record<DirectoryCategory, DirectoryCategoryUi> = {
   food: {
     heroImage: foodHero.url,
+    thumbnail: thumbFood,
     icon: UtensilsCrossed,
     showcaseAds: toShowcaseAds([
       { id: "american", name: "Liberty Grill House", tagline: "All-American Burgers, Ribs & Shakes", industry: "restaurant", image: adAmerican },
@@ -57,7 +62,8 @@ export const DIRECTORY_CATEGORY_UI: Record<DirectoryCategory, DirectoryCategoryU
     ]),
   },
   beauty: {
-    heroImage: beautyHero,
+    heroImage: null,
+    thumbnail: thumbBeauty,
     icon: Scissors,
     showcaseAds: toShowcaseAds([
       { id: "cut-dye", name: "Lumina Salon", tagline: "Precision Cuts & Luxe Color", industry: "salon_hair", image: adCutDye },
