@@ -9,7 +9,7 @@ import { AdSlider } from "@/components/biz/AdSlider";
 import { ShareBar } from "@/components/biz/ShareBar";
 import { YoutubeHoverOverlay } from "@/components/biz/YoutubeHoverOverlay";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
-import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
+import { FloatingHomeButton, FloatingBackButton } from "@/components/biz/FloatingHomeButton";
 import {
   DIRECTORY_CATEGORIES,
   type DirectoryCategory,
