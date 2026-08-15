@@ -797,7 +797,7 @@ export function MiniPlayer() {
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
           <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
-            <span className="truncate pr-2">
+            <span className={`truncate pr-2 ${showPlayFallback && !religiousPaused ? "gbm-flash" : ""}`}>
               {religiousPaused
                 ? "⏸ Music is paused"
                 : showPlayFallback
