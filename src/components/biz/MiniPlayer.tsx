@@ -792,7 +792,7 @@ export function MiniPlayer() {
     <>
       <TapToPlayOverlay visible={showPlayFallback && !religiousPaused} onTap={handleManualPlay} />
       <div
-        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)]"
+        className={`fixed z-40 bottom-3 right-3 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)] ${showPlayFallback && !religiousPaused ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
         style={{ width: size.width }}
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
