@@ -184,12 +184,12 @@ function Index() {
             {marqueeTiles.map((tile, i) => (
               <Link
                 key={`${tile.id}-${i}`}
-                to="/$city"
-                params={{ city: tile.category }}
-                search={{ ad: tile.id }}
+                to={tile.placeholder ? "/placeholder" : "/$city"}
+                params={tile.placeholder ? undefined : { city: tile.category }}
+                search={tile.placeholder ? undefined : { ad: tile.id }}
                 aria-hidden={i >= tiles.length ? true : undefined}
                 tabIndex={i >= tiles.length ? -1 : undefined}
-                title={`View ${tile.name}`}
+                title={tile.placeholder ? "Sample ad placement" : `View ${tile.name}`}
                 className="shrink-0 rounded-xl transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#F4C430]"
               >
                 <img
