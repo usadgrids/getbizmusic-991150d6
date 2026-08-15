@@ -454,12 +454,27 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
             <div
               className="relative w-full h-full bg-gray-100"
             >
-              <img
-                src={current.image_url}
-                alt={current.business_name}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-contain"
-              />
+              {current.ad_number == null ? (
+                <Link
+                  to="/placeholder"
+                  aria-label="Sample ad placement — continue browsing ads"
+                  className="absolute inset-0 block"
+                >
+                  <img
+                    src={current.image_url}
+                    alt={current.business_name}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-contain"
+                  />
+                </Link>
+              ) : (
+                <img
+                  src={current.image_url}
+                  alt={current.business_name}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              )}
               {videoActive && currentVideoId && (
                 <div
                   key={videoNonce}
