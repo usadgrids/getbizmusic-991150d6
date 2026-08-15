@@ -207,15 +207,14 @@ function Index() {
       {/* Category card grid */}
       <main className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
-          {categories.map(({ slug, href }) => {
+          {categories.map(({ slug }) => {
             const config = DIRECTORY_CATEGORIES[slug];
             const ui = DIRECTORY_CATEGORY_UI[slug];
             return (
-              <a
+              <Link
                 key={slug}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
+                to="/$city"
+                params={{ city: slug }}
                 className="group relative block aspect-[4/5] overflow-hidden rounded-3xl border border-[#D4A24C]/20 transition-all hover:-translate-y-2 hover:border-[#F4C430]"
               >
                 <img
