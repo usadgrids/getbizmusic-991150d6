@@ -196,6 +196,7 @@ export function CategoryHubPage({
 
       <BizFooter />
       <FloatingHomeButton />
+      <FloatingBackButton />
     </div>
   );
 }

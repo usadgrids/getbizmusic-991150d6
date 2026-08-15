@@ -405,6 +405,7 @@ export function DirectoryPlaceView({
 
       <BizFooter />
       <FloatingHomeButton />
+      <FloatingBackButton />
     </div>
   );
 }

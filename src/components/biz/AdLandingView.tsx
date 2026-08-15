@@ -226,6 +226,7 @@ export function AdLandingView({
       </main>
       <BizFooter />
       <FloatingHomeButton />
+      <FloatingBackButton />
     </div>
   );
 }
