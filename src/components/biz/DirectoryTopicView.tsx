@@ -227,6 +227,7 @@ export function DirectoryTopicView({
       </main>
 
       <BizFooter />
+      <FloatingHomeButton />
     </div>
   );
 }
