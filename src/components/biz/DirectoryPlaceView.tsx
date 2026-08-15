@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Phone, Globe, CalendarCheck, Star, ArrowLeft } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
 import {
   DAY_ORDER,
   DIRECTORY_LABELS,
@@ -403,6 +404,7 @@ export function DirectoryPlaceView({
       </main>
 
       <BizFooter />
+      <FloatingHomeButton />
     </div>
   );
 }

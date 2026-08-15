@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, ExternalLink, MapPin } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
+import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
 import {
   DIRECTORY_LABELS,
   schemaTypeFor,
