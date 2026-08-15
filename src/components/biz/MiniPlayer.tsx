@@ -833,10 +833,10 @@ export function MiniPlayer() {
               <button
                 type="button"
                 onClick={handleManualPlay}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold text-[#D4A24C] sm:text-xs"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold sm:text-xs"
               >
-                <Volume2 size={14} />
-                <span>Tap to Play Music</span>
+                <Volume2 size={18} className="gbm-flash" />
+                <span className="gbm-flash">Tap to Play Music</span>
               </button>
             ) : null}
           </div>
