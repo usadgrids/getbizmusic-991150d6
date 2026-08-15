@@ -25,11 +25,7 @@ export type DirectoryTopicPage = {
 };
 
 
-function todayHours(place: DirectoryPlace) {
-  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  const key = days[new Date().getDay()]!;
-  return place.hours?.[key] ?? "—";
-}
+
 
 
 export function buildTopicJsonLd(category: DirectoryCategory, topic: DirectoryTopicPage) {
