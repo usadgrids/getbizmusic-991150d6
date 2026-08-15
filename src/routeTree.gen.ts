@@ -19,6 +19,7 @@ import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AllianceRouteImport } from './routes/alliance'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as CityRouteImport } from './routes/$city'
@@ -101,6 +102,11 @@ const DesignRoute = DesignRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AllianceRoute = AllianceRouteImport.update({
+  id: '/alliance',
+  path: '/alliance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/$city': typeof CityRouteWithChildren
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
+  '/alliance': typeof AllianceRoute
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
+  '/alliance': typeof AllianceRoute
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -376,6 +384,7 @@ export interface FileRoutesById {
   '/$city': typeof CityRouteWithChildren
   '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
+  '/alliance': typeof AllianceRoute
   '/auth': typeof AuthRoute
   '/design': typeof DesignRouteWithChildren
   '/edit-ad': typeof EditAdRoute
@@ -423,6 +432,7 @@ export interface FileRouteTypes {
     | '/$city'
     | '/activate'
     | '/admin'
+    | '/alliance'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activate'
+    | '/alliance'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/$city'
     | '/activate'
     | '/admin'
+    | '/alliance'
     | '/auth'
     | '/design'
     | '/edit-ad'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   CityRoute: typeof CityRouteWithChildren
   ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AllianceRoute: typeof AllianceRoute
   AuthRoute: typeof AuthRoute
   DesignRoute: typeof DesignRouteWithChildren
   EditAdRoute: typeof EditAdRoute
@@ -659,6 +672,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alliance': {
+      id: '/alliance'
+      path: '/alliance'
+      fullPath: '/alliance'
+      preLoaderRoute: typeof AllianceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -955,6 +975,7 @@ const rootRouteChildren: RootRouteChildren = {
   CityRoute: CityRouteWithChildren,
   ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
+  AllianceRoute: AllianceRoute,
   AuthRoute: AuthRoute,
   DesignRoute: DesignRouteWithChildren,
   EditAdRoute: EditAdRoute,
