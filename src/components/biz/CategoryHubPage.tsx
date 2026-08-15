@@ -23,9 +23,12 @@ import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 export function CategoryHubPage({
   category,
   initialCode,
+  focusAdId: requestedAdId = null,
 }: {
   category: DirectoryCategory;
   initialCode?: string;
+  /** Slide id to jump to on load, e.g. from a home-page marquee thumbnail. */
+  focusAdId?: string | null;
 }) {
   const config = DIRECTORY_CATEGORIES[category];
   const ui = DIRECTORY_CATEGORY_UI[category];
@@ -100,7 +103,7 @@ export function CategoryHubPage({
             title={config.sliderTitle}
             featured
             hideAdShareBar
-            focusAdId={proofSlide?.id ?? null}
+            focusAdId={proofSlide?.id ?? requestedAdId}
             focusNonce={focusNonce}
             belowShareBar={
               <>
