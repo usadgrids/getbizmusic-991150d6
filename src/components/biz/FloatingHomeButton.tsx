@@ -11,9 +11,9 @@ export function FloatingHomeButton() {
     <Link
       to="/"
       aria-label="Back to home"
-      className="fixed z-40 right-3 bottom-3 sm:right-5 sm:bottom-5 inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-[#D4A24C] border border-[#D4A24C]/40 px-3.5 py-2 text-xs font-semibold shadow-lg shadow-black/20 transition-transform hover:scale-105 hover:bg-[#0F2A4A]/95"
+      className="fixed z-40 right-3 top-1/2 -translate-y-1/2 sm:right-5 inline-flex flex-col items-center gap-1 rounded-full bg-[#0F2A4A] text-[#D4A24C] border border-[#D4A24C]/40 px-2.5 py-3 text-xs font-semibold shadow-lg shadow-black/20 transition-transform hover:scale-105 hover:bg-[#0F2A4A]/95"
     >
-      <Home size={14} />
+      <Home size={16} />
       <span className="hidden xs:inline sm:inline">Home</span>
     </Link>
   );
