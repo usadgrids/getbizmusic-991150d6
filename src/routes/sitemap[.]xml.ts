@@ -34,6 +34,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             lastmod: (t.updated_at as string | null) ?? undefined,
             priority: "0.85",
           })),
+          { loc: `${SITE}/alliance`, priority: "0.8" },
           { loc: `${SITE}/pricing`, priority: "0.7" },
           { loc: `${SITE}/submit`, priority: "0.5" },
         ];

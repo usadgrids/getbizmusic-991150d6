@@ -15,6 +15,7 @@ export function BizNavbar() {
           <Link to="/" className="hover:text-[#D4A24C] transition-colors">Home</Link>
           <a href="#featured" className="hover:text-[#D4A24C] transition-colors">Featured</a>
           <a href="#pricing" className="hover:text-[#D4A24C] transition-colors">Pricing</a>
+          <Link to="/alliance" className="hover:text-[#D4A24C] transition-colors">Alliance</Link>
           <Link
             to="/submit"
             className="bg-[#D4A24C] text-[#0F2A4A] font-semibold px-4 py-1.5 rounded-md hover:bg-[#e0b266] transition-colors"
@@ -31,6 +32,7 @@ export function BizNavbar() {
           <Link to="/" onClick={() => setOpen(false)}>Home</Link>
           <a href="#featured" onClick={() => setOpen(false)}>Featured</a>
           <a href="#pricing" onClick={() => setOpen(false)}>Pricing</a>
+          <Link to="/alliance" onClick={() => setOpen(false)}>Alliance</Link>
           <Link
             to="/submit"
             onClick={() => setOpen(false)}

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Browse Get Biz Music business categories — Food & Dining, Beauty & Grooming — with music streaming while you browse. Advertise your business from $12/year.",
+          "Browse Get Biz Music business categories — Food & Dining, Beauty & Grooming — with music streaming while you browse. Join the AI Business Alliance to get recommended by AI tools.",
       },
       { property: "og:title", content: "Get Biz Music — Browse Business Categories with Music Streaming" },
       {
