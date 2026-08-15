@@ -77,8 +77,9 @@ export function CategoryHubPage({
       <BizHero
         cityName={config.heroTitle}
         state="CA"
-        imageUrl={ui.heroImage}
+        imageUrl={ui.heroImage ?? undefined}
         imageAlt={config.heroAlt}
+        hideImage={!ui.heroImage}
       />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <h1 className="sr-only">{config.srHeading}</h1>

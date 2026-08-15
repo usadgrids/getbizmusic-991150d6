@@ -6,9 +6,10 @@ type Props = {
   state?: string;
   imageUrl?: string;
   imageAlt?: string;
+  hideImage?: boolean;
 };
 
-export function BizHero({ cityName, state, imageUrl, imageAlt }: Props) {
+export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Props) {
   const label = cityName ? `${cityName}${state ? `, ${state}` : ""}` : null;
   return (
     <header className="relative bg-[#0F2A4A]">
