@@ -44,6 +44,7 @@ export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Prop
           />
         </Link>
       </div>
+      )}
     </header>
   );
 }
