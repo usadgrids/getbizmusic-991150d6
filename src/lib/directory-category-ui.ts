@@ -8,6 +8,7 @@ import type { DirectoryCategory } from "@/lib/directory-categories";
 import type { PublicAd } from "@/lib/ads.functions";
 
 import foodHero from "@/assets/food-hero.png.asset.json";
+import beautyHero from "@/assets/beauty-hero.png.asset.json";
 import adAmerican from "@/assets/food-ad-american.jpg";
 import adFilipino from "@/assets/food-ad-filipino.jpg";
 import adMexican from "@/assets/food-ad-mexican.jpg";
@@ -62,7 +63,7 @@ export const DIRECTORY_CATEGORY_UI: Record<DirectoryCategory, DirectoryCategoryU
     ]),
   },
   beauty: {
-    heroImage: null,
+    heroImage: beautyHero.url,
     thumbnail: thumbBeauty,
     icon: Scissors,
     showcaseAds: toShowcaseAds([
