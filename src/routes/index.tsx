@@ -80,16 +80,44 @@ function Index() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
 
-  // Build the marquee thumbnail pool: real category ads + showcase placeholders
-  // so the strip is never empty even before advertisers sign up.
-  const thumbnails: string[] = [
-    ...DIRECTORY_CATEGORY_UI.food.showcaseAds.map((a) => a.image_url),
-    ...DIRECTORY_CATEGORY_UI.beauty.showcaseAds.map((a) => a.image_url),
-    ...(hydrated ? foodAds.map((a) => a.image_url) : []),
-    ...(hydrated ? beautyAds.map((a) => a.image_url) : []),
-  ].filter(Boolean);
-  // Duplicate for a seamless loop.
-  const marqueeTiles = thumbnails.length > 0 ? [...thumbnails, ...thumbnails] : [];
+  // Build the marquee tile pool: real category ads + showcase placeholders so the
+  // strip is never empty before advertisers sign up. Each tile deep-links to its
+  // own slide on the matching category page.
+  type MarqueeTile = { id: string; src: string; category: "food" | "beauty"; name: string };
+  const rawTiles: MarqueeTile[] = [
+    ...DIRECTORY_CATEGORY_UI.food.showcaseAds.map((a) => ({
+      id: a.id,
+      src: a.image_url,
+      category: "food" as const,
+      name: a.business_name,
+    })),
+    ...DIRECTORY_CATEGORY_UI.beauty.showcaseAds.map((a) => ({
+      id: a.id,
+      src: a.image_url,
+      category: "beauty" as const,
+      name: a.business_name,
+    })),
+    ...(hydrated
+      ? foodAds.map((a) => ({ id: a.id, src: a.image_url, category: "food" as const, name: a.business_name }))
+      : []),
+    ...(hydrated
+      ? beautyAds.map((a) => ({ id: a.id, src: a.image_url, category: "beauty" as const, name: a.business_name }))
+      : []),
+  ].filter((t) => Boolean(t.src));
+
+  // Drop duplicates so the same artwork never crawls past twice. Signed storage
+  // URLs differ by token, so compare on the path only.
+  const seenTiles = new Set<string>();
+  const tiles: MarqueeTile[] = [];
+  for (const tile of rawTiles) {
+    const key = tile.src.split("?")[0];
+    if (seenTiles.has(key)) continue;
+    seenTiles.add(key);
+    tiles.push(tile);
+  }
+  // Render the unique set twice only to make the loop seamless; the second pass is
+  // hidden from assistive tech and never adds a new image to the rotation.
+  const marqueeTiles = tiles.length > 0 ? [...tiles, ...tiles] : [];
 
   const categories = [
     { slug: "food" as const, href: "/food", coming: false },
@@ -108,7 +136,7 @@ function Index() {
             Business Directory + Music Streaming
           </div>
           <h1 className="font-['Sora'] text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
-            Find Your <span className="text-[#F4C430]">Vibe</span>
+            Find Your <span className="text-[#F4C430]">Vibe</span> In San Diego County, CA
           </h1>
           <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg text-white/75">
             Curated local business categories synced with the perfect soundtrack. Pick a category
@@ -138,15 +166,24 @@ function Index() {
           <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-20 bg-gradient-to-r from-[#0F2A4A] to-transparent sm:w-28" />
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-20 bg-gradient-to-l from-[#0F2A4A] to-transparent sm:w-28" />
           <div className="flex w-max gap-4 will-change-transform animate-[home-marquee_22s_linear_infinite] hover:[animation-play-state:paused]">
-            {marqueeTiles.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt=""
-                aria-hidden="true"
-                loading="lazy"
-                className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-xl border border-[#D4A24C]/30 object-cover"
-              />
+            {marqueeTiles.map((tile, i) => (
+              <Link
+                key={`${tile.id}-${i}`}
+                to="/$city"
+                params={{ city: tile.category }}
+                search={{ ad: tile.id }}
+                aria-hidden={i >= tiles.length ? true : undefined}
+                tabIndex={i >= tiles.length ? -1 : undefined}
+                title={`View ${tile.name}`}
+                className="shrink-0 rounded-xl transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#F4C430]"
+              >
+                <img
+                  src={tile.src}
+                  alt={i >= tiles.length ? "" : `${tile.name} ad preview`}
+                  loading="lazy"
+                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl border border-[#D4A24C]/30 object-cover"
+                />
+              </Link>
             ))}
           </div>
         </section>

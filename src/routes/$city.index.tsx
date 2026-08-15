@@ -20,7 +20,7 @@ import {
 
 
 export const Route = createFileRoute("/$city/")({
-  validateSearch: z.object({ code: z.string().optional() }),
+  validateSearch: z.object({ code: z.string().optional(), ad: z.string().optional() }),
   loader: async ({ params, context }) => {
     // Master template branch: Knowledge Graph category hub (/food, /beauty, …).
     if (isDirectoryCategory(params.city)) {
@@ -97,7 +97,10 @@ export const Route = createFileRoute("/$city/")({
 function CitySegmentPage() {
   const { category } = Route.useLoaderData();
   const search = Route.useSearch();
-  if (category) return <CategoryHubPage category={category} initialCode={search.code} />;
+  if (category)
+    return (
+      <CategoryHubPage category={category} initialCode={search.code} focusAdId={search.ad ?? null} />
+    );
   return <CityHome />;
 }
 
