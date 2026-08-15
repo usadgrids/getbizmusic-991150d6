@@ -454,7 +454,7 @@ export function AdSlider({ ads, title, featured = false, focusAdId = null, focus
             <div
               className="relative w-full h-full bg-gray-100"
             >
-              {current.ad_number == null ? (
+              {current.id.startsWith("showcase-") ? (
                 <Link
                   to="/placeholder"
                   aria-label="Sample ad placement — continue browsing ads"
