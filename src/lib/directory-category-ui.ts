@@ -63,7 +63,7 @@ export const DIRECTORY_CATEGORY_UI: Record<DirectoryCategory, DirectoryCategoryU
     ]),
   },
   beauty: {
-    heroImage: null,
+    heroImage: beautyHero.url,
     thumbnail: thumbBeauty,
     icon: Scissors,
     showcaseAds: toShowcaseAds([
