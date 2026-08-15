@@ -8,6 +8,7 @@ import { BizNavbar } from "@/components/biz/BizNavbar";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
+import { ALLIANCE_BENEFITS } from "@/lib/alliance";
 
 const OG_IMAGE_URL =
   "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
