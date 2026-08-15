@@ -197,3 +197,25 @@
   }
 }
 
+@keyframes gbm-yellow-flash {
+  0%, 100% {
+    color: #FFE100;
+    filter: drop-shadow(0 0 6px rgba(255, 225, 0, 0.9));
+  }
+  50% {
+    color: #FFF7B0;
+    filter: drop-shadow(0 0 14px rgba(255, 225, 0, 1));
+  }
+}
+
+.gbm-flash {
+  animation: gbm-yellow-flash 0.7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gbm-flash {
+    animation: none;
+    color: #FFE100;
+  }
+}
+
