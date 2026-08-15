@@ -232,7 +232,7 @@ function Index() {
                     <ArrowRight size={14} />
                   </p>
                 </div>
-              </a>
+              </Link>
             );
           })}
 
