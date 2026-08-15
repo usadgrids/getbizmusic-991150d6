@@ -792,12 +792,12 @@ export function MiniPlayer() {
     <>
       <TapToPlayOverlay visible={showPlayFallback && !religiousPaused} onTap={handleManualPlay} />
       <div
-        className="fixed z-40 bottom-3 right-3 opacity-20 hover:opacity-100 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)]"
+        className={`fixed z-40 bottom-3 right-3 transition-opacity duration-100 max-w-[calc(100vw-1.5rem)] ${showPlayFallback && !religiousPaused ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
         style={{ width: size.width }}
       >
         <div className="overflow-hidden rounded-xl border border-white/40 bg-white/20 shadow-sm backdrop-blur-sm">
           <div className="flex h-9 items-center justify-between px-2 text-[11px] font-medium text-white/70 max-sm:h-6 max-sm:text-[9px]">
-            <span className="truncate pr-2">
+            <span className={`truncate pr-2 ${showPlayFallback && !religiousPaused ? "gbm-flash" : ""}`}>
               {religiousPaused
                 ? "⏸ Music is paused"
                 : showPlayFallback
@@ -833,10 +833,10 @@ export function MiniPlayer() {
               <button
                 type="button"
                 onClick={handleManualPlay}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold text-[#D4A24C] sm:text-xs"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#0F2A4A]/95 px-2 text-[11px] font-semibold sm:text-xs"
               >
-                <Volume2 size={14} />
-                <span>Tap to Play Music</span>
+                <Volume2 size={18} className="gbm-flash" />
+                <span className="gbm-flash">Tap to Play Music</span>
               </button>
             ) : null}
           </div>
