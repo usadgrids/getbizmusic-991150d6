@@ -83,25 +83,27 @@ function Index() {
   // Build the marquee tile pool: real category ads + showcase placeholders so the
   // strip is never empty before advertisers sign up. Each tile deep-links to its
   // own slide on the matching category page.
-  type MarqueeTile = { id: string; src: string; category: "food" | "beauty"; name: string };
+  type MarqueeTile = { id: string; src: string; category: "food" | "beauty"; name: string; placeholder: boolean };
   const rawTiles: MarqueeTile[] = [
     ...DIRECTORY_CATEGORY_UI.food.showcaseAds.map((a) => ({
       id: a.id,
       src: a.image_url,
       category: "food" as const,
       name: a.business_name,
+      placeholder: true,
     })),
     ...DIRECTORY_CATEGORY_UI.beauty.showcaseAds.map((a) => ({
       id: a.id,
       src: a.image_url,
       category: "beauty" as const,
       name: a.business_name,
+      placeholder: true,
     })),
     ...(hydrated
-      ? foodAds.map((a) => ({ id: a.id, src: a.image_url, category: "food" as const, name: a.business_name }))
+      ? foodAds.map((a) => ({ id: a.id, src: a.image_url, category: "food" as const, name: a.business_name, placeholder: false }))
       : []),
     ...(hydrated
-      ? beautyAds.map((a) => ({ id: a.id, src: a.image_url, category: "beauty" as const, name: a.business_name }))
+      ? beautyAds.map((a) => ({ id: a.id, src: a.image_url, category: "beauty" as const, name: a.business_name, placeholder: false }))
       : []),
   ].filter((t) => Boolean(t.src));
 
@@ -182,12 +184,12 @@ function Index() {
             {marqueeTiles.map((tile, i) => (
               <Link
                 key={`${tile.id}-${i}`}
-                to="/$city"
-                params={{ city: tile.category }}
-                search={{ ad: tile.id }}
+                to={tile.placeholder ? "/placeholder" : "/$city"}
+                params={tile.placeholder ? undefined : { city: tile.category }}
+                search={tile.placeholder ? undefined : { ad: tile.id }}
                 aria-hidden={i >= tiles.length ? true : undefined}
                 tabIndex={i >= tiles.length ? -1 : undefined}
-                title={`View ${tile.name}`}
+                title={tile.placeholder ? "Sample ad placement" : `View ${tile.name}`}
                 className="shrink-0 rounded-xl transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#F4C430]"
               >
                 <img
