@@ -25,6 +25,7 @@ export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Prop
           </div>
         </div>
       )}
+      {hideImage ? null : (
       <div className="relative mx-auto w-full max-w-[1400px]">
         <Link
           to="/pricing"
