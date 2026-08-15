@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Phone, ExternalLink, MapPin } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
@@ -101,6 +102,16 @@ export function DirectoryTopicView({
   topic: DirectoryTopicPage;
 }) {
   const label = DIRECTORY_LABELS[category];
+  // Compute "today" only after hydration — server and client may be in
+  // different timezones, so deriving hours from new Date().getDay() during SSR
+  // causes a hydration mismatch.
+  const [dayKey, setDayKey] = useState<string | null>(null);
+  useEffect(() => {
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    setDayKey(days[new Date().getDay()]!);
+  }, []);
+  const hoursToday = (place: DirectoryPlace) =>
+    dayKey ? place.hours?.[dayKey] ?? "—" : "—";
   const verified = topic.updatedAt
     ? new Date(topic.updatedAt).toLocaleDateString("en-US", {
         year: "numeric",
@@ -175,7 +186,7 @@ export function DirectoryTopicView({
                     <td className="px-4 py-3 text-muted-foreground">
                       {[place.city, place.state].filter(Boolean).join(", ") || "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{todayHours(place)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{hoursToday(place)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{place.price_range ?? "—"}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
