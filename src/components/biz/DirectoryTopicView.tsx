@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Phone, ExternalLink, MapPin } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
-import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
+import { FloatingHomeButton, FloatingBackButton } from "@/components/biz/FloatingHomeButton";
 import {
   DIRECTORY_LABELS,
   schemaTypeFor,
@@ -237,6 +237,7 @@ export function DirectoryTopicView({
 
       <BizFooter />
       <FloatingHomeButton />
+      <FloatingBackButton />
     </div>
   );
 }
