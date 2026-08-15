@@ -144,17 +144,30 @@ function Index() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              to="/pricing"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#F4C430] shadow-md"
+              to="/$city"
+              params={{ city: "food" }}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 px-7 py-3 text-sm font-bold text-white/90 transition-colors hover:bg-white/10"
             >
-              Submit Your Ad
-              <ArrowRight size={16} />
+              Browse Ads
             </Link>
             <Link
               to="/submit"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold text-[#0F2A4A] transition-transform hover:scale-105 hover:bg-[#F4C430] shadow-md"
+            >
+              Upload My Existing Ad
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              to="/design"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-[#D4A24C] px-7 py-3 text-sm font-bold text-[#D4A24C] transition-colors hover:bg-[#D4A24C]/10"
             >
-              Advertise
+              Request Free Ad Design
+            </Link>
+            <Link
+              to="/alliance"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F4C430] px-7 py-3 text-sm font-bold text-[#F4C430] transition-colors hover:bg-[#F4C430]/10"
+            >
+              Become A Member
             </Link>
           </div>
         </div>
