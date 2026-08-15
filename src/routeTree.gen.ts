@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PlaceholderRouteImport } from './routes/placeholder'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as EditAdRouteImport } from './routes/edit-ad'
@@ -77,6 +78,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaceholderRoute = PlaceholderRouteImport.update({
+  id: '/placeholder',
+  path: '/placeholder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/edit-ad': typeof EditAdRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
+  '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/edit-ad': typeof EditAdRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
+  '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/edit-ad': typeof EditAdRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
+  '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/edit-ad'
     | '/llms.txt'
     | '/mcp'
+    | '/placeholder'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/edit-ad'
     | '/llms.txt'
     | '/mcp'
+    | '/placeholder'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
@@ -528,6 +539,7 @@ export interface FileRouteTypes {
     | '/edit-ad'
     | '/llms.txt'
     | '/mcp'
+    | '/placeholder'
     | '/pricing'
     | '/reset-password'
     | '/robots.txt'
@@ -575,6 +587,7 @@ export interface RootRouteChildren {
   EditAdRoute: typeof EditAdRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   McpRoute: typeof McpRoute
+  PlaceholderRoute: typeof PlaceholderRoute
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -637,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/placeholder': {
+      id: '/placeholder'
+      path: '/placeholder'
+      fullPath: '/placeholder'
+      preLoaderRoute: typeof PlaceholderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -981,6 +1001,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditAdRoute: EditAdRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   McpRoute: McpRoute,
+  PlaceholderRoute: PlaceholderRoute,
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
