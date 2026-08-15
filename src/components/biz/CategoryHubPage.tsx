@@ -13,6 +13,7 @@ import { AdSlider } from "@/components/biz/AdSlider";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 
 import { PageShareBar } from "@/components/biz/PageShareBar";
+import { FloatingHomeButton } from "@/components/biz/FloatingHomeButton";
 import { DIRECTORY_CATEGORIES, type DirectoryCategory } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 
@@ -194,6 +195,7 @@ export function CategoryHubPage({
       </main>
 
       <BizFooter />
+      <FloatingHomeButton />
     </div>
   );
 }
