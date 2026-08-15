@@ -202,6 +202,72 @@ function Index() {
         </div>
       </main>
 
+      {/* AI Business Alliance */}
+      <section aria-labelledby="alliance-heading" className="border-t border-white/10 bg-[#0d2440]">
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#F4C430] mb-5">
+              <Sparkles size={14} />
+              AI Business Alliance
+            </div>
+            <h2
+              id="alliance-heading"
+              className="font-['Sora'] text-3xl sm:text-4xl font-extrabold tracking-tight"
+            >
+              Increase Visibility. Build Credibility.{" "}
+              <span className="text-[#F4C430]">Grow with AI.</span>
+            </h2>
+            <p className="mt-4 mx-auto max-w-2xl text-sm sm:text-base text-white/70">
+              Join the GetBizMusic.com AI Business Alliance and get seen, recommended, and trusted by
+              AI tools, consumers, and business partners.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {ALLIANCE_BENEFITS.map(({ icon: Icon, title, text }) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-white/10 bg-[#153a66]/50 p-6 transition-colors hover:border-[#D4A24C]/60"
+              >
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#D4A24C]/15 text-[#F4C430]">
+                  <Icon size={20} />
+                </span>
+                <h3 className="mt-4 font-['Sora'] text-lg font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/70">{text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-[#D4A24C]/40 bg-gradient-to-br from-[#153a66] via-[#0F2A4A] to-[#153a66] p-8 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#F4C430]">
+              Special Launch Price
+            </p>
+            <p className="mt-2 font-['Sora'] text-4xl font-extrabold text-[#F4C430]">
+              $49.95
+              <span className="ml-2 align-middle text-base font-semibold text-white/70">
+                / annual membership
+              </span>
+            </p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/pricing"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold text-[#0F2A4A] shadow-md transition-transform hover:scale-105 hover:bg-[#F4C430]"
+              >
+                Join the Alliance
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                to="/alliance"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#D4A24C] px-7 py-3 text-sm font-bold text-[#D4A24C] transition-colors hover:bg-[#D4A24C]/10"
+              >
+                See full membership details
+              </Link>
+            </div>
+            <p className="mt-4 text-xs text-white/45">Prices subject to change without notice.</p>
+          </div>
+        </div>
+      </section>
+
       <BizFooter />
 
       <style>{`@keyframes home-marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
