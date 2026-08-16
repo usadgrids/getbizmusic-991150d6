@@ -46,6 +46,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [results, setResults] = useState<PlaceResult[] | null>(null);
 
   const [claimTarget, setClaimTarget] = useState<PlaceResult | null>(null);
+  // When true, the claim form was reached via "add yours" (no matching Place),
+  // so the address field is editable and pre-filled only with the business name.
+  const [manualClaim, setManualClaim] = useState(false);
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
@@ -54,6 +57,22 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [wantsAdDesign, setWantsAdDesign] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  function startManualClaim() {
+    setClaimTarget({
+      placeId: "",
+      name: businessName.trim(),
+      address: "",
+      website: undefined,
+      phone: undefined,
+    });
+    setManualClaim(true);
+  }
+
+  function pickResult(r: PlaceResult) {
+    setClaimTarget(r);
+    setManualClaim(false);
+  }
 
   async function onSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -69,6 +88,7 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
     setMessage(null);
     setResults(null);
     setClaimTarget(null);
+    setManualClaim(false);
     try {
       const res = await runSearch({
         data: {
@@ -83,7 +103,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
         setMessage(res.message);
         setResults(null);
       } else {
-        setMessage(res.message ?? null);
+        // Don't surface the generic "no matching businesses" string as a banner —
+        // the dedicated empty-state UI below handles the no-results case.
+        setMessage(null);
         setResults(res.results);
       }
     } catch {
@@ -220,8 +242,19 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
         </p>
       )}
 
+      {results && results.length > 1 && (
+        <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
+          We found multiple locations for your business. Please choose your primary location to
+          start — you can always update or add more later!
+        </p>
+      )}
+
+      {results && results.length === 1 && (
+        <p className="mt-4 text-sm font-semibold text-[#0F2A4A]">Is this your business?</p>
+      )}
+
       {results && results.length > 0 && (
-        <ul className="mt-4 grid gap-2">
+        <ul className="mt-3 grid gap-2">
           {results.map((r) => (
             <li
               key={r.placeId || r.name}
@@ -235,32 +268,71 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
                   {r.name}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-600">{r.address}</p>
+                {r.phone && <p className="mt-0.5 text-xs text-gray-500">{r.phone}</p>}
                 {r.website && <p className="truncate text-xs text-gray-500">{r.website}</p>}
               </div>
               <button
                 type="button"
-                onClick={() => setClaimTarget(r)}
+                onClick={() => pickResult(r)}
                 className="shrink-0 rounded-full bg-[#D4A24C] px-4 py-1.5 text-xs font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
               >
-                This is my business
+                {results.length > 1 ? "This is my primary location" : "Yes, this is my business"}
               </button>
             </li>
           ))}
         </ul>
       )}
 
+      {results && results.length === 0 && (
+        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-6 text-center">
+          <p className="text-sm font-semibold text-[#0F2A4A]">
+            We couldn&rsquo;t find a business by that name in San Diego County. Want to add yours?
+          </p>
+          <button
+            type="button"
+            onClick={startManualClaim}
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
+          >
+            <Building2 size={16} />
+            Add my business
+          </button>
+        </div>
+      )}
+
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          <h3 className="text-base font-bold text-[#0F2A4A]">Claim this listing</h3>
+          <h3 className="text-base font-bold text-[#0F2A4A]">
+            {manualClaim ? "Add your business" : "Claim this listing"}
+          </h3>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
-              <input className={`${inputClass} bg-gray-50`} value={claimTarget.name} readOnly />
+              <input
+                className={inputClass}
+                value={claimTarget.name}
+                readOnly={!manualClaim}
+                maxLength={120}
+                onChange={
+                  manualClaim
+                    ? (e) => setClaimTarget({ ...claimTarget, name: e.target.value })
+                    : undefined
+                }
+              />
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Address</label>
-              <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
+              {manualClaim ? (
+                <input
+                  className={inputClass}
+                  value={claimTarget.address}
+                  maxLength={200}
+                  placeholder="Street address, city, state, ZIP"
+                  onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
+                />
+              ) : (
+                <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
+              )}
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
