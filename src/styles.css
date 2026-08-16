@@ -145,8 +145,12 @@
   html,
   body {
     overflow-x: clip;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     overscroll-behavior-x: none;
+    /* Lock horizontal panning on touch devices — vertical scroll only. */
+    touch-action: pan-y;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -155,6 +159,31 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  /* Media and embeds can never force the layout wider than the viewport. */
+  img,
+  svg,
+  video,
+  canvas,
+  iframe,
+  table,
+  pre {
+    max-width: 100%;
+  }
+
+  /* Long unbroken strings (URLs, emails) wrap instead of stretching the page. */
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  a,
+  li,
+  span,
+  td {
+    overflow-wrap: anywhere;
+  }
+
 
   /*
    * Scoped navy canvas for semantic-token pages (Knowledge Graph directory
