@@ -429,21 +429,27 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Name</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Your Name <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 value={ownerName}
                 maxLength={120}
+                required
                 onChange={(e) => setOwnerName(e.target.value)}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Email</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Your Email <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 type="email"
                 value={ownerEmail}
                 maxLength={255}
+                required
                 onChange={(e) => setOwnerEmail(e.target.value)}
               />
             </div>
