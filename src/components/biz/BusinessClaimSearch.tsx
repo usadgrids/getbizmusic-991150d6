@@ -46,6 +46,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [results, setResults] = useState<PlaceResult[] | null>(null);
 
   const [claimTarget, setClaimTarget] = useState<PlaceResult | null>(null);
+  // When true, the claim form was reached via "add yours" (no matching Place),
+  // so the address field is editable and pre-filled only with the business name.
+  const [manualClaim, setManualClaim] = useState(false);
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
@@ -54,6 +57,22 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [wantsAdDesign, setWantsAdDesign] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  function startManualClaim() {
+    setClaimTarget({
+      placeId: "",
+      name: businessName.trim(),
+      address: "",
+      website: undefined,
+      phone: undefined,
+    });
+    setManualClaim(true);
+  }
+
+  function pickResult(r: PlaceResult) {
+    setClaimTarget(r);
+    setManualClaim(false);
+  }
 
   async function onSearch(e: React.FormEvent) {
     e.preventDefault();
