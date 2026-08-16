@@ -492,6 +492,8 @@ export type Database = {
       business_claims: {
         Row: {
           address: string | null
+          alliance_member: boolean
+          alliance_membership_date: string | null
           business_category: string | null
           business_name: string
           created_at: string
@@ -512,6 +514,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          alliance_member?: boolean
+          alliance_membership_date?: string | null
           business_category?: string | null
           business_name: string
           created_at?: string
@@ -532,6 +536,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          alliance_member?: boolean
+          alliance_membership_date?: string | null
           business_category?: string | null
           business_name?: string
           created_at?: string

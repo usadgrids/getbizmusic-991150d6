@@ -34,18 +34,25 @@ const BusinessClaimConfirmationEmail = ({
           <Text style={p}>Hi {ownerName || 'there'},</Text>
           <Text style={p}>
             Thank you for claiming <strong>{businessName || 'your business'}</strong> on GetBizMusic.
-            Our team is reviewing your request and will follow up within <strong>3–5 business days</strong>
-            {' '}with the information you asked for.
+            We&rsquo;ll prepare your free materials within <strong>3–5 business days</strong>, and
+            you&rsquo;ll get to review everything first.
           </Text>
           <Hr style={hr} />
           <Text style={p}><strong>Business:</strong> {businessName || '—'}</Text>
           {businessCategory ? <Text style={p}><strong>Category:</strong> {businessCategory}</Text> : null}
           {address ? <Text style={p}><strong>Address:</strong> {address}</Text> : null}
           <Text style={p}>
-            <strong>AI visibility audit requested:</strong> {wantsAiAudit ? 'Yes' : 'No'}
+            <strong>FREE AI Visibility Audit Report:</strong> {wantsAiAudit ? 'Yes' : 'No'}
           </Text>
           <Text style={p}>
-            <strong>Ad design help requested:</strong> {wantsAdDesign ? 'Yes' : 'No'}
+            <strong>FREE Professional Ad Design:</strong> {wantsAdDesign ? 'Yes' : 'No'}
+          </Text>
+          <Hr style={hr} />
+          <Text style={p}>
+            Once you&rsquo;ve seen your free audit and ad design, you&rsquo;ll have the option — never
+            a requirement — to AI Answer Engine optimize your business and publish your approved ad
+            online as a GetBizMusic.com AI Business Alliance Member for $49.95/year (pricing subject
+            to change without notice). The audit and design are yours to see for free either way.
           </Text>
           <Hr style={hr} />
           <Text style={footer}>

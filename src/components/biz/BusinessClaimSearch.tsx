@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,7 +38,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(options[0] ?? "Other");
-  const [captcha, setCaptcha] = useState(newCaptcha);
+  // Seeded after mount so SSR and client markup match (Math.random differs).
+  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
+  useEffect(() => setCaptcha(newCaptcha()), []);
   const [captchaInput, setCaptchaInput] = useState("");
 
   const [searching, setSearching] = useState(false);
@@ -169,10 +171,11 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
     >
-      <h2 className="text-lg font-bold text-[#0F2A4A]">Find & claim your business</h2>
+      <h2 className="text-lg font-bold text-[#0F2A4A]">Find &amp; Claim Your Business</h2>
       <p className="mt-1 text-sm text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
-        you correctly.
+        you correctly. Get a free AI Visibility Audit and a free professionally designed ad — no
+        cost to see what&rsquo;s possible for your business.
       </p>
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -379,23 +382,55 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
             </div>
           </div>
 
-          <div className="mt-3 space-y-2">
-            <label className="flex items-center gap-2 text-sm text-[#0F2A4A]">
+          <div className="mt-4 space-y-3">
+            <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
               <input
                 type="checkbox"
+                className="mt-1"
                 checked={wantsAiAudit}
                 onChange={(e) => setWantsAiAudit(e.target.checked)}
               />
-              Send me a free AI visibility audit for my business
+              <span>
+                <span className="font-semibold">
+                  (Recommended) Get my FREE AI Visibility Audit Report for{" "}
+                  {claimTarget.name || businessName.trim() || "my business"}
+                </span>
+                <span className="mt-0.5 block text-xs text-gray-600">
+                  See exactly how AI answer engines currently see (or don&rsquo;t see) your business.
+                </span>
+              </span>
             </label>
-            <label className="flex items-center gap-2 text-sm text-[#0F2A4A]">
+            <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
               <input
                 type="checkbox"
+                className="mt-1"
                 checked={wantsAdDesign}
                 onChange={(e) => setWantsAdDesign(e.target.checked)}
               />
-              I&rsquo;d like help designing my ad
+              <span>
+                <span className="font-semibold">
+                  Get my FREE Professional Ad Design for{" "}
+                  {claimTarget.name || businessName.trim() || "my business"}
+                </span>
+                <span className="mt-0.5 block text-xs text-gray-600">
+                  A custom graphic ad, designed for you to preview and approve — no obligation.
+                </span>
+              </span>
             </label>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#7a5410]">
+              What happens next
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-[#7a5410]">
+              We&rsquo;ll prepare your free report and/or ad design within 3–5 business days. Once
+              ready, you&rsquo;ll get to review everything first. If you&rsquo;d like to AI Answer
+              Engine optimize your business and publish your approved ad design online, you&rsquo;ll
+              have the option to become a GetBizMusic.com AI Business Alliance Member for
+              $49.95/year. There&rsquo;s no obligation — the audit and design are yours to see for
+              free either way. Pricing subject to change without notice.
+            </p>
           </div>
 
           <button
