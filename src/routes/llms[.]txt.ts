@@ -36,14 +36,14 @@ export const Route = createFileRoute("/llms.txt")({
 
         for (const slug of DIRECTORY_CATEGORY_SLUGS) {
           const config = DIRECTORY_CATEGORIES[slug];
-          lines.push(`## ${config.title}`, "", `- [${config.title} hub](${SITE}/${slug}): ${config.seoDescription}`, "");
+          lines.push(`## ${config.title}`, "", `- [${config.title} hub](${SITE}/sdcounty?category=${slug}): ${config.seoDescription}`, "");
 
           const catTopics = (topics ?? []).filter((t) => t.category === slug);
           if (catTopics.length) {
             lines.push("### Questions answered", "");
             for (const t of catTopics) {
               lines.push(
-                `- [${t.question}](${SITE}/${slug}/${t.topic_slug}): ${String(t.answer).slice(0, 200)}`,
+                `- [${t.question}](${SITE}/sdcounty/${t.topic_slug}): ${String(t.answer).slice(0, 200)}`,
               );
             }
             lines.push("");
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/llms.txt")({
             for (const p of catPlaces) {
               const where = [p.city, p.state].filter(Boolean).join(", ");
               lines.push(
-                `- [${p.name}${where ? ` (${where})` : ""}](${SITE}/${slug}/${p.slug}): ${(p.summary ?? "Hours, services, contact details and FAQs.").slice(0, 200)}`,
+                `- [${p.name}${where ? ` (${where})` : ""}](${SITE}/sdcounty/${p.slug}): ${(p.summary ?? "Hours, services, contact details and FAQs.").slice(0, 200)}`,
               );
             }
             lines.push("");
