@@ -241,8 +241,19 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
         </p>
       )}
 
+      {results && results.length > 1 && (
+        <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
+          We found multiple locations for your business. Please choose your primary location to
+          start — you can always update or add more later!
+        </p>
+      )}
+
+      {results && results.length === 1 && (
+        <p className="mt-4 text-sm font-semibold text-[#0F2A4A]">Is this your business?</p>
+      )}
+
       {results && results.length > 0 && (
-        <ul className="mt-4 grid gap-2">
+        <ul className="mt-3 grid gap-2">
           {results.map((r) => (
             <li
               key={r.placeId || r.name}
@@ -256,18 +267,35 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
                   {r.name}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-600">{r.address}</p>
+                {r.phone && <p className="mt-0.5 text-xs text-gray-500">{r.phone}</p>}
                 {r.website && <p className="truncate text-xs text-gray-500">{r.website}</p>}
               </div>
               <button
                 type="button"
-                onClick={() => setClaimTarget(r)}
+                onClick={() => pickResult(r)}
                 className="shrink-0 rounded-full bg-[#D4A24C] px-4 py-1.5 text-xs font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
               >
-                This is my business
+                {results.length > 1 ? "This is my primary location" : "Yes, this is my business"}
               </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {results && results.length === 0 && (
+        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-6 text-center">
+          <p className="text-sm font-semibold text-[#0F2A4A]">
+            We couldn&rsquo;t find a business by that name in San Diego County. Want to add yours?
+          </p>
+          <button
+            type="button"
+            onClick={startManualClaim}
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
+          >
+            <Building2 size={16} />
+            Add my business
+          </button>
+        </div>
       )}
 
       {claimTarget && (
