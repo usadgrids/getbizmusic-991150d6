@@ -237,17 +237,24 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </span>{" "}
         are all welcome.
       </p>
-      <h2 className="mt-1 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
-      <p className="mt-1 text-sm text-gray-600">
+      <h2 className="mt-2 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
-        you correctly. Get a free AI Visibility Audit and a free professionally designed ad — no
-        cost to see what&rsquo;s possible for your business.{" "}
+        you correctly. Get a{" "}
+        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
+          free AI Visibility Audit
+        </span>{" "}
+        and a{" "}
+        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
+          free professionally designed ad
+        </span>{" "}
+        — no cost to see what&rsquo;s possible for your business.{" "}
         <button
           type="button"
           onClick={() => setTermsOpen(true)}
           className="text-xs text-[#B08C46] underline underline-offset-2 hover:text-[#8a6d33]"
         >
-          (Terms &amp; Conditions apply)
+          (Terms & Conditions apply)
         </button>
       </p>
 
