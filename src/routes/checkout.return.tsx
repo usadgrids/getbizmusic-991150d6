@@ -48,13 +48,13 @@ function CheckoutReturn() {
   }, [session_id]);
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <main className="max-w-2xl mx-auto px-4 py-16 text-center">
         {state.status === "loading" && (
           <>
-            <Loader2 className="mx-auto animate-spin text-[#0F2A4A]" size={40} />
-            <h1 className="mt-4 font-serif text-2xl font-bold text-[#0F2A4A]">Confirming your payment…</h1>
-            <p className="text-gray-600 mt-2 text-sm">Hang tight, this usually takes just a few seconds.</p>
+            <Loader2 className="mx-auto animate-spin text-[#D4A24C]" size={40} />
+            <h1 className="mt-4 font-serif text-2xl font-bold text-white">Confirming your payment…</h1>
+            <p className="text-white/70 mt-2 text-sm">Hang tight, this usually takes just a few seconds.</p>
           </>
         )}
         {state.status === "paid" && state.token && (
@@ -62,8 +62,8 @@ function CheckoutReturn() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
               <Check size={32} />
             </div>
-            <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Payment Received!</h1>
-            <p className="text-gray-600 mt-3">
+            <h1 className="font-serif text-3xl font-bold text-white">Payment Received!</h1>
+            <p className="text-white/70 mt-3">
               Thank you. A receipt and your unique submission link have been sent to <strong>{state.email}</strong>.
             </p>
             <div className="mt-6 bg-white border border-gray-200 rounded-xl p-5 text-left">
@@ -83,16 +83,16 @@ function CheckoutReturn() {
         )}
         {state.status === "pending" && (
           <>
-            <Loader2 className="mx-auto text-[#0F2A4A]" size={40} />
-            <h1 className="mt-4 font-serif text-2xl font-bold text-[#0F2A4A]">Payment Processing</h1>
-            <p className="text-gray-600 mt-3">{state.message}</p>
+            <Loader2 className="mx-auto text-[#D4A24C]" size={40} />
+            <h1 className="mt-4 font-serif text-2xl font-bold text-white">Payment Processing</h1>
+            <p className="text-white/70 mt-3">{state.message}</p>
           </>
         )}
         {state.status === "error" && (
           <>
-            <h1 className="font-serif text-2xl font-bold text-red-600">Something went wrong</h1>
-            <p className="text-gray-600 mt-2">{state.message}</p>
-            <Link to="/pricing" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">
+            <h1 className="font-serif text-2xl font-bold text-red-400">Something went wrong</h1>
+            <p className="text-white/70 mt-2">{state.message}</p>
+            <Link to="/pricing" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">
               ← Back to pricing
             </Link>
           </>
