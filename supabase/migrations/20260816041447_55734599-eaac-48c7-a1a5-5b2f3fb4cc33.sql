@@ -1,0 +1,1 @@
+ALTER TABLE public.leads DROP COLUMN IF EXISTS brevo_contact_id;

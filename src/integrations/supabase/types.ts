@@ -1089,7 +1089,6 @@ export type Database = {
       }
       leads: {
         Row: {
-          brevo_contact_id: number | null
           business_name: string | null
           campaign_status: string
           city: string | null
@@ -1116,7 +1115,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          brevo_contact_id?: number | null
           business_name?: string | null
           campaign_status?: string
           city?: string | null
@@ -1143,7 +1141,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          brevo_contact_id?: number | null
           business_name?: string | null
           campaign_status?: string
           city?: string | null
