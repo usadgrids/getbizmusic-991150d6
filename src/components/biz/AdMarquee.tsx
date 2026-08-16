@@ -20,7 +20,7 @@ const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap(
  * overlay showing that ad graphic large with an invitation to request a free
  * custom ad design; moving the pointer away dismisses the overlay.
  */
-export function AdMarquee() {
+export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useQuery({
     queryKey: ["admarquee-ads"],
@@ -83,7 +83,7 @@ export function AdMarquee() {
           {strip.map((ad, i) => (
             <div
               key={`${ad.id}-${i}`}
-              onMouseEnter={() => setHovered(ad)}
+              onMouseEnter={() => { if (!disabled) setHovered(ad); }}
               className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md ring-1 ring-[#D4A24C]/30 sm:h-20 sm:w-36"
             >
               <img

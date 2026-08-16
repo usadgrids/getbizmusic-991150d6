@@ -78,6 +78,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [results, setResults] = useState<PlaceResult[] | null>(null);
+  // Once a search has been submitted, disable the marquee hover overlay so it
+  // stops bothering users who are already reviewing results.
+  const [searched, setSearched] = useState(false);
 
   const [claimTarget, setClaimTarget] = useState<PlaceResult | null>(null);
   // When true, the claim form was reached via "add yours" (no matching Place),
@@ -120,6 +123,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     }
 
     setSearching(true);
+    setSearched(true);
     setMessage(null);
     setResults(null);
     setClaimTarget(null);
@@ -357,7 +361,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       </form>
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
-      <AdMarquee />
+      <AdMarquee disabled={searched} />
 
       {message && (
         <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
