@@ -102,7 +102,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
         setMessage(res.message);
         setResults(null);
       } else {
-        setMessage(res.message ?? null);
+        // Don't surface the generic "no matching businesses" string as a banner —
+        // the dedicated empty-state UI below handles the no-results case.
+        setMessage(null);
         setResults(res.results);
       }
     } catch {
