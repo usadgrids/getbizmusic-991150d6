@@ -252,8 +252,7 @@ export function DirectoryPlaceView({
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <Link
-          to="/$city"
-          params={{ city: category }}
+          to="/sdcounty"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden /> Back to {label.title}

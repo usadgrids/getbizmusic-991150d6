@@ -127,8 +127,7 @@ export function DirectoryTopicView({
 
       <main className="mx-auto w-full max-w-4xl px-4 py-10">
         <Link
-          to="/$city"
-          params={{ city: category }}
+          to="/sdcounty"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
           {label.title}
@@ -170,7 +169,7 @@ export function DirectoryTopicView({
                     <td className="px-4 py-3">
                       <Link
                         to="/sdcounty/$slug"
-                        params={{ city: category, slug: place.slug }}
+                        params={{ slug: place.slug }}
                         className="font-semibold text-primary underline underline-offset-2"
                       >
                         {place.name}
