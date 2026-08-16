@@ -157,43 +157,33 @@ function Index() {
             {/* Thin gold accent line at top */}
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4A24C] to-transparent" />
 
-            {/* Section label */}
-            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-[#D4A24C]">
-              Get Listed — San Diego County
-            </p>
+            {/* Invitation quote */}
+            <div className="px-1 sm:px-4">
+              <p className="text-center text-[15px] font-semibold leading-snug text-[#d4af37] sm:text-xl md:text-2xl">
+                &ldquo;We&rsquo;re only extending by-invitation AI optimization access to a limited number of San Diego County businesses this year.&rdquo;
+              </p>
 
-            {/* Category toggle — routes the reused widget to the right claim options */}
-            <div className="mt-4 flex justify-center">
-              <div
-                role="tablist"
-                aria-label="Choose your business category"
-                className="inline-flex rounded-full border border-[#D4A24C]/40 bg-[#0a0e1a]/60 p-1"
-              >
-                {CATEGORY_TABS.map(({ slug, label, icon: Icon }) => {
-                  const active = category === slug;
-                  return (
-                    <button
-                      key={slug}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => setCategory(slug)}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-colors sm:px-6 sm:text-sm ${
-                        active
-                          ? "bg-[#D4A24C] text-[#0F2A4A] shadow"
-                          : "text-white/70 hover:text-white"
-                      }`}
-                    >
-                      <Icon size={15} />
-                      {label}
-                    </button>
-                  );
-                })}
+              {/* Signature block */}
+              <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+                <img
+                  src="https://getbizmusic.com/__l5e/assets-v1/c1b84ad5-8673-482d-b654-e488045db784/ralph-posadas-headshot.png"
+                  alt="Ralph T. Posadas"
+                  loading="lazy"
+                  className="h-16 w-16 rounded-full border border-[#D4A24C]/70 object-cover sm:h-20 sm:w-20"
+                />
+                <div className="text-center sm:text-left">
+                  <p className="font-['Great_Vibes'] text-2xl leading-tight text-white sm:text-3xl">
+                    Ralph T. Posadas
+                  </p>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/60 sm:text-xs">
+                    GetBizMusic AI Business Alliance, President
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* The reused Find & Claim widget — not rebuilt, just mounted */}
-            <div key={category} className="mt-2 [&>section]:mt-0 [&>section]:shadow-none">
+            <div className="mt-6 [&>section]:mt-0 [&>section]:shadow-none">
               <BusinessClaimSearch category={category} />
             </div>
           </div>
