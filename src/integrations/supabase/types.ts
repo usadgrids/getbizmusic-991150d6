@@ -492,10 +492,12 @@ export type Database = {
       business_claims: {
         Row: {
           address: string | null
+          address_is_private: boolean
           alliance_member: boolean
           alliance_membership_date: string | null
           business_category: string | null
           business_name: string
+          business_type: string
           created_at: string
           design_approved: boolean
           design_asset_url: string | null
@@ -510,6 +512,7 @@ export type Database = {
           owner_phone: string | null
           phone: string | null
           priority: boolean
+          service_area_label: string | null
           source_category_page: string | null
           status: string
           submitted_at: string
@@ -521,10 +524,12 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          address_is_private?: boolean
           alliance_member?: boolean
           alliance_membership_date?: string | null
           business_category?: string | null
           business_name: string
+          business_type?: string
           created_at?: string
           design_approved?: boolean
           design_asset_url?: string | null
@@ -539,6 +544,7 @@ export type Database = {
           owner_phone?: string | null
           phone?: string | null
           priority?: boolean
+          service_area_label?: string | null
           source_category_page?: string | null
           status?: string
           submitted_at?: string
@@ -550,10 +556,12 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          address_is_private?: boolean
           alliance_member?: boolean
           alliance_membership_date?: string | null
           business_category?: string | null
           business_name?: string
+          business_type?: string
           created_at?: string
           design_approved?: boolean
           design_asset_url?: string | null
@@ -568,6 +576,7 @@ export type Database = {
           owner_phone?: string | null
           phone?: string | null
           priority?: boolean
+          service_area_label?: string | null
           source_category_page?: string | null
           status?: string
           submitted_at?: string
