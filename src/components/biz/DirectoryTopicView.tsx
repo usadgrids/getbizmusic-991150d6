@@ -169,7 +169,7 @@ export function DirectoryTopicView({
                   <tr key={place.id} className="border-t border-border align-top">
                     <td className="px-4 py-3">
                       <Link
-                        to="/$city/$slug"
+                        to="/sdcounty/$slug"
                         params={{ city: category, slug: place.slug }}
                         className="font-semibold text-primary underline underline-offset-2"
                       >

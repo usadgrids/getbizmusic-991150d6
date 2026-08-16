@@ -64,7 +64,7 @@ export function buildPlaceJsonLd(
   industry?: string | null,
 ) {
   const base = DIRECTORY_LABELS[category].basePath;
-  const url = `${SITE}${base}/${place.slug}`;
+  const url = `${SITE}/sdcounty/${place.slug}`;
 
   const business: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -123,7 +123,7 @@ export function buildPlaceJsonLd(
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "GetBizMusic", item: SITE },
-        { "@type": "ListItem", position: 2, name: DIRECTORY_LABELS[category].title, item: `${SITE}${base}` },
+        { "@type": "ListItem", position: 2, name: "San Diego County Directory", item: `${SITE}/sdcounty` },
         { "@type": "ListItem", position: 3, name: place.name, item: url },
       ],
     },
@@ -174,7 +174,7 @@ export function DirectoryPlaceView({
   // separate from this machine-readable Knowledge Graph page.
   const shareUrl = adNumber
     ? `${SITE}${base}/ad/${adNumber}`
-    : `${SITE}${base}/${place.slug}`;
+    : `${SITE}/sdcounty/${place.slug}`;
 
   return (
     <div className="gbm-navy-scope min-h-screen bg-background text-foreground">
