@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,7 +38,9 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(options[0] ?? "Other");
-  const [captcha, setCaptcha] = useState(newCaptcha);
+  // Seeded after mount so SSR and client markup match (Math.random differs).
+  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
+  useEffect(() => setCaptcha(newCaptcha()), []);
   const [captchaInput, setCaptchaInput] = useState("");
 
   const [searching, setSearching] = useState(false);
