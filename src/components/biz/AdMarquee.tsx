@@ -93,7 +93,7 @@ export function AdMarquee() {
       {/* Full-page hover overlay */}
       {hovered && (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-[#0F2A4A]/85 px-4 backdrop-blur-sm"
+          className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#0F2A4A]/85 px-4 backdrop-blur-sm"
           role="status"
           aria-live="polite"
         >
