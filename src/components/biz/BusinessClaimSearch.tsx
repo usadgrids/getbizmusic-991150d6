@@ -259,6 +259,22 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             onChange={setSelectedCategory}
           />
         </div>
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Launch Code (optional)
+          </label>
+          <input
+            className={inputClass}
+            value={launchCode}
+            maxLength={40}
+            onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
+            placeholder="1000-FIRST"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            🎉 Reserved for our first 1,000 San Diego County businesses. This code may be
+            deactivated at any time once that milestone is reached.
+          </p>
+        </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
             Quick check: {captcha.a} + {captcha.b} = ?
