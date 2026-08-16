@@ -76,9 +76,9 @@ export function AdLandingView({
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0F2A4A] text-white overflow-x-hidden">
       <main className="w-full max-w-[1200px] mx-auto px-3 sm:px-5 py-6 sm:py-10">
-        <nav className="text-xs text-gray-500 mb-3">
+        <nav className="text-xs text-white/60 mb-3">
           <Link to="/" className="hover:underline">Home</Link>
           {breadcrumb && (
             <>
@@ -92,7 +92,7 @@ export function AdLandingView({
           <span>Ad #{ad.ad_number}</span>
         </nav>
 
-        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#0F2A4A] mb-3 text-center tracking-wide">
+        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-3 text-center tracking-wide">
           Featured Business
         </h2>
 
@@ -233,13 +233,13 @@ export function AdLandingView({
 
 export function AdLandingNotFound() {
   return (
-    <div className="min-h-screen bg-[#f5f6f8] flex flex-col">
+    <div className="min-h-screen bg-[#0F2A4A] text-white flex flex-col">
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <h1 className="font-serif text-3xl text-[#0F2A4A] font-bold mb-2">
+          <h1 className="font-serif text-3xl text-white font-bold mb-2">
             Ad not found
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-white/70 mb-4">
             This ad may have expired or been removed.
           </p>
           <Link
