@@ -51,8 +51,23 @@ function newCaptcha() {
   return { a, b };
 }
 
+const BUSINESS_TYPES = [
+  { value: "physical", label: "Physical storefront/office — public address" },
+  {
+    value: "home_based",
+    label: "Home-based — I work from home, prefer not to show my home address publicly",
+  },
+  {
+    value: "mobile",
+    label: "Mobile/service-area business — I travel to clients, no fixed location",
+  },
+] as const;
+
+type BusinessType = (typeof BUSINESS_TYPES)[number]["value"];
+
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-[#0F2A4A] outline-none focus:border-[#D4A24C]";
+
 
 /**
  * Reusable "find & claim your business" widget for Knowledge Graph category
@@ -88,6 +103,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [manualClaim, setManualClaim] = useState(false);
   // Public-facing DBA name; optional. When set it is what visitors see.
   const [tradeName, setTradeName] = useState("");
+  const [businessType, setBusinessType] = useState<BusinessType>("physical");
+  const addressIsPrivate = businessType !== "physical";
+  const [serviceAreaChoice, setServiceAreaChoice] = useState("Serves San Diego County");
+  const [serviceAreaCustom, setServiceAreaCustom] = useState("");
+  const serviceAreaLabel = !addressIsPrivate
+    ? null
+    : serviceAreaChoice === "city"
+      ? serviceAreaCustom.trim()
+        ? `Serves ${serviceAreaCustom.trim()}`
+        : ""
+      : serviceAreaChoice === "custom"
+        ? serviceAreaCustom.trim()
+        : serviceAreaChoice;
+
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
@@ -177,6 +206,10 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     if (!claimTarget) return;
     if (ownerName.trim().length < 2) return toast.error("Enter your name.");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail.trim())) return toast.error("Enter a valid email.");
+    if (claimTarget.address.trim().length < 5)
+      return toast.error("Enter your business address.");
+    if (addressIsPrivate && !serviceAreaLabel)
+      return toast.error("Choose the service area shown publicly.");
 
     setSubmitting(true);
     try {
@@ -185,10 +218,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           businessName: claimTarget.name || businessName.trim(),
           tradeName: tradeName.trim() || undefined,
           businessCategory: selectedCategory,
-          address: claimTarget.address,
+          address: claimTarget.address.trim(),
+          businessType,
+          addressIsPrivate,
+          serviceAreaLabel: serviceAreaLabel || undefined,
           website: claimTarget.website,
           phone: claimTarget.phone,
           googlePlaceId: claimTarget.placeId,
+
           ownerName: ownerName.trim(),
           ownerEmail: ownerEmail.trim(),
           ownerPhone: ownerPhone.trim() || undefined,
@@ -523,21 +560,80 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-                Address {manualClaim && <span className="text-[#D4A24C]">*</span>}
+                Business Type <span className="text-[#D4A24C]">*</span>
               </label>
-              {manualClaim ? (
-                <input
-                  className={inputClass}
-                  value={claimTarget.address}
-                  maxLength={200}
-                  required
-                  placeholder="Street address, city, state, ZIP"
-                  onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
-                />
-              ) : (
-                <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
-              )}
+              <div className="space-y-1.5 rounded-lg border border-gray-300 px-3 py-2">
+                {BUSINESS_TYPES.map((t) => (
+                  <label key={t.value} className="flex items-start gap-2 text-xs text-[#0F2A4A]">
+                    <input
+                      type="radio"
+                      className="mt-0.5"
+                      name="business-type"
+                      value={t.value}
+                      checked={businessType === t.value}
+                      onChange={() => setBusinessType(t.value)}
+                    />
+                    <span>{t.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                {addressIsPrivate
+                  ? "Business Address (Private — used for verification and billing only, never displayed publicly)"
+                  : "Business Address"}{" "}
+                <span className="text-[#D4A24C]">*</span>
+              </label>
+              <input
+                className={inputClass}
+                value={claimTarget.address}
+                maxLength={200}
+                required
+                placeholder="Street address, city, state, ZIP"
+                onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                {addressIsPrivate
+                  ? "Your address stays private. Your service area below is what shows publicly."
+                  : "This address will be displayed publicly on your listing."}
+              </p>
+            </div>
+            {addressIsPrivate && (
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                  Service Area (shown publicly) <span className="text-[#D4A24C]">*</span>
+                </label>
+                <select
+                  className={inputClass}
+                  value={serviceAreaChoice}
+                  onChange={(e) => setServiceAreaChoice(e.target.value)}
+                >
+                  <option value="city">Serves a specific city</option>
+                  <option value="Serves San Diego County">Serves San Diego County</option>
+                  <option value="Serves Southern California">Serves Southern California</option>
+                  <option value="Serves the entire State of California">
+                    Serves the entire State of California
+                  </option>
+                  <option value="custom">Custom</option>
+                </select>
+                {(serviceAreaChoice === "city" || serviceAreaChoice === "custom") && (
+                  <input
+                    className={`${inputClass} mt-2`}
+                    value={serviceAreaCustom}
+                    maxLength={120}
+                    required
+                    placeholder={
+                      serviceAreaChoice === "city"
+                        ? "City name (e.g. Chula Vista)"
+                        : "Describe your service area"
+                    }
+                    onChange={(e) => setServiceAreaCustom(e.target.value)}
+                  />
+                )}
+              </div>
+            )}
+
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
                 Business Category <span className="text-[#D4A24C]">*</span>

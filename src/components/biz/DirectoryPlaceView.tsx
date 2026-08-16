@@ -153,13 +153,16 @@ export function DirectoryPlaceView({
   faqs,
   adNumber = null,
   foundingMember = false,
+  serviceAreaLabel = null,
 }: {
   category: DirectoryCategory;
   place: DirectoryPlace;
   faqs: DirectoryFaq[];
   adNumber?: number | null;
   foundingMember?: boolean;
+  serviceAreaLabel?: string | null;
 }) {
+
   const label = DIRECTORY_LABELS[category];
   const attrs = attributeEntries(place.attributes ?? {});
   const verified = place.last_crawled_at
@@ -274,12 +277,20 @@ export function DirectoryPlaceView({
             </span>
           )}
           <p className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            {(place.city || place.state) && (
+            {serviceAreaLabel ? (
               <span className="inline-flex items-center gap-1">
                 <MapPin className="h-4 w-4" aria-hidden />
-                {[place.address, place.city, place.state, place.zip].filter(Boolean).join(", ")}
+                {serviceAreaLabel}
               </span>
+            ) : (
+              (place.city || place.state) && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-4 w-4" aria-hidden />
+                  {[place.address, place.city, place.state, place.zip].filter(Boolean).join(", ")}
+                </span>
+              )
             )}
+
             {place.rating != null && (
               <span className="inline-flex items-center gap-1">
                 <Star className="h-4 w-4" aria-hidden /> {place.rating}

@@ -111,6 +111,8 @@ function CountyDirectoryPage() {
       faqs={data.faqs}
       adNumber={data.adNumber ?? null}
       foundingMember={data.foundingMember ?? false}
+      serviceAreaLabel={data.serviceAreaLabel ?? null}
     />
+
   );
 }
