@@ -361,7 +361,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       </form>
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
-      <AdMarquee />
+      <AdMarquee disabled={searched} />
 
       {message && (
         <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
