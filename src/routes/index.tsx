@@ -25,25 +25,26 @@ function AdTileBackground() {
   });
 
   if (!ads.length) return null;
-  const tiles = Array.from({ length: 24 }, (_, i) => ads[i % ads.length]);
+  const tiles = Array.from({ length: 36 }, (_, i) => ads[i % ads.length]);
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-[0.18] sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-40 sm:grid-cols-4 lg:grid-cols-6">
         {tiles.map((ad, i) => (
           <img
             key={`${ad.id}-${i}`}
             src={ad.image_url}
             alt=""
             loading="lazy"
-            className="h-full w-full object-cover"
+            className="aspect-[4/3] h-full w-full rounded-md object-cover"
           />
         ))}
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A] via-[#0F2A4A]/80 to-[#0F2A4A]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/85 via-[#0F2A4A]/70 to-[#0F2A4A]/90" />
     </div>
   );
 }
+
 
 const OG_IMAGE_URL =
   "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
