@@ -103,6 +103,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [manualClaim, setManualClaim] = useState(false);
   // Public-facing DBA name; optional. When set it is what visitors see.
   const [tradeName, setTradeName] = useState("");
+  const [businessType, setBusinessType] = useState<BusinessType>("physical");
+  const addressIsPrivate = businessType !== "physical";
+  const [serviceAreaChoice, setServiceAreaChoice] = useState("Serves San Diego County");
+  const [serviceAreaCustom, setServiceAreaCustom] = useState("");
+  const serviceAreaLabel = !addressIsPrivate
+    ? null
+    : serviceAreaChoice === "city"
+      ? serviceAreaCustom.trim()
+        ? `Serves ${serviceAreaCustom.trim()}`
+        : ""
+      : serviceAreaChoice === "custom"
+        ? serviceAreaCustom.trim()
+        : serviceAreaChoice;
+
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
