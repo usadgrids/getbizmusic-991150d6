@@ -157,7 +157,7 @@ function Index() {
             {/* Invitation quote */}
             <div className="px-1 sm:px-4">
               <p className="text-center text-[15px] font-semibold leading-snug text-[#d4af37] sm:text-xl md:text-2xl">
-                &ldquo;We&rsquo;re only extending by-invitation AI optimization access to a limited number of San Diego County businesses this year.&rdquo;
+                &ldquo;We&rsquo;re only extending by-invitation AI visibility optimization access to a limited number of San Diego County businesses this year.&rdquo;
               </p>
 
               {/* Signature block */}

@@ -222,7 +222,10 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
     >
-      <h2 className="text-lg font-bold text-[#0F2A4A]">Find &amp; Claim Your Business</h2>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D4A24C]">
+        Brick & Mortar Businesses, Independent Agencies, Mobile Businesses, Business Opportunities, and Home-Based Businesses are all welcome.
+      </p>
+      <h2 className="mt-1 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
       <p className="mt-1 text-sm text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
         you correctly. Get a free AI Visibility Audit and a free professionally designed ad — no
