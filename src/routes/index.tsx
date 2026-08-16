@@ -1,10 +1,49 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Building2, UtensilsCrossed, Scissors } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
-import type { DirectoryCategory } from "@/lib/directory-categories";
+import { getAdsByCategory } from "@/lib/ads.functions";
+import {
+  DIRECTORY_CATEGORIES,
+  DIRECTORY_CATEGORY_SLUGS,
+  type DirectoryCategory,
+} from "@/lib/directory-categories";
 import homeHero from "@/assets/SD-Business-3.png.asset.json";
+
+const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
+
+/** Decorative tiled mosaic of live advertiser graphics behind the claim panel. */
+function AdTileBackground() {
+  const fetchAds = useServerFn(getAdsByCategory);
+  const { data: ads = [] } = useQuery({
+    queryKey: ["home-tile-ads"],
+    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "home-tiles" } }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!ads.length) return null;
+  const tiles = Array.from({ length: 24 }, (_, i) => ads[i % ads.length]);
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-[0.18] sm:grid-cols-4 lg:grid-cols-6">
+        {tiles.map((ad, i) => (
+          <img
+            key={`${ad.id}-${i}`}
+            src={ad.image_url}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ))}
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A] via-[#0F2A4A]/80 to-[#0F2A4A]" />
+    </div>
+  );
+}
 
 const OG_IMAGE_URL =
   "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
