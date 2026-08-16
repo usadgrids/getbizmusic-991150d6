@@ -17,6 +17,7 @@ const claimSchema = z.object({
   wantsAdDesign: z.boolean().default(false),
   notes: z.string().trim().max(1000).optional(),
   sourceCategoryPage: z.string().trim().max(60).optional(),
+  launchCode: z.string().trim().max(40).optional(),
 });
 
 export const submitBusinessClaim = createServerFn({ method: "POST" })
