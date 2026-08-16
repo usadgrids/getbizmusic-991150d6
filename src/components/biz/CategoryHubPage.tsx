@@ -165,6 +165,8 @@ export function CategoryHubPage({
             <p className="mt-2 text-sm text-gray-600">{config.emptyBody}</p>
           </section>
         )}
+        <BusinessClaimSearch category={category} />
+
         {!!topics.length && (
           <section
             aria-label="Popular questions"
