@@ -4,6 +4,7 @@ import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { searchBusinesses } from "@/lib/places.functions";
 import { submitBusinessClaim } from "@/lib/claims.functions";
+import { AdMarquee } from "@/components/biz/AdMarquee";
 import {
   BUSINESS_CATEGORY_GROUPS,
   DEFAULT_BUSINESS_CATEGORY,
@@ -354,6 +355,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           </button>
         </div>
       </form>
+
+      {/* Crawling sample-ad marquee — hover an image for the free design offer */}
+      <AdMarquee />
 
       {message && (
         <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
