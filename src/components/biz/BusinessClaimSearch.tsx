@@ -4,6 +4,7 @@ import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { searchBusinesses } from "@/lib/places.functions";
 import { submitBusinessClaim } from "@/lib/claims.functions";
+import { AdMarquee } from "@/components/biz/AdMarquee";
 import {
   BUSINESS_CATEGORY_GROUPS,
   DEFAULT_BUSINESS_CATEGORY,
