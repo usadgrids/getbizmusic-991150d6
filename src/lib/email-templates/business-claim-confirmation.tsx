@@ -58,6 +58,13 @@ const BusinessClaimConfirmationEmail = ({
             notice). The audit and design are yours to see for free either way.
           </Text>
           <Hr style={hr} />
+          <Text style={p}>
+            <strong>Explore our full ad and music streaming platform now:</strong>{" "}
+            <a href="https://www.getbizmusic.com/sdcounty" style={linkStyle}>
+              www.getbizmusic.com/sdcounty
+            </a>
+          </Text>
+          <Hr style={hr} />
           <Text style={footer}>
             Questions? Just reply to this email and we&rsquo;ll help you out.
           </Text>
