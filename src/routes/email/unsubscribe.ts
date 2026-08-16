@@ -37,7 +37,19 @@ export const Route = createFileRoute("/email/unsubscribe")({
           .maybeSingle()
 
         if (lookupError || !tokenRecord) {
-          return Response.json({ error: 'Invalid or expired token' }, { status: 404 })
+          // Campaign recipients carry their token on the `leads` row instead.
+          const { data: lead } = await supabase
+            .from('leads')
+            .select('id, unsubscribed_at')
+            .eq('unsubscribe_token', token)
+            .maybeSingle()
+          if (!lead) {
+            return Response.json({ error: 'Invalid or expired token' }, { status: 404 })
+          }
+          if (lead.unsubscribed_at) {
+            return Response.json({ valid: false, reason: 'already_unsubscribed' })
+          }
+          return Response.json({ valid: true })
         }
 
         if (tokenRecord.used_at) {
@@ -100,7 +112,29 @@ export const Route = createFileRoute("/email/unsubscribe")({
           .maybeSingle()
 
         if (lookupError || !tokenRecord) {
-          return Response.json({ error: 'Invalid or expired token' }, { status: 404 })
+          // Campaign lead unsubscribe: mark the lead and suppress the address so
+          // it is excluded from every future send.
+          const { data: lead } = await supabase
+            .from('leads')
+            .select('id, email, unsubscribed_at')
+            .eq('unsubscribe_token', token)
+            .maybeSingle()
+          if (!lead) {
+            return Response.json({ error: 'Invalid or expired token' }, { status: 404 })
+          }
+          if (lead.unsubscribed_at) {
+            return Response.json({ success: false, reason: 'already_unsubscribed' })
+          }
+          const now = new Date().toISOString()
+          await supabase
+            .from('leads')
+            .update({ unsubscribed_at: now, campaign_status: 'unsubscribed', last_event_at: now })
+            .eq('id', lead.id)
+          await supabase
+            .from('suppressed_emails')
+            .upsert({ email: lead.email.toLowerCase(), reason: 'unsubscribe' }, { onConflict: 'email' })
+          console.log('Lead unsubscribed', { email_redacted: redactEmail(lead.email) })
+          return Response.json({ success: true })
         }
 
         if (tokenRecord.used_at) {
