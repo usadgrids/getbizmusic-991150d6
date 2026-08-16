@@ -51,8 +51,23 @@ function newCaptcha() {
   return { a, b };
 }
 
+const BUSINESS_TYPES = [
+  { value: "physical", label: "Physical storefront/office — public address" },
+  {
+    value: "home_based",
+    label: "Home-based — I work from home, prefer not to show my home address publicly",
+  },
+  {
+    value: "mobile",
+    label: "Mobile/service-area business — I travel to clients, no fixed location",
+  },
+] as const;
+
+type BusinessType = (typeof BUSINESS_TYPES)[number]["value"];
+
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-[#0F2A4A] outline-none focus:border-[#D4A24C]";
+
 
 /**
  * Reusable "find & claim your business" widget for Knowledge Graph category
