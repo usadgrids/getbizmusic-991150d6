@@ -9,6 +9,8 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 import { ALLIANCE_BENEFITS } from "@/lib/alliance";
+import homeHero from "@/assets/home-hero-sd.png.asset.json";
+
 
 const OG_IMAGE_URL =
   "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
@@ -132,7 +134,15 @@ function Index() {
 
       {/* Hero header */}
       <header className="relative overflow-hidden">
+        <div className="mx-auto w-full max-w-[1400px]">
+          <img
+            src={homeHero.url}
+            alt="Is your San Diego County business visible on ChatGPT and other AI search engines? GetBizMusic.com"
+            className="block w-full h-auto"
+          />
+        </div>
         <div className="mx-auto max-w-6xl px-4 py-16 sm:py-20 text-center">
+
           <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#F4C430] mb-5">
             <Sparkles size={14} />
             Business Directory + Music Streaming
