@@ -17,6 +17,7 @@ const claimSchema = z.object({
   wantsAdDesign: z.boolean().default(false),
   notes: z.string().trim().max(1000).optional(),
   sourceCategoryPage: z.string().trim().max(60).optional(),
+  launchCode: z.string().trim().max(40).optional(),
 });
 
 export const submitBusinessClaim = createServerFn({ method: "POST" })
@@ -31,7 +32,27 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Launch code: redeem atomically. Never blocks the claim — an invalid,
+    // deactivated or fully-redeemed code simply isn't applied.
+    let launchApplied = false;
+    let lockedPrice: number | null = null;
+    if (data.launchCode) {
+      const { data: redeemed } = await supabaseAdmin.rpc("redeem_launch_code", {
+        _code: data.launchCode,
+      });
+      const row = Array.isArray(redeemed) ? redeemed[0] : redeemed;
+      if (row?.applied) {
+        launchApplied = true;
+        lockedPrice = row.locked_price ?? null;
+      }
+    }
+
     const { error } = await supabaseAdmin.from("business_claims").insert({
+      launch_code_used: launchApplied ? data.launchCode!.trim().toUpperCase() : null,
+      founding_member: launchApplied,
+      priority: launchApplied,
+      locked_price: lockedPrice,
       business_name: data.businessName,
       business_category: data.businessCategory ?? null,
       address: data.address ?? null,
@@ -70,5 +91,13 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       console.error("claim confirmation email failed", err);
     }
 
-    return { ok: true as const };
+    return {
+      ok: true as const,
+      launchApplied,
+      lockedPrice,
+      launchMessage:
+        data.launchCode && !launchApplied
+          ? "This launch code is no longer active, but you can still submit your claim."
+          : null,
+    };
   });

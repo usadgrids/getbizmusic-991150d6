@@ -68,6 +68,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
   useEffect(() => setCaptcha(newCaptcha()), []);
   const [captchaInput, setCaptchaInput] = useState("");
+  const [launchCode, setLaunchCode] = useState("");
+  const [launchMessage, setLaunchMessage] = useState<string | null>(null);
+  const [foundingMember, setFoundingMember] = useState(false);
 
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -168,9 +171,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           wantsAdDesign,
           notes: notes.trim() || undefined,
           sourceCategoryPage: category ? `/${category}` : "/sdcounty",
+          launchCode: launchCode.trim() || undefined,
         },
       });
-      if (!res.ok) return toast.error(res.error);
+      if (!res.ok) {
+        setLaunchMessage(null);
+        return toast.error(res.error);
+      }
+      if (res.launchMessage) {
+        setLaunchMessage(res.launchMessage);
+        setFoundingMember(false);
+      } else {
+        setLaunchMessage(null);
+        setFoundingMember(Boolean(res.launchApplied));
+      }
       setDone(true);
     } catch {
       toast.error("Submission failed. Please try again.");
@@ -188,6 +202,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           We sent a confirmation to <strong>{ownerEmail}</strong>. Our team will follow up within 3–5
           business days with the information you requested.
         </p>
+        {foundingMember && (
+          <p className="mx-auto mt-4 max-w-md rounded-xl border border-[#D4A24C] bg-[#FFF8E8] px-4 py-3 text-sm font-semibold text-[#7a5410]">
+            🎉 Launch code applied — you&rsquo;re a Founding 1,000 Member. Your $49.95/year
+            membership price is locked in permanently and your claim is at the front of our queue.
+          </p>
+        )}
+        {launchMessage && (
+          <p className="mx-auto mt-4 max-w-md rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            {launchMessage}
+          </p>
+        )}
       </section>
     );
   }
@@ -233,6 +258,22 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             value={selectedCategory}
             onChange={setSelectedCategory}
           />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Launch Code (optional)
+          </label>
+          <input
+            className={inputClass}
+            value={launchCode}
+            maxLength={40}
+            onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
+            placeholder="1000-FIRST"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            🎉 Reserved for our first 1,000 San Diego County businesses. This code may be
+            deactivated at any time once that milestone is reached.
+          </p>
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">

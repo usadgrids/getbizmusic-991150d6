@@ -497,13 +497,17 @@ export type Database = {
           business_category: string | null
           business_name: string
           created_at: string
+          founding_member: boolean
           google_place_id: string | null
           id: string
+          launch_code_used: string | null
+          locked_price: number | null
           notes: string | null
           owner_email: string
           owner_name: string
           owner_phone: string | null
           phone: string | null
+          priority: boolean
           source_category_page: string | null
           status: string
           submitted_at: string
@@ -519,13 +523,17 @@ export type Database = {
           business_category?: string | null
           business_name: string
           created_at?: string
+          founding_member?: boolean
           google_place_id?: string | null
           id?: string
+          launch_code_used?: string | null
+          locked_price?: number | null
           notes?: string | null
           owner_email: string
           owner_name: string
           owner_phone?: string | null
           phone?: string | null
+          priority?: boolean
           source_category_page?: string | null
           status?: string
           submitted_at?: string
@@ -541,13 +549,17 @@ export type Database = {
           business_category?: string | null
           business_name?: string
           created_at?: string
+          founding_member?: boolean
           google_place_id?: string | null
           id?: string
+          launch_code_used?: string | null
+          locked_price?: number | null
           notes?: string | null
           owner_email?: string
           owner_name?: string
           owner_phone?: string | null
           phone?: string | null
+          priority?: boolean
           source_category_page?: string | null
           status?: string
           submitted_at?: string
@@ -1087,6 +1099,39 @@ export type Database = {
           },
         ]
       }
+      launch_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          locked_price: number
+          redemption_count: number
+          redemption_limit: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          locked_price?: number
+          redemption_count?: number
+          redemption_limit?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          locked_price?: number
+          redemption_count?: number
+          redemption_limit?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           business_name: string | null
@@ -1249,6 +1294,13 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      redeem_launch_code: {
+        Args: { _code: string }
+        Returns: {
+          applied: boolean
+          locked_price: number
         }[]
       }
     }

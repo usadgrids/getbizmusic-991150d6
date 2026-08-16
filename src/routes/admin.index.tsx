@@ -26,6 +26,7 @@ import { markActivationPaid } from "@/lib/activation.functions";
 import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
 import { DirectorySection } from "@/components/admin/DirectorySection";
 import { VisibilityAuditSection } from "@/components/admin/VisibilityAuditSection";
+import { LaunchCodesSection } from "@/components/admin/LaunchCodesSection";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -358,6 +359,8 @@ function AdminConsole() {
         <AdRepsSection />
 
         <DesignOrdersSection />
+
+        <LaunchCodesSection />
 
         <ActivationCodesSection />
 
