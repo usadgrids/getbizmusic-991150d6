@@ -9,14 +9,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { AdSlider } from "@/components/biz/AdSlider";
 import { CityPickerButton } from "@/components/biz/CityPickerModal";
 import { z } from "zod";
-import { CategoryHubPage } from "@/components/biz/CategoryHubPage";
-import { listDirectoryPlaces, listDirectoryTopics } from "@/lib/directory.functions";
-import { getAdsByCategory } from "@/lib/ads.functions";
-import {
-  DIRECTORY_CATEGORIES,
-  isDirectoryCategory,
-  type DirectoryCategory,
-} from "@/lib/directory-categories";
+import { isDirectoryCategory } from "@/lib/directory-categories";
 
 
 export const Route = createFileRoute("/$city/")({
@@ -28,24 +21,6 @@ export const Route = createFileRoute("/$city/")({
     if (isDirectoryCategory(params.city)) {
       throw redirect({ to: "/sdcounty", statusCode: 301 });
     }
-    if (false as boolean) {
-      const category = params.city as DirectoryCategory;
-      const config = DIRECTORY_CATEGORIES[category];
-      await context.queryClient.ensureQueryData({
-        queryKey: ["directory-places", category],
-        queryFn: () => listDirectoryPlaces({ data: { category } }),
-      });
-      await context.queryClient.ensureQueryData({
-        queryKey: ["directory-topics", category],
-        queryFn: () => listDirectoryTopics({ data: { category } }),
-      });
-      await context.queryClient.ensureQueryData({
-        queryKey: ["category-ads", category],
-        queryFn: () =>
-          getAdsByCategory({ data: { industries: config.industries, seed_key: category } }),
-      });
-      return { city: null, category };
-    }
 
     const city = await getCityBySlug({ data: { slug: params.city } });
     if (!city || !city.is_active) {
@@ -55,26 +30,10 @@ export const Route = createFileRoute("/$city/")({
       queryKey: ["active-ads", params.city],
       queryFn: () => getActiveAds({ data: { city_slug: params.city } }),
     });
-    return { city, category: null };
+    return { city };
   },
   head: ({ loaderData, params }) => {
     const url = `https://getbizmusic.com/${params.city}`;
-    const category = loaderData?.category;
-    if (category) {
-      const config = DIRECTORY_CATEGORIES[category];
-      return {
-        meta: [
-          { title: config.seoTitle },
-          { name: "description", content: config.seoDescription },
-          { property: "og:title", content: config.seoTitle },
-          { property: "og:description", content: config.seoDescription },
-          { property: "og:url", content: url },
-          { property: "og:type", content: "website" },
-          { name: "twitter:card", content: "summary_large_image" },
-        ],
-        links: [{ rel: "canonical", href: url }],
-      };
-    }
     const city = loaderData?.city;
     const label = city ? `${city.name}, ${city.state}` : "";
     const title = city
@@ -95,19 +54,8 @@ export const Route = createFileRoute("/$city/")({
       links: [{ rel: "canonical", href: url }],
     };
   },
-  component: CitySegmentPage,
+  component: CityHome,
 });
-
-/** One entry point for both city pages and Knowledge Graph category hubs. */
-function CitySegmentPage() {
-  const { category } = Route.useLoaderData();
-  const search = Route.useSearch();
-  if (category)
-    return (
-      <CategoryHubPage category={category} initialCode={search.code} focusAdId={search.ad ?? null} />
-    );
-  return <CityHome />;
-}
 
 function CityHome() {
   const { city } = Route.useLoaderData();
