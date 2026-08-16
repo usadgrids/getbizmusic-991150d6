@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DIRECTORY_CATEGORY_SLUGS } from "@/lib/directory-categories";
 
 const SITE = "https://www.getbizmusic.com";
 
@@ -53,14 +52,14 @@ export const Route = createFileRoute("/sitemap.xml")({
         }
         for (const p of places ?? []) {
           urls.push({
-            loc: `${SITE}/${p.category}/${p.slug}`,
+            loc: `${SITE}/sdcounty/${p.slug}`,
             lastmod: p.updated_at ?? undefined,
             priority: "0.8",
           });
           const adNumber = p.ad_id ? adNumberById.get(p.ad_id as string) : undefined;
           if (adNumber != null) {
             urls.push({
-              loc: `${SITE}/${p.category}/ad/${adNumber}`,
+              loc: `${SITE}/ad/${adNumber}`,
               lastmod: p.updated_at ?? undefined,
               priority: "0.7",
             });
