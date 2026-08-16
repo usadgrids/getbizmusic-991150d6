@@ -426,6 +426,24 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
       )}
 
+      {results && results.length > 0 && !claimTarget && (
+        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-5 text-center">
+          <p className="text-sm font-semibold text-[#0F2A4A]">Don&rsquo;t see your business here?</p>
+          <p className="mt-1 text-xs text-gray-600">
+            If none of these match, you can add your business manually and we&rsquo;ll build your
+            listing from scratch.
+          </p>
+          <button
+            type="button"
+            onClick={startManualClaim}
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-[#0F2A4A] bg-white px-6 py-2.5 text-sm font-bold text-[#0F2A4A] hover:bg-[#0F2A4A] hover:text-white"
+          >
+            <Building2 size={16} />
+            None of these are my business — Add it manually
+          </button>
+        </div>
+      )}
+
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
           <h3 className="text-base font-bold text-[#0F2A4A]">
