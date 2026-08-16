@@ -1,0 +1,1 @@
+ALTER TABLE public.business_claims ADD COLUMN IF NOT EXISTS trade_name text;
