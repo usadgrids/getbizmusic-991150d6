@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles } from "lucide-react";
@@ -22,8 +22,13 @@ import {
 export const Route = createFileRoute("/$city/")({
   validateSearch: z.object({ code: z.string().optional(), ad: z.string().optional() }),
   loader: async ({ params, context }) => {
-    // Master template branch: Knowledge Graph category hub (/food, /beauty, …).
+    // Legacy Knowledge Graph category hubs (/food, /beauty) are now served by
+    // the unified county directory. Permanent server-side 301 so existing
+    // links, bookmarks and AI citations keep resolving.
     if (isDirectoryCategory(params.city)) {
+      throw redirect({ to: "/sdcounty", statusCode: 301 });
+    }
+    if (false as boolean) {
       const category = params.city as DirectoryCategory;
       const config = DIRECTORY_CATEGORIES[category];
       await context.queryClient.ensureQueryData({
