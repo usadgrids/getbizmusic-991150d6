@@ -29,7 +29,7 @@ export type DirectoryTopicPage = {
 
 
 export function buildTopicJsonLd(category: DirectoryCategory, topic: DirectoryTopicPage) {
-  const base = DIRECTORY_LABELS[category].basePath;
+  const base = "/sdcounty";
   const url = `${SITE}${base}/${topic.slug}`;
   const graph: unknown[] = [
     {
@@ -99,7 +99,6 @@ export function DirectoryTopicView({
   category: DirectoryCategory;
   topic: DirectoryTopicPage;
 }) {
-  const label = DIRECTORY_LABELS[category];
   // Compute "today" only after hydration — server and client may be in
   // different timezones, so deriving hours from new Date().getDay() during SSR
   // causes a hydration mismatch.
