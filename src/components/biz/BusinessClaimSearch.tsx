@@ -264,6 +264,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           We sent a confirmation to <strong>{ownerEmail}</strong>. Our team will follow up within 3–5
           business days with the information you requested.
         </p>
+        <p className="mt-4 text-sm font-medium text-[#0F2A4A]">
+          Explore our full ad and music streaming platform now at{" "}
+          <a
+            href="https://www.getbizmusic.com/sdcounty"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[#0F2A4A] underline decoration-[#D4A24C] decoration-2 underline-offset-2 hover:text-[#D4A24C]"
+          >
+            www.getbizmusic.com/sdcounty
+          </a>
+        </p>
         {foundingMember && (
           <p className="mx-auto mt-4 max-w-md rounded-xl border border-[#D4A24C] bg-[#FFF8E8] px-4 py-3 text-sm font-semibold text-[#7a5410]">
             🎉 Launch code applied — you&rsquo;re a Founding 1,000 Member. Your $49.95/year
