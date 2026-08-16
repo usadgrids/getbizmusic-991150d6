@@ -95,6 +95,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  // Legal Business Name input — auto-focused after a user views a sample ad so
+  // they drop straight into the claim flow with a "Start Here" cue.
+  const businessNameRef = useRef<HTMLInputElement | null>(null);
+  const [showStartHere, setShowStartHere] = useState(false);
+  const startHereTimer = useRef<number | null>(null);
+
+  function triggerStartHere() {
+    if (done) return;
+    businessNameRef.current?.focus();
+    setShowStartHere(true);
+    if (startHereTimer.current) window.clearTimeout(startHereTimer.current);
+    startHereTimer.current = window.setTimeout(() => setShowStartHere(false), 4000);
+  }
+
   function startManualClaim() {
     setClaimTarget({
       placeId: "",
