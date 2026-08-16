@@ -142,16 +142,16 @@ export function AdLandingView({
 
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-serif text-2xl sm:text-3xl text-[#0F2A4A] font-bold truncate">
+            <h1 className="font-serif text-2xl sm:text-3xl text-white font-bold truncate">
               {ad.business_name}
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-white/70">
               <span className="text-[#D4A24C] font-semibold">{industry}</span>
               <span className="mx-1.5">·</span>
               <span className="font-mono">#{ad.ad_number}</span>
             </p>
             {ad.tagline && (
-              <p className="mt-1 text-[#0F2A4A]/80 text-sm">{ad.tagline}</p>
+              <p className="mt-1 text-white/70 text-sm">{ad.tagline}</p>
             )}
           </div>
 
@@ -161,13 +161,14 @@ export function AdLandingView({
                 href={ad.website_url}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-[#D4A24C] px-4 py-2 text-sm font-semibold hover:bg-[#0F2A4A]/90"
+                aria-label={`Visit ${ad.business_name}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#D4A24C] text-[#0F2A4A] px-4 py-2 text-sm font-semibold hover:bg-[#e0b566]"
               >
                 <ExternalLink size={14} /> Visit website
               </a>
             )}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Share:</span>
+              <span className="text-xs text-white/60">Share:</span>
               <ShareBar
                 adNumber={ad.ad_number}
                 businessName={ad.business_name}
