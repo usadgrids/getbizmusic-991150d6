@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2, UtensilsCrossed, Scissors } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
 import { getAdsByCategory } from "@/lib/ads.functions";
 import {
-  DIRECTORY_CATEGORIES,
   DIRECTORY_CATEGORY_SLUGS,
+  DIRECTORY_CATEGORIES,
   type DirectoryCategory,
 } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
