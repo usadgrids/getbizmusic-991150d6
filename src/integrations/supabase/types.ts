@@ -497,6 +497,8 @@ export type Database = {
           business_category: string | null
           business_name: string
           created_at: string
+          design_approved: boolean
+          design_asset_url: string | null
           founding_member: boolean
           google_place_id: string | null
           id: string
@@ -523,6 +525,8 @@ export type Database = {
           business_category?: string | null
           business_name: string
           created_at?: string
+          design_approved?: boolean
+          design_asset_url?: string | null
           founding_member?: boolean
           google_place_id?: string | null
           id?: string
@@ -549,6 +553,8 @@ export type Database = {
           business_category?: string | null
           business_name?: string
           created_at?: string
+          design_approved?: boolean
+          design_asset_url?: string | null
           founding_member?: boolean
           google_place_id?: string | null
           id?: string
