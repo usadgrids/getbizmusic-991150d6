@@ -171,9 +171,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           wantsAdDesign,
           notes: notes.trim() || undefined,
           sourceCategoryPage: category ? `/${category}` : "/sdcounty",
+          launchCode: launchCode.trim() || undefined,
         },
       });
-      if (!res.ok) return toast.error(res.error);
+      if (!res.ok) {
+        setLaunchMessage(null);
+        return toast.error(res.error);
+      }
+      if (res.launchMessage) {
+        setLaunchMessage(res.launchMessage);
+        setFoundingMember(false);
+      } else {
+        setLaunchMessage(null);
+        setFoundingMember(Boolean(res.launchApplied));
+      }
       setDone(true);
     } catch {
       toast.error("Submission failed. Please try again.");
