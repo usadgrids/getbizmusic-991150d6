@@ -68,6 +68,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
   useEffect(() => setCaptcha(newCaptcha()), []);
   const [captchaInput, setCaptchaInput] = useState("");
+  const [launchCode, setLaunchCode] = useState("");
+  const [launchMessage, setLaunchMessage] = useState<string | null>(null);
+  const [foundingMember, setFoundingMember] = useState(false);
 
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
