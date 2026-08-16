@@ -25,7 +25,21 @@ function AdTileBackground() {
   });
 
   if (!ads.length) return null;
-  const tiles = Array.from({ length: 36 }, (_, i) => ads[i % ads.length]);
+  // De-duplicate by image so the mosaic shows many *different* ads, not the
+  // same graphic repeated in stripes.
+  const byImage = new Map<string, (typeof ads)[number]>();
+  for (const ad of ads) {
+    const url = ad.image_url ?? ad.id;
+    if (!byImage.has(url)) byImage.set(url, ad);
+  }
+  const unique = Array.from(byImage.values());
+  // Fisher-Yates shuffle so identical tiles are not neighbours.
+  const shuffled = [...unique];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const tiles = Array.from({ length: 36 }, (_, i) => shuffled[i % shuffled.length]);
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
