@@ -83,7 +83,7 @@ export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
           {strip.map((ad, i) => (
             <div
               key={`${ad.id}-${i}`}
-              onMouseEnter={() => setHovered(ad)}
+              onMouseEnter={() => { if (!disabled) setHovered(ad); }}
               className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md ring-1 ring-[#D4A24C]/30 sm:h-20 sm:w-36"
             >
               <img
