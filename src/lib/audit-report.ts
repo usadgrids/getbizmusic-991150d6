@@ -110,7 +110,7 @@ export function buildAuditReportHtml(audit: ReportAudit): string {
   ${
     audit.gbmKnowledgeGraph && audit.gbmKnowledgeGraph.length
       ? `<h2>What we&rsquo;ll build into your Knowledge Graph page</h2>
-         <p class="gbm-intro">These are woven into your unique GetBizMusic Knowledge Graph URL (e.g. www.getbizmusic.com/beauty/your-business) so AI answer engines can discover, trust, and recommend your business to potential customers.</p>
+         <p class="gbm-intro">These are woven into your unique GetBizMusic Knowledge Graph URL (e.g. www.getbizmusic.com/sdcounty/your-business) so AI answer engines can discover, trust, and recommend your business to potential customers.</p>
          <ul>${list(audit.gbmKnowledgeGraph)}</ul>`
       : ""
   }

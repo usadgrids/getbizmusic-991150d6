@@ -120,7 +120,7 @@ export function DirectorySection() {
         </button>
       </header>
       <p className="mt-1 text-sm text-muted-foreground">
-        Researched listings published at /food/&lt;slug&gt; and /beauty/&lt;slug&gt; with schema markup
+        Researched listings published at /sdcounty/&lt;slug&gt; with schema markup
         so ChatGPT, Perplexity and Google AI cite getbizmusic.com.
       </p>
 
