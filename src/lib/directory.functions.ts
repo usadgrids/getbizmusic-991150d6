@@ -46,6 +46,23 @@ export const listDirectoryPlaces = createServerFn({ method: "GET" })
     return { places: (rows ?? []).map((r) => toPlace(r as Record<string, unknown>)) };
   });
 
+/** Every published listing across every category — powers the /sdcounty hub. */
+export const listAllDirectoryPlaces = createServerFn({ method: "GET" }).handler(async () => {
+  const supabase = await publicClient();
+  const { data: rows, error } = await supabase
+    .from("food_places")
+    .select(PLACE_COLUMNS)
+    .eq("status", "published")
+    .order("name", { ascending: true });
+  if (error) {
+    console.error("[directory] listAllDirectoryPlaces failed", error.message);
+    return { places: [] as DirectoryPlace[] };
+  }
+  return { places: (rows ?? []).map((r) => toPlace(r as Record<string, unknown>)) };
+});
+
+
+
 export const getDirectoryPlace = createServerFn({ method: "GET" })
   .inputValidator((d) =>
     z.object({ category: categorySchema, slug: z.string().min(1) }).parse(d),
