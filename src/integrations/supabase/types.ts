@@ -821,6 +821,7 @@ export type Database = {
           id: string
           message_id: string | null
           metadata: Json | null
+          provider_message_id: string | null
           recipient_email: string
           status: string
           template_name: string
@@ -831,6 +832,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           metadata?: Json | null
+          provider_message_id?: string | null
           recipient_email: string
           status: string
           template_name: string
@@ -841,6 +843,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           metadata?: Json | null
+          provider_message_id?: string | null
           recipient_email?: string
           status?: string
           template_name?: string
