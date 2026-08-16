@@ -202,6 +202,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           We sent a confirmation to <strong>{ownerEmail}</strong>. Our team will follow up within 3–5
           business days with the information you requested.
         </p>
+        {foundingMember && (
+          <p className="mx-auto mt-4 max-w-md rounded-xl border border-[#D4A24C] bg-[#FFF8E8] px-4 py-3 text-sm font-semibold text-[#7a5410]">
+            🎉 Launch code applied — you&rsquo;re a Founding 1,000 Member. Your $49.95/year
+            membership price is locked in permanently and your claim is at the front of our queue.
+          </p>
+        )}
+        {launchMessage && (
+          <p className="mx-auto mt-4 max-w-md rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            {launchMessage}
+          </p>
+        )}
       </section>
     );
   }
