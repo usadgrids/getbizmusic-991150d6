@@ -235,28 +235,36 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Legal Business Name <span className="text-[#D4A24C]">*</span>
+          </label>
           <input
             className={inputClass}
             value={businessName}
             maxLength={120}
+            required
             onChange={(e) => setBusinessName(e.target.value)}
             placeholder="e.g. Maria's Kitchen LLC"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Zip Code</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Zip Code <span className="text-[#D4A24C]">*</span>
+          </label>
           <input
             className={inputClass}
             value={zip}
             inputMode="numeric"
             maxLength={5}
+            required
             onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
             placeholder="92101"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Business Category <span className="text-[#D4A24C]">*</span>
+          </label>
           <CategorySelect
             className={inputClass}
             value={selectedCategory}
