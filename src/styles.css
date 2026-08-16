@@ -211,8 +211,18 @@
   animation-play-state: paused;
 }
 
+/* Faster crawl for the in-form sample-ad marquee */
+.admarquee-track {
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+.admarquee-container:hover .admarquee-track {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
+  .marquee-track,
+  .admarquee-track {
     animation: none;
   }
 }
