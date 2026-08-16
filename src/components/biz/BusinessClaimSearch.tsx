@@ -8,6 +8,7 @@ import {
   BUSINESS_CATEGORY_GROUPS,
   DEFAULT_BUSINESS_CATEGORY,
 } from "@/lib/business-categories";
+import { AI_AUDIT_TERMS, AI_AUDIT_TERMS_TITLE } from "@/lib/ai-audit-terms";
 import type { DirectoryCategory } from "@/lib/directory-categories";
 
 /** Grouped <optgroup> dropdown shared by the found-on-Google and manual flows. */
@@ -61,6 +62,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const runSearch = useServerFn(searchBusinesses);
   const runClaim = useServerFn(submitBusinessClaim);
 
+  const [termsOpen, setTermsOpen] = useState(false);
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
