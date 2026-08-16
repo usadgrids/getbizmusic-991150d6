@@ -169,10 +169,11 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
     >
-      <h2 className="text-lg font-bold text-[#0F2A4A]">Find & claim your business</h2>
+      <h2 className="text-lg font-bold text-[#0F2A4A]">Find &amp; Claim Your Business</h2>
       <p className="mt-1 text-sm text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
-        you correctly.
+        you correctly. Get a free AI Visibility Audit and a free professionally designed ad — no
+        cost to see what&rsquo;s possible for your business.
       </p>
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
