@@ -169,7 +169,7 @@ function Index() {
                   className="h-16 w-16 rounded-full border border-[#D4A24C]/70 object-cover sm:h-20 sm:w-20"
                 />
                 <div className="text-center sm:text-left">
-                  <p className="font-['Great_Vibes'] text-2xl leading-tight text-white sm:text-3xl">
+                  <p className="font-['Mr_De_Haviland'] text-3xl leading-tight text-white sm:text-4xl">
                     Ralph T. Posadas
                   </p>
                   <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/60 sm:text-xs">
