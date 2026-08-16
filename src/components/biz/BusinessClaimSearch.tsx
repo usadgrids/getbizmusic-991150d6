@@ -230,8 +230,12 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D4A24C]">
-        Brick & Mortar Businesses, Independent Agencies, Mobile Businesses, Business Opportunities, and Home-Based Businesses are all welcome.
+      <p className="text-[13px] font-medium leading-relaxed text-[#0F2A4A]/80 sm:text-sm">
+        <span className="font-semibold text-[#0F2A4A]">
+          Brick & Mortar Businesses, Independent Agencies, Mobile Businesses, Business
+          Opportunities, and Home-Based Businesses
+        </span>{" "}
+        are all welcome.
       </p>
       <h2 className="mt-1 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
       <p className="mt-1 text-sm text-gray-600">
