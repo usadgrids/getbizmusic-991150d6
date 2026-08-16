@@ -273,12 +273,13 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Launch Code (optional)
+            Launch Code <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
             value={launchCode}
             maxLength={40}
+            required
             onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
             placeholder="1000-FIRST"
           />
@@ -289,13 +290,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Quick check: {captcha.a} + {captcha.b} = ?
+            Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
             value={captchaInput}
             inputMode="numeric"
             maxLength={3}
+            required
             onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
             placeholder="Answer"
           />
