@@ -4,6 +4,12 @@ import { toast } from "sonner";
 import { Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+function safeNext(next: string | undefined): string {
+  if (!next) return "/";
+  if (!next.startsWith("/") || next.startsWith("//")) return "/";
+  return next;
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
@@ -25,13 +31,6 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
 });
-
-function safeNext(next: string | undefined): string {
-  if (!next) return "/";
-  // Only allow same-origin relative paths.
-  if (!next.startsWith("/") || next.startsWith("//")) return "/";
-  return next;
-}
 
 function AuthPage() {
   const { next } = Route.useSearch();
