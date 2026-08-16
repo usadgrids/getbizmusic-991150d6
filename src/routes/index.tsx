@@ -26,47 +26,46 @@ function AdTileBackground() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Widen the pool with the showcase/placeholder ad graphics so the mosaic has
-  // enough distinct images to avoid repeats.
-  const showcase = DIRECTORY_CATEGORY_SLUGS.flatMap(
-    (s) => DIRECTORY_CATEGORY_UI[s].showcaseAds,
-  );
-  const pooled = [...ads, ...showcase];
-  if (!pooled.length) return null;
-  // De-duplicate by image so the mosaic shows many *different* ads, not the
-  // same graphic repeated in stripes.
-  const byImage = new Map<string, (typeof pooled)[number]>();
-  for (const ad of pooled) {
-    const url = ad.image_url ?? ad.id;
-    if (!byImage.has(url)) byImage.set(url, ad);
-  }
-  const unique = Array.from(byImage.values());
+  // Build the mosaic once per ad payload (memoised) — recomputing the shuffle
+  // on every render forced all tiles to remount and made the page feel slow.
+  const tiles = useMemo(() => {
+    const showcase = DIRECTORY_CATEGORY_SLUGS.flatMap(
+      (s) => DIRECTORY_CATEGORY_UI[s].showcaseAds,
+    );
+    const pooled = [...ads, ...showcase];
+    if (!pooled.length) return [];
 
-  // Fisher-Yates shuffle the unique set first for variety.
-  const shuffled = [...unique];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
+    // De-duplicate by image so the mosaic shows many *different* ads.
+    const byImage = new Map<string, (typeof pooled)[number]>();
+    for (const ad of pooled) {
+      const url = ad.image_url ?? ad.id;
+      if (!byImage.has(url)) byImage.set(url, ad);
+    }
+    const shuffled = Array.from(byImage.values());
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
 
-  // Build 36 tiles guaranteeing that no two horizontally-adjacent tiles share
-  // the same image. The grid wraps left→right at every breakpoint, so
-  // consecutive array indices are side-by-side neighbours. We greedily pick a
-  // candidate whose image differs from the previously placed tile; if the pool
-  // only has repeats left we refill it from the shuffled unique set.
-  const imgUrl = (ad: (typeof ads)[number]) => ad.image_url ?? ad.id;
-  const tiles: (typeof ads)[number][] = [];
-  let lastUrl: string | null = null;
-  let pool = [...shuffled];
-  for (let i = 0; i < 36; i++) {
-    let idx = pool.findIndex((a) => imgUrl(a) !== lastUrl);
-    if (idx === -1) idx = 0; // only one unique image available
-    const ad = pool[idx];
-    tiles.push(ad);
-    lastUrl = imgUrl(ad);
-    pool.splice(idx, 1);
-    if (pool.length === 0) pool = [...shuffled];
-  }
+    // 18 tiles is enough to fill the panel backdrop while keeping image
+    // decoding cheap; no two horizontally-adjacent tiles repeat.
+    const imgUrl = (ad: (typeof pooled)[number]) => ad.image_url ?? ad.id;
+    const out: (typeof pooled)[number][] = [];
+    let lastUrl: string | null = null;
+    let pool = [...shuffled];
+    for (let i = 0; i < 18; i++) {
+      let idx = pool.findIndex((a) => imgUrl(a) !== lastUrl);
+      if (idx === -1) idx = 0;
+      const ad = pool[idx];
+      out.push(ad);
+      lastUrl = imgUrl(ad);
+      pool.splice(idx, 1);
+      if (pool.length === 0) pool = [...shuffled];
+    }
+    return out;
+  }, [ads]);
+
+  if (!tiles.length) return null;
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -77,6 +76,7 @@ function AdTileBackground() {
             src={ad.image_url}
             alt=""
             loading="lazy"
+            decoding="async"
             className="aspect-[4/3] h-full w-full rounded-md object-cover"
           />
         ))}
