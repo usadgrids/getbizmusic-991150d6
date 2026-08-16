@@ -21,6 +21,7 @@ const SD_COUNTY_BOUNDS = {
 export async function searchSanDiegoBusinesses(
   businessName: string,
   zip: string,
+  category?: string,
 ): Promise<PlaceSearchResponse> {
   // Validate ZIP BEFORE spending an API call.
   if (!isSanDiegoCountyZip(zip)) {
@@ -32,6 +33,10 @@ export async function searchSanDiegoBusinesses(
     return { served: true, message: "Business search is not configured yet.", results: [] };
   }
 
+  // Category is a relevance hint inside the free-text query only — never a
+  // hard filter, since Google's own "type" field is unreliable.
+  const categoryHint = category && category.toLowerCase() !== "other" ? ` ${category}` : "";
+
   const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
     headers: {
@@ -41,7 +46,7 @@ export async function searchSanDiegoBusinesses(
         "places.id,places.displayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber",
     },
     body: JSON.stringify({
-      textQuery: `${businessName} ${zip}`,
+      textQuery: `${businessName}${categoryHint} ${zip}`,
       maxResultCount: 10,
       locationRestriction: { rectangle: SD_COUNTY_BOUNDS },
     }),
