@@ -51,7 +51,6 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicDirectoryRefreshRouteImport } from './routes/api/public/directory/refresh'
 import { Route as ApiPublicDirectoryAnswersDotjsonRouteImport } from './routes/api/public/directory/answers[.]json'
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
-import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
 import { Route as ApiPublicDirectoryCategorySlugRouteImport } from './routes/api/public/directory/$category.$slug'
 
@@ -275,12 +274,6 @@ const ApiPublicDirectoryCategoryRoute =
     path: '/api/public/directory/$category',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicCampaignsBrevoWebhookRoute =
-  ApiPublicCampaignsBrevoWebhookRouteImport.update({
-    id: '/api/public/campaigns/brevo-webhook',
-    path: '/api/public/campaigns/brevo-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicAdImageAdNumberRoute =
   ApiPublicAdImageAdNumberRouteImport.update({
     id: '/api/public/ad-image/$adNumber',
@@ -329,7 +322,6 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -374,7 +366,6 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -422,7 +413,6 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -471,7 +461,6 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -516,7 +505,6 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -563,7 +551,6 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -603,7 +590,6 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
-  ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
   ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
   ApiPublicDirectoryAnswersDotjsonRoute: typeof ApiPublicDirectoryAnswersDotjsonRoute
   ApiPublicDirectoryRefreshRoute: typeof ApiPublicDirectoryRefreshRoute
@@ -911,13 +897,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDirectoryCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/campaigns/brevo-webhook': {
-      id: '/api/public/campaigns/brevo-webhook'
-      path: '/api/public/campaigns/brevo-webhook'
-      fullPath: '/api/public/campaigns/brevo-webhook'
-      preLoaderRoute: typeof ApiPublicCampaignsBrevoWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/ad-image/$adNumber': {
       id: '/api/public/ad-image/$adNumber'
       path: '/api/public/ad-image/$adNumber'
@@ -1018,7 +997,6 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
-  ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
   ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
   ApiPublicDirectoryAnswersDotjsonRoute: ApiPublicDirectoryAnswersDotjsonRoute,
   ApiPublicDirectoryRefreshRoute: ApiPublicDirectoryRefreshRoute,
