@@ -74,7 +74,7 @@ function ArtworkUploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F7FA] py-10 px-4">
+    <main className="min-h-screen bg-[#0F2A4A] text-white py-10 px-4">
       <div className="max-w-lg mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
         {state.loading ? (
           <div className="flex items-center justify-center gap-2 text-gray-500 py-8">

@@ -80,7 +80,7 @@ function DesignPage() {
         <main className="max-w-3xl mx-auto px-4 py-8">
           <button
             onClick={() => setClientSecret(null)}
-            className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4"
+            className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4"
           >
             <ArrowLeft size={14} /> Back
           </button>
@@ -99,7 +99,7 @@ function DesignPage() {
     <div className="min-h-screen bg-[#0F2A4A] text-white">
       <PaymentTestModeBanner />
       <main className="max-w-3xl mx-auto px-4 py-10">
-        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+        <Link to="/" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
 
@@ -107,10 +107,10 @@ function DesignPage() {
           <div className="inline-flex items-center gap-2 bg-[#FFF8EC] border border-[#D4A24C]/60 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-[#0F2A4A]">
             <Sparkles size={14} className="text-[#D4A24C]" /> Done-For-You
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0F2A4A] mt-4">
+          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mt-4">
             Pro Ad Design — Guaranteed To Meet Spec
           </h1>
-          <p className="text-gray-600 mt-3 max-w-xl mx-auto">
+          <p className="text-white/70 mt-3 max-w-xl mx-auto">
             Our team will professionally design your BizSpot Music–compliant ad for just{" "}
             <strong>$49.95</strong>. Delivered within <strong>72 hours</strong>, with unlimited
             revisions until final approval.

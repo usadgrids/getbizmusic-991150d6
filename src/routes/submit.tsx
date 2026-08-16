@@ -271,8 +271,8 @@ function SubmitPage() {
     return (
       <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-20 text-center">
-          <Loader2 className="mx-auto animate-spin text-[#0F2A4A]" size={36} />
-          <p className="mt-3 text-gray-600">Verifying your payment…</p>
+          <Loader2 className="mx-auto animate-spin text-[#D4A24C]" size={36} />
+          <p className="mt-3 text-white/70">Verifying your payment…</p>
         </main>
         <BizFooter />
       </div>
@@ -286,8 +286,8 @@ function SubmitPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 text-amber-700 mb-4">
             <Lock size={28} />
           </div>
-          <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Payment Required</h1>
-          <p className="text-gray-600 mt-2">{verify.reason ?? "You need to pay before submitting your ad."}</p>
+          <h1 className="font-serif text-2xl font-bold text-white">Payment Required</h1>
+          <p className="text-white/70 mt-2">{verify.reason ?? "You need to pay before submitting your ad."}</p>
           <Link
             to="/pricing"
             className="inline-block mt-6 bg-[#D4A24C] text-[#0F2A4A] font-bold px-5 py-2.5 rounded-md hover:bg-[#e0b266]"
@@ -304,9 +304,9 @@ function SubmitPage() {
     return (
       <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-16 text-center">
-          <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Link Already Used</h1>
-          <p className="text-gray-600 mt-2">This submission link has already been used. Your ad is in the review queue.</p>
-          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+          <h1 className="font-serif text-2xl font-bold text-white">Link Already Used</h1>
+          <p className="text-white/70 mt-2">This submission link has already been used. Your ad is in the review queue.</p>
+          <Link to="/" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">← Back to home</Link>
         </main>
         <BizFooter />
       </div>
@@ -320,12 +320,12 @@ function SubmitPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-700 mb-4">
             <Check size={32} />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Reminder Sent!</h1>
-          <p className="text-gray-600 mt-3">
+          <h1 className="font-serif text-3xl font-bold text-white">Reminder Sent!</h1>
+          <p className="text-white/70 mt-3">
             We've emailed your private submission link to <strong>{verify.email}</strong>.
             Your paid spot is saved — submit whenever your 1216×896 image is ready.
           </p>
-          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+          <Link to="/" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">← Back to home</Link>
         </main>
         <BizFooter />
       </div>
@@ -339,13 +339,13 @@ function SubmitPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
             <Check size={32} />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Submission Received!</h1>
-          <p className="text-gray-600 mt-3">
+          <h1 className="font-serif text-3xl font-bold text-white">Submission Received!</h1>
+          <p className="text-white/70 mt-3">
             Your ad is in our review queue — we check every submission within 24 hours.
             We've sent a confirmation email to <strong>{verify.email}</strong>. Once approved,
             you'll get a second email with your unique ad number and shareable link.
           </p>
-          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+          <Link to="/" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">← Back to home</Link>
         </main>
         <BizFooter />
       </div>
@@ -362,10 +362,10 @@ function SubmitPage() {
   return (
     <div className="min-h-screen bg-[#0F2A4A] text-white">
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+        <Link to="/" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
-        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">
+        <h1 className="font-serif text-3xl font-bold text-white">
           {isMinistry ? "Submit Your Ministry Ad (Free)" : "Submit Your Business Ad"}
         </h1>
         <div className="mt-3 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-3 py-1.5 rounded-full">
