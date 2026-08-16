@@ -25,12 +25,9 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const urls: Array<{ loc: string; lastmod?: string; priority: string }> = [
           { loc: `${SITE}/`, priority: "1.0" },
-          ...DIRECTORY_CATEGORY_SLUGS.map((slug) => ({
-            loc: `${SITE}/${slug}`,
-            priority: "0.9",
-          })),
+          { loc: `${SITE}/sdcounty`, priority: "0.9" },
           ...(topics ?? []).map((t) => ({
-            loc: `${SITE}/${t.category}/${t.topic_slug}`,
+            loc: `${SITE}/sdcounty/${t.topic_slug}`,
             lastmod: (t.updated_at as string | null) ?? undefined,
             priority: "0.85",
           })),
