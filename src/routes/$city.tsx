@@ -12,20 +12,20 @@ export const Route = createFileRoute("/$city")({
     return { city };
   },
   errorComponent: ({ error }) => (
-    <div className="min-h-screen flex items-center justify-center p-8 text-center bg-[#f5f6f8]">
+    <div className="min-h-screen flex items-center justify-center p-8 text-center bg-[#0F2A4A] text-white">
       <div>
-        <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
-        <p className="text-sm text-gray-600">{error.message}</p>
+        <h1 className="text-2xl font-bold mb-2 text-white">Something went wrong</h1>
+        <p className="text-sm text-white/70">{error.message}</p>
       </div>
     </div>
   ),
   notFoundComponent: () => (
-    <div className="min-h-screen flex items-center justify-center p-8 text-center bg-[#f5f6f8]">
+    <div className="min-h-screen flex items-center justify-center p-8 text-center bg-[#0F2A4A] text-white">
       <div>
-        <h1 className="text-2xl font-bold mb-2">Page not found</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-2xl font-bold mb-2 text-white">Page not found</h1>
+        <p className="text-sm text-white/70">
           We don't have a page for this yet.{" "}
-          <a href="/" className="text-blue-600 underline">Browse active cities</a>.
+          <a href="/" className="text-[#D4A24C] underline">Browse active cities</a>.
         </p>
       </div>
     </div>

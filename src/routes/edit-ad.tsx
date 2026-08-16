@@ -146,10 +146,10 @@ function EditAdPage() {
 
   if (state.status === "checking") {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-20 text-center">
-          <Loader2 className="mx-auto animate-spin text-[#0F2A4A]" size={36} />
-          <p className="mt-3 text-gray-600">Loading your ad…</p>
+          <Loader2 className="mx-auto animate-spin text-[#D4A24C]" size={36} />
+          <p className="mt-3 text-white/70">Loading your ad…</p>
         </main>
         <BizFooter />
       </div>
@@ -158,15 +158,15 @@ function EditAdPage() {
 
   if (state.status === "bad") {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 text-amber-700 mb-4">
             <Lock size={28} />
           </div>
-          <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Edit Link Invalid</h1>
-          <p className="text-gray-600 mt-2">{state.reason || "This edit link is invalid or expired."}</p>
-          <p className="text-gray-500 mt-2 text-sm">Check the approval email we sent — it contains your permanent edit link.</p>
-          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+          <h1 className="font-serif text-2xl font-bold text-white">Edit Link Invalid</h1>
+          <p className="text-white/70 mt-2">{state.reason || "This edit link is invalid or expired."}</p>
+          <p className="text-white/60 mt-2 text-sm">Check the approval email we sent — it contains your permanent edit link.</p>
+          <Link to="/" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">← Back to home</Link>
         </main>
         <BizFooter />
       </div>
@@ -175,18 +175,18 @@ function EditAdPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
             <Check size={32} />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Edits Submitted!</h1>
-          <p className="text-gray-600 mt-3">
+          <h1 className="font-serif text-3xl font-bold text-white">Edits Submitted!</h1>
+          <p className="text-white/70 mt-3">
             Your changes are in the review queue — we review every edit within <strong>24 hours</strong>.
             Your current ad stays live during review. You'll get a confirmation email at{" "}
             <strong>{state.ad && "contact" in state ? state.contact.email : ""}</strong> once your edits are approved.
           </p>
-          <Link to="/" className="inline-block mt-6 text-[#0F2A4A] font-semibold hover:underline">← Back to home</Link>
+          <Link to="/" className="inline-block mt-6 text-[#D4A24C] font-semibold hover:underline">← Back to home</Link>
         </main>
         <BizFooter />
       </div>
@@ -196,13 +196,13 @@ function EditAdPage() {
   const { ad, contact, pendingEdit } = state;
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+        <Link to="/" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
-        <h1 className="font-serif text-3xl font-bold text-[#0F2A4A]">Edit Your Ad</h1>
-        <div className="mt-2 text-sm text-gray-600">
+        <h1 className="font-serif text-3xl font-bold text-white">Edit Your Ad</h1>
+        <div className="mt-2 text-sm text-white/70">
           Editing ad <strong>#{ad.ad_number}</strong> — <em>{ad.business_name}</em>
         </div>
 

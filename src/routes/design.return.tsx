@@ -129,31 +129,31 @@ function DesignReturn() {
 
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <main className="max-w-2xl mx-auto px-4 py-10">
-        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+        <Link to="/" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
 
         {state.status === "loading" && (
           <div className="text-center py-16">
-            <Loader2 className="mx-auto animate-spin text-[#0F2A4A]" size={40} />
-            <p className="mt-3 text-gray-600">Confirming your payment…</p>
+            <Loader2 className="mx-auto animate-spin text-[#D4A24C]" size={40} />
+            <p className="mt-3 text-white/70">Confirming your payment…</p>
           </div>
         )}
 
         {state.status === "pending" && (
           <div className="text-center py-16">
-            <Loader2 className="mx-auto text-[#0F2A4A]" size={40} />
-            <h1 className="mt-4 font-serif text-2xl font-bold text-[#0F2A4A]">Payment Processing</h1>
-            <p className="text-gray-600 mt-3">{state.message}</p>
+            <Loader2 className="mx-auto text-[#D4A24C]" size={40} />
+            <h1 className="mt-4 font-serif text-2xl font-bold text-white">Payment Processing</h1>
+            <p className="text-white/70 mt-3">{state.message}</p>
           </div>
         )}
 
         {state.status === "error" && (
           <div className="text-center py-16">
-            <h1 className="font-serif text-2xl font-bold text-red-600">Something went wrong</h1>
-            <p className="text-gray-600 mt-2">{state.message}</p>
+            <h1 className="font-serif text-2xl font-bold text-red-400">Something went wrong</h1>
+            <p className="text-white/70 mt-2">{state.message}</p>
           </div>
         )}
 
@@ -185,8 +185,8 @@ function DesignReturn() {
               </p>
             </div>
 
-            <h2 className="mt-8 font-serif text-2xl font-bold text-[#0F2A4A]">Next step: send us your business info</h2>
-            <p className="text-gray-600 mt-2">
+            <h2 className="mt-8 font-serif text-2xl font-bold text-white">Next step: send us your business info</h2>
+            <p className="text-white/70 mt-2">
               Takes 2–3 minutes. We'll design your ad and email it back within 72 hours for your approval or revision.
             </p>
 

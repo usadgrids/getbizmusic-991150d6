@@ -218,12 +218,12 @@ function PricingPage() {
 
   if (clientSecret) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <PaymentTestModeBanner />
         <main className="max-w-3xl mx-auto px-4 py-8">
           <button
             onClick={() => setClientSecret(null)}
-            className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4"
+            className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4"
           >
             <ArrowLeft size={14} /> Back to plans
           </button>
@@ -252,12 +252,12 @@ function PricingPage() {
       );
     };
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <PaymentTestModeBanner />
         <main className="max-w-2xl mx-auto px-4 py-8">
           <button
             onClick={() => { setZelleResult(null); }}
-            className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4"
+            className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4"
           >
             <ArrowLeft size={14} /> Back to plans
           </button>
@@ -349,16 +349,16 @@ function PricingPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <PaymentTestModeBanner />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
+        <Link to="/" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home
         </Link>
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0F2A4A] text-center">
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white text-center">
           Pick Your Annual Ad Plan
         </h1>
-        <p className="text-center text-gray-600 mt-2 max-w-xl mx-auto">
+        <p className="text-center text-white/70 mt-2 max-w-xl mx-auto">
           Pay first, then submit your ad. We email you a one-time submission link the moment your payment clears.
         </p>
 

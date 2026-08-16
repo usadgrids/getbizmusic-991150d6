@@ -598,7 +598,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   const category = city as DirectoryCategory;
   const config = DIRECTORY_CATEGORIES[category];
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <PaymentTestModeBanner />
       <header className="bg-[#0F2A4A] text-white">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
