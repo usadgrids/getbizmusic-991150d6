@@ -1,11 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { searchBusinesses } from "@/lib/places.functions";
 import { submitBusinessClaim } from "@/lib/claims.functions";
-import { claimCategoryOptions } from "@/lib/claim-categories";
+import {
+  BUSINESS_CATEGORY_GROUPS,
+  DEFAULT_BUSINESS_CATEGORY,
+} from "@/lib/business-categories";
 import type { DirectoryCategory } from "@/lib/directory-categories";
+
+/** Grouped <optgroup> dropdown shared by the found-on-Google and manual flows. */
+function CategorySelect({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  className: string;
+}) {
+  return (
+    <select className={className} value={value} onChange={(e) => onChange(e.target.value)}>
+      {BUSINESS_CATEGORY_GROUPS.map((group) => (
+        <optgroup key={group.label} label={group.label}>
+          {group.options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
 
 type PlaceResult = {
   placeId: string;
@@ -29,15 +57,13 @@ const inputClass =
  * pages. Drop it on /food, /beauty or any future category page — the dropdown
  * options and stored source page follow the `category` prop.
  */
-export function BusinessClaimSearch({ category }: { category: DirectoryCategory }) {
-  const options = useMemo(() => claimCategoryOptions(category), [category]);
-
+export function BusinessClaimSearch({ category }: { category?: DirectoryCategory }) {
   const runSearch = useServerFn(searchBusinesses);
   const runClaim = useServerFn(submitBusinessClaim);
 
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(options[0] ?? "Other");
+  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
   // Seeded after mount so SSR and client markup match (Math.random differs).
   const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
   useEffect(() => setCaptcha(newCaptcha()), []);
@@ -141,7 +167,7 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
           wantsAiAudit,
           wantsAdDesign,
           notes: notes.trim() || undefined,
-          sourceCategoryPage: `/${category}`,
+          sourceCategoryPage: category ? `/${category}` : "/sdcounty",
         },
       });
       if (!res.ok) return toast.error(res.error);
@@ -202,17 +228,11 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
-          <select
+          <CategorySelect
             className={inputClass}
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {options.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedCategory}
+          />
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
@@ -339,7 +359,11 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
-              <input className={`${inputClass} bg-gray-50`} value={selectedCategory} readOnly />
+              <CategorySelect
+                className={inputClass}
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Name</label>

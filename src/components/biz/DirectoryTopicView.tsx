@@ -29,7 +29,7 @@ export type DirectoryTopicPage = {
 
 
 export function buildTopicJsonLd(category: DirectoryCategory, topic: DirectoryTopicPage) {
-  const base = DIRECTORY_LABELS[category].basePath;
+  const base = "/sdcounty";
   const url = `${SITE}${base}/${topic.slug}`;
   const graph: unknown[] = [
     {
@@ -99,7 +99,6 @@ export function DirectoryTopicView({
   category: DirectoryCategory;
   topic: DirectoryTopicPage;
 }) {
-  const label = DIRECTORY_LABELS[category];
   // Compute "today" only after hydration — server and client may be in
   // different timezones, so deriving hours from new Date().getDay() during SSR
   // causes a hydration mismatch.
@@ -127,11 +126,10 @@ export function DirectoryTopicView({
 
       <main className="mx-auto w-full max-w-4xl px-4 py-10">
         <Link
-          to="/$city"
-          params={{ city: category }}
+          to="/sdcounty"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          {label.title}
+          San Diego County Directory
         </Link>
 
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -169,8 +167,8 @@ export function DirectoryTopicView({
                   <tr key={place.id} className="border-t border-border align-top">
                     <td className="px-4 py-3">
                       <Link
-                        to="/$city/$slug"
-                        params={{ city: category, slug: place.slug }}
+                        to="/sdcounty/$slug"
+                        params={{ slug: place.slug }}
                         className="font-semibold text-primary underline underline-offset-2"
                       >
                         {place.name}

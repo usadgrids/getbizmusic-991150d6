@@ -26,8 +26,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as CityRouteImport } from './routes/$city'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SdcountyIndexRouteImport } from './routes/sdcounty.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
+import { Route as SdcountySlugRouteImport } from './routes/sdcounty.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -141,6 +143,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SdcountyIndexRoute = SdcountyIndexRouteImport.update({
+  id: '/sdcounty/',
+  path: '/sdcounty/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -150,6 +157,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CityRoute,
+} as any)
+const SdcountySlugRoute = SdcountySlugRouteImport.update({
+  id: '/sdcounty/$slug',
+  path: '/sdcounty/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -329,8 +341,10 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/sdcounty/': typeof SdcountyIndexRoute
   '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -375,8 +389,10 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/sdcounty': typeof SdcountyIndexRoute
   '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -424,8 +440,10 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/sdcounty/': typeof SdcountyIndexRoute
   '/$city/ad/$adNumber': typeof CityAdAdNumberRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -474,8 +492,10 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city/'
     | '/admin/'
+    | '/sdcounty/'
     | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -520,8 +540,10 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city'
     | '/admin'
+    | '/sdcounty'
     | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -568,8 +590,10 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city/'
     | '/admin/'
+    | '/sdcounty/'
     | '/$city/ad/$adNumber'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -612,6 +636,8 @@ export interface RootRouteChildren {
   AdAdNumberRoute: typeof AdAdNumberRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  SdcountySlugRoute: typeof SdcountySlugRoute
+  SdcountyIndexRoute: typeof SdcountyIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -749,6 +775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sdcounty/': {
+      id: '/sdcounty/'
+      path: '/sdcounty'
+      fullPath: '/sdcounty/'
+      preLoaderRoute: typeof SdcountyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -762,6 +795,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$city/'
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
+    }
+    '/sdcounty/$slug': {
+      id: '/sdcounty/$slug'
+      path: '/sdcounty/$slug'
+      fullPath: '/sdcounty/$slug'
+      preLoaderRoute: typeof SdcountySlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -1035,6 +1075,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdAdNumberRoute: AdAdNumberRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  SdcountySlugRoute: SdcountySlugRoute,
+  SdcountyIndexRoute: SdcountyIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

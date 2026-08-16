@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DIRECTORY_CATEGORY_SLUGS } from "@/lib/directory-categories";
 
 const SITE = "https://www.getbizmusic.com";
 
@@ -25,12 +24,9 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const urls: Array<{ loc: string; lastmod?: string; priority: string }> = [
           { loc: `${SITE}/`, priority: "1.0" },
-          ...DIRECTORY_CATEGORY_SLUGS.map((slug) => ({
-            loc: `${SITE}/${slug}`,
-            priority: "0.9",
-          })),
+          { loc: `${SITE}/sdcounty`, priority: "0.9" },
           ...(topics ?? []).map((t) => ({
-            loc: `${SITE}/${t.category}/${t.topic_slug}`,
+            loc: `${SITE}/sdcounty/${t.topic_slug}`,
             lastmod: (t.updated_at as string | null) ?? undefined,
             priority: "0.85",
           })),
@@ -56,14 +52,14 @@ export const Route = createFileRoute("/sitemap.xml")({
         }
         for (const p of places ?? []) {
           urls.push({
-            loc: `${SITE}/${p.category}/${p.slug}`,
+            loc: `${SITE}/sdcounty/${p.slug}`,
             lastmod: p.updated_at ?? undefined,
             priority: "0.8",
           });
           const adNumber = p.ad_id ? adNumberById.get(p.ad_id as string) : undefined;
           if (adNumber != null) {
             urls.push({
-              loc: `${SITE}/${p.category}/ad/${adNumber}`,
+              loc: `${SITE}/ad/${adNumber}`,
               lastmod: p.updated_at ?? undefined,
               priority: "0.7",
             });

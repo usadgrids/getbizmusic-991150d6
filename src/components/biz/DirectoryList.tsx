@@ -7,16 +7,16 @@ export function DirectoryList({
   category,
   places,
 }: {
-  category: DirectoryCategory;
+  category?: DirectoryCategory;
   places: DirectoryPlace[];
 }) {
   if (!places.length) return null;
-  const label = DIRECTORY_LABELS[category];
+  const heading = category ? DIRECTORY_LABELS[category].title : "San Diego County";
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-10" aria-labelledby="directory-heading">
       <h2 id="directory-heading" className="text-2xl font-bold tracking-tight text-foreground">
-        BizMusic Knowledge Graph — {label.title}, San Diego County
+        BizMusic Knowledge Graph — {heading}
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Verified hours, services and answers for the businesses advertising on GetBizMusic.
@@ -27,8 +27,8 @@ export function DirectoryList({
         {places.map((place) => (
           <li key={place.id}>
             <Link
-              to="/$city/$slug"
-              params={{ city: category, slug: place.slug }}
+              to="/sdcounty/$slug"
+              params={{ slug: place.slug }}
 
               className="flex h-full flex-col rounded-xl border border-border bg-card p-4 transition hover:border-primary hover:shadow-md"
             >
