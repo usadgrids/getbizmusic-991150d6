@@ -36,7 +36,7 @@ export function AdMarquee() {
   );
   const pooled: Ad[] = [
     ...ads.map((a) => ({ id: a.id, image_url: a.image_url })),
-    ...showcase.map((s, i) => ({ id: `showcase-${i}`, image_url: s })),
+    ...showcase.map((s) => ({ id: s.id, image_url: s.image_url })),
   ];
 
   // De-duplicate by image_url so the crawl shows many distinct ads.
