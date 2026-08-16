@@ -297,3 +297,14 @@
   }
 }
 
+
+/* Horizontal carousels/marquees keep their own gesture handling. */
+.marquee-container,
+.marquee-track,
+.admarquee-container,
+.admarquee-track,
+[data-allow-x-pan],
+.overflow-x-auto,
+.overflow-x-scroll {
+  touch-action: auto;
+}
