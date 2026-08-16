@@ -424,12 +424,14 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
               What happens next
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[#7a5410]">
-              We&rsquo;ll prepare your free report and/or ad design within 3–5 business days. Once
-              ready, you&rsquo;ll get to review everything first. If you&rsquo;d like to AI Answer
-              Engine optimize your business and publish your approved ad design online, you&rsquo;ll
-              have the option to become a GetBizMusic.com AI Business Alliance Member for
-              $49.95/year. There&rsquo;s no obligation — the audit and design are yours to see for
-              free either way. Pricing subject to change without notice.
+              We&rsquo;ll prepare your free AI Visibility Audit and/or ad design within 3–5 business
+              days. You&rsquo;ll get to review and approve your ad design completely free — no cost,
+              no obligation. Your AI Visibility Audit and professional ad design normally run{" "}
+              <span className="font-semibold text-gray-400 line-through">$149.95</span>{" "}
+              <span className="font-semibold text-[#0F2A4A]">— but as one of our by-invitation local
+              businesses, you get full AI Business Alliance Membership, including publishing and AI
+              Answer Engine optimization, for just $49.95/year.</span> Pricing subject to change
+              without notice.
             </p>
           </div>
 

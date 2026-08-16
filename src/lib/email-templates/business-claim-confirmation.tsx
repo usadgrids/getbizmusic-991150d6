@@ -51,8 +51,11 @@ const BusinessClaimConfirmationEmail = ({
           <Text style={p}>
             Once you&rsquo;ve seen your free audit and ad design, you&rsquo;ll have the option — never
             a requirement — to AI Answer Engine optimize your business and publish your approved ad
-            online as a GetBizMusic.com AI Business Alliance Member for $49.95/year (pricing subject
-            to change without notice). The audit and design are yours to see for free either way.
+            online as a GetBizMusic.com AI Business Alliance Member. Your AI Visibility Audit and
+            professional ad design normally run $149.95 — but as one of our by-invitation local
+            businesses, you get full AI Business Alliance Membership, including publishing and AI
+            Answer Engine optimization, for just $49.95/year (pricing subject to change without
+            notice). The audit and design are yours to see for free either way.
           </Text>
           <Hr style={hr} />
           <Text style={footer}>
