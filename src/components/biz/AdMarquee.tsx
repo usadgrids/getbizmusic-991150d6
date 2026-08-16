@@ -66,17 +66,14 @@ export function AdMarquee() {
       <div
         className="admarquee-container relative mt-5 overflow-hidden rounded-xl border border-[#D4A24C]/30 bg-[#0F2A4A]/40"
         aria-label="Sample business ads"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
         <div className="admarquee-track flex w-max gap-2 px-2 py-2">
           {strip.map((ad, i) => (
-            <button
+            <div
               key={`${ad.id}-${i}`}
-              type="button"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-              onFocus={() => setHovered(true)}
-              onBlur={() => setHovered(false)}
-              className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md ring-1 ring-[#D4A24C]/30 transition hover:ring-2 hover:ring-[#D4A24C] sm:h-20 sm:w-36"
+              className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md ring-1 ring-[#D4A24C]/30 sm:h-20 sm:w-36"
             >
               <img
                 src={ad.image_url}
@@ -85,7 +82,7 @@ export function AdMarquee() {
                 className="h-full w-full object-cover"
                 draggable={false}
               />
-            </button>
+            </div>
           ))}
         </div>
         {/* Gold edge fades */}
