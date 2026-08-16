@@ -489,6 +489,69 @@ export type Database = {
           },
         ]
       }
+      business_claims: {
+        Row: {
+          address: string | null
+          business_category: string | null
+          business_name: string
+          created_at: string
+          google_place_id: string | null
+          id: string
+          notes: string | null
+          owner_email: string
+          owner_name: string
+          owner_phone: string | null
+          phone: string | null
+          source_category_page: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          wants_ad_design: boolean
+          wants_ai_audit: boolean
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_category?: string | null
+          business_name: string
+          created_at?: string
+          google_place_id?: string | null
+          id?: string
+          notes?: string | null
+          owner_email: string
+          owner_name: string
+          owner_phone?: string | null
+          phone?: string | null
+          source_category_page?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          wants_ad_design?: boolean
+          wants_ai_audit?: boolean
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_category?: string | null
+          business_name?: string
+          created_at?: string
+          google_place_id?: string | null
+          id?: string
+          notes?: string | null
+          owner_email?: string
+          owner_name?: string
+          owner_phone?: string | null
+          phone?: string | null
+          source_category_page?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          wants_ad_design?: boolean
+          wants_ai_audit?: boolean
+          website?: string | null
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           created_at: string

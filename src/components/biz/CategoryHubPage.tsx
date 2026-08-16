@@ -14,6 +14,7 @@ import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 
 import { PageShareBar } from "@/components/biz/PageShareBar";
 import { FloatingHomeButton, FloatingBackButton } from "@/components/biz/FloatingHomeButton";
+import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
 import { DIRECTORY_CATEGORIES, type DirectoryCategory } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 
@@ -164,6 +165,8 @@ export function CategoryHubPage({
             <p className="mt-2 text-sm text-gray-600">{config.emptyBody}</p>
           </section>
         )}
+        <BusinessClaimSearch category={category} />
+
         {!!topics.length && (
           <section
             aria-label="Popular questions"
