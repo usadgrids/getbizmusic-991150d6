@@ -123,6 +123,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     }
 
     setSearching(true);
+    setSearched(true);
     setMessage(null);
     setResults(null);
     setClaimTarget(null);
