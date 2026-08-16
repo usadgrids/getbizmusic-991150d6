@@ -269,7 +269,7 @@ function SubmitPage() {
   // --- Guard states ---
   if (verify.status === "checking") {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-20 text-center">
           <Loader2 className="mx-auto animate-spin text-[#0F2A4A]" size={36} />
           <p className="mt-3 text-gray-600">Verifying your payment…</p>
@@ -281,7 +281,7 @@ function SubmitPage() {
 
   if (verify.status === "bad") {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 text-amber-700 mb-4">
             <Lock size={28} />
@@ -302,7 +302,7 @@ function SubmitPage() {
 
   if (verify.tokenUsed) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-xl mx-auto px-4 py-16 text-center">
           <h1 className="font-serif text-2xl font-bold text-[#0F2A4A]">Link Already Used</h1>
           <p className="text-gray-600 mt-2">This submission link has already been used. Your ad is in the review queue.</p>
@@ -315,7 +315,7 @@ function SubmitPage() {
 
   if (reminderSent) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-700 mb-4">
             <Check size={32} />
@@ -334,7 +334,7 @@ function SubmitPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
             <Check size={32} />
@@ -360,7 +360,7 @@ function SubmitPage() {
   const designPending = verify.designAddon === true;
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <main className="max-w-3xl mx-auto px-4 py-8">
         <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Back to home

@@ -75,7 +75,7 @@ function DesignPage() {
 
   if (clientSecret) {
     return (
-      <div className="min-h-screen bg-[#f5f6f8]">
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
         <PaymentTestModeBanner />
         <main className="max-w-3xl mx-auto px-4 py-8">
           <button
@@ -96,7 +96,7 @@ function DesignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-h-screen bg-[#0F2A4A] text-white">
       <PaymentTestModeBanner />
       <main className="max-w-3xl mx-auto px-4 py-10">
         <Link to="/" className="text-sm text-gray-500 hover:text-[#0F2A4A] inline-flex items-center gap-1 mb-4">
