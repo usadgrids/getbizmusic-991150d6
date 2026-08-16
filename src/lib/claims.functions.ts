@@ -7,7 +7,11 @@ const claimSchema = z.object({
   businessName: z.string().trim().min(2).max(200),
   tradeName: z.string().trim().max(200).optional(),
   businessCategory: z.string().trim().max(80).optional(),
-  address: z.string().trim().max(300).optional(),
+  address: z.string().trim().min(5).max(300),
+  businessType: z.enum(["physical", "home_based", "mobile"]).default("physical"),
+  addressIsPrivate: z.boolean().default(false),
+  serviceAreaLabel: z.string().trim().max(160).optional(),
+
   website: z.string().trim().max(300).optional(),
   phone: z.string().trim().max(40).optional(),
   googlePlaceId: z.string().trim().max(200).optional(),
