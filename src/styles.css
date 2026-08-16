@@ -151,9 +151,29 @@
 
   body {
     position: relative;
-    background-color: var(--color-background);
+    background-color: #0F2A4A;
     color: var(--color-foreground);
     font-family: var(--font-sans);
+  }
+
+  /*
+   * Scoped navy canvas for semantic-token pages (Knowledge Graph directory
+   * views). Overrides the theme tokens in-scope so bg-background/text-foreground
+   * render on the same #0F2A4A navy used across the rest of the site.
+   */
+  .gbm-navy-scope {
+    --background: #0F2A4A;
+    --foreground: #ffffff;
+    --card: #16365e;
+    --card-foreground: #ffffff;
+    --popover: #16365e;
+    --popover-foreground: #ffffff;
+    --muted: #1b3c66;
+    --muted-foreground: #c9d6e6;
+    --border: rgba(255, 255, 255, 0.16);
+    --input: rgba(255, 255, 255, 0.18);
+    --primary: #D4A24C;
+    --primary-foreground: #0F2A4A;
   }
 
 }
