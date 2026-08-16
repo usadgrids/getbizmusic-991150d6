@@ -108,13 +108,8 @@ export function AdMarquee() {
           role="status"
           aria-live="polite"
         >
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[#D4A24C] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)]">
-            <img
-              src={hovered.image_url}
-              alt="Sample business ad"
-              className="block max-h-[70vh] w-full object-contain"
-            />
-            <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#0F2A4A]/95 via-[#0F2A4A]/70 to-transparent px-5 py-5 text-center">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-[#D4A24C] bg-gradient-to-br from-[#16213e] via-[#0F2A4A] to-[#0a0e1a] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)]">
+            <div className="border-b border-[#D4A24C]/40 bg-[#0F2A4A] px-6 py-5 text-center">
               <p className="text-xl font-bold leading-snug text-[#D4A24C] sm:text-2xl">
                 Sample Business Ads
               </p>
@@ -122,6 +117,11 @@ export function AdMarquee() {
                 Request Your Free Custom Design Now!
               </p>
             </div>
+            <img
+              src={hovered.image_url}
+              alt="Sample business ad"
+              className="block max-h-[65vh] w-full object-contain"
+            />
           </div>
         </div>
       )}
