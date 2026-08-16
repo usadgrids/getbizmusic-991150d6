@@ -29,7 +29,7 @@ function AdTileBackground() {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-25 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-40 sm:grid-cols-4 lg:grid-cols-6">
         {tiles.map((ad, i) => (
           <img
             key={`${ad.id}-${i}`}
