@@ -104,18 +104,32 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
       adNumber = (adRow?.ad_number as number | null) ?? null;
     }
 
-    // Founding 1,000 Member badge — driven by the business's launch-code claim.
+    // Founding 1,000 Member badge + address privacy — driven by the business's claim.
     let foundingMember = false;
+    let addressIsPrivate = false;
+    let serviceAreaLabel: string | null = null;
     {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: claim } = await supabaseAdmin
+      const { data: claims } = await supabaseAdmin
         .from("business_claims")
-        .select("id")
-        .eq("founding_member", true)
+        .select("founding_member, address_is_private, service_area_label")
         .ilike("business_name", place.name)
-        .limit(1)
-        .maybeSingle();
-      foundingMember = Boolean(claim);
+        .order("submitted_at", { ascending: false })
+        .limit(5);
+      for (const c of claims ?? []) {
+        if (c.founding_member) foundingMember = true;
+      }
+      const latest = claims?.[0];
+      if (latest?.address_is_private) {
+        addressIsPrivate = true;
+        serviceAreaLabel = latest.service_area_label ?? null;
+      }
+    }
+
+    if (addressIsPrivate) {
+      place.address = null;
+      place.lat = null;
+      place.lng = null;
     }
 
     const { data: faqs } = await supabase
@@ -123,8 +137,15 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
       .select("question, answer")
       .eq("place_id", place.id)
       .order("sort_order", { ascending: true });
-    return { place, adNumber, foundingMember, faqs: (faqs ?? []) as DirectoryFaq[] };
+    return {
+      place,
+      adNumber,
+      foundingMember,
+      serviceAreaLabel: addressIsPrivate ? serviceAreaLabel : null,
+      faqs: (faqs ?? []) as DirectoryFaq[],
+    };
   });
+
 
 
 // ---------------- Topic (unbranded answer) pages ----------------
