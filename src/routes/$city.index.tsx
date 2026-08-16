@@ -115,7 +115,7 @@ function CityHome() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0F2A4A] text-white overflow-x-hidden">
       <BizHero cityName={city.name} state={city.state} />
       <main className="w-full max-w-[1800px] mx-auto px-2 sm:px-4 pb-20 sm:pb-16 min-w-0">
         <AdSlider

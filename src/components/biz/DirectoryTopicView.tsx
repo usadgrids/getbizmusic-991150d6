@@ -119,7 +119,7 @@ export function DirectoryTopicView({
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="gbm-navy-scope min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildTopicJsonLd(category, topic)) }}
