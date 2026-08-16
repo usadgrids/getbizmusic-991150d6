@@ -26,16 +26,19 @@ function AdTileBackground() {
 
   if (!ads.length) return null;
   // De-duplicate by image so the mosaic shows many *different* ads, not the
-  // same graphic repeated in stripes. Then shuffle so identical-looking tiles
-  // are never neighbours.
-  const byImage = new Map<string, PublicAd>();
+  // same graphic repeated in stripes.
+  const byImage = new Map<string, (typeof ads)[number]>();
   for (const ad of ads) {
     const url = ad.image_url ?? ad.id;
     if (!byImage.has(url)) byImage.set(url, ad);
   }
   const unique = Array.from(byImage.values());
-  const shuffled = fairShuffle(unique, "home-tiles-mosaic");
-  // Pad with the unique set (cycled) if we need more tiles than we have images.
+  // Fisher-Yates shuffle so identical tiles are not neighbours.
+  const shuffled = [...unique];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   const tiles = Array.from({ length: 36 }, (_, i) => shuffled[i % shuffled.length]);
 
   return (
