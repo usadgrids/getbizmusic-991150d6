@@ -109,6 +109,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     e.preventDefault();
     if (businessName.trim().length < 2) return toast.error("Enter your legal business name.");
     if (!/^\d{5}$/.test(zip.trim())) return toast.error("Enter a 5-digit ZIP code.");
+    if (launchCode.trim().length < 2) return toast.error("Enter your launch code.");
     if (Number(captchaInput) !== captcha.a + captcha.b) {
       setCaptcha(newCaptcha());
       setCaptchaInput("");
@@ -234,28 +235,36 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Legal Business Name <span className="text-[#D4A24C]">*</span>
+          </label>
           <input
             className={inputClass}
             value={businessName}
             maxLength={120}
+            required
             onChange={(e) => setBusinessName(e.target.value)}
             placeholder="e.g. Maria's Kitchen LLC"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Zip Code</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Zip Code <span className="text-[#D4A24C]">*</span>
+          </label>
           <input
             className={inputClass}
             value={zip}
             inputMode="numeric"
             maxLength={5}
+            required
             onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
             placeholder="92101"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
+          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+            Business Category <span className="text-[#D4A24C]">*</span>
+          </label>
           <CategorySelect
             className={inputClass}
             value={selectedCategory}
@@ -264,12 +273,13 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Launch Code (optional)
+            Launch Code <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
             value={launchCode}
             maxLength={40}
+            required
             onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
             placeholder="1000-FIRST"
           />
@@ -280,13 +290,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Quick check: {captcha.a} + {captcha.b} = ?
+            Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
             value={captchaInput}
             inputMode="numeric"
             maxLength={3}
+            required
             onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
             placeholder="Answer"
           />
@@ -374,12 +385,15 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Legal Business Name <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 value={claimTarget.name}
                 readOnly={!manualClaim}
                 maxLength={120}
+                required
                 onChange={
                   manualClaim
                     ? (e) => setClaimTarget({ ...claimTarget, name: e.target.value })
@@ -388,12 +402,15 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Address</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Address {manualClaim && <span className="text-[#D4A24C]">*</span>}
+              </label>
               {manualClaim ? (
                 <input
                   className={inputClass}
                   value={claimTarget.address}
                   maxLength={200}
+                  required
                   placeholder="Street address, city, state, ZIP"
                   onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
                 />
@@ -402,7 +419,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               )}
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Business Category <span className="text-[#D4A24C]">*</span>
+              </label>
               <CategorySelect
                 className={inputClass}
                 value={selectedCategory}
@@ -410,21 +429,27 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Name</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Your Name <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 value={ownerName}
                 maxLength={120}
+                required
                 onChange={(e) => setOwnerName(e.target.value)}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Email</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Your Email <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 type="email"
                 value={ownerEmail}
                 maxLength={255}
+                required
                 onChange={(e) => setOwnerEmail(e.target.value)}
               />
             </div>
