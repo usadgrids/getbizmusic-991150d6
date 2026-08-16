@@ -9,7 +9,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 import { ALLIANCE_BENEFITS } from "@/lib/alliance";
-import homeHero from "@/assets/home-hero-sd.png.asset.json";
+import homeHero from "@/assets/SD-Business-3.png.asset.json";
 
 
 const OG_IMAGE_URL =
