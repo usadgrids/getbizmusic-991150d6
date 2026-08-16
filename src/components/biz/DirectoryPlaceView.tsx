@@ -153,13 +153,16 @@ export function DirectoryPlaceView({
   faqs,
   adNumber = null,
   foundingMember = false,
+  serviceAreaLabel = null,
 }: {
   category: DirectoryCategory;
   place: DirectoryPlace;
   faqs: DirectoryFaq[];
   adNumber?: number | null;
   foundingMember?: boolean;
+  serviceAreaLabel?: string | null;
 }) {
+
   const label = DIRECTORY_LABELS[category];
   const attrs = attributeEntries(place.attributes ?? {});
   const verified = place.last_crawled_at
