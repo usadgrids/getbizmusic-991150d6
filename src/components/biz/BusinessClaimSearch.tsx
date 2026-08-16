@@ -300,16 +300,38 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          <h3 className="text-base font-bold text-[#0F2A4A]">Claim this listing</h3>
+          <h3 className="text-base font-bold text-[#0F2A4A]">
+            {manualClaim ? "Add your business" : "Claim this listing"}
+          </h3>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
-              <input className={`${inputClass} bg-gray-50`} value={claimTarget.name} readOnly />
+              <input
+                className={inputClass}
+                value={claimTarget.name}
+                readOnly={!manualClaim}
+                maxLength={120}
+                onChange={
+                  manualClaim
+                    ? (e) => setClaimTarget({ ...claimTarget, name: e.target.value })
+                    : undefined
+                }
+              />
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Address</label>
-              <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
+              {manualClaim ? (
+                <input
+                  className={inputClass}
+                  value={claimTarget.address}
+                  maxLength={200}
+                  placeholder="Street address, city, state, ZIP"
+                  onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
+                />
+              ) : (
+                <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
+              )}
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
