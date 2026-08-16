@@ -1103,10 +1103,13 @@ export type Database = {
           last_opened_at: string | null
           open_count: number
           owner_name: string | null
+          resend_message_id: string | null
           sent_at: string | null
           source: string
           source_detail: string | null
           state: string
+          unsubscribe_token: string | null
+          unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -1127,10 +1130,13 @@ export type Database = {
           last_opened_at?: string | null
           open_count?: number
           owner_name?: string | null
+          resend_message_id?: string | null
           sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -1151,10 +1157,13 @@ export type Database = {
           last_opened_at?: string | null
           open_count?: number
           owner_name?: string | null
+          resend_message_id?: string | null
           sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Relationships: []
