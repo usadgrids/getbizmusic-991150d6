@@ -32,13 +32,6 @@ export const Route = createFileRoute("/auth")({
   }),
 });
 
-function safeNext(next: string | undefined): string {
-  if (!next) return "/";
-  // Only allow same-origin relative paths.
-  if (!next.startsWith("/") || next.startsWith("//")) return "/";
-  return next;
-}
-
 function AuthPage() {
   const { next } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
