@@ -82,7 +82,14 @@ export const BUSINESS_CATEGORY_GROUPS: BusinessCategoryGroup[] = [
   },
   {
     label: "Retail",
-    options: ["Clothing & Apparel", "Specialty & Gift Shops", "Grocery & Convenience Stores"],
+    options: [
+      "Clothing & Apparel",
+      "Jewelry Stores",
+      "Specialty & Gift Shops",
+      "Grocery & Convenience Stores",
+      "Furniture & Home Goods",
+      "Electronics Stores",
+    ],
   },
   {
     label: "Pets",
