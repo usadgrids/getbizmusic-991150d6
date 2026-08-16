@@ -40,7 +40,7 @@ function AdTileBackground() {
           />
         ))}
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/85 via-[#0F2A4A]/70 to-[#0F2A4A]/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/70 via-[#0F2A4A]/55 to-[#0F2A4A]/75" />
     </div>
   );
 }
