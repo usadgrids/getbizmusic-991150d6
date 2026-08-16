@@ -77,7 +77,7 @@ export function CategoryHubPage({
   const slides = [...(proofSlide ? [proofSlide] : []), ...ui.showcaseAds, ...ads];
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0F2A4A] text-white overflow-x-hidden">
       <BizHero
         cityName={config.heroTitle}
         state="CA"
