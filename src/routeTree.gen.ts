@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
@@ -55,6 +56,11 @@ import { Route as ApiPublicCampaignsResendWebhookRouteImport } from './routes/ap
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
 import { Route as ApiPublicDirectoryCategorySlugRouteImport } from './routes/api/public/directory/$category.$slug'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -498,6 +508,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -545,6 +556,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -593,6 +605,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ActivateArtworkRoute: typeof ActivateArtworkRoute
@@ -617,6 +630,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submit': {
       id: '/submit'
       path: '/submit'
@@ -1007,6 +1027,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
