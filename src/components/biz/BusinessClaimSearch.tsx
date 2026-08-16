@@ -88,6 +88,7 @@ export function BusinessClaimSearch({ category }: { category: DirectoryCategory 
     setMessage(null);
     setResults(null);
     setClaimTarget(null);
+    setManualClaim(false);
     try {
       const res = await runSearch({
         data: {
