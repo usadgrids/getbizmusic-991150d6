@@ -90,10 +90,7 @@ function AdTileBackground() {
 const OG_IMAGE_URL =
   "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
 
-const CATEGORY_TABS: { slug: DirectoryCategory; label: string; icon: typeof UtensilsCrossed }[] = [
-  { slug: "food", label: "Food & Dining", icon: UtensilsCrossed },
-  { slug: "beauty", label: "Beauty & Grooming", icon: Scissors },
-];
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
