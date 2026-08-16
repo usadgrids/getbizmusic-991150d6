@@ -216,7 +216,95 @@ export const importApolloLeads = createServerFn({ method: "POST" })
     };
   });
 
-__MIDDLE__
+// ---------- Server fn: send campaign via Resend ----------
+// Resend has no list/campaign builder — the `leads` table IS the list.
+export const sendResendCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { subject: string; htmlContent: string; campaignName?: string }) => {
+    if (!input?.subject?.trim()) throw new Error("Subject required.");
+    if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
+    return {
+      subject: input.subject.trim(),
+      htmlContent: input.htmlContent,
+      campaignName: input.campaignName?.trim() || `NC 2026 — ${new Date().toISOString().slice(0, 10)}`,
+    };
+  })
+  .handler(async ({ data, context }) => {
+    await requireAdminEmail(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendCampaignToLeads } = await import("@/lib/email/campaign-send.server");
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("leads")
+      .select("id, email, business_name, owner_name, city, unsubscribe_token")
+      .eq("campaign_status", "not_sent")
+      .is("unsubscribed_at", null)
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    const leads = rows ?? [];
+    if (!leads.length) {
+      return { ok: false as const, reason: "No un-sent leads to send to." };
+    }
+
+    const result = await sendCampaignToLeads({
+      supabaseAdmin,
+      leads,
+      subject: data.subject,
+      htmlContent: data.htmlContent,
+    });
+
+    return {
+      ok: true as const,
+      campaign_name: data.campaignName,
+      recipients: leads.length,
+      ...result,
+    };
+  });
+
+// ---------- Server fn: send test email ----------
+export const sendTestCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { toEmail: string; subject: string; htmlContent: string }) => {
+    if (!input?.toEmail?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.toEmail.trim())) {
+      throw new Error("A valid test email address is required.");
+    }
+    if (!input?.subject?.trim()) throw new Error("Subject required.");
+    if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
+    return {
+      toEmail: input.toEmail.trim().toLowerCase(),
+      subject: input.subject.trim(),
+      htmlContent: input.htmlContent,
+    };
+  })
+  .handler(async ({ data, context }) => {
+    await requireAdminEmail(context);
+    const { sendResendEmail, unsubscribeHeaders } = await import("@/lib/email/resend.server");
+    const { buildFinalHtml, personalize } = await import("@/lib/email/campaign-send.server");
+
+    const previewToken = "preview-test-token";
+    const html = buildFinalHtml(
+      personalize(data.htmlContent, {
+        id: "test",
+        email: data.toEmail,
+        business_name: "Sample Business",
+        owner_name: "Sample Owner",
+        city: PRIMARY_CITY,
+      }),
+      previewToken,
+    );
+
+    await sendResendEmail({
+      to: data.toEmail,
+      subject: `[TEST] ${data.subject}`,
+      html,
+      headers: unsubscribeHeaders(previewToken),
+      tags: [{ name: "campaign", value: "test" }],
+    });
+
+    return { ok: true as const, to: data.toEmail };
+  });
+
+
 
 // ---------- Server fn: dashboard stats ----------
 export const getCampaignDashboard = createServerFn({ method: "GET" })
