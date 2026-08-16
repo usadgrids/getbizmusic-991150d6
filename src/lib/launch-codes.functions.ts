@@ -63,7 +63,7 @@ export const adminUpdateLaunchCode = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
+    const patch: { is_active?: boolean; redemption_limit?: number } = {};
     if (data.isActive !== undefined) patch.is_active = data.isActive;
     if (data.redemptionLimit !== undefined) patch.redemption_limit = data.redemptionLimit;
     const { error } = await supabaseAdmin.from("launch_codes").update(patch).eq("id", data.id);
