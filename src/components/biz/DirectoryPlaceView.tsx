@@ -149,11 +149,13 @@ export function DirectoryPlaceView({
   place,
   faqs,
   adNumber = null,
+  foundingMember = false,
 }: {
   category: DirectoryCategory;
   place: DirectoryPlace;
   faqs: DirectoryFaq[];
   adNumber?: number | null;
+  foundingMember?: boolean;
 }) {
   const label = DIRECTORY_LABELS[category];
   const attrs = attributeEntries(place.attributes ?? {});
@@ -262,6 +264,12 @@ export function DirectoryPlaceView({
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {place.name}
           </h1>
+          {foundingMember && (
+            <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#FFF8E8] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#7a5410]">
+              <Star className="h-3.5 w-3.5 fill-[#D4A24C] text-[#D4A24C]" aria-hidden />
+              Founding 1,000 Member
+            </span>
+          )}
           <p className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             {(place.city || place.state) && (
               <span className="inline-flex items-center gap-1">

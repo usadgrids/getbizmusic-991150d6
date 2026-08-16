@@ -110,6 +110,7 @@ function CountyDirectoryPage() {
       place={data.place}
       faqs={data.faqs}
       adNumber={data.adNumber ?? null}
+      foundingMember={data.foundingMember ?? false}
     />
   );
 }

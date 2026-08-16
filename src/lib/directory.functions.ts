@@ -104,12 +104,26 @@ export const getDirectoryPlace = createServerFn({ method: "GET" })
       adNumber = (adRow?.ad_number as number | null) ?? null;
     }
 
+    // Founding 1,000 Member badge — driven by the business's launch-code claim.
+    let foundingMember = false;
+    {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: claim } = await supabaseAdmin
+        .from("business_claims")
+        .select("id")
+        .eq("founding_member", true)
+        .ilike("business_name", place.name)
+        .limit(1)
+        .maybeSingle();
+      foundingMember = Boolean(claim);
+    }
+
     const { data: faqs } = await supabase
       .from("food_place_faqs")
       .select("question, answer")
       .eq("place_id", place.id)
       .order("sort_order", { ascending: true });
-    return { place, adNumber, faqs: (faqs ?? []) as DirectoryFaq[] };
+    return { place, adNumber, foundingMember, faqs: (faqs ?? []) as DirectoryFaq[] };
   });
 
 
