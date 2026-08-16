@@ -13,6 +13,7 @@ import { template as zelleInstructionsTemplate } from './zelle-instructions'
 import { template as activationReceiptTemplate } from './activation-receipt'
 import { template as activationInstructionsTemplate } from './activation-instructions'
 import { template as activationInvoiceTemplate } from './activation-invoice'
+import { template as businessClaimConfirmationTemplate } from './business-claim-confirmation'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -41,4 +42,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'activation-receipt': activationReceiptTemplate,
   'activation-instructions': activationInstructionsTemplate,
   'activation-invoice': activationInvoiceTemplate,
+  'business-claim-confirmation': businessClaimConfirmationTemplate,
 }
