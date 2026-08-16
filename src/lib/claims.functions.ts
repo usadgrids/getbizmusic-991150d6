@@ -61,7 +61,11 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       business_name: data.businessName,
       trade_name: data.tradeName || null,
       business_category: data.businessCategory ?? null,
-      address: data.address ?? null,
+      address: data.address,
+      business_type: data.businessType,
+      address_is_private: data.addressIsPrivate,
+      service_area_label: data.addressIsPrivate ? (data.serviceAreaLabel ?? null) : null,
+
       website: data.website ?? null,
       phone: data.phone ?? null,
       google_place_id: data.googlePlaceId ?? null,
