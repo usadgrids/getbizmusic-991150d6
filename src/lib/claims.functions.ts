@@ -91,5 +91,13 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       console.error("claim confirmation email failed", err);
     }
 
-    return { ok: true as const };
+    return {
+      ok: true as const,
+      launchApplied,
+      lockedPrice,
+      launchMessage:
+        data.launchCode && !launchApplied
+          ? "This launch code is no longer active, but you can still submit your claim."
+          : null,
+    };
   });
