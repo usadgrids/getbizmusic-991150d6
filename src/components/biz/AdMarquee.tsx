@@ -20,7 +20,13 @@ const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap(
  * overlay showing that ad graphic large with an invitation to request a free
  * custom ad design; moving the pointer away dismisses the overlay.
  */
-export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
+export function AdMarquee({
+  disabled = false,
+  onHoverDismiss,
+}: {
+  disabled?: boolean;
+  onHoverDismiss?: () => void;
+}) {
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useQuery({
     queryKey: ["admarquee-ads"],
@@ -77,7 +83,12 @@ export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
       <div
         className="admarquee-container relative mt-5 overflow-hidden rounded-xl border border-[#D4A24C]/30 bg-[#0F2A4A]/40"
         aria-label="Sample business ads"
-        onMouseLeave={() => setHovered(null)}
+        onMouseLeave={() => {
+          if (hovered) {
+            setHovered(null);
+            onHoverDismiss?.();
+          }
+        }}
       >
         <div className="admarquee-track flex w-max gap-2 px-2 py-2">
           {strip.map((ad, i) => (

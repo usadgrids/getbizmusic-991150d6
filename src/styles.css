@@ -249,3 +249,22 @@
   }
 }
 
+@keyframes gbm-start-here {
+  0% { opacity: 0; transform: translateY(-4px) scale(0.85); }
+  25% { opacity: 1; transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.04); }
+  75% { transform: translateY(0) scale(1); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.gbm-start-here-badge {
+  animation: gbm-start-here 0.5s ease-out both, gbm-start-here 1.4s ease-in-out 0.5s infinite;
+  box-shadow: 0 0 0 0 rgba(212, 162, 76, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gbm-start-here-badge {
+    animation: none;
+  }
+}
+

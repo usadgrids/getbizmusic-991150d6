@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
@@ -94,6 +94,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [wantsAdDesign, setWantsAdDesign] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Legal Business Name input — auto-focused after a user views a sample ad so
+  // they drop straight into the claim flow with a "Start Here" cue.
+  const businessNameRef = useRef<HTMLInputElement | null>(null);
+  const [showStartHere, setShowStartHere] = useState(false);
+  const startHereTimer = useRef<number | null>(null);
+
+  function triggerStartHere() {
+    if (done) return;
+    businessNameRef.current?.focus();
+    setShowStartHere(true);
+    if (startHereTimer.current) window.clearTimeout(startHereTimer.current);
+    startHereTimer.current = window.setTimeout(() => setShowStartHere(false), 4000);
+  }
 
   function startManualClaim() {
     setClaimTarget({
@@ -292,10 +306,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Legal Business Name <span className="text-[#D4A24C]">*</span>
-          </label>
+          <div className="mb-1 flex items-center gap-2">
+            <label className="block text-xs font-semibold text-[#0F2A4A]">
+              Legal Business Name <span className="text-[#D4A24C]">*</span>
+            </label>
+            {showStartHere && (
+              <span className="gbm-start-here-badge inline-flex items-center gap-1 rounded-full bg-[#D4A24C] px-2.5 py-0.5 text-[11px] font-bold text-[#0F2A4A] shadow-sm">
+                Start Here
+                <span aria-hidden>↓</span>
+              </span>
+            )}
+          </div>
           <input
+            ref={businessNameRef}
             className={inputClass}
             value={businessName}
             maxLength={120}
@@ -372,7 +395,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       </form>
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
-      <AdMarquee disabled={searched} />
+      <AdMarquee disabled={searched} onHoverDismiss={triggerStartHere} />
 
       {message && (
         <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
