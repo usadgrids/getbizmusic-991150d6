@@ -306,10 +306,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Legal Business Name <span className="text-[#D4A24C]">*</span>
-          </label>
+          <div className="mb-1 flex items-center gap-2">
+            <label className="block text-xs font-semibold text-[#0F2A4A]">
+              Legal Business Name <span className="text-[#D4A24C]">*</span>
+            </label>
+            {showStartHere && (
+              <span className="gbm-start-here-badge inline-flex items-center gap-1 rounded-full bg-[#D4A24C] px-2.5 py-0.5 text-[11px] font-bold text-[#0F2A4A] shadow-sm">
+                Start Here
+                <span aria-hidden>↓</span>
+              </span>
+            )}
+          </div>
           <input
+            ref={businessNameRef}
             className={inputClass}
             value={businessName}
             maxLength={120}
