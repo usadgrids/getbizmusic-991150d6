@@ -58,6 +58,13 @@ const BusinessClaimConfirmationEmail = ({
             notice). The audit and design are yours to see for free either way.
           </Text>
           <Hr style={hr} />
+          <Text style={p}>
+            <strong>Explore our full ad and music streaming platform now:</strong>{" "}
+            <a href="https://www.getbizmusic.com/sdcounty" style={linkStyle}>
+              www.getbizmusic.com/sdcounty
+            </a>
+          </Text>
+          <Hr style={hr} />
           <Text style={footer}>
             Questions? Just reply to this email and we&rsquo;ll help you out.
           </Text>
@@ -90,5 +97,6 @@ const h1: React.CSSProperties = { color: '#ffffff', fontSize: '22px', margin: 0 
 const content: React.CSSProperties = { padding: '25px', fontFamily: 'Arial, sans-serif' }
 const p: React.CSSProperties = { fontSize: '14px', lineHeight: '22px', color: '#374151', margin: '10px 0' }
 const hr: React.CSSProperties = { borderColor: '#e5e7eb', margin: '22px 0' }
+const linkStyle: React.CSSProperties = { color: NAVY, fontWeight: 'bold', textDecoration: 'underline' }
 const footer: React.CSSProperties = { fontSize: '13px', color: '#6b7280', margin: '10px 0' }
 const footerSmall: React.CSSProperties = { fontSize: '11px', color: '#9ca3af', margin: '4px 0 0 0' }
