@@ -3,12 +3,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Users, Send, RefreshCw, Filter, Eye, MailCheck, Clock, Save, RotateCcw, Activity } from "lucide-react";
+import { ArrowLeft, Download, Users, Send, Filter, Eye, MailCheck, Save, RotateCcw, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   importApolloLeads,
-  syncLeadsToBrevo,
-  sendBrevoCampaign,
+  sendResendCampaign,
   sendTestCampaign,
   getCampaignDashboard,
 } from "@/lib/campaigns.functions";
@@ -64,8 +63,7 @@ function Dashboard() {
 
   const load = useServerFn(getCampaignDashboard);
   const imp = useServerFn(importApolloLeads);
-  const sync = useServerFn(syncLeadsToBrevo);
-  const send = useServerFn(sendBrevoCampaign);
+  const send = useServerFn(sendResendCampaign);
   const sendTest = useServerFn(sendTestCampaign);
 
   const filters = useMemo(
@@ -91,15 +89,6 @@ function Dashboard() {
       qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Import failed"),
-  });
-
-  const syncMut = useMutation({
-    mutationFn: () => sync({}),
-    onSuccess: (r) => {
-      toast.success(`Synced ${r.synced} contacts to Brevo (failed: ${r.failed})`);
-      qc.invalidateQueries({ queryKey: ["campaigns-dashboard"] });
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Sync failed"),
   });
 
   const [showSend, setShowSend] = useState(false);
@@ -148,45 +137,15 @@ function Dashboard() {
   };
 
 
-  // Scheduling
-  const [sendMode, setSendMode] = useState<"now" | "schedule">("now");
-  const [day, setDay] = useState<string>("1"); // 0=Sun … 6=Sat
-  const [hour12, setHour12] = useState("9");
-  const [minute, setMinute] = useState("00");
-  const [meridiem, setMeridiem] = useState<"AM" | "PM">("AM");
-
-  const scheduledDate = useMemo(() => {
-    if (sendMode !== "schedule") return null;
-    let h = Number(hour12) % 12;
-    if (meridiem === "PM") h += 12;
-    const now = new Date();
-    const d = new Date(now);
-    const target = Number(day);
-    let delta = (target - now.getDay() + 7) % 7;
-    d.setDate(now.getDate() + delta);
-    d.setHours(h, Number(minute), 0, 0);
-    if (d.getTime() <= now.getTime() + 60_000) d.setDate(d.getDate() + 7);
-    return d;
-  }, [sendMode, day, hour12, minute, meridiem]);
-
   const sendMut = useMutation({
-    mutationFn: () =>
-      send({
-        data: {
-          subject,
-          htmlContent: html,
-          scheduledAt: scheduledDate ? scheduledDate.toISOString() : undefined,
-        },
-      }),
+    mutationFn: () => send({ data: { subject, htmlContent: html } }),
     onSuccess: (r) => {
-      if ("ok" in r && r.ok === false) {
+      if (!r.ok) {
         toast.error(r.reason ?? "Send failed");
         return;
       }
       toast.success(
-        scheduledDate
-          ? `Campaign scheduled for ${scheduledDate.toLocaleString()} — recipients: ${r.recipients}`
-          : `Campaign queued — recipients: ${r.recipients}`,
+        `Campaign sent — ${r.sent} delivered to Resend, ${r.failed} failed, ${r.skipped_suppressed} skipped (unsubscribed).`,
       );
       setShowSend(false);
       setConfirmed(false);
@@ -221,9 +180,6 @@ function Dashboard() {
             <button onClick={() => importMut.mutate()} disabled={importMut.isPending} className="inline-flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white text-sm rounded disabled:opacity-50">
               <Download className="w-4 h-4" /> {importMut.isPending ? "Importing…" : "Import from Apollo"}
             </button>
-            <button onClick={() => syncMut.mutate()} disabled={syncMut.isPending} className="inline-flex items-center gap-2 px-3 py-2 bg-slate-700 text-white text-sm rounded disabled:opacity-50">
-              <RefreshCw className={`w-4 h-4 ${syncMut.isPending ? "animate-spin" : ""}`} /> Sync to Brevo
-            </button>
             <button onClick={() => setShowSend((v) => !v)} className="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white text-sm rounded">
               <Send className="w-4 h-4" /> Send campaign
             </button>
@@ -252,7 +208,7 @@ function Dashboard() {
             </h2>
             <p className="text-xs text-gray-500">
               {m?.last_event_at ? `Last event ${new Date(m.last_event_at).toLocaleString()}` : "No events yet"}
-              {" · live from Brevo webhooks"}
+              {" · live from Resend webhooks"}
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -264,7 +220,7 @@ function Dashboard() {
             <Stat label="Bounced / failed" value={m?.bounced ?? 0} tone="red" />
           </div>
           <p className="text-xs text-gray-500">
-            "Received" counts Brevo <code>delivered</code> events (an open also implies delivery). "Reopened" counts
+            "Received" counts Resend <code>email.delivered</code> events (an open also implies delivery). "Reopened" counts
             recipients who opened more than once.
           </p>
         </section>
@@ -326,7 +282,7 @@ function Dashboard() {
               </div>
             )}
             <p className="text-xs text-gray-500">
-              The system automatically appends the mailing address footer and the Brevo unsubscribe link.
+              The system automatically appends the mailing address footer and a working unsubscribe link.
               Sends only to leads with status = <code>not_sent</code>.
             </p>
 
@@ -354,44 +310,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Time to send */}
-            <div className="pt-2 border-t space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <Clock className="w-4 h-4" /> Time to send
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm">
-                <label className="flex items-center gap-1.5">
-                  <input type="radio" checked={sendMode === "now"} onChange={() => setSendMode("now")} /> Send now
-                </label>
-                <label className="flex items-center gap-1.5">
-                  <input type="radio" checked={sendMode === "schedule"} onChange={() => setSendMode("schedule")} /> Schedule
-                </label>
-                {sendMode === "schedule" && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <select value={day} onChange={(e) => setDay(e.target.value)} className="border rounded px-2 py-1">
-                      {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d, i) => (
-                        <option key={d} value={String(i)}>{d}</option>
-                      ))}
-                    </select>
-                    <select value={hour12} onChange={(e) => setHour12(e.target.value)} className="border rounded px-2 py-1">
-                      {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                    <span>:</span>
-                    <select value={minute} onChange={(e) => setMinute(e.target.value)} className="border rounded px-2 py-1">
-                      {["00", "15", "30", "45"].map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                    <select value={meridiem} onChange={(e) => setMeridiem(e.target.value as "AM" | "PM")} className="border rounded px-2 py-1">
-                      <option value="AM">AM</option>
-                      <option value="PM">PM</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-              {scheduledDate && (
-                <p className="text-xs text-gray-500">Will send {scheduledDate.toLocaleString()} (your local time).</p>
-              )}
-            </div>
-
             {/* Launch controls */}
             <div className="flex flex-col gap-3 pt-2 border-t">
               <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -409,9 +327,7 @@ function Dashboard() {
                   disabled={sendMut.isPending || !confirmed}
                   className="px-4 py-2 bg-emerald-600 text-white text-sm rounded disabled:opacity-50"
                 >
-                  {sendMut.isPending
-                    ? (scheduledDate ? "Scheduling…" : "Launching…")
-                    : (scheduledDate ? "Schedule campaign" : "Launch campaign")}
+                  {sendMut.isPending ? "Launching…" : "Launch campaign"}
                 </button>
                 <button onClick={() => { setShowSend(false); setShowPreview(false); setConfirmed(false); }} className="px-4 py-2 bg-gray-100 text-sm rounded">Cancel</button>
               </div>

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
@@ -51,10 +52,15 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicDirectoryRefreshRouteImport } from './routes/api/public/directory/refresh'
 import { Route as ApiPublicDirectoryAnswersDotjsonRouteImport } from './routes/api/public/directory/answers[.]json'
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
-import { Route as ApiPublicCampaignsBrevoWebhookRouteImport } from './routes/api/public/campaigns/brevo-webhook'
+import { Route as ApiPublicCampaignsResendWebhookRouteImport } from './routes/api/public/campaigns/resend-webhook'
 import { Route as ApiPublicAdImageAdNumberRouteImport } from './routes/api/public/ad-image.$adNumber'
 import { Route as ApiPublicDirectoryCategorySlugRouteImport } from './routes/api/public/directory/$category.$slug'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
@@ -275,10 +281,10 @@ const ApiPublicDirectoryCategoryRoute =
     path: '/api/public/directory/$category',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicCampaignsBrevoWebhookRoute =
-  ApiPublicCampaignsBrevoWebhookRouteImport.update({
-    id: '/api/public/campaigns/brevo-webhook',
-    path: '/api/public/campaigns/brevo-webhook',
+const ApiPublicCampaignsResendWebhookRoute =
+  ApiPublicCampaignsResendWebhookRouteImport.update({
+    id: '/api/public/campaigns/resend-webhook',
+    path: '/api/public/campaigns/resend-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicAdImageAdNumberRoute =
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -329,7 +336,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
+  '/api/public/campaigns/resend-webhook': typeof ApiPublicCampaignsResendWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -374,7 +382,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
+  '/api/public/campaigns/resend-webhook': typeof ApiPublicCampaignsResendWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/$city/$slug': typeof CitySlugRoute
   '/$city/activate': typeof CityActivateRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -422,7 +431,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/ad-image/$adNumber': typeof ApiPublicAdImageAdNumberRoute
-  '/api/public/campaigns/brevo-webhook': typeof ApiPublicCampaignsBrevoWebhookRoute
+  '/api/public/campaigns/resend-webhook': typeof ApiPublicCampaignsResendWebhookRoute
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -471,7 +481,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
+    | '/api/public/campaigns/resend-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -498,6 +508,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -516,7 +527,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
+    | '/api/public/campaigns/resend-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -545,6 +556,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/unsubscribe'
     | '/$city/$slug'
     | '/$city/activate'
     | '/.mcp/list-tools'
@@ -563,7 +575,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/lovable/email/suppression'
     | '/api/public/ad-image/$adNumber'
-    | '/api/public/campaigns/brevo-webhook'
+    | '/api/public/campaigns/resend-webhook'
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
@@ -593,6 +605,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ActivateArtworkRoute: typeof ActivateArtworkRoute
@@ -603,7 +616,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAdImageAdNumberRoute: typeof ApiPublicAdImageAdNumberRoute
-  ApiPublicCampaignsBrevoWebhookRoute: typeof ApiPublicCampaignsBrevoWebhookRoute
+  ApiPublicCampaignsResendWebhookRoute: typeof ApiPublicCampaignsResendWebhookRoute
   ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
   ApiPublicDirectoryAnswersDotjsonRoute: typeof ApiPublicDirectoryAnswersDotjsonRoute
   ApiPublicDirectoryRefreshRoute: typeof ApiPublicDirectoryRefreshRoute
@@ -617,6 +630,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submit': {
       id: '/submit'
       path: '/submit'
@@ -911,11 +931,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDirectoryCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/campaigns/brevo-webhook': {
-      id: '/api/public/campaigns/brevo-webhook'
-      path: '/api/public/campaigns/brevo-webhook'
-      fullPath: '/api/public/campaigns/brevo-webhook'
-      preLoaderRoute: typeof ApiPublicCampaignsBrevoWebhookRouteImport
+    '/api/public/campaigns/resend-webhook': {
+      id: '/api/public/campaigns/resend-webhook'
+      path: '/api/public/campaigns/resend-webhook'
+      fullPath: '/api/public/campaigns/resend-webhook'
+      preLoaderRoute: typeof ApiPublicCampaignsResendWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ad-image/$adNumber': {
@@ -1007,6 +1027,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
@@ -1018,7 +1039,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAdImageAdNumberRoute: ApiPublicAdImageAdNumberRoute,
-  ApiPublicCampaignsBrevoWebhookRoute: ApiPublicCampaignsBrevoWebhookRoute,
+  ApiPublicCampaignsResendWebhookRoute: ApiPublicCampaignsResendWebhookRoute,
   ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
   ApiPublicDirectoryAnswersDotjsonRoute: ApiPublicDirectoryAnswersDotjsonRoute,
   ApiPublicDirectoryRefreshRoute: ApiPublicDirectoryRefreshRoute,

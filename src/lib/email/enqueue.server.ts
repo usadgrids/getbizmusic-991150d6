@@ -1,41 +1,24 @@
-// Server-only helper to enqueue a transactional email from trusted server
-// contexts (webhooks, cron) — bypasses the auth-gated /lovable/email/transactional/send
-// route by using supabaseAdmin directly. Renders the template server-side and
-// enqueues via the same `enqueue_email` RPC the send route uses, so the
-// existing queue dispatcher handles delivery, retries, and unsubscribe footer.
+// Server-only transactional email sender. Sends directly through Resend.
+//
+// Historically this enqueued into a pgmq queue processed by a Mailgun-backed
+// dispatcher. All sending now goes through Resend. The exported name is kept
+// so every existing call site (claims, activation, design orders, paid order
+// notifications, reminders, etc.) continues to work unchanged.
 import * as React from 'react'
 import { render } from 'react-email'
 import { TEMPLATES } from '@/lib/email-templates/registry'
-
-const SITE_NAME = 'GetBizMusic'
-const SENDER_DOMAIN = 'notify.mail.usadgrids.com'
-const FROM_DOMAIN = 'notify.mail.usadgrids.com'
-
-function generateToken(): string {
-  const bytes = new Uint8Array(32)
-  crypto.getRandomValues(bytes)
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
-}
-
-function bytesToUuid(bytes: Uint8Array): string {
-  const b = bytes.slice(0, 16)
-  b[6] = (b[6] & 0x0f) | 0x50
-  b[8] = (b[8] & 0x3f) | 0x80
-  const hex = Array.from(b).map((value) => value.toString(16).padStart(2, '0')).join('')
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-}
-
-async function messageIdFromIdempotencyKey(idempotencyKey: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(idempotencyKey))
-  return bytesToUuid(new Uint8Array(digest))
-}
+import {
+  messageIdFromIdempotencyKey,
+  redactEmail,
+  sendResendEmail,
+} from './resend.server'
 
 export async function enqueueTransactionalEmailInternal(input: {
   templateName: string
   recipientEmail: string
   templateData?: Record<string, unknown>
   idempotencyKey?: string
-}): Promise<{ ok: boolean; reason?: string }> {
+}): Promise<{ ok: boolean; reason?: string; messageId?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
   const template = TEMPLATES[input.templateName]
@@ -45,35 +28,14 @@ export async function enqueueTransactionalEmailInternal(input: {
   if (!recipient) return { ok: false, reason: 'no recipient' }
   const normalized = recipient.toLowerCase()
 
-  const { data: suppressed } = await supabaseAdmin
+  // Suppression is fail-closed: unsubscribed / bounced addresses never get mail.
+  const { data: suppressed, error: suppressionError } = await supabaseAdmin
     .from('suppressed_emails')
     .select('id')
     .eq('email', normalized)
     .maybeSingle()
+  if (suppressionError) return { ok: false, reason: 'suppression check failed' }
   if (suppressed) return { ok: false, reason: 'suppressed' }
-
-  // Unsubscribe token (reuse existing or create)
-  let unsubscribeToken: string
-  const { data: existingToken } = await supabaseAdmin
-    .from('email_unsubscribe_tokens')
-    .select('token, used_at')
-    .eq('email', normalized)
-    .maybeSingle()
-
-  if (existingToken?.token && !existingToken.used_at) {
-    unsubscribeToken = existingToken.token as string
-  } else {
-    const fresh = generateToken()
-    await supabaseAdmin
-      .from('email_unsubscribe_tokens')
-      .upsert({ token: fresh, email: normalized }, { onConflict: 'email', ignoreDuplicates: true })
-    const { data: readBack } = await supabaseAdmin
-      .from('email_unsubscribe_tokens')
-      .select('token')
-      .eq('email', normalized)
-      .maybeSingle()
-    unsubscribeToken = (readBack?.token as string) || fresh
-  }
 
   const element = React.createElement(template.component, input.templateData || {})
   const html = await render(element)
@@ -86,41 +48,50 @@ export async function enqueueTransactionalEmailInternal(input: {
   const idempotencyKey = input.idempotencyKey || crypto.randomUUID()
   const messageId = await messageIdFromIdempotencyKey(idempotencyKey)
 
-  await supabaseAdmin.from('email_send_log').insert({
-    message_id: messageId,
-    template_name: input.templateName,
-    recipient_email: recipient,
-    status: 'pending',
-  })
+  // Idempotency: if this exact key already sent, don't send twice.
+  const { data: prior } = await supabaseAdmin
+    .from('email_send_log')
+    .select('id')
+    .eq('message_id', messageId)
+    .eq('status', 'sent')
+    .maybeSingle()
+  if (prior) return { ok: true, reason: 'already_sent', messageId }
 
-  const { error: enqueueError } = await supabaseAdmin.rpc('enqueue_email', {
-    queue_name: 'transactional_emails',
-    payload: {
-      message_id: messageId,
+  try {
+    const result = await sendResendEmail({
       to: recipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
       subject,
       html,
       text,
-      purpose: 'transactional',
-      label: input.templateName,
-      idempotency_key: idempotencyKey,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-    },
-  })
+      tags: [{ name: 'template', value: input.templateName.slice(0, 50) }],
+    })
 
-  if (enqueueError) {
+    await supabaseAdmin.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: input.templateName,
+      recipient_email: recipient,
+      status: 'sent',
+      provider_message_id: result.id || null,
+    })
+
+    return { ok: true, messageId }
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err)
+    console.error('Resend transactional send failed', {
+      templateName: input.templateName,
+      recipient_redacted: redactEmail(recipient),
+      reason,
+    })
     await supabaseAdmin.from('email_send_log').insert({
       message_id: messageId,
       template_name: input.templateName,
       recipient_email: recipient,
       status: 'failed',
-      error_message: enqueueError.message,
+      error_message: reason.slice(0, 500),
     })
-    return { ok: false, reason: enqueueError.message }
+    return { ok: false, reason }
   }
-
-  return { ok: true }
 }
+
+/** Alias with a name that matches what it actually does now. */
+export const sendTransactionalEmailInternal = enqueueTransactionalEmailInternal

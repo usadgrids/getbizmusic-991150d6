@@ -821,6 +821,7 @@ export type Database = {
           id: string
           message_id: string | null
           metadata: Json | null
+          provider_message_id: string | null
           recipient_email: string
           status: string
           template_name: string
@@ -831,6 +832,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           metadata?: Json | null
+          provider_message_id?: string | null
           recipient_email: string
           status: string
           template_name: string
@@ -841,6 +843,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           metadata?: Json | null
+          provider_message_id?: string | null
           recipient_email?: string
           status?: string
           template_name?: string
@@ -1086,7 +1089,6 @@ export type Database = {
       }
       leads: {
         Row: {
-          brevo_contact_id: number | null
           business_name: string | null
           campaign_status: string
           city: string | null
@@ -1103,14 +1105,16 @@ export type Database = {
           last_opened_at: string | null
           open_count: number
           owner_name: string | null
+          resend_message_id: string | null
           sent_at: string | null
           source: string
           source_detail: string | null
           state: string
+          unsubscribe_token: string | null
+          unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
-          brevo_contact_id?: number | null
           business_name?: string | null
           campaign_status?: string
           city?: string | null
@@ -1127,14 +1131,16 @@ export type Database = {
           last_opened_at?: string | null
           open_count?: number
           owner_name?: string | null
+          resend_message_id?: string | null
           sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
-          brevo_contact_id?: number | null
           business_name?: string | null
           campaign_status?: string
           city?: string | null
@@ -1151,10 +1157,13 @@ export type Database = {
           last_opened_at?: string | null
           open_count?: number
           owner_name?: string | null
+          resend_message_id?: string | null
           sent_at?: string | null
           source?: string
           source_detail?: string | null
           state?: string
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Relationships: []

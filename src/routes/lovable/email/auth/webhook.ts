@@ -32,9 +32,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 
 // Configuration
 const SITE_NAME = "GetBizMusic"
-const SENDER_DOMAIN = "notify.mail.usadgrids.com"
 const ROOT_DOMAIN = "mail.usadgrids.com"
-const FROM_DOMAIN = "notify.mail.usadgrids.com"
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'
@@ -163,53 +161,43 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
         const messageId = crypto.randomUUID()
 
-        // Log pending BEFORE enqueue so we have a record even if enqueue crashes
-        await supabase.from('email_send_log').insert({
-          message_id: messageId,
-          template_name: emailType,
-          recipient_email: payload.data.email,
-          status: 'pending',
-        })
+        const { sendResendEmail } = await import('@/lib/email/resend.server')
 
-        const { error: enqueueError } = await supabase.rpc('enqueue_email', {
-          queue_name: 'auth_emails',
-          payload: {
-            run_id,
-            message_id: messageId,
+        try {
+          const sent = await sendResendEmail({
             to: payload.data.email,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
             subject: EMAIL_SUBJECTS[emailType] || 'Notification',
             html,
             text,
-            purpose: 'transactional',
-            label: emailType,
-            queued_at: new Date().toISOString(),
-          },
-        })
-
-        if (enqueueError) {
-          console.error('Failed to enqueue auth email', { error: enqueueError, run_id, emailType })
+            tags: [{ name: 'auth', value: emailType }],
+          })
+          await supabase.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: emailType,
+            recipient_email: payload.data.email,
+            status: 'sent',
+            provider_message_id: sent.id || null,
+          })
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : String(error)
+          console.error('Failed to send auth email via Resend', { reason, run_id, emailType })
           await supabase.from('email_send_log').insert({
             message_id: messageId,
             template_name: emailType,
             recipient_email: payload.data.email,
             status: 'failed',
-            error_message: 'Failed to enqueue email',
+            error_message: reason.slice(0, 500),
           })
-          return Response.json(
-            { error: 'Failed to enqueue email' },
-            { status: 500 }
-          )
+          return Response.json({ error: 'Failed to send email' }, { status: 500 })
         }
 
-        console.log('Auth email enqueued', {
+        console.log('Auth email sent via Resend', {
           emailType,
           email_redacted: redactEmail(payload.data.email),
           run_id,
         })
 
-        return Response.json({ success: true, queued: true })
+        return Response.json({ success: true, sent: true })
       },
     },
   },

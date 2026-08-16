@@ -1,24 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// Brevo transactional/email-campaign webhook.
-// Configure in Brevo → set URL to:
-//   https://<your-domain>/api/public/campaigns/brevo-webhook?token=<CAMPAIGNS_WEBHOOK_TOKEN>
-// Subscribe events: sent, opened, click, hard_bounce, soft_bounce, unsubscribed, spam, blocked.
+// Resend webhook for campaign engagement tracking.
+// Configure in Resend → Webhooks → URL:
+//   https://<your-domain>/api/public/campaigns/resend-webhook?token=<CAMPAIGNS_WEBHOOK_TOKEN>
+// Events: email.sent, email.delivered, email.opened, email.clicked,
+//         email.bounced, email.complained.
 
 const EVENT_TO_STATUS: Record<string, string> = {
-  sent: "sent",
-  delivered: "sent",
-  opened: "opened",
-  unique_opened: "opened",
-  click: "clicked",
-  clicks: "clicked",
-  hard_bounce: "bounced",
-  soft_bounce: "bounced",
-  blocked: "bounced",
-  spam: "bounced",
-  invalid_email: "bounced",
-  unsubscribed: "unsubscribed",
-  list_addition: "sent",
+  "email.sent": "sent",
+  "email.delivered": "sent",
+  "email.opened": "opened",
+  "email.clicked": "clicked",
+  "email.bounced": "bounced",
+  "email.complained": "bounced",
+  "email.delivery_delayed": "sent",
 };
 
 // Rank so a later "clicked" wins over an earlier "opened"/"sent".
@@ -31,13 +26,16 @@ const RANK: Record<string, number> = {
   unsubscribed: 5,
 };
 
-interface BrevoWebhookEvent {
-  event?: string;
-  email?: string;
-  date?: string;
+interface ResendWebhookEvent {
+  type?: string;
+  created_at?: string;
+  data?: {
+    to?: string[] | string;
+    email_id?: string;
+  };
 }
 
-export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
+export const Route = createFileRoute("/api/public/campaigns/resend-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -47,9 +45,9 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
         const token = url.searchParams.get("token") ?? request.headers.get("x-webhook-token");
         if (token !== expected) return new Response("Unauthorized", { status: 401 });
 
-        let payload: BrevoWebhookEvent | BrevoWebhookEvent[];
+        let payload: ResendWebhookEvent | ResendWebhookEvent[];
         try {
-          payload = (await request.json()) as BrevoWebhookEvent | BrevoWebhookEvent[];
+          payload = (await request.json()) as ResendWebhookEvent | ResendWebhookEvent[];
         } catch {
           return new Response("Invalid JSON", { status: 400 });
         }
@@ -59,8 +57,9 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
 
         let updated = 0;
         for (const evt of events) {
-          const email = evt.email?.toLowerCase();
-          const eventName = evt.event?.toLowerCase();
+          const eventName = evt.type?.toLowerCase();
+          const rawTo = evt.data?.to;
+          const email = (Array.isArray(rawTo) ? rawTo[0] : rawTo)?.toLowerCase();
           if (!email || !eventName) continue;
           const nextStatus = EVENT_TO_STATUS[eventName];
           if (!nextStatus) continue;
@@ -72,7 +71,7 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
             .maybeSingle();
           if (!existing) continue;
 
-          const when = evt.date ?? new Date().toISOString();
+          const when = evt.created_at ?? new Date().toISOString();
           const patch: {
             last_event_at: string;
             campaign_status?: string;
@@ -88,12 +87,13 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
           const nextRank = RANK[nextStatus] ?? 0;
           if (nextRank >= currentRank) patch.campaign_status = nextStatus;
 
-          if (eventName === "sent" || eventName === "delivered" || eventName === "list_addition") {
+          if (eventName === "email.sent" && !existing.sent_at) patch.sent_at = when;
+          if (eventName === "email.delivered") {
+            if (!existing.delivered_at) patch.delivered_at = when;
             if (!existing.sent_at) patch.sent_at = when;
           }
-          if (eventName === "delivered" && !existing.delivered_at) patch.delivered_at = when;
 
-          if (eventName === "opened" || eventName === "unique_opened") {
+          if (eventName === "email.opened") {
             patch.open_count = (existing.open_count ?? 0) + 1;
             patch.last_opened_at = when;
             if (!existing.first_opened_at) patch.first_opened_at = when;
@@ -101,13 +101,23 @@ export const Route = createFileRoute("/api/public/campaigns/brevo-webhook")({
             if (!existing.delivered_at) patch.delivered_at = when;
             if (!existing.sent_at) patch.sent_at = when;
           }
-          if (eventName === "click" || eventName === "clicks") {
+          if (eventName === "email.clicked") {
             patch.click_count = (existing.click_count ?? 0) + 1;
           }
 
           await supabaseAdmin.from("leads").update(patch).eq("id", existing.id);
           updated++;
 
+          // Hard bounces and spam complaints must never be mailed again.
+          if (eventName === "email.bounced" || eventName === "email.complained") {
+            await supabaseAdmin.from("suppressed_emails").upsert(
+              {
+                email,
+                reason: eventName === "email.complained" ? "complaint" : "bounce",
+              },
+              { onConflict: "email" },
+            );
+          }
         }
 
         return Response.json({ ok: true, updated });

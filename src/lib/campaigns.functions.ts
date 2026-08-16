@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ============================================================================
-// B2B Lead Generation & Email Campaign — Apollo.io + Brevo (admin-only)
+// B2B Lead Generation & Email Campaign — Apollo.io + Resend (admin-only)
 // ============================================================================
 
 const ADMIN_EMAIL_ALLOWLIST = new Set<string>([
@@ -15,12 +15,7 @@ const PRIMARY_STATE = "CA";
 const FOUNDED_YEAR = 2026;
 const FALLBACK_ZIPS = ["91950", "91910", "91911", "91913", "91914", "91932", "92173"];
 const TARGET_TOTAL = 500;
-const BREVO_LIST_NAME = "National City - New Businesses 2026";
 
-// Mailing address + sender for CAN-SPAM footer (user-provided)
-const SENDER_NAME = "GetBizMusic.com";
-const SENDER_EMAIL = "info@getbizmusic.com";
-const MAILING_ADDRESS = "PO Box 254";
 
 async function requireAdminEmail(context: { claims?: { email?: string } | null }) {
   const email = String((context.claims as { email?: string } | null)?.email ?? "").toLowerCase();
@@ -221,245 +216,48 @@ export const importApolloLeads = createServerFn({ method: "POST" })
     };
   });
 
-// ---------- Brevo helpers ----------
-const BREVO_GATEWAY = "https://connector-gateway.lovable.dev/brevo";
-
-async function brevoFetch(path: string, init: RequestInit = {}) {
-  const lovableKey = process.env.LOVABLE_API_KEY;
-  const brevoKey = process.env.BREVO_API_KEY;
-  if (!lovableKey || !brevoKey) throw new Error("Brevo credentials missing.");
-  // The connector gateway already targets Brevo's v3 API root, so strip any /v3 prefix.
-  const normalizedPath = path.startsWith("/v3/") ? path.slice(3) : path;
-  const res = await fetch(`${BREVO_GATEWAY}${normalizedPath}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": brevoKey,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...(init.headers ?? {}),
-    },
-  });
-  return res;
-}
-
-function buildFinalHtml(htmlContent: string): string {
-  const footer = `
-      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;line-height:1.5;">
-        <p style="margin:0 0 6px;">You are receiving this because your business was identified as a newly founded ${PRIMARY_CITY}-area business.</p>
-        <p style="margin:0 0 6px;"><strong>${SENDER_NAME}</strong> · ${MAILING_ADDRESS}</p>
-        <p style="margin:0;"><a href="{{ unsubscribe }}" style="color:#2563eb;">Unsubscribe</a></p>
-      </div>`;
-  return /\{\{\s*unsubscribe\s*\}\}/i.test(htmlContent) ? htmlContent : `${htmlContent}${footer}`;
-}
-
-async function ensureBrevoList(): Promise<number> {
-  // List existing lists (paginated). Look for our name.
-  let offset = 0;
-  const limit = 50;
-  while (true) {
-    const res = await brevoFetch(`/v3/contacts/lists?limit=${limit}&offset=${offset}`);
-    if (!res.ok) throw new Error(`Brevo list lookup failed (${res.status}): ${await res.text()}`);
-    const body = (await res.json()) as { lists?: Array<{ id: number; name: string }>; count?: number };
-    const found = body.lists?.find((l) => l.name === BREVO_LIST_NAME);
-    if (found) return found.id;
-    const total = body.count ?? 0;
-    offset += limit;
-    if (offset >= total) break;
-  }
-  // Create it — Brevo requires a folderId. Use folder 1 (default).
-  const create = await brevoFetch(`/v3/contacts/lists`, {
-    method: "POST",
-    body: JSON.stringify({ name: BREVO_LIST_NAME, folderId: 1 }),
-  });
-  if (!create.ok) throw new Error(`Brevo list create failed (${create.status}): ${await create.text()}`);
-  const created = (await create.json()) as { id: number };
-  return created.id;
-}
-
-// ---------- Server fn: sync leads to Brevo list ----------
-export const syncLeadsToBrevo = createServerFn({ method: "POST" })
+// ---------- Server fn: send campaign via Resend ----------
+// Resend has no list/campaign builder — the `leads` table IS the list.
+export const sendResendCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await requireAdminEmail(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const listId = await ensureBrevoList();
-
-    // Pull leads that are not_sent and have no brevo_contact_id yet.
-    const { data: rows, error } = await supabaseAdmin
-      .from("leads")
-      .select("id, email, business_name, owner_name, industry_category, city, state, founded_year")
-      .eq("campaign_status", "not_sent")
-      .is("brevo_contact_id", null)
-      .limit(1000);
-    if (error) throw new Error(error.message);
-    const leads = rows ?? [];
-    if (!leads.length) return { ok: true as const, list_id: listId, synced: 0, failed: 0 };
-
-    let synced = 0;
-    let failed = 0;
-    // Batch via createContacts endpoint (up to 100 per request).
-    const CHUNK = 100;
-    for (let i = 0; i < leads.length; i += CHUNK) {
-      const chunk = leads.slice(i, i + CHUNK);
-      // createContacts is import-style; use per-contact upsert for reliability + id capture.
-      for (const lead of chunk) {
-        const payload = {
-          email: lead.email,
-          updateEnabled: true,
-          listIds: [listId],
-          attributes: {
-            BUSINESS_NAME: lead.business_name ?? "",
-            OWNER_NAME: lead.owner_name ?? "",
-            INDUSTRY_CATEGORY: lead.industry_category ?? "",
-            CITY: lead.city ?? "",
-            STATE: lead.state ?? "",
-            FOUNDED_YEAR: lead.founded_year ?? "",
-          },
-        };
-        const res = await brevoFetch(`/v3/contacts`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok && res.status !== 204) {
-          failed++;
-          continue;
-        }
-        let contactId: number | null = null;
-        try {
-          const body = (await res.json()) as { id?: number };
-          contactId = body?.id ?? null;
-        } catch {
-          contactId = null;
-        }
-        if (!contactId) {
-          // fetch by email
-          const get = await brevoFetch(`/v3/contacts/${encodeURIComponent(lead.email)}`);
-          if (get.ok) {
-            const b = (await get.json()) as { id?: number };
-            contactId = b?.id ?? null;
-          }
-        }
-        await supabaseAdmin
-          .from("leads")
-          .update({ brevo_contact_id: contactId })
-          .eq("id", lead.id);
-        synced++;
-      }
-    }
-
-    return { ok: true as const, list_id: listId, synced, failed };
-  });
-
-// ---------- Server fn: send campaign ----------
-export const sendBrevoCampaign = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { subject: string; htmlContent: string; campaignName?: string; scheduledAt?: string }) => {
+  .inputValidator((input: { subject: string; htmlContent: string; campaignName?: string }) => {
     if (!input?.subject?.trim()) throw new Error("Subject required.");
     if (!input?.htmlContent?.trim()) throw new Error("HTML content required.");
-    const scheduledAt = input.scheduledAt?.trim() || undefined;
-    if (scheduledAt && Number.isNaN(Date.parse(scheduledAt))) throw new Error("Invalid scheduled date/time.");
-    if (scheduledAt && Date.parse(scheduledAt) < Date.now() + 60_000) {
-      throw new Error("Scheduled time must be at least a minute in the future.");
-    }
     return {
       subject: input.subject.trim(),
       htmlContent: input.htmlContent,
       campaignName: input.campaignName?.trim() || `NC 2026 — ${new Date().toISOString().slice(0, 10)}`,
-      scheduledAt,
     };
   })
   .handler(async ({ data, context }) => {
     await requireAdminEmail(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendCampaignToLeads } = await import("@/lib/email/campaign-send.server");
 
-    // Ensure only not_sent leads are targeted: create a fresh Brevo list for THIS send.
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const perSendListName = `NC-2026 send ${stamp}`;
-
-    const createList = await brevoFetch(`/v3/contacts/lists`, {
-      method: "POST",
-      body: JSON.stringify({ name: perSendListName, folderId: 1 }),
-    });
-    if (!createList.ok) throw new Error(`Brevo list create failed (${createList.status}): ${await createList.text()}`);
-    const { id: sendListId } = (await createList.json()) as { id: number };
-
-    // Fetch not_sent leads with a brevo_contact_id.
     const { data: rows, error } = await supabaseAdmin
       .from("leads")
-      .select("id, email, brevo_contact_id")
+      .select("id, email, business_name, owner_name, city, unsubscribe_token")
       .eq("campaign_status", "not_sent")
-      .not("brevo_contact_id", "is", null)
-      .limit(10000);
+      .is("unsubscribed_at", null)
+      .limit(5000);
     if (error) throw new Error(error.message);
     const leads = rows ?? [];
     if (!leads.length) {
-      return { ok: false as const, reason: "No un-sent leads with Brevo contacts. Run Sync first." };
+      return { ok: false as const, reason: "No un-sent leads to send to." };
     }
 
-    // Add contacts to the per-send list, 150 emails per call.
-    const CHUNK = 150;
-    for (let i = 0; i < leads.length; i += CHUNK) {
-      const emails = leads.slice(i, i + CHUNK).map((l) => l.email);
-      const addRes = await brevoFetch(`/v3/contacts/lists/${sendListId}/contacts/add`, {
-        method: "POST",
-        body: JSON.stringify({ emails }),
-      });
-      if (!addRes.ok && addRes.status !== 400) {
-        throw new Error(`Brevo add-to-list failed (${addRes.status}): ${await addRes.text()}`);
-      }
-    }
-
-    const finalHtml = buildFinalHtml(data.htmlContent);
-
-    // Create the campaign (scheduled if a date/time was provided).
-    const createCampaign = await brevoFetch(`/v3/emailCampaigns`, {
-      method: "POST",
-      body: JSON.stringify({
-        name: data.campaignName,
-        subject: data.subject,
-        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-        htmlContent: finalHtml,
-        recipients: { listIds: [sendListId] },
-        inlineImageActivation: false,
-        ...(data.scheduledAt ? { scheduledAt: data.scheduledAt } : {}),
-      }),
+    const result = await sendCampaignToLeads({
+      supabaseAdmin,
+      leads,
+      subject: data.subject,
+      htmlContent: data.htmlContent,
     });
-    if (!createCampaign.ok) {
-      throw new Error(`Brevo campaign create failed (${createCampaign.status}): ${await createCampaign.text()}`);
-    }
-    const { id: campaignId } = (await createCampaign.json()) as { id: number };
-
-    if (data.scheduledAt) {
-      // Move the draft into the scheduled queue.
-      const queue = await brevoFetch(`/v3/emailCampaigns/${campaignId}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status: "queued" }),
-      });
-      if (!queue.ok && queue.status !== 204) {
-        throw new Error(`Brevo schedule failed (${queue.status}): ${await queue.text()}`);
-      }
-    } else {
-      const sendNow = await brevoFetch(`/v3/emailCampaigns/${campaignId}/sendNow`, { method: "POST" });
-      if (!sendNow.ok && sendNow.status !== 204) {
-        throw new Error(`Brevo sendNow failed (${sendNow.status}): ${await sendNow.text()}`);
-      }
-    }
-
-    // Optimistically mark as sent.
-    const ids = leads.map((l) => l.id);
-    await supabaseAdmin
-      .from("leads")
-      .update({ campaign_status: "sent", last_event_at: new Date().toISOString() })
-      .in("id", ids);
 
     return {
       ok: true as const,
-      campaign_id: campaignId,
-      send_list_id: sendListId,
+      campaign_name: data.campaignName,
       recipients: leads.length,
-      scheduled_at: data.scheduledAt ?? null,
+      ...result,
     };
   });
 
@@ -480,23 +278,33 @@ export const sendTestCampaign = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await requireAdminEmail(context);
+    const { sendResendEmail, unsubscribeHeaders } = await import("@/lib/email/resend.server");
+    const { buildFinalHtml, personalize } = await import("@/lib/email/campaign-send.server");
 
-    const finalHtml = buildFinalHtml(data.htmlContent);
-    const res = await brevoFetch(`/v3/smtp/email`, {
-      method: "POST",
-      body: JSON.stringify({
-        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-        to: [{ email: data.toEmail }],
-        subject: `[TEST] ${data.subject}`,
-        htmlContent: finalHtml,
+    const previewToken = "preview-test-token";
+    const html = buildFinalHtml(
+      personalize(data.htmlContent, {
+        id: "test",
+        email: data.toEmail,
+        business_name: "Sample Business",
+        owner_name: "Sample Owner",
+        city: PRIMARY_CITY,
       }),
+      previewToken,
+    );
+
+    await sendResendEmail({
+      to: data.toEmail,
+      subject: `[TEST] ${data.subject}`,
+      html,
+      headers: unsubscribeHeaders(previewToken),
+      tags: [{ name: "campaign", value: "test" }],
     });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Brevo test send failed (${res.status}): ${body}`);
-    }
+
     return { ok: true as const, to: data.toEmail };
   });
+
+
 
 // ---------- Server fn: dashboard stats ----------
 export const getCampaignDashboard = createServerFn({ method: "GET" })
