@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ============================================================================
-// B2B Lead Generation & Email Campaign — Apollo.io + Brevo (admin-only)
+// B2B Lead Generation & Email Campaign — Apollo.io + Resend (admin-only)
 // ============================================================================
 
 const ADMIN_EMAIL_ALLOWLIST = new Set<string>([
@@ -15,12 +15,7 @@ const PRIMARY_STATE = "CA";
 const FOUNDED_YEAR = 2026;
 const FALLBACK_ZIPS = ["91950", "91910", "91911", "91913", "91914", "91932", "92173"];
 const TARGET_TOTAL = 500;
-const BREVO_LIST_NAME = "National City - New Businesses 2026";
 
-// Mailing address + sender for CAN-SPAM footer (user-provided)
-const SENDER_NAME = "GetBizMusic.com";
-const SENDER_EMAIL = "info@getbizmusic.com";
-const MAILING_ADDRESS = "PO Box 254";
 
 async function requireAdminEmail(context: { claims?: { email?: string } | null }) {
   const email = String((context.claims as { email?: string } | null)?.email ?? "").toLowerCase();
