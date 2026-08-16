@@ -29,6 +29,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SdcountyIndexRouteImport } from './routes/sdcounty.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
+import { Route as TermsAiAuditRouteImport } from './routes/terms.ai-audit'
 import { Route as SdcountySlugRouteImport } from './routes/sdcounty.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
@@ -157,6 +158,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CityRoute,
+} as any)
+const TermsAiAuditRoute = TermsAiAuditRouteImport.update({
+  id: '/terms/ai-audit',
+  path: '/terms/ai-audit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SdcountySlugRoute = SdcountySlugRouteImport.update({
   id: '/sdcounty/$slug',
@@ -342,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
+  '/terms/ai-audit': typeof TermsAiAuditRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -390,6 +397,7 @@ export interface FileRoutesByTo {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
+  '/terms/ai-audit': typeof TermsAiAuditRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
   '/sdcounty': typeof SdcountyIndexRoute
@@ -441,6 +449,7 @@ export interface FileRoutesById {
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
+  '/terms/ai-audit': typeof TermsAiAuditRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -493,6 +502,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
+    | '/terms/ai-audit'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
+    | '/terms/ai-audit'
     | '/$city'
     | '/admin'
     | '/sdcounty'
@@ -591,6 +602,7 @@ export interface FileRouteTypes {
     | '/design/return'
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
+    | '/terms/ai-audit'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -637,6 +649,7 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   SdcountySlugRoute: typeof SdcountySlugRoute
+  TermsAiAuditRoute: typeof TermsAiAuditRoute
   SdcountyIndexRoute: typeof SdcountyIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -795,6 +808,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$city/'
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
+    }
+    '/terms/ai-audit': {
+      id: '/terms/ai-audit'
+      path: '/terms/ai-audit'
+      fullPath: '/terms/ai-audit'
+      preLoaderRoute: typeof TermsAiAuditRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/sdcounty/$slug': {
       id: '/sdcounty/$slug'
@@ -1076,6 +1096,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   SdcountySlugRoute: SdcountySlugRoute,
+  TermsAiAuditRoute: TermsAiAuditRoute,
   SdcountyIndexRoute: SdcountyIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
