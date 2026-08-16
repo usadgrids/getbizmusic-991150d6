@@ -33,17 +33,35 @@ function AdTileBackground() {
     if (!byImage.has(url)) byImage.set(url, ad);
   }
   const unique = Array.from(byImage.values());
-  // Fisher-Yates shuffle so identical tiles are not neighbours.
+  // Fisher-Yates shuffle the unique set first for variety.
   const shuffled = [...unique];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  const tiles = Array.from({ length: 36 }, (_, i) => shuffled[i % shuffled.length]);
+
+  // Build 36 tiles guaranteeing that no two horizontally-adjacent tiles share
+  // the same image. The grid wraps left→right at every breakpoint, so
+  // consecutive array indices are side-by-side neighbours. We greedily pick a
+  // candidate whose image differs from the previously placed tile; if the pool
+  // only has repeats left we refill it from the shuffled unique set.
+  const imgUrl = (ad: (typeof ads)[number]) => ad.image_url ?? ad.id;
+  const tiles: (typeof ads)[number][] = [];
+  let lastUrl: string | null = null;
+  let pool = [...shuffled];
+  for (let i = 0; i < 36; i++) {
+    let idx = pool.findIndex((a) => imgUrl(a) !== lastUrl);
+    if (idx === -1) idx = 0; // only one unique image available
+    const ad = pool[idx];
+    tiles.push(ad);
+    lastUrl = imgUrl(ad);
+    pool.splice(idx, 1);
+    if (pool.length === 0) pool = [...shuffled];
+  }
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-40 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid h-full w-full grid-cols-3 gap-1 opacity-50 sm:grid-cols-4 lg:grid-cols-6">
         {tiles.map((ad, i) => (
           <img
             key={`${ad.id}-${i}`}
@@ -54,7 +72,7 @@ function AdTileBackground() {
           />
         ))}
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/45 via-[#0F2A4A]/35 to-[#0F2A4A]/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/35 via-[#0F2A4A]/30 to-[#0F2A4A]/35" />
     </div>
   );
 }
