@@ -523,21 +523,80 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-                Address {manualClaim && <span className="text-[#D4A24C]">*</span>}
+                Business Type <span className="text-[#D4A24C]">*</span>
               </label>
-              {manualClaim ? (
-                <input
-                  className={inputClass}
-                  value={claimTarget.address}
-                  maxLength={200}
-                  required
-                  placeholder="Street address, city, state, ZIP"
-                  onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
-                />
-              ) : (
-                <input className={`${inputClass} bg-gray-50`} value={claimTarget.address} readOnly />
-              )}
+              <div className="space-y-1.5 rounded-lg border border-gray-300 px-3 py-2">
+                {BUSINESS_TYPES.map((t) => (
+                  <label key={t.value} className="flex items-start gap-2 text-xs text-[#0F2A4A]">
+                    <input
+                      type="radio"
+                      className="mt-0.5"
+                      name="business-type"
+                      value={t.value}
+                      checked={businessType === t.value}
+                      onChange={() => setBusinessType(t.value)}
+                    />
+                    <span>{t.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                {addressIsPrivate
+                  ? "Business Address (Private — used for verification and billing only, never displayed publicly)"
+                  : "Business Address"}{" "}
+                <span className="text-[#D4A24C]">*</span>
+              </label>
+              <input
+                className={inputClass}
+                value={claimTarget.address}
+                maxLength={200}
+                required
+                placeholder="Street address, city, state, ZIP"
+                onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                {addressIsPrivate
+                  ? "Your address stays private. Your service area below is what shows publicly."
+                  : "This address will be displayed publicly on your listing."}
+              </p>
+            </div>
+            {addressIsPrivate && (
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                  Service Area (shown publicly) <span className="text-[#D4A24C]">*</span>
+                </label>
+                <select
+                  className={inputClass}
+                  value={serviceAreaChoice}
+                  onChange={(e) => setServiceAreaChoice(e.target.value)}
+                >
+                  <option value="city">Serves a specific city</option>
+                  <option value="Serves San Diego County">Serves San Diego County</option>
+                  <option value="Serves Southern California">Serves Southern California</option>
+                  <option value="Serves the entire State of California">
+                    Serves the entire State of California
+                  </option>
+                  <option value="custom">Custom</option>
+                </select>
+                {(serviceAreaChoice === "city" || serviceAreaChoice === "custom") && (
+                  <input
+                    className={`${inputClass} mt-2`}
+                    value={serviceAreaCustom}
+                    maxLength={120}
+                    required
+                    placeholder={
+                      serviceAreaChoice === "city"
+                        ? "City name (e.g. Chula Vista)"
+                        : "Describe your service area"
+                    }
+                    onChange={(e) => setServiceAreaCustom(e.target.value)}
+                  />
+                )}
+              </div>
+            )}
+
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
                 Business Category <span className="text-[#D4A24C]">*</span>
