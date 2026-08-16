@@ -206,6 +206,10 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     if (!claimTarget) return;
     if (ownerName.trim().length < 2) return toast.error("Enter your name.");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail.trim())) return toast.error("Enter a valid email.");
+    if (claimTarget.address.trim().length < 5)
+      return toast.error("Enter your business address.");
+    if (addressIsPrivate && !serviceAreaLabel)
+      return toast.error("Choose the service area shown publicly.");
 
     setSubmitting(true);
     try {
@@ -214,10 +218,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           businessName: claimTarget.name || businessName.trim(),
           tradeName: tradeName.trim() || undefined,
           businessCategory: selectedCategory,
-          address: claimTarget.address,
+          address: claimTarget.address.trim(),
+          businessType,
+          addressIsPrivate,
+          serviceAreaLabel: serviceAreaLabel || undefined,
           website: claimTarget.website,
           phone: claimTarget.phone,
           googlePlaceId: claimTarget.placeId,
+
           ownerName: ownerName.trim(),
           ownerEmail: ownerEmail.trim(),
           ownerPhone: ownerPhone.trim() || undefined,
