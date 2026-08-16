@@ -29,6 +29,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SdcountyIndexRouteImport } from './routes/sdcounty.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
+import { Route as SdcountySlugRouteImport } from './routes/sdcounty.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -156,6 +157,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CityRoute,
+} as any)
+const SdcountySlugRoute = SdcountySlugRouteImport.update({
+  id: '/sdcounty/$slug',
+  path: '/sdcounty/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
   '/sdcounty': typeof SdcountyIndexRoute
@@ -432,6 +440,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/sdcounty/$slug': typeof SdcountySlugRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -483,6 +492,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -530,6 +540,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city'
     | '/admin'
     | '/sdcounty'
@@ -579,6 +590,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
+    | '/sdcounty/$slug'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -624,6 +636,7 @@ export interface RootRouteChildren {
   AdAdNumberRoute: typeof AdAdNumberRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  SdcountySlugRoute: typeof SdcountySlugRoute
   SdcountyIndexRoute: typeof SdcountyIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -782,6 +795,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$city/'
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
+    }
+    '/sdcounty/$slug': {
+      id: '/sdcounty/$slug'
+      path: '/sdcounty/$slug'
+      fullPath: '/sdcounty/$slug'
+      preLoaderRoute: typeof SdcountySlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -1055,6 +1075,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdAdNumberRoute: AdAdNumberRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  SdcountySlugRoute: SdcountySlugRoute,
   SdcountyIndexRoute: SdcountyIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
