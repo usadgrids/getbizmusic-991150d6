@@ -385,12 +385,15 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Legal Business Name</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Legal Business Name <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
                 value={claimTarget.name}
                 readOnly={!manualClaim}
                 maxLength={120}
+                required
                 onChange={
                   manualClaim
                     ? (e) => setClaimTarget({ ...claimTarget, name: e.target.value })
@@ -399,12 +402,15 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Address</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Address {manualClaim && <span className="text-[#D4A24C]">*</span>}
+              </label>
               {manualClaim ? (
                 <input
                   className={inputClass}
                   value={claimTarget.address}
                   maxLength={200}
+                  required
                   placeholder="Street address, city, state, ZIP"
                   onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
                 />
@@ -413,7 +419,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               )}
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Business Category</label>
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Business Category <span className="text-[#D4A24C]">*</span>
+              </label>
               <CategorySelect
                 className={inputClass}
                 value={selectedCategory}
