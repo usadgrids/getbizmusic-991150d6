@@ -69,7 +69,10 @@ export function buildPlaceJsonLd(
   const business: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": schemaTypeFor(category, industry),
+    // Public-facing name (trade name / DBA when the business registered one),
+    // with the registered legal entity name kept as schema.org `legalName`.
     name: place.name,
+    legalName: (place as { legal_name?: string | null }).legal_name || undefined,
     url,
     description: place.summary ?? place.description ?? undefined,
     image: place.image_url ?? undefined,

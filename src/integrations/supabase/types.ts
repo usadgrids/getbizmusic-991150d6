@@ -513,6 +513,7 @@ export type Database = {
           source_category_page: string | null
           status: string
           submitted_at: string
+          trade_name: string | null
           updated_at: string
           wants_ad_design: boolean
           wants_ai_audit: boolean
@@ -541,6 +542,7 @@ export type Database = {
           source_category_page?: string | null
           status?: string
           submitted_at?: string
+          trade_name?: string | null
           updated_at?: string
           wants_ad_design?: boolean
           wants_ai_audit?: boolean
@@ -569,6 +571,7 @@ export type Database = {
           source_category_page?: string | null
           status?: string
           submitted_at?: string
+          trade_name?: string | null
           updated_at?: string
           wants_ad_design?: boolean
           wants_ai_audit?: boolean

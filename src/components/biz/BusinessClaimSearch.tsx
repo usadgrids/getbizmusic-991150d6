@@ -86,6 +86,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   // When true, the claim form was reached via "add yours" (no matching Place),
   // so the address field is editable and pre-filled only with the business name.
   const [manualClaim, setManualClaim] = useState(false);
+  // Public-facing DBA name; optional. When set it is what visitors see.
+  const [tradeName, setTradeName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
@@ -181,6 +183,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       const res = await runClaim({
         data: {
           businessName: claimTarget.name || businessName.trim(),
+          tradeName: tradeName.trim() || undefined,
           businessCategory: selectedCategory,
           address: claimTarget.address,
           website: claimTarget.website,
@@ -501,6 +504,22 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                     : undefined
                 }
               />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                Trade Name / DBA <span className="text-gray-400">(optional)</span>
+              </label>
+              <input
+                className={inputClass}
+                value={tradeName}
+                maxLength={120}
+                onChange={(e) => setTradeName(e.target.value)}
+                placeholder="e.g. Maria's Kitchen"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Only fill this in if you operate under a different name than your legal business
+                name. If provided, this is the name shown publicly on your listing.
+              </p>
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
