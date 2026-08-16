@@ -24,15 +24,22 @@ function AdTileBackground() {
     staleTime: 5 * 60 * 1000,
   });
 
-  if (!ads.length) return null;
+  // Widen the pool with the showcase/placeholder ad graphics so the mosaic has
+  // enough distinct images to avoid repeats.
+  const showcase = DIRECTORY_CATEGORY_SLUGS.flatMap(
+    (s) => DIRECTORY_CATEGORY_UI[s].showcaseAds,
+  );
+  const pooled = [...ads, ...showcase];
+  if (!pooled.length) return null;
   // De-duplicate by image so the mosaic shows many *different* ads, not the
   // same graphic repeated in stripes.
-  const byImage = new Map<string, (typeof ads)[number]>();
-  for (const ad of ads) {
+  const byImage = new Map<string, (typeof pooled)[number]>();
+  for (const ad of pooled) {
     const url = ad.image_url ?? ad.id;
     if (!byImage.has(url)) byImage.set(url, ad);
   }
   const unique = Array.from(byImage.values());
+
   // Fisher-Yates shuffle the unique set first for variety.
   const shuffled = [...unique];
   for (let i = shuffled.length - 1; i > 0; i--) {
