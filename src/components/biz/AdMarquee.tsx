@@ -20,7 +20,13 @@ const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap(
  * overlay showing that ad graphic large with an invitation to request a free
  * custom ad design; moving the pointer away dismisses the overlay.
  */
-export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
+export function AdMarquee({
+  disabled = false,
+  onHoverDismiss,
+}: {
+  disabled?: boolean;
+  onHoverDismiss?: () => void;
+}) {
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useQuery({
     queryKey: ["admarquee-ads"],
