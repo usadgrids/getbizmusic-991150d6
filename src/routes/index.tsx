@@ -166,7 +166,7 @@ function Index() {
                   src="https://getbizmusic.com/__l5e/assets-v1/c1b84ad5-8673-482d-b654-e488045db784/ralph-posadas-headshot.png"
                   alt="Ralph T. Posadas"
                   loading="lazy"
-                  className="h-16 w-16 rounded-full border border-[#D4A24C]/70 object-cover sm:h-20 sm:w-20"
+                  className="h-20 w-20 rounded-full border border-[#D4A24C]/70 object-cover sm:h-28 sm:w-28"
                 />
                 <div className="text-center sm:text-left">
                   <p className="font-['Mr_De_Haviland'] text-3xl leading-tight text-white sm:text-4xl">
