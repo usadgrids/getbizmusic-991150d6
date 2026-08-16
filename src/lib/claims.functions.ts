@@ -5,6 +5,7 @@ import { checkRateLimit } from "./rate-limit.server";
 
 const claimSchema = z.object({
   businessName: z.string().trim().min(2).max(200),
+  tradeName: z.string().trim().max(200).optional(),
   businessCategory: z.string().trim().max(80).optional(),
   address: z.string().trim().max(300).optional(),
   website: z.string().trim().max(300).optional(),
@@ -54,6 +55,7 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       priority: launchApplied,
       locked_price: lockedPrice,
       business_name: data.businessName,
+      trade_name: data.tradeName || null,
       business_category: data.businessCategory ?? null,
       address: data.address ?? null,
       website: data.website ?? null,
@@ -80,7 +82,8 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
         recipientEmail: data.ownerEmail,
         templateData: {
           ownerName: data.ownerName,
-          businessName: data.businessName,
+          businessName: data.tradeName || data.businessName,
+          legalBusinessName: data.businessName,
           businessCategory: data.businessCategory,
           address: data.address,
           wantsAiAudit: data.wantsAiAudit,
