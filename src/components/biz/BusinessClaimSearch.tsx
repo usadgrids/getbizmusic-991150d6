@@ -230,8 +230,47 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       <p className="mt-1 text-sm text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
         you correctly. Get a free AI Visibility Audit and a free professionally designed ad — no
-        cost to see what&rsquo;s possible for your business.
+        cost to see what&rsquo;s possible for your business.{" "}
+        <button
+          type="button"
+          onClick={() => setTermsOpen(true)}
+          className="text-xs text-[#B08C46] underline underline-offset-2 hover:text-[#8a6d33]"
+        >
+          (Terms &amp; Conditions apply)
+        </button>
       </p>
+
+      {termsOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={AI_AUDIT_TERMS_TITLE}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setTermsOpen(false)}
+        >
+          <div
+            className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 sm:p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-bold text-[#0F2A4A]">{AI_AUDIT_TERMS_TITLE}</h3>
+            <ol className="mt-4 space-y-4 text-xs leading-relaxed text-gray-700">
+              {AI_AUDIT_TERMS.map((t, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="font-bold text-[#D4A24C]">{i + 1}.</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ol>
+            <button
+              type="button"
+              onClick={() => setTermsOpen(false)}
+              className="mt-5 rounded-full bg-[#0F2A4A] px-5 py-2 text-sm font-bold text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
