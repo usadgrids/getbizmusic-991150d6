@@ -78,6 +78,7 @@ export function AdMarquee({ disabled = false }: { disabled?: boolean }) {
         className="admarquee-container relative mt-5 overflow-hidden rounded-xl border border-[#D4A24C]/30 bg-[#0F2A4A]/40"
         aria-label="Sample business ads"
         onMouseLeave={() => setHovered(null)}
+        onMouseEnter={() => !disabled && undefined}
       >
         <div className="admarquee-track flex w-max gap-2 px-2 py-2">
           {strip.map((ad, i) => (
