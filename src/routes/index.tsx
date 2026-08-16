@@ -11,7 +11,9 @@ import {
   DIRECTORY_CATEGORY_SLUGS,
   type DirectoryCategory,
 } from "@/lib/directory-categories";
+import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 import homeHero from "@/assets/SD-Business-3.png.asset.json";
+
 
 const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
 
