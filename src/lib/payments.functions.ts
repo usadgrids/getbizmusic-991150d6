@@ -642,7 +642,9 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
 
 // ---- Pay Later (Bill Me) -------------------------------------------------
 
-const payLaterInputSchema = zelleInputSchema; // same fields as Zelle
+const payLaterInputSchema = zelleInputSchema.extend({
+  industry: z.string().trim().max(120).optional(),
+});
 
 type PayLaterOrderResult =
   | {
