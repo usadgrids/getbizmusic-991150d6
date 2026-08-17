@@ -18,7 +18,7 @@ import {
 } from "@/lib/ads.functions";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { getActiveCities } from "@/lib/cities.functions";
-import { INDUSTRIES, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
+import { INDUSTRIES, AD_CATEGORY_GROUPS, AD_PLANS, isReligiousIndustry } from "@/lib/biz-utils";
 import { listReps, createRep, updateRep, deleteRep, listRepOrders, type RepRow } from "@/lib/reps.functions";
 import { listDesignOrders, deleteDesignOrder, setDesignOrderCompleted, type DesignOrderRow } from "@/lib/design.functions";
 import { listZelleOrders, markZelleOrderPaid, cancelZelleOrder, listVenmoOrders, type ZelleOrderAdminRow, type VenmoOrderAdminRow } from "@/lib/payments.functions";
@@ -836,7 +836,11 @@ function ManualSubmitSection({ onCreated }: { onCreated: () => void }) {
                 className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
               >
                 <option value="" disabled>Pick one…</option>
-                {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+                {AD_CATEGORY_GROUPS.map((g) => (
+                  <optgroup key={g.label} label={g.label}>
+                    {g.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </optgroup>
+                ))}
               </select>
               {isCommunityEvent && (
                 <p className="mt-1 text-[11px] text-emerald-700">
@@ -1174,7 +1178,11 @@ function EditAdModal({
               value={industry} onChange={(e) => setIndustry(e.target.value)} required
               className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
             >
-              {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+              {AD_CATEGORY_GROUPS.map((g) => (
+                  <optgroup key={g.label} label={g.label}>
+                    {g.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </optgroup>
+                ))}
               {!INDUSTRIES.some((i) => i.value === industry) && (
                 <option value={industry}>{industry}</option>
               )}

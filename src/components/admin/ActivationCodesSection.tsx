@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { KeyRound, Trash2, Check, Link2, Plus, Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { INDUSTRIES } from "@/lib/biz-utils";
+import { AD_CATEGORY_GROUPS } from "@/lib/business-categories";
 import { getActiveCities } from "@/lib/cities.functions";
 import {
   listActivationCodes,
@@ -171,8 +171,12 @@ export function ActivationCodesSection() {
             <span className="text-xs font-semibold text-gray-600">Business category *</span>
             <select name="industry" defaultValue={editing?.industry ?? ""} required className={inputCls}>
               <option value="" disabled>Select…</option>
-              {INDUSTRIES.map((i) => (
-                <option key={i.value} value={i.value}>{i.label}</option>
+              {AD_CATEGORY_GROUPS.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.options.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>
