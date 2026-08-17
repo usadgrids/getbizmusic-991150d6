@@ -190,16 +190,16 @@ function Index() {
               <BusinessClaimSearch category={category} />
             </div>
 
-            {/* Secondary, lower-emphasis activation-code entry */}
-            <div className="mt-5 border-t border-white/10 pt-4 text-center">
+            {/* Secondary, clearly separated activation-code entry */}
+            <div className="mt-12 border-t-2 border-dashed border-white/15 pt-8 text-center">
               {!showActivation ? (
                 <button
                   type="button"
                   onClick={() => setShowActivation(true)}
                   className="inline-flex items-center gap-2 text-sm font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-[#D4A24C]"
                 >
-                  <KeyRound size={14} aria-hidden />
-                  Already have an Activation Code from us?
+                  <Unlock size={14} aria-hidden />
+                  Already a GetBizMusic partner? Enter your Activation Code
                 </button>
               ) : (
                 <div className="[&>section]:mt-0">
@@ -209,6 +209,10 @@ function Index() {
                       if (proof) void navigate({ to: "/activate", search: { code: proof.code } });
                     }}
                   />
+                  <p className="mx-auto mt-3 max-w-xl text-xs text-white/60">
+                    Already received a flyer or been personally onboarded? Enter your Activation
+                    Code here to view your ready-made ad.
+                  </p>
                   <button
                     type="button"
                     onClick={() => setShowActivation(false)}
@@ -219,6 +223,7 @@ function Index() {
                 </div>
               )}
             </div>
+
 
           </div>
         </div>
