@@ -176,6 +176,7 @@ export type Database = {
           agreed_no_refund: boolean
           agreed_terms: boolean
           amount_cents: number
+          bill_later_due_date: string | null
           business_name: string | null
           city_id: string | null
           commission_cents: number
@@ -188,16 +189,24 @@ export type Database = {
           environment: string
           id: string
           ip_address: string | null
+          membership_due_date: string | null
+          membership_start_date: string | null
+          membership_status: string
           owner_name: string | null
           paid_at: string | null
           payment_method: string
+          payment_verified: boolean
+          payment_verified_at: string | null
+          payment_verified_by: string | null
           phone: string | null
           plan: string
+          renewal_reminder_sent_at: string | null
           rep_code: string | null
           rep_id: string | null
           status: string
           stripe_session_id: string
           submission_token: string
+          terms_accepted_at: string | null
           token_used: boolean
         }
         Insert: {
@@ -205,6 +214,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents: number
+          bill_later_due_date?: string | null
           business_name?: string | null
           city_id?: string | null
           commission_cents?: number
@@ -217,16 +227,24 @@ export type Database = {
           environment?: string
           id?: string
           ip_address?: string | null
+          membership_due_date?: string | null
+          membership_start_date?: string | null
+          membership_status?: string
           owner_name?: string | null
           paid_at?: string | null
           payment_method?: string
+          payment_verified?: boolean
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
           phone?: string | null
           plan: string
+          renewal_reminder_sent_at?: string | null
           rep_code?: string | null
           rep_id?: string | null
           status?: string
           stripe_session_id: string
           submission_token?: string
+          terms_accepted_at?: string | null
           token_used?: boolean
         }
         Update: {
@@ -234,6 +252,7 @@ export type Database = {
           agreed_no_refund?: boolean
           agreed_terms?: boolean
           amount_cents?: number
+          bill_later_due_date?: string | null
           business_name?: string | null
           city_id?: string | null
           commission_cents?: number
@@ -246,16 +265,24 @@ export type Database = {
           environment?: string
           id?: string
           ip_address?: string | null
+          membership_due_date?: string | null
+          membership_start_date?: string | null
+          membership_status?: string
           owner_name?: string | null
           paid_at?: string | null
           payment_method?: string
+          payment_verified?: boolean
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
           phone?: string | null
           plan?: string
+          renewal_reminder_sent_at?: string | null
           rep_code?: string | null
           rep_id?: string | null
           status?: string
           stripe_session_id?: string
           submission_token?: string
+          terms_accepted_at?: string | null
           token_used?: boolean
         }
         Relationships: [
