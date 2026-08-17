@@ -160,7 +160,18 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     e.preventDefault();
     if (businessName.trim().length < 2) return toast.error("Enter your legal business name.");
     if (!/^\d{5}$/.test(zip.trim())) return toast.error("Enter a 5-digit ZIP code.");
-    if (launchCode.trim().length < 2) return toast.error("Enter your launch code.");
+    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
+    try {
+      const kind = await classifyFn({ data: { code: launchCode.trim() } });
+      if (kind.kind === "activation") {
+        return toast.error(
+          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
+        );
+      }
+    } catch {
+      /* classification is advisory only */
+    }
+
     if (Number(captchaInput) !== captcha.a + captcha.b) {
       setCaptcha(newCaptcha());
       setCaptchaInput("");
