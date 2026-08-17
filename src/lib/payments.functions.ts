@@ -666,10 +666,6 @@ export const createPayLaterOrder = createServerFn({ method: "POST" })
       const agreedAt = new Date().toISOString();
       const ipAddress = getClientIp();
 
-      const planMeta = AD_PLANS[data.plan];
-      const baseAmount = planMeta.price * 100;
-      const productName = `Get Biz Music — ${planMeta.label}`;
-
       // Rep code validation (same rules as Zelle).
       let repId: string | null = null;
       let repCode: string | null = null;
