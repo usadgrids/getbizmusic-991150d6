@@ -1,5 +1,5 @@
 // Membership payment notification emails (card + Zelle/Venmo two-stage flow).
-import { CATEGORY_LABELS } from "@/lib/business-categories";
+import { industryLabel } from "@/lib/business-categories";
 
 const PT = "America/Los_Angeles";
 
@@ -72,7 +72,7 @@ async function resolveCategoryLabel(paymentId: string): Promise<string | undefin
     .maybeSingle();
   const industry = data?.industry as string | undefined;
   if (!industry) return undefined;
-  return (CATEGORY_LABELS as Record<string, string>)[industry] ?? industry;
+  return industryLabel(industry) || industry;
 }
 
 /**
