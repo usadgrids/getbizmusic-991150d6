@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2 } from "lucide-react";
-import { getAdsByCategory } from "@/lib/ads.functions";
+import { getCountyAds } from "@/lib/ads.functions";
 import { listAllDirectoryPlaces, listDirectoryTopics } from "@/lib/directory.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
