@@ -41,6 +41,23 @@ export function LaunchCodesSection() {
     }
   }
 
+  const markComplete = useServerFn(markClaimAuditComplete);
+
+  async function handleNotify(claimId: string) {
+    const score = window.prompt("Enter the AI Visibility Score (e.g. 42/100), or leave blank:", "");
+    if (score === null) return; // cancelled
+    setNotifyBusy(claimId);
+    try {
+      await markComplete({ data: { claimId, auditScore: score || undefined } });
+      toast.success("Owner notified — audit marked complete");
+      refetchClaims();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Notification failed");
+    } finally {
+      setNotifyBusy(null);
+    }
+  }
+
   return (
     <section className="mt-10 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="flex items-center gap-2 text-lg font-bold text-[#0F2A4A]">
