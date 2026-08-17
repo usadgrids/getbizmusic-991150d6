@@ -257,7 +257,7 @@ function PricingPage() {
     }
   };
 
-
+  if (clientSecret) {
     return (
       <div className="min-h-screen bg-[#0F2A4A] text-white">
         <PaymentTestModeBanner />
