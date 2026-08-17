@@ -35,6 +35,7 @@ import { Route as SdcountySlugRouteImport } from './routes/sdcounty.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DesignReturnRouteImport } from './routes/design.return'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as AdminTestEmailsRouteImport } from './routes/admin.test-emails'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminCampaignsRouteImport } from './routes/admin.campaigns'
 import { Route as AdAdNumberRouteImport } from './routes/ad.$adNumber'
@@ -190,6 +191,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestEmailsRoute = AdminTestEmailsRouteImport.update({
+  id: '/test-emails',
+  path: '/test-emails',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminDisputesRoute = AdminDisputesRouteImport.update({
   id: '/disputes',
@@ -357,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/ad/$adNumber': typeof AdAdNumberRoute
   '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/design/return': typeof DesignReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/admin/test-emails'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -568,6 +578,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/admin/test-emails'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -621,6 +632,7 @@ export interface FileRouteTypes {
     | '/ad/$adNumber'
     | '/admin/campaigns'
     | '/admin/disputes'
+    | '/admin/test-emails'
     | '/checkout/return'
     | '/design/return'
     | '/email/unsubscribe'
@@ -878,6 +890,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/test-emails': {
+      id: '/admin/test-emails'
+      path: '/test-emails'
+      fullPath: '/admin/test-emails'
+      preLoaderRoute: typeof AdminTestEmailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/disputes': {
       id: '/admin/disputes'
       path: '/disputes'
@@ -1075,12 +1094,14 @@ const CityRouteWithChildren = CityRoute._addFileChildren(CityRouteChildren)
 interface AdminRouteChildren {
   AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminDisputesRoute: typeof AdminDisputesRoute
+  AdminTestEmailsRoute: typeof AdminTestEmailsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCampaignsRoute: AdminCampaignsRoute,
   AdminDisputesRoute: AdminDisputesRoute,
+  AdminTestEmailsRoute: AdminTestEmailsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
