@@ -62,7 +62,7 @@ function PricingPage() {
     if (designParam === "0" || designParam === "false") return false;
     return true; // default to professionally designed ad
   });
-  const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
+  const [payMethod, setPayMethod] = useState<"card" | "zelle" | "pay_later">("card");
   const [ownerName, setOwnerName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
