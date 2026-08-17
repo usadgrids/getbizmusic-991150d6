@@ -67,6 +67,10 @@ function PricingPage() {
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
   const [zelleLoading, setZelleLoading] = useState(false);
+  const [payLaterLoading, setPayLaterLoading] = useState(false);
+  const [payLaterResult, setPayLaterResult] = useState<{
+    invoiceNumber: string; amountFormatted: string; dueDateFormatted: string; submitUrl: string;
+  } | null>(null);
   const [zelleResult, setZelleResult] = useState<{
     token: string; memoCode: string; amountFormatted: string; zellePhone: string; submitUrl: string;
   } | null>(null);
