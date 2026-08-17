@@ -662,9 +662,12 @@ export const createPayLaterOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PayLaterOrderResult> => {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { industryLabel } = await import("@/lib/business-categories");
       const agreedAt = new Date().toISOString();
       const ipAddress = getClientIp();
+
+      const planMeta = AD_PLANS[data.plan];
+      const baseAmount = planMeta.price * 100;
+
 
       // Rep code validation (same rules as Zelle).
       let repId: string | null = null;
