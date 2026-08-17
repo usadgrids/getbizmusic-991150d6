@@ -144,7 +144,9 @@
 
   html,
   body {
-    overflow-x: clip;
+    margin: 0;
+    min-width: 0;
+    overflow-x: hidden;
     width: 100%;
     max-width: 100%;
     overscroll-behavior-x: none;
@@ -158,6 +160,26 @@
     background-color: #0F2A4A;
     color: var(--color-foreground);
     font-family: var(--font-sans);
+  }
+
+  /* Permanent viewport guard: route shells stay centered and cannot grow wider
+   * than phone or tablet screens when animated/fixed children are present. */
+  body > div,
+  body > main,
+  body > section {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  main,
+  section,
+  header,
+  footer,
+  nav,
+  form {
+    min-width: 0;
+    max-width: 100%;
   }
 
   /* Media and embeds can never force the layout wider than the viewport. */
@@ -243,7 +265,13 @@
 /* Faster crawl for the in-form sample-ad marquee */
 .admarquee-track {
   animation: marquee 40s linear infinite;
+  contain: layout paint;
   will-change: transform;
+}
+.admarquee-container {
+  width: 100%;
+  max-width: 100%;
+  contain: layout paint;
 }
 .admarquee-container:hover .admarquee-track {
   animation-play-state: paused;

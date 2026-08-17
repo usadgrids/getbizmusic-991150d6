@@ -307,7 +307,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   return (
     <section
       aria-label="Claim your business listing"
-      className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
+      className="mx-auto mt-8 w-full max-w-3xl min-w-0 overflow-hidden rounded-2xl bg-white px-4 py-6 shadow-sm sm:px-8"
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {[
@@ -535,7 +535,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           {results.map((r) => (
             <li
               key={r.placeId || r.name}
-              className={`flex items-start justify-between gap-3 rounded-lg border px-3 py-3 ${
+              className={`grid min-w-0 gap-3 rounded-lg border px-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${
                 claimTarget?.placeId === r.placeId ? "border-[#D4A24C] bg-[#fdf7ec]" : "border-gray-200"
               }`}
             >
@@ -551,7 +551,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               <button
                 type="button"
                 onClick={() => pickResult(r)}
-                className="shrink-0 rounded-full bg-[#D4A24C] px-4 py-1.5 text-xs font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
+                className="w-full rounded-full bg-[#D4A24C] px-4 py-1.5 text-xs font-bold text-[#0F2A4A] hover:bg-[#e0b566] sm:w-auto sm:shrink-0"
               >
                 {results.length > 1 ? "This is my primary location" : "Yes, this is my business"}
               </button>

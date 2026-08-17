@@ -126,12 +126,12 @@ export function AdMarquee({
     <>
       <div
         ref={containerRef}
-        className="admarquee-container relative mt-5 overflow-hidden rounded-xl border border-[#D4A24C]/30 bg-[#0F2A4A]/40"
+        className="admarquee-container relative mt-5 w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-[#D4A24C]/30 bg-[#0F2A4A]/40"
         aria-label="Sample business ads"
         onMouseLeave={dismiss}
         onPointerLeave={dismiss}
       >
-        <div className="admarquee-track flex w-max gap-2 px-2 py-2">
+        <div className="admarquee-track flex w-max max-w-none gap-2 px-2 py-2">
           {strip.map((ad, i) => (
             <div
               key={`${ad.id}-${i}`}

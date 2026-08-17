@@ -131,7 +131,7 @@ function Index() {
 
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0F2A4A] text-white overflow-x-clip">
+    <div className="mx-auto flex min-h-screen w-full max-w-full min-w-0 flex-col overflow-x-hidden bg-[#0F2A4A] text-white">
       {/* Brand anchor — visible, not a clickable nav item */}
       <div className="flex items-center justify-center gap-2 pt-6 pb-3 text-[#D4A24C]">
         <Building2 size={20} className="text-[#D4A24C]" aria-hidden />
@@ -141,7 +141,7 @@ function Index() {
       </div>
 
       {/* Hero header image */}
-      <header className="relative overflow-hidden">
+      <header className="relative w-full max-w-full min-w-0 overflow-hidden">
         <div className="mx-auto w-full max-w-[1400px] px-2 sm:px-4">
           <img
             src={homeHero.url}
@@ -152,9 +152,9 @@ function Index() {
       </header>
 
       {/* Centerpiece: the Find & Claim Your Business panel */}
-      <main className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <main className="relative mx-auto flex w-full max-w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12 sm:py-16">
         <AdTileBackground />
-        <div className="relative w-full max-w-3xl">
+        <div className="relative mx-auto w-full max-w-3xl min-w-0">
           {/* Premium panel wrapping the reused widget */}
           <div className="relative overflow-hidden rounded-3xl border border-[#D4A24C]/40 bg-gradient-to-br from-[#16213e] via-[#0F2A4A] to-[#0a0e1a] p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)] sm:p-8">
             {/* Thin gold accent line at top */}
