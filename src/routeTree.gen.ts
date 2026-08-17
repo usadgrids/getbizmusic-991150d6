@@ -29,6 +29,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SdcountyIndexRouteImport } from './routes/sdcounty.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CityIndexRouteImport } from './routes/$city.index'
+import { Route as TermsMembershipRouteImport } from './routes/terms.membership'
 import { Route as TermsAiAuditRouteImport } from './routes/terms.ai-audit'
 import { Route as SdcountySlugRouteImport } from './routes/sdcounty.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -158,6 +159,11 @@ const CityIndexRoute = CityIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CityRoute,
+} as any)
+const TermsMembershipRoute = TermsMembershipRouteImport.update({
+  id: '/terms/membership',
+  path: '/terms/membership',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TermsAiAuditRoute = TermsAiAuditRouteImport.update({
   id: '/terms/ai-audit',
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
   '/terms/ai-audit': typeof TermsAiAuditRoute
+  '/terms/membership': typeof TermsMembershipRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
   '/terms/ai-audit': typeof TermsAiAuditRoute
+  '/terms/membership': typeof TermsMembershipRoute
   '/$city': typeof CityIndexRoute
   '/admin': typeof AdminIndexRoute
   '/sdcounty': typeof SdcountyIndexRoute
@@ -450,6 +458,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sdcounty/$slug': typeof SdcountySlugRoute
   '/terms/ai-audit': typeof TermsAiAuditRoute
+  '/terms/membership': typeof TermsMembershipRoute
   '/$city/': typeof CityIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sdcounty/': typeof SdcountyIndexRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
     | '/terms/ai-audit'
+    | '/terms/membership'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -552,6 +562,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
     | '/terms/ai-audit'
+    | '/terms/membership'
     | '/$city'
     | '/admin'
     | '/sdcounty'
@@ -603,6 +614,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/sdcounty/$slug'
     | '/terms/ai-audit'
+    | '/terms/membership'
     | '/$city/'
     | '/admin/'
     | '/sdcounty/'
@@ -650,6 +662,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   SdcountySlugRoute: typeof SdcountySlugRoute
   TermsAiAuditRoute: typeof TermsAiAuditRoute
+  TermsMembershipRoute: typeof TermsMembershipRoute
   SdcountyIndexRoute: typeof SdcountyIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -808,6 +821,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$city/'
       preLoaderRoute: typeof CityIndexRouteImport
       parentRoute: typeof CityRoute
+    }
+    '/terms/membership': {
+      id: '/terms/membership'
+      path: '/terms/membership'
+      fullPath: '/terms/membership'
+      preLoaderRoute: typeof TermsMembershipRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/terms/ai-audit': {
       id: '/terms/ai-audit'
@@ -1097,6 +1117,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   SdcountySlugRoute: SdcountySlugRoute,
   TermsAiAuditRoute: TermsAiAuditRoute,
+  TermsMembershipRoute: TermsMembershipRoute,
   SdcountyIndexRoute: SdcountyIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
