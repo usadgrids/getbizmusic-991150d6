@@ -529,7 +529,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
           status: "awaiting_zelle",
           design_addon: designAddon,
           environment: data.environment,
-          payment_method: "zelle",
+
           owner_name: data.ownerName,
           business_name: data.businessName,
           phone: data.phone,
