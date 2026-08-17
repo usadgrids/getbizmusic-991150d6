@@ -15,6 +15,8 @@ import { template as activationInstructionsTemplate } from './activation-instruc
 import { template as activationInvoiceTemplate } from './activation-invoice'
 import { template as businessClaimConfirmationTemplate } from './business-claim-confirmation'
 import { template as membershipRenewalReminderTemplate } from './membership-renewal-reminder'
+import { template as membershipReceiptTemplate } from './membership-receipt'
+import { template as membershipPendingVerificationTemplate } from './membership-pending-verification'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -45,4 +47,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'activation-invoice': activationInvoiceTemplate,
   'business-claim-confirmation': businessClaimConfirmationTemplate,
   'membership-renewal-reminder': membershipRenewalReminderTemplate,
+  'membership-receipt': membershipReceiptTemplate,
+  'membership-pending-verification': membershipPendingVerificationTemplate,
 }

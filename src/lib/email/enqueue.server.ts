@@ -18,6 +18,7 @@ export async function enqueueTransactionalEmailInternal(input: {
   recipientEmail: string
   templateData?: Record<string, unknown>
   idempotencyKey?: string
+  attachments?: Array<{ filename: string; content: string; contentType?: string }>
 }): Promise<{ ok: boolean; reason?: string; messageId?: string }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
@@ -64,6 +65,7 @@ export async function enqueueTransactionalEmailInternal(input: {
       html,
       text,
       tags: [{ name: 'template', value: input.templateName.slice(0, 50) }],
+      ...(input.attachments?.length ? { attachments: input.attachments } : {}),
     })
 
     await supabaseAdmin.from('email_send_log').insert({

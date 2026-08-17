@@ -1,0 +1,2 @@
+ALTER TABLE public.ad_payments ADD COLUMN IF NOT EXISTS receipt_number text;
+CREATE UNIQUE INDEX IF NOT EXISTS ad_payments_receipt_number_key ON public.ad_payments (receipt_number) WHERE receipt_number IS NOT NULL;

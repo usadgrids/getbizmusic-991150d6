@@ -200,6 +200,7 @@ export type Database = {
           payment_verified_by: string | null
           phone: string | null
           plan: string
+          receipt_number: string | null
           renewal_reminder_sent_at: string | null
           rep_code: string | null
           rep_id: string | null
@@ -238,6 +239,7 @@ export type Database = {
           payment_verified_by?: string | null
           phone?: string | null
           plan: string
+          receipt_number?: string | null
           renewal_reminder_sent_at?: string | null
           rep_code?: string | null
           rep_id?: string | null
@@ -276,6 +278,7 @@ export type Database = {
           payment_verified_by?: string | null
           phone?: string | null
           plan?: string
+          receipt_number?: string | null
           renewal_reminder_sent_at?: string | null
           rep_code?: string | null
           rep_id?: string | null

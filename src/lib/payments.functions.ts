@@ -323,7 +323,7 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
           .from("ad_payments")
           .update((() => { const nowIso = new Date().toISOString(); return { status: "paid", paid_at: nowIso, ...membershipActivatedFields(nowIso) }; })())
           .eq("stripe_session_id", session.id)
-          .select("submission_token, customer_email, plan, amount_cents")
+          .select("id, submission_token, customer_email, plan, amount_cents")
           .maybeSingle();
         if (updated) {
           // Fallback: if the webhook hasn't landed yet, send the receipt from here too.
@@ -358,6 +358,23 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
             }) + " PT";
             const cardDetails = charge?.payment_method_details?.card;
             const customerEmail = (updated.customer_email as string) || session.customer_email || session.customer_details?.email;
+
+            // Membership receipt (card) — idempotent via the stored receipt number.
+            if (customerEmail && updated.id) {
+              try {
+                const { sendMembershipReceiptEmail } = await import(
+                  "@/lib/email/membership-emails.server"
+                );
+                await sendMembershipReceiptEmail({
+                  paymentId: updated.id as string,
+                  email: customerEmail,
+                  paidAtIso,
+                  paymentMethodLabel: "Card",
+                });
+              } catch (e) {
+                console.error("membership receipt email failed:", e);
+              }
+            }
             await enqueueTransactionalEmailInternal({
               templateName: "payment-receipt",
               recipientEmail: customerEmail as string,
@@ -590,6 +607,24 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
         console.error("zelle-instructions enqueue failed (order still created):", e);
       }
 
+      // Stage 1 membership acknowledgment — payment verification pending.
+      try {
+        const { sendMembershipPendingVerificationEmail } = await import(
+          "@/lib/email/membership-emails.server"
+        );
+        await sendMembershipPendingVerificationEmail({
+          email: data.customerEmail,
+          ownerName: data.ownerName,
+          businessName: data.businessName,
+          paymentMethodLabel: "Zelle",
+          amountFormatted,
+          memoCode,
+          idempotencyKey: `membership-pending-${syntheticSession}`,
+        });
+      } catch (e) {
+        console.error("membership pending-verification email failed:", e);
+      }
+
       return {
         ok: true,
         token,
@@ -722,6 +757,16 @@ export const markZelleOrderPaid = createServerFn({ method: "POST" })
         submissionToken: row.submission_token as string,
         cardBrand: methodLabel,
         paidAtIso,
+      });
+
+      // Stage 2 — payment verified receipt with the personalized Terms PDF.
+      const { sendMembershipReceiptEmail } = await import("@/lib/email/membership-emails.server");
+      await sendMembershipReceiptEmail({
+        paymentId: row.id as string,
+        email: customerEmail,
+        paidAtIso,
+        paymentMethodLabel: methodLabel,
+        verified: true,
       });
     } catch (e) {
       console.error("markZelleOrderPaid email enqueue failed:", e);

@@ -52,6 +52,13 @@ const MembershipRenewalReminderEmail = ({
             If you'd rather not continue, no action is needed — simply ignore this email and your
             membership will lapse at the end of your paid term with no further charges.
           </Text>
+          <Text style={small}>
+            Explore the GetBizMusic AI Business Alliance directory and see other local businesses
+            already building their AI visibility:{' '}
+            <a href="https://www.getbizmusic.com/sdcounty" style={{ color: NAVY, fontWeight: 'bold' }}>
+              https://www.getbizmusic.com/sdcounty
+            </a>
+          </Text>
         </Section>
       </Container>
     </Body>
