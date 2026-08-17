@@ -53,6 +53,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicMembershipsDailyRouteImport } from './routes/api/public/memberships/daily'
 import { Route as ApiPublicDirectoryRefreshRouteImport } from './routes/api/public/directory/refresh'
 import { Route as ApiPublicDirectoryAnswersDotjsonRouteImport } from './routes/api/public/directory/answers[.]json'
 import { Route as ApiPublicDirectoryCategoryRouteImport } from './routes/api/public/directory/$category'
@@ -287,6 +288,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMembershipsDailyRoute =
+  ApiPublicMembershipsDailyRouteImport.update({
+    id: '/api/public/memberships/daily',
+    path: '/api/public/memberships/daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDirectoryRefreshRoute =
   ApiPublicDirectoryRefreshRouteImport.update({
     id: '/api/public/directory/refresh',
@@ -368,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
+  '/api/public/memberships/daily': typeof ApiPublicMembershipsDailyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -418,6 +426,7 @@ export interface FileRoutesByTo {
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
+  '/api/public/memberships/daily': typeof ApiPublicMembershipsDailyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -471,6 +480,7 @@ export interface FileRoutesById {
   '/api/public/directory/$category': typeof ApiPublicDirectoryCategoryRouteWithChildren
   '/api/public/directory/answers.json': typeof ApiPublicDirectoryAnswersDotjsonRoute
   '/api/public/directory/refresh': typeof ApiPublicDirectoryRefreshRoute
+  '/api/public/memberships/daily': typeof ApiPublicMembershipsDailyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
+    | '/api/public/memberships/daily'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -575,6 +586,7 @@ export interface FileRouteTypes {
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
+    | '/api/public/memberships/daily'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -627,6 +639,7 @@ export interface FileRouteTypes {
     | '/api/public/directory/$category'
     | '/api/public/directory/answers.json'
     | '/api/public/directory/refresh'
+    | '/api/public/memberships/daily'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -672,6 +685,7 @@ export interface RootRouteChildren {
   ApiPublicDirectoryCategoryRoute: typeof ApiPublicDirectoryCategoryRouteWithChildren
   ApiPublicDirectoryAnswersDotjsonRoute: typeof ApiPublicDirectoryAnswersDotjsonRoute
   ApiPublicDirectoryRefreshRoute: typeof ApiPublicDirectoryRefreshRoute
+  ApiPublicMembershipsDailyRoute: typeof ApiPublicMembershipsDailyRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -990,6 +1004,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/memberships/daily': {
+      id: '/api/public/memberships/daily'
+      path: '/api/public/memberships/daily'
+      fullPath: '/api/public/memberships/daily'
+      preLoaderRoute: typeof ApiPublicMembershipsDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/directory/refresh': {
       id: '/api/public/directory/refresh'
       path: '/api/public/directory/refresh'
@@ -1127,6 +1148,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDirectoryCategoryRoute: ApiPublicDirectoryCategoryRouteWithChildren,
   ApiPublicDirectoryAnswersDotjsonRoute: ApiPublicDirectoryAnswersDotjsonRoute,
   ApiPublicDirectoryRefreshRoute: ApiPublicDirectoryRefreshRoute,
+  ApiPublicMembershipsDailyRoute: ApiPublicMembershipsDailyRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
