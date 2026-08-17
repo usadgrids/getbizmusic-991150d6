@@ -1,4 +1,4 @@
-import { membershipActivatedFields } from "@/lib/membership.server";
+import { membershipActivatedFields } from "@/lib/membership-lifecycle";
 import { createFileRoute } from "@tanstack/react-router";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
 import { sendPaidOrderNotificationToProcessing } from "@/lib/email/paid-order-notification.server";

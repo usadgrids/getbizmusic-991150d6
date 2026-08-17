@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { AD_PLANS } from "@/lib/biz-utils";
 import { DESIGN_PRICE_CENTS } from "@/lib/design.functions";
-import { membershipActivatedFields, membershipPendingFields } from "@/lib/membership.server";
+import { membershipActivatedFields, membershipPendingFields } from "@/lib/membership-lifecycle";
 
 const ZELLE_PHONE = "619-707-0467";
 
