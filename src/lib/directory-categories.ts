@@ -31,6 +31,14 @@ export type DirectoryCategoryConfig = {
 };
 
 export const FOOD_INDUSTRIES = [
+  // universal taxonomy values
+  "restaurants",
+  "bakeries_desserts",
+  "coffee_cafes",
+  "bars_nightlife",
+  "food_trucks_catering",
+  "grocery_convenience",
+  // legacy values (pre-standardization records)
   "restaurant",
   "food_truck",
   "cafe_coffee",
@@ -45,6 +53,13 @@ export const FOOD_INDUSTRIES = [
 ];
 
 export const BEAUTY_INDUSTRIES = [
+  // universal taxonomy values
+  "salons_barbershops",
+  "nail_salons",
+  "spas_massage",
+  "skincare_esthetics",
+  "tattoo_piercing",
+  // legacy values
   "salon",
   "salon_hair",
   "nail_salon",
@@ -122,8 +137,8 @@ export function schemaTypeFor(category: DirectoryCategory, industry?: string | n
   if (category === "food") return "Restaurant";
   const v = (industry ?? "").toLowerCase();
   if (v === "barbershop") return "HairSalon";
-  if (v === "nail_salon") return "NailSalon";
-  if (v === "spa_massage" || v === "medical_spa") return "DaySpa";
+  if (v === "nail_salon" || v === "nail_salons") return "NailSalon";
+  if (v === "spa_massage" || v === "medical_spa" || v === "spas_massage") return "DaySpa";
   return "HairSalon";
 }
 
