@@ -684,16 +684,30 @@ function PricingPage() {
                   className="mt-0.5"
                 />
                 <Label htmlFor="agree-all" className="text-sm text-[#0F2A4A] cursor-pointer leading-snug">
-                  <span className="font-semibold">I agree to all of the following:</span>
-                  <ul className="mt-2 space-y-2 list-disc pl-5 font-normal">
-                    <li>Got it — I understand this is a fun novelty ad spot with no guaranteed views, plays, or business results.</li>
-                    {!isReligious && (
-                      <li>I understand and I'm good with the no-refund policy — once I purchase, it's final.</li>
-                    )}
-                    <li>Your business and contact info will be instantly available to anyone who clicks your ad.</li>
-                    <li>I agree to receive texts, calls, or emails from WINALL Media, LLC. for other products and services. Consent is not required to purchase. Msg &amp; data rates may apply. Opt out anytime.</li>
-                  </ul>
+                  <span className="font-normal">
+                    I confirm the details above are accurate, and I agree to the GetBizMusic AI
+                    Business Alliance Membership Terms, disclosures, and no-refund policy. This
+                    membership does not auto-renew — I understand I will receive a reminder email
+                    before my membership expires. If I select Pay Later or pay by Zelle/Venmo, I
+                    understand the additional terms that apply to those payment methods. Being
+                    cited or recommended by AI search tools is not guaranteed or under our control.{" "}
+                    <a
+                      href="/terms/membership"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-semibold underline text-[#0F2A4A]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      (Full Terms &amp; Conditions)
+                    </a>
+                  </span>
+                  <span className="mt-2 block text-xs font-normal text-[#0F2A4A]/70">
+                    I also agree to receive texts, calls, or emails from WINALL Media, LLC. for
+                    other products and services. Consent is not required to purchase. Msg &amp; data
+                    rates may apply. Opt out anytime.
+                  </span>
                 </Label>
+
               </div>
             </div>
           </div>
