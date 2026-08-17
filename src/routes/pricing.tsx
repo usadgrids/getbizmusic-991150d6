@@ -617,7 +617,7 @@ function PricingPage() {
                 />
               </div>
               <p className="text-[11px] text-gray-500">
-                We use these to confirm your Zelle payment and reach you if we have questions. You can refine them later at the ad-submission step.
+                We use these to confirm your payment and reach you if we have questions. You can refine them later at the ad-submission step.
               </p>
             </div>
           )}
