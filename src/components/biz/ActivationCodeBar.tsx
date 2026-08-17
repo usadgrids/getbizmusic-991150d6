@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { KeyRound, Loader2, AlertTriangle, Sparkles } from "lucide-react";
+import { Unlock, Loader2, AlertTriangle, Sparkles } from "lucide-react";
 import { lookupActivationCode, type ActivationProof } from "@/lib/activation.functions";
+import { classifyCode } from "@/lib/code-classify.functions";
 
 const STORAGE_KEY = "gbm_activation_code";
 
@@ -13,9 +14,11 @@ type Props = {
 
 export function ActivationCodeBar({ initialCode, onProof }: Props) {
   const lookupFn = useServerFn(lookupActivationCode);
+  const classifyFn = useServerFn(classifyCode);
   const [code, setCode] = useState(initialCode ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   const runLookup = async (raw: string) => {
     const value = raw.trim();
