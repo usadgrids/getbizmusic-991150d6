@@ -17,6 +17,9 @@ import { template as businessClaimConfirmationTemplate } from './business-claim-
 import { template as membershipRenewalReminderTemplate } from './membership-renewal-reminder'
 import { template as membershipReceiptTemplate } from './membership-receipt'
 import { template as membershipPendingVerificationTemplate } from './membership-pending-verification'
+import { template as membershipPayLaterTemplate } from './membership-pay-later'
+import { template as payLaterCancelledTemplate } from './pay-later-cancelled'
+import { template as claimAuditCompleteTemplate } from './claim-audit-complete'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -49,4 +52,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'membership-renewal-reminder': membershipRenewalReminderTemplate,
   'membership-receipt': membershipReceiptTemplate,
   'membership-pending-verification': membershipPendingVerificationTemplate,
+  'membership-pay-later': membershipPayLaterTemplate,
+  'pay-later-cancelled': payLaterCancelledTemplate,
+  'claim-audit-complete': claimAuditCompleteTemplate,
 }
