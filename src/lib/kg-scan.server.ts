@@ -331,9 +331,9 @@ export function buildSchema(
     localBusiness["address"] = {
       "@type": "PostalAddress",
       streetAddress: business.address,
-      addressLocality: business.city ?? undefined,
-      addressRegion: business.state ?? undefined,
-      postalCode: business.zip ?? undefined,
+      addressLocality: business.city,
+      addressRegion: business.state,
+      postalCode: business.zip,
       addressCountry: "US",
     };
   } else {
