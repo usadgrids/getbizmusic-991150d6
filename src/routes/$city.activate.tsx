@@ -429,7 +429,7 @@ function CategoryActivatePage() {
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
               placeholder="ACTIVATION CODE"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 font-mono tracking-widest uppercase text-center focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 font-mono tracking-widest uppercase text-center text-[#0F2A4A] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A24C]"
             />
             <button
               type="submit"
