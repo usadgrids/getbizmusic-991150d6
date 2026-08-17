@@ -640,6 +640,184 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
     }
   });
 
+// ---- Pay Later (Bill Me) -------------------------------------------------
+
+const payLaterInputSchema = zelleInputSchema; // same fields as Zelle
+
+type PayLaterOrderResult =
+  | {
+      ok: true;
+      token: string;
+      invoiceNumber: string;
+      amountCents: number;
+      amountFormatted: string;
+      dueDateFormatted: string;
+      payNowUrl: string;
+      submitUrl: string;
+    }
+  | { ok: false; error: string };
+
+export const createPayLaterOrder = createServerFn({ method: "POST" })
+  .inputValidator((d: z.input<typeof payLaterInputSchema>) => payLaterInputSchema.parse(d))
+  .handler(async ({ data }): Promise<PayLaterOrderResult> => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { industryLabel } = await import("@/lib/business-categories");
+      const agreedAt = new Date().toISOString();
+      const ipAddress = getClientIp();
+
+      const planMeta = AD_PLANS[data.plan];
+      const baseAmount = planMeta.price * 100;
+      const productName = `Get Biz Music — ${planMeta.label}`;
+
+      // Rep code validation (same rules as Zelle).
+      let repId: string | null = null;
+      let repCode: string | null = null;
+      let commissionPercent: number | null = null;
+      let discountCents = 0;
+      let chargeAmount = baseAmount;
+      if (data.repCode && data.repCode.trim().length > 0) {
+        const codeNorm = data.repCode.toUpperCase().replace(/\s+/g, "");
+        const { data: rep } = await supabaseAdmin
+          .from("ad_reps")
+          .select("id, code, commission_percent, active")
+          .eq("code", codeNorm)
+          .maybeSingle();
+        if (rep && rep.active) {
+          repId = rep.id;
+          repCode = rep.code;
+          commissionPercent = Number(rep.commission_percent);
+          chargeAmount = Math.round(baseAmount * 0.5);
+          discountCents = baseAmount - chargeAmount;
+        }
+      }
+      const commissionCents = commissionPercent != null
+        ? Math.round(chargeAmount * (commissionPercent / 100))
+        : 0;
+
+      const designAddon = data.designAddon === true;
+      const designCents = designAddon ? DESIGN_PRICE_CENTS : 0;
+      const totalAmount = chargeAmount + designCents;
+      const amountFormatted = `$${(totalAmount / 100).toFixed(2)}`;
+
+      // Duplicate-order guard (same window logic as Zelle).
+      const DUP_WINDOW_MS = 15 * 60 * 1000;
+      const sinceIso = new Date(Date.now() - DUP_WINDOW_MS).toISOString();
+      const { data: recent } = await supabaseAdmin
+        .from("ad_payments")
+        .select("stripe_session_id, submission_token, amount_cents")
+        .eq("customer_email", data.customerEmail)
+        .eq("plan", data.plan)
+        .eq("payment_method", "pay_later")
+        .eq("status", "awaiting_payment")
+        .eq("environment", data.environment)
+        .gte("created_at", sinceIso)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (recent?.submission_token && (recent.amount_cents ?? 0) === totalAmount) {
+        const invoice = String(recent.stripe_session_id).replace(/^pay-later-/, "").slice(0, 8).toUpperCase();
+        const token = recent.submission_token as string;
+        return {
+          ok: true,
+          token,
+          invoiceNumber: invoice,
+          amountCents: totalAmount,
+          amountFormatted,
+          dueDateFormatted: new Date(Date.now() + 7 * 86400_000).toLocaleDateString("en-US", {
+            dateStyle: "long",
+            timeZone: "America/Los_Angeles",
+          }),
+          payNowUrl: `https://www.getbizmusic.com/pricing`,
+          submitUrl: `https://www.getbizmusic.com/submit?token=${token}`,
+        };
+      }
+
+      const syntheticSession = `pay-later-${crypto.randomUUID()}`;
+      const invoiceNumber = syntheticSession.replace(/^pay-later-/, "").slice(0, 8).toUpperCase();
+      const dueDate = new Date(Date.now() + 7 * 86400_000);
+      const dueDateFormatted = dueDate.toLocaleDateString("en-US", {
+        dateStyle: "long",
+        timeZone: "America/Los_Angeles",
+      });
+
+      const { data: inserted, error: insertError } = await supabaseAdmin
+        .from("ad_payments")
+        .insert({
+          stripe_session_id: syntheticSession,
+          customer_email: data.customerEmail,
+          plan: data.plan,
+          amount_cents: totalAmount,
+          status: "awaiting_payment",
+          design_addon: designAddon,
+          environment: data.environment,
+          owner_name: data.ownerName,
+          business_name: data.businessName,
+          phone: data.phone,
+          agreed_terms: true,
+          agreed_no_refund: true,
+          agreed_at: agreedAt,
+          disclosure_version: DISCLOSURE_VERSION,
+          ip_address: ipAddress,
+          rep_id: repId,
+          rep_code: repCode,
+          discount_cents: discountCents,
+          commission_cents: commissionCents,
+          commission_percent: commissionPercent,
+          ...membershipPendingFields("pay_later", agreedAt),
+        })
+        .select("submission_token")
+        .maybeSingle();
+
+      if (insertError || !inserted?.submission_token) {
+        console.error("createPayLaterOrder insert failed:", insertError);
+        return { ok: false, error: insertError?.message ?? "Could not create Pay Later order" };
+      }
+
+      const token = inserted.submission_token as string;
+      const submitUrl = `https://www.getbizmusic.com/submit?token=${token}`;
+      const payNowUrl = `https://www.getbizmusic.com/pricing`;
+      const categoryLabel = industryLabel(data.industry) || undefined;
+
+      // Send the Pay Later confirmation email.
+      try {
+        const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+        await enqueueTransactionalEmailInternal({
+          templateName: "membership-pay-later",
+          recipientEmail: data.customerEmail,
+          idempotencyKey: `pay-later-${syntheticSession}`,
+          templateData: {
+            ownerName: data.ownerName,
+            businessName: data.businessName,
+            categoryLabel,
+            amountFormatted,
+            invoiceNumber,
+            dueDateFormatted,
+            payNowUrl,
+            zellePhone: ZELLE_PHONE,
+            venmoHandle: "@RTPosadas",
+          },
+        });
+      } catch (e) {
+        console.error("pay-later confirmation email failed (order still created):", e);
+      }
+
+      return {
+        ok: true,
+        token,
+        invoiceNumber,
+        amountCents: totalAmount,
+        amountFormatted,
+        dueDateFormatted,
+        payNowUrl,
+        submitUrl,
+      };
+    } catch (e) {
+      console.error("createPayLaterOrder error:", e);
+      return { ok: false, error: e instanceof Error ? e.message : "Unexpected error" };
+    }
+  });
+
 async function assertAdmin(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
