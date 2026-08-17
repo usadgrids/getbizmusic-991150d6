@@ -22,6 +22,7 @@ export type PlacesRaw = {
   rating: number | null;
   reviewCount: number;
   photoCount: number;
+  photosReported: boolean;
   hours: string[];
   types: string[];
   priceLevel: string | null;
@@ -163,6 +164,7 @@ export async function fetchPlaceDetails(
     rating: (p["rating"] as number) ?? null,
     reviewCount: (p["userRatingCount"] as number) ?? 0,
     photoCount: photos.length,
+    photosReported: "photos" in p || "photos" in details,
     hours,
     types: (p["types"] as string[]) ?? [],
     priceLevel: (p["priceLevel"] as string) ?? null,
@@ -497,13 +499,16 @@ export function computeScore(input: {
     ["services list", facts.services.length > 0],
     ["service area", Boolean(facts.serviceArea)],
     ["pricing signals", Boolean(facts.pricingSignals)],
-    ["photos", (places?.photoCount ?? 0) > 0],
     ["phone", Boolean(input.phone)],
     ["address", Boolean(input.address)],
     ["website", Boolean(input.website)],
   ];
+  // Photos only count when Google actually reports them for this account tier;
+  // otherwise the field is unknown and is dropped from the denominator.
+  const photosKnown = places?.photosReported ?? false;
+  if (photosKnown) fields.push(["photos", (places?.photoCount ?? 0) > 0]);
   const found = fields.filter(([, ok]) => ok);
-  const completeness = (found.length / 8) * 25;
+  const completeness = (found.length / fields.length) * 25;
 
   // Schema Coverage — 25 pts.
   const schemaScore = (schema.localBusiness && schema.localValid ? 15 : 0) + (schema.faqPage && schema.faqValid ? 10 : 0);
@@ -538,7 +543,7 @@ export function computeScore(input: {
   let weakestSummary: string;
   switch (weakest.key) {
     case "Data Completeness":
-      weakestSummary = `Your biggest gap: Data Completeness — ${found.length} of 8 key fields were found${
+      weakestSummary = `Your biggest gap: Data Completeness — ${found.length} of ${fields.length} key fields were found${
         missingFields.length ? `. Missing: ${missingFields.join(", ")}` : ""
       }.`;
       break;
