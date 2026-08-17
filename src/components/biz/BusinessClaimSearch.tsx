@@ -489,6 +489,27 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
       </form>
 
+      {/* Reassurance strip — no payment friction until they opt in */}
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-[#D4A24C]/25 bg-[#FBF7EE] px-4 py-2.5 text-center">
+        {[
+          { icon: "💳", text: "No credit card required" },
+          { icon: "👤", text: "No account needed" },
+          { icon: "🔁", text: "No recurring charges" },
+        ].map((item) => (
+          <span
+            key={item.text}
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0F2A4A]/80"
+          >
+            <span aria-hidden>{item.icon}</span>
+            {item.text}
+          </span>
+        ))}
+        <span className="hidden sm:inline-block h-3 w-px bg-[#D4A24C]/30" aria-hidden />
+        <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#7a5410]">
+          You only pay if you choose to become a member
+        </span>
+      </div>
+
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
       <AdMarquee disabled={searched} onHoverDismiss={triggerStartHere} />
 
