@@ -309,13 +309,25 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl rounded-2xl bg-white px-5 py-6 shadow-sm sm:px-8"
     >
-      <p className="text-[13px] font-medium leading-relaxed text-[#0F2A4A]/80 sm:text-sm">
-        <span className="font-semibold text-[#0F2A4A]">
-          Brick & Mortar Businesses, Independent Agencies, Mobile Businesses, Business
-          Opportunities, and Home-Based Businesses
-        </span>{" "}
-        are all welcome.
-      </p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {[
+          "Brick & Mortar",
+          "Independent Agencies",
+          "Mobile Businesses",
+          "Business Opportunities",
+          "Home-Based Businesses",
+        ].map((label) => (
+          <span
+            key={label}
+            className="font-['Sora'] inline-flex items-center rounded-full border border-[#D4A24C]/50 bg-[#FFF8E8] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#0F2A4A] shadow-sm"
+          >
+            {label}
+          </span>
+        ))}
+        <span className="font-['Sora'] text-[11px] font-bold uppercase tracking-[0.22em] text-[#B08C46]">
+          — All Welcome
+        </span>
+      </div>
       <h2 className="mt-2 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
       <p className="mt-1 text-sm leading-relaxed text-gray-600">
         Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
