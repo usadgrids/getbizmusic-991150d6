@@ -1,3 +1,5 @@
+import type { Json } from "@/integrations/supabase/types";
+
 // Server-only AI Visibility Knowledge Graph pipeline.
 // 1 Gather (Google Places + Firecrawl) -> 2 Normalize (AI) -> 3 Schema (JSON-LD)
 // -> 4 Q&A (AI) -> 5 Score (deterministic, in code) -> 6 Publish (Supabase).
@@ -622,8 +624,8 @@ export async function runKnowledgeScan(opts: {
     rating: places?.rating ?? null,
     review_count: places?.reviewCount ?? 0,
     photo_count: places?.photoCount ?? 0,
-    localbusiness_jsonld: schema.localBusiness,
-    faq_jsonld: schema.faqPage,
+    localbusiness_jsonld: schema.localBusiness as unknown as Json,
+    faq_jsonld: schema.faqPage as unknown as Json,
     schema_valid: schema.localValid && schema.faqValid,
     schema_notes: schema.notes.join(" "),
     needs_manual_validation: needsManualValidation,
@@ -655,14 +657,14 @@ export async function runKnowledgeScan(opts: {
   await supabaseAdmin.from("business_facts").upsert(
     {
       business_id: businessId,
-      hours: facts.hours,
+      hours: facts.hours as unknown as Json,
       services: facts.services,
       service_area: facts.serviceArea,
       pricing_signals: facts.pricingSignals,
       review_sentiment: facts.reviewSentiment,
       differentiators: facts.differentiators,
       summary: facts.summary,
-      raw_places: places as unknown as Record<string, unknown> | null,
+      raw_places: places as unknown as Json,
       source_urls: [...new Set(sources.map((s) => s.url))].slice(0, 12),
     },
     { onConflict: "business_id" },
