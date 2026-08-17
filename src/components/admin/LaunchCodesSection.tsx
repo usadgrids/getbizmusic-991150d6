@@ -20,7 +20,7 @@ export function LaunchCodesSection() {
     queryKey: ["admin-launch-codes"],
     queryFn: () => listCodes(),
   });
-  const { data: claims = [] } = useQuery({
+  const { data: claims = [], refetch: refetchClaims } = useQuery({
     queryKey: ["admin-claims"],
     queryFn: () => listClaims(),
   });
