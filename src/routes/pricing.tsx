@@ -525,7 +525,7 @@ function PricingPage() {
           {!isReligious && (
             <div className="mb-5">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Payment method</div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setPayMethod("card")}
@@ -535,7 +535,7 @@ function PricingPage() {
                       : "bg-white text-[#0F2A4A] border-gray-300 hover:border-gray-400"
                   }`}
                 >
-                  <CreditCard size={16} /> Pay with Card
+                  <CreditCard size={16} /> Card
                 </button>
                 <button
                   type="button"
@@ -546,7 +546,18 @@ function PricingPage() {
                       : "bg-white text-purple-700 border-purple-300 hover:border-purple-500"
                   }`}
                 >
-                  <Send size={16} /> Pay with Zelle
+                  <Send size={16} /> Zelle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("pay_later")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "pay_later"
+                      ? "bg-[#D4A24C] text-[#0F2A4A] border-[#D4A24C]"
+                      : "bg-white text-[#0F2A4A] border-[#D4A24C]/60 hover:border-[#D4A24C]"
+                  }`}
+                >
+                  <FileText size={16} /> Bill Me
                 </button>
               </div>
               {payMethod === "zelle" && (
@@ -554,11 +565,17 @@ function PricingPage() {
                   Send Zelle to <strong>619-707-0467</strong>. Your ad goes live once we confirm payment (usually within 24 hours).
                 </p>
               )}
+              {payMethod === "pay_later" && (
+                <p className="mt-2 text-xs text-[#0F2A4A] bg-[#FFF8EC] border border-[#D4A24C]/60 rounded-md px-3 py-2">
+                  <strong>Bill Me Later:</strong> Reserve your spot now and pay within 7 days.
+                  Your reservation is automatically cancelled if unpaid after 7 days.
+                </p>
+              )}
             </div>
           )}
 
-          {/* Zelle-only contact fields */}
-          {!isReligious && payMethod === "zelle" && (
+          {/* Zelle + Pay Later contact fields */}
+          {!isReligious && (payMethod === "zelle" || payMethod === "pay_later") && (
             <div className="space-y-3 mb-4">
               <div>
                 <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
