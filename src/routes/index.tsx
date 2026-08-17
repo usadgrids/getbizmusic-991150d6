@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2 } from "lucide-react";
+import { Building2, KeyRound } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
+import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { getAdsByCategory } from "@/lib/ads.functions";
 import {
   DIRECTORY_CATEGORY_SLUGS,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 import homeHero from "@/assets/SD-Business-3.png.asset.json";
+
 
 
 const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
