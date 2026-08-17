@@ -150,7 +150,7 @@ export async function fetchPlaceDetails(
   const photos = ((p["photos"] ?? details["photos"]) as unknown[]) ?? [];
 
   return {
-    placeId: (p["id"] as string) ?? null,
+    placeId,
     name: ((p["displayName"] as { text?: string } | undefined)?.text) ?? null,
     address: (p["formattedAddress"] as string) ?? null,
     city: comp("locality"),
@@ -162,7 +162,7 @@ export async function fetchPlaceDetails(
     lng: loc?.longitude ?? null,
     rating: (p["rating"] as number) ?? null,
     reviewCount: (p["userRatingCount"] as number) ?? 0,
-    photoCount: ((p["photos"] as unknown[]) ?? []).length,
+    photoCount: photos.length,
     hours,
     types: (p["types"] as string[]) ?? [],
     priceLevel: (p["priceLevel"] as string) ?? null,
