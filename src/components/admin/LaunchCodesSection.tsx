@@ -132,6 +132,7 @@ export function LaunchCodesSection() {
               <th className="py-2 pr-3">Priority Access Code</th>
               <th className="py-2 pr-3">Price</th>
               <th className="py-2 pr-3">Submitted</th>
+              <th className="py-2 pr-3">Action</th>
             </tr>
           </thead>
           <tbody>
