@@ -389,6 +389,72 @@ function PricingPage() {
     );
   }
 
+  if (payLaterResult) {
+    return (
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
+        <PaymentTestModeBanner />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setPayLaterResult(null); }}
+            className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4"
+          >
+            <ArrowLeft size={14} /> Back to plans
+          </button>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-[#FFF8EC] border border-[#D4A24C]/60 text-[#0F2A4A] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                <FileText size={12} /> Pay Later reserved
+              </div>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F2A4A] mt-3">
+                Your spot is reserved — pay within 7 days
+              </h1>
+              <p className="text-sm text-gray-600 mt-2">
+                We emailed an invoice to <strong>{email}</strong>. Send payment by{" "}
+                <strong>{payLaterResult.dueDateFormatted}</strong> to keep your reservation.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-xl border-2 border-[#D4A24C] bg-[#FFF8EC]/60 p-5 text-center">
+              <div className="grid grid-cols-2 gap-3 text-left">
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold">Amount due</div>
+                  <div className="text-2xl font-bold text-[#0F2A4A] mt-0.5">{payLaterResult.amountFormatted}</div>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold">Invoice #</div>
+                  <div className="text-lg font-mono font-bold text-[#0F2A4A] mt-0.5">{payLaterResult.invoiceNumber}</div>
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-[#0F2A4A]">
+                <p><strong>Zelle:</strong> 619-707-0467 (WINALL MEDIA LLC)</p>
+                <p><strong>Venmo:</strong> @RTPosadas</p>
+                <p className="text-xs text-gray-600 mt-1">Include invoice <strong>{payLaterResult.invoiceNumber}</strong> in the memo.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-[#FFF8EC] border-2 border-[#D4A24C] rounded-xl p-5 text-center">
+              <div className="text-xs uppercase tracking-wide text-[#D4A24C] font-bold">Ready to upload your ad?</div>
+              <p className="text-sm text-[#0F2A4A] mt-1">
+                You can submit your ad artwork now. It goes live once we confirm your payment.
+              </p>
+              <a
+                href={payLaterResult.submitUrl}
+                className="mt-3 inline-block bg-[#D4A24C] text-[#0F2A4A] font-bold px-6 py-2.5 rounded-md hover:bg-[#e0b266]"
+              >
+                Submit Your Ad
+              </a>
+            </div>
+
+            <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center gap-1.5">
+              <Shield size={12} /> A copy of your invoice was emailed to you.
+            </p>
+          </div>
+        </main>
+        <BizFooter />
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-[#0F2A4A] text-white">
