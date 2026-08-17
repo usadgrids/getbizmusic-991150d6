@@ -19,7 +19,9 @@ import {
 } from "@/lib/directory-categories";
 import { toUniversalCategory } from "@/lib/business-categories";
 
-const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
+// Directory (Knowledge Graph) categories still drive the place list; ads are
+// no longer limited to them — see getCountyAds.
+
 
 function filterSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
