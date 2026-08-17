@@ -29,7 +29,17 @@ export function ActivationCodeBar({ initialCode, onProof }: Props) {
       const res = await lookupFn({ data: { code: value } });
       if (!res.found) {
         onProof(null);
-        setError(res.reason);
+        let reason = res.reason;
+        try {
+          const kind = await classifyFn({ data: { code: value } });
+          if (kind.kind === "priority") {
+            reason =
+              "That looks like a Priority Access Code — try entering it above in the Find & Claim form instead.";
+          }
+        } catch {
+          /* classification is advisory only */
+        }
+        setError(reason);
         try {
           sessionStorage.removeItem(STORAGE_KEY);
         } catch {
@@ -37,6 +47,7 @@ export function ActivationCodeBar({ initialCode, onProof }: Props) {
         }
         return;
       }
+
       onProof(res.proof);
       try {
         sessionStorage.setItem(STORAGE_KEY, res.proof.code);
