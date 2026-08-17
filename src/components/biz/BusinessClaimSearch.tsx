@@ -77,6 +77,8 @@ const inputClass =
 export function BusinessClaimSearch({ category }: { category?: DirectoryCategory }) {
   const runSearch = useServerFn(searchBusinesses);
   const runClaim = useServerFn(submitBusinessClaim);
+  const classifyFn = useServerFn(classifyCode);
+
 
   const [termsOpen, setTermsOpen] = useState(false);
   const [businessName, setBusinessName] = useState("");
