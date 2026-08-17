@@ -100,6 +100,10 @@ function CategoryActivatePage() {
   const [correct, setCorrect] = useState<"yes" | "no">("yes");
   const [notes, setNotes] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [voice, setVoice] = useState("");
@@ -125,6 +129,10 @@ function CategoryActivatePage() {
       }
       setProof(res.proof);
       setBusinessName(res.proof.businessName ?? "");
+      setContactName(res.proof.contactName ?? "");
+      setTagline(res.proof.tagline ?? "");
+      setWebsiteUrl(res.proof.websiteUrl ?? "");
+      setYoutubeUrl(res.proof.youtubeUrl ?? "");
       setAddress(res.proof.businessAddress ?? "");
       setEmail(res.proof.contactEmail ?? "");
       setVoice(res.proof.phoneVoice ?? "");
@@ -212,6 +220,10 @@ function CategoryActivatePage() {
           confirmedCorrect: correct === "yes",
           correctionNotes: correct === "no" ? notes.trim() : undefined,
           businessName: businessName.trim(),
+          contactName: contactName.trim() || undefined,
+          tagline: tagline.trim() || undefined,
+          websiteUrl: websiteUrl.trim() || undefined,
+          youtubeUrl: youtubeUrl.trim() || undefined,
           businessAddress: address.trim() || undefined,
           email: email.trim(),
           phoneVoice: voice.trim() || undefined,
@@ -470,9 +482,16 @@ function CategoryActivatePage() {
         {/* Contact details */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-3">
           <h2 className="font-serif text-lg font-bold text-[#0F2A4A]">Your business details</h2>
-          <p className="text-xs text-gray-500 -mt-2">Pre-filled from your listing — edit anything that's out of date.</p>
+          <p className="text-xs text-gray-500 -mt-2">
+            Everything below is pre-filled from your activation code — please check, confirm, and update anything
+            that isn't current.
+          </p>
           <Field label="Business name" value={businessName} onChange={setBusinessName} required />
+          <Field label="Contact person" value={contactName} onChange={setContactName} />
           <Field label="Business address" value={address} onChange={setAddress} />
+          <Field label="Tagline / slogan shown on your ad" value={tagline} onChange={setTagline} />
+          <Field label="Website URL" value={websiteUrl} onChange={setWebsiteUrl} />
+          <Field label="Video URL (YouTube, optional)" value={youtubeUrl} onChange={setYoutubeUrl} />
           <Field label="Customer support email" value={email} onChange={setEmail} type="email" required />
           <Field label="Customer support number (voice)" value={voice} onChange={setVoice} />
           <label className="flex items-center gap-2 text-xs text-gray-600">
