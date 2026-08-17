@@ -778,7 +778,8 @@ export const createPayLaterOrder = createServerFn({ method: "POST" })
       const token = inserted.submission_token as string;
       const submitUrl = `https://www.getbizmusic.com/submit?token=${token}`;
       const payNowUrl = `https://www.getbizmusic.com/pricing`;
-      const categoryLabel = industryLabel(data.industry) || undefined;
+      const { industryLabel } = await import("@/lib/business-categories");
+      const categoryLabel = data.industry ? (industryLabel(data.industry) || data.industry) : undefined;
 
       // Send the Pay Later confirmation email.
       try {
