@@ -67,7 +67,7 @@ const BUSINESS_TYPES = [
 type BusinessType = (typeof BUSINESS_TYPES)[number]["value"];
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-[#0F2A4A] outline-none focus:border-[#D4A24C]";
+  "w-full rounded-lg border border-[#0F2A4A]/25 bg-[#F4F7FB] px-3 py-2 text-sm font-medium text-[#0F2A4A] shadow-sm outline-none transition focus:border-[#D4A24C] focus:bg-white focus:ring-2 focus:ring-[#D4A24C]/40";
 
 
 /**
