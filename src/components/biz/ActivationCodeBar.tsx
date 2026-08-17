@@ -94,13 +94,16 @@ export function ActivationCodeBar({ initialCode, onProof }: Props) {
     <section className="mt-6 sm:mt-8">
       <div className="rounded-2xl border-2 border-[#D4A24C] bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-5 py-6 sm:px-8 sm:py-8 text-center text-white shadow-md">
         <div className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F4C430] mb-3">
-          <KeyRound size={14} />
+          <Unlock size={14} />
           Activate Your Ad
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">Have an activation code from your rep?</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">
+          Already a GetBizMusic partner? Enter your Activation Code
+        </h2>
         <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
-          Enter the code on your flyer to preview your own ad in the rotation above and activate your listing.
+          Enter the code on your flyer to preview your ready-made ad and activate your listing.
         </p>
+
         <form
           className="flex flex-col sm:flex-row items-center justify-center gap-3"
           onSubmit={(e) => {
