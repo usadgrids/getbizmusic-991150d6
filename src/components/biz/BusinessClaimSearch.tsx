@@ -403,8 +403,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Launch Code <span className="text-[#D4A24C]">*</span>
+          <label className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-[#0F2A4A]">
+            <span aria-hidden>🎟️</span>
+            Priority Access Code <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
@@ -414,11 +415,16 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
             placeholder="1000-FIRST"
           />
+          <p className="mt-1 text-xs font-medium text-[#0F2A4A]/70">
+            New to GetBizMusic? This code locks in your founding-member pricing and priority
+            processing.
+          </p>
           <p className="mt-1 text-xs text-gray-500">
             🎉 Reserved for our first 1,000 San Diego County businesses. This code may be
             deactivated at any time once that milestone is reached.
           </p>
         </div>
+
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
             Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>
