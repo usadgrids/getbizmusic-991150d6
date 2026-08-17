@@ -119,6 +119,37 @@ function ActivatePage() {
     }
   };
 
+  const resetCode = () => {
+    setProof(null);
+    setCodeInput("");
+    setLookupError(null);
+    setCorrect("yes");
+    setNotes("");
+    setBusinessName("");
+    setContactName("");
+    setTagline("");
+    setWebsiteUrl("");
+    setYoutubeUrl("");
+    setAddress("");
+    setEmail("");
+    setVoice("");
+    setSms("");
+    setSameAsVoice(true);
+    setAgreed(false);
+    setMethod("stripe");
+    setArtwork("ours");
+    setArtworkFile(null);
+    setClientSecret(null);
+    setManual(null);
+    setBilled(null);
+    try {
+      sessionStorage.removeItem("gbm_activation_code");
+    } catch {
+      /* ignore */
+    }
+    void navigate({ to: "/activate", search: {} });
+  };
+
   // Auto-lookup from the link, and confirm a returning Stripe session.
   useEffect(() => {
     if (search.code) void runLookup(search.code);
@@ -397,9 +428,18 @@ function ActivatePage() {
     <Shell>
       <div className="space-y-6">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="bg-[#0F2A4A] text-white px-5 py-3 flex items-center gap-2">
-            <ShieldCheck className="text-[#D4A24C]" size={18} />
-            <h1 className="font-serif text-lg">Review your ad — code {proof.code}</h1>
+          <div className="bg-[#0F2A4A] text-white px-5 py-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <ShieldCheck className="text-[#D4A24C] shrink-0" size={18} />
+              <h1 className="font-serif text-lg truncate">Review your ad — code {proof.code}</h1>
+            </div>
+            <button
+              type="button"
+              onClick={resetCode}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+            >
+              <KeyRound size={13} /> Use a different code
+            </button>
           </div>
           <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
