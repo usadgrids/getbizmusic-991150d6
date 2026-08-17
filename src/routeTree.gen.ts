@@ -14,6 +14,7 @@ import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as QuickPayRouteImport } from './routes/quick-pay'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlaceholderRouteImport } from './routes/placeholder'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -85,6 +86,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuickPayRoute = QuickPayRouteImport.update({
+  id: '/quick-pay',
+  path: '/quick-pay',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -350,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
+  '/quick-pay': typeof QuickPayRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -402,6 +409,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
+  '/quick-pay': typeof QuickPayRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -457,6 +465,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/placeholder': typeof PlaceholderRoute
   '/pricing': typeof PricingRoute
+  '/quick-pay': typeof QuickPayRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -513,6 +522,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/placeholder'
     | '/pricing'
+    | '/quick-pay'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/placeholder'
     | '/pricing'
+    | '/quick-pay'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -619,6 +630,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/placeholder'
     | '/pricing'
+    | '/quick-pay'
     | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -674,6 +686,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PlaceholderRoute: typeof PlaceholderRoute
   PricingRoute: typeof PricingRoute
+  QuickPayRoute: typeof QuickPayRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -741,6 +754,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quick-pay': {
+      id: '/quick-pay'
+      path: '/quick-pay'
+      fullPath: '/quick-pay'
+      preLoaderRoute: typeof QuickPayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -1145,6 +1165,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PlaceholderRoute: PlaceholderRoute,
   PricingRoute: PricingRoute,
+  QuickPayRoute: QuickPayRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
