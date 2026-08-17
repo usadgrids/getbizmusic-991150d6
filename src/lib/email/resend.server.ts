@@ -25,6 +25,8 @@ export interface ResendMessage {
   tags?: Array<{ name: string; value: string }>
   /** Override the From display name only (address stays verified). */
   fromName?: string
+  /** File attachments (base64 content). Not supported by the batch endpoint. */
+  attachments?: Array<{ filename: string; content: string; contentType?: string }>
 }
 
 function buildPayload(msg: ResendMessage) {
@@ -38,6 +40,15 @@ function buildPayload(msg: ResendMessage) {
     ...(msg.text ? { text: msg.text } : {}),
     ...(msg.headers ? { headers: msg.headers } : {}),
     ...(msg.tags ? { tags: msg.tags } : {}),
+    ...(msg.attachments?.length
+      ? {
+          attachments: msg.attachments.map((a) => ({
+            filename: a.filename,
+            content: a.content,
+            ...(a.contentType ? { content_type: a.contentType } : {}),
+          })),
+        }
+      : {}),
   }
 }
 
