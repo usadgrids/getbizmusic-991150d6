@@ -13,7 +13,7 @@ import { DirectoryList } from "@/components/biz/DirectoryList";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
 import { FloatingHomeButton, FloatingBackButton } from "@/components/biz/FloatingHomeButton";
 import {
-  DIRECTORY_CATEGORIES,
+  
   DIRECTORY_CATEGORY_SLUGS,
   type DirectoryCategory,
 } from "@/lib/directory-categories";
