@@ -189,6 +189,37 @@ function Index() {
             <div className="mt-6 [&>section]:mt-0 [&>section]:shadow-none">
               <BusinessClaimSearch category={category} />
             </div>
+
+            {/* Secondary, lower-emphasis activation-code entry */}
+            <div className="mt-5 border-t border-white/10 pt-4 text-center">
+              {!showActivation ? (
+                <button
+                  type="button"
+                  onClick={() => setShowActivation(true)}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-[#D4A24C]"
+                >
+                  <KeyRound size={14} aria-hidden />
+                  Already have an Activation Code from us?
+                </button>
+              ) : (
+                <div className="[&>section]:mt-0">
+                  <ActivationCodeBar
+                    proof={null}
+                    onProof={(proof) => {
+                      if (proof) void navigate({ to: "/activate", search: { code: proof.code } });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowActivation(false)}
+                    className="mt-3 text-xs text-white/50 underline underline-offset-4 hover:text-white/80"
+                  >
+                    Hide
+                  </button>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </main>
