@@ -291,6 +291,21 @@ export async function normalizeFacts(
 
 // ---------------- Step 3: Schema ----------------
 
+/** Convert human hours ("9 AM - 5 PM", "Open 24 hours") to schema.org 24h ranges. */
+function toOpeningHoursSpec(value: string): string | null {
+  const v = value.trim();
+  if (/closed/i.test(v)) return null;
+  if (/24\s*hours/i.test(v)) return "00:00-23:59";
+  const m = v.match(/(\d{1,2})(?::(\d{2}))?\s*([AaPp])\.?[Mm]\.?\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*([AaPp])\.?[Mm]\.?/);
+  if (!m) return null;
+  const to24 = (h: string, min: string | undefined, ap: string) => {
+    let hh = parseInt(h, 10) % 12;
+    if (ap.toLowerCase() === "p") hh += 12;
+    return `${String(hh).padStart(2, "0")}:${min ?? "00"}`;
+  };
+  return `${to24(m[1]!, m[2], m[3]!)}-${to24(m[4]!, m[5], m[6]!)}`;
+}
+
 export type SchemaResult = {
   localBusiness: Json | null;
   faqPage: Json | null;
@@ -319,7 +334,11 @@ export function buildSchema(
   const notes: string[] = [];
 
   const openingHours = Object.entries(facts.hours)
-    .map(([day, val]) => `${day.slice(0, 2)} ${val}`)
+    .map(([day, val]) => {
+      const spec = toOpeningHoursSpec(val);
+      return spec ? `${day.slice(0, 2)} ${spec}` : null;
+    })
+    .filter((v): v is string => Boolean(v))
     .slice(0, 7);
 
   const localBusiness: Record<string, Json> = {
@@ -344,7 +363,7 @@ export function buildSchema(
   }
   if (business.phone) localBusiness["telephone"] = business.phone;
   else notes.push("No phone number found.");
-  if (business.website) localBusiness["url"] = business.website;
+  if (business.website) localBusiness["url"] = business.website.replace(/\/+$/, "");
   else notes.push("No website found.");
   if (openingHours.length) localBusiness["openingHours"] = openingHours;
   else notes.push("No opening hours found.");
