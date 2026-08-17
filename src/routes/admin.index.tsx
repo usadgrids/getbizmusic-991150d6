@@ -26,6 +26,7 @@ import { markActivationPaid } from "@/lib/activation.functions";
 import { ActivationCodesSection } from "@/components/admin/ActivationCodesSection";
 import { DirectorySection } from "@/components/admin/DirectorySection";
 import { VisibilityAuditSection } from "@/components/admin/VisibilityAuditSection";
+import { KnowledgeScanSection } from "@/components/admin/KnowledgeScanSection";
 import { LaunchCodesSection } from "@/components/admin/LaunchCodesSection";
 
 export const Route = createFileRoute("/admin/")({
@@ -367,6 +368,8 @@ function AdminConsole() {
         <DirectorySection />
 
         <VisibilityAuditSection />
+
+        <KnowledgeScanSection />
 
         <section className="bg-white rounded-xl shadow-sm p-4 flex flex-wrap items-center justify-between gap-3">
           <div>
