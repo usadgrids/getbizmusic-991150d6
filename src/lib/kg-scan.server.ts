@@ -119,17 +119,35 @@ export async function fetchPlaceDetails(
   const p = json.places?.[0];
   if (!p) return null;
 
+  // Text Search omits photos/reviews on some tiers — pull them from Place Details.
+  let details: Record<string, unknown> = {};
+  const placeId = (p["id"] as string) ?? null;
+  if (placeId) {
+    try {
+      const dres = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+        headers: { "X-Goog-Api-Key": apiKey, "X-Goog-FieldMask": "photos,reviews,regularOpeningHours" },
+      });
+      if (dres.ok) details = (await dres.json()) as Record<string, unknown>;
+    } catch {
+      /* details are optional */
+    }
+  }
+
   const comps = (p["addressComponents"] as Array<{ longText?: string; shortText?: string; types?: string[] }>) ?? [];
   const comp = (type: string, short = false) => {
     const c = comps.find((x) => (x.types ?? []).includes(type));
     return (short ? c?.shortText : c?.longText) ?? null;
   };
   const loc = p["location"] as { latitude?: number; longitude?: number } | undefined;
-  const hours = (p["regularOpeningHours"] as { weekdayDescriptions?: string[] } | undefined)?.weekdayDescriptions ?? [];
-  const reviews = ((p["reviews"] as Array<{ text?: { text?: string } }>) ?? [])
+  const hoursSrc = (p["regularOpeningHours"] ?? details["regularOpeningHours"]) as
+    | { weekdayDescriptions?: string[] }
+    | undefined;
+  const hours = hoursSrc?.weekdayDescriptions ?? [];
+  const reviews = (((p["reviews"] ?? details["reviews"]) as Array<{ text?: { text?: string } }>) ?? [])
     .map((r) => r.text?.text ?? "")
     .filter(Boolean)
     .slice(0, 5);
+  const photos = ((p["photos"] ?? details["photos"]) as unknown[]) ?? [];
 
   return {
     placeId: (p["id"] as string) ?? null,
