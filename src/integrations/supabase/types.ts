@@ -618,6 +618,62 @@ export type Database = {
         }
         Relationships: []
       }
+      business_facts: {
+        Row: {
+          business_id: string
+          created_at: string
+          differentiators: string[]
+          hours: Json
+          id: string
+          pricing_signals: string | null
+          raw_places: Json | null
+          review_sentiment: string | null
+          service_area: string | null
+          services: string[]
+          source_urls: string[]
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          differentiators?: string[]
+          hours?: Json
+          id?: string
+          pricing_signals?: string | null
+          raw_places?: Json | null
+          review_sentiment?: string | null
+          service_area?: string | null
+          services?: string[]
+          source_urls?: string[]
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          differentiators?: string[]
+          hours?: Json
+          id?: string
+          pricing_signals?: string | null
+          raw_places?: Json | null
+          review_sentiment?: string | null
+          service_area?: string | null
+          services?: string[]
+          source_urls?: string[]
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_facts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "kg_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           created_at: string
@@ -1147,6 +1203,111 @@ export type Database = {
           },
         ]
       }
+      kg_businesses: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          faq_jsonld: Json | null
+          google_place_id: string | null
+          grade: string | null
+          id: string
+          last_scanned_at: string | null
+          lat: number | null
+          lng: number | null
+          localbusiness_jsonld: Json | null
+          name: string
+          needs_manual_validation: boolean
+          phone: string | null
+          photo_count: number
+          rating: number | null
+          review_count: number
+          schema_notes: string | null
+          schema_valid: boolean
+          score: number | null
+          score_answerability: number
+          score_completeness: number
+          score_reviews: number
+          score_schema: number
+          slug: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          weakest_component: string | null
+          weakest_summary: string | null
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          faq_jsonld?: Json | null
+          google_place_id?: string | null
+          grade?: string | null
+          id?: string
+          last_scanned_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          localbusiness_jsonld?: Json | null
+          name: string
+          needs_manual_validation?: boolean
+          phone?: string | null
+          photo_count?: number
+          rating?: number | null
+          review_count?: number
+          schema_notes?: string | null
+          schema_valid?: boolean
+          score?: number | null
+          score_answerability?: number
+          score_completeness?: number
+          score_reviews?: number
+          score_schema?: number
+          slug?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          weakest_component?: string | null
+          weakest_summary?: string | null
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          faq_jsonld?: Json | null
+          google_place_id?: string | null
+          grade?: string | null
+          id?: string
+          last_scanned_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          localbusiness_jsonld?: Json | null
+          name?: string
+          needs_manual_validation?: boolean
+          phone?: string | null
+          photo_count?: number
+          rating?: number | null
+          review_count?: number
+          schema_notes?: string | null
+          schema_valid?: boolean
+          score?: number | null
+          score_answerability?: number
+          score_completeness?: number
+          score_reviews?: number
+          score_schema?: number
+          slug?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          weakest_component?: string | null
+          weakest_summary?: string | null
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
       launch_codes: {
         Row: {
           code: string
@@ -1260,6 +1421,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      qa_pairs: {
+        Row: {
+          answer: string | null
+          answered: boolean
+          business_id: string
+          created_at: string
+          flag: string
+          id: string
+          missing_data: string | null
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          answered?: boolean
+          business_id: string
+          created_at?: string
+          flag?: string
+          id?: string
+          missing_data?: string | null
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          answered?: boolean
+          business_id?: string
+          created_at?: string
+          flag?: string
+          id?: string
+          missing_data?: string | null
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_pairs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "kg_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
