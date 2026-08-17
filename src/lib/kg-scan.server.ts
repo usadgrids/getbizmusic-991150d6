@@ -292,8 +292,8 @@ export async function normalizeFacts(
 // ---------------- Step 3: Schema ----------------
 
 export type SchemaResult = {
-  localBusiness: Record<string, unknown> | null;
-  faqPage: Record<string, unknown> | null;
+  localBusiness: Json | null;
+  faqPage: Json | null;
   localValid: boolean;
   faqValid: boolean;
   notes: string[];
@@ -322,7 +322,7 @@ export function buildSchema(
     .map(([day, val]) => `${day.slice(0, 2)} ${val}`)
     .slice(0, 7);
 
-  const localBusiness: Record<string, unknown> = {
+  const localBusiness: Record<string, Json> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: business.name,
@@ -624,8 +624,8 @@ export async function runKnowledgeScan(opts: {
     rating: places?.rating ?? null,
     review_count: places?.reviewCount ?? 0,
     photo_count: places?.photoCount ?? 0,
-    localbusiness_jsonld: schema.localBusiness as unknown as Json,
-    faq_jsonld: schema.faqPage as unknown as Json,
+    localbusiness_jsonld: schema.localBusiness,
+    faq_jsonld: schema.faqPage,
     schema_valid: schema.localValid && schema.faqValid,
     schema_notes: schema.notes.join(" "),
     needs_manual_validation: needsManualValidation,
