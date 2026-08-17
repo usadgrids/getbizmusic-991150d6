@@ -87,3 +87,57 @@ export const adminListClaims = createServerFn({ method: "GET" })
       .limit(200);
     return (data ?? []) as ClaimRow[];
   });
+
+/**
+ * Mark a claim's AI Visibility Audit as complete and notify the owner by email.
+ * Idempotent: if the audit is already complete, it just re-sends the notification.
+ */
+export const markClaimAuditComplete = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      claimId: z.string().uuid(),
+      auditScore: z.string().trim().max(20).optional(),
+    }).parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: row, error } = await supabaseAdmin
+      .from("business_claims")
+      .select("id, business_name, business_category, owner_name, owner_email, status")
+      .eq("id", data.claimId)
+      .maybeSingle();
+    if (error || !row) throw new Error(error?.message ?? "Claim not found");
+
+    // Update status so admins can see which claims have been audited.
+    if (row.status !== "audit_complete") {
+      await supabaseAdmin
+        .from("business_claims")
+        .update({ status: "audit_complete", updated_at: new Date().toISOString() })
+        .eq("id", data.claimId);
+    }
+
+    // Send the notification email.
+    try {
+      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
+      await enqueueTransactionalEmailInternal({
+        templateName: "claim-audit-complete",
+        recipientEmail: row.owner_email as string,
+        idempotencyKey: `claim-audit-complete-${row.id}-${Date.now()}`,
+        templateData: {
+          ownerName: (row.owner_name as string) || undefined,
+          businessName: (row.business_name as string) || undefined,
+          businessCategory: (row.business_category as string) || undefined,
+          auditScore: data.auditScore || undefined,
+          hubUrl: "https://www.getbizmusic.com/sdcounty",
+        },
+      });
+    } catch (e) {
+      console.error("claim audit complete email failed:", e);
+      throw new Error("Claim marked complete, but notification email failed to send.");
+    }
+
+    return { ok: true as const };
+  });

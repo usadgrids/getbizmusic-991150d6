@@ -203,11 +203,9 @@ function Tester() {
         ))}
 
         <p className="text-xs text-gray-500 mt-6">
-          Not implemented in the system today (so no test button exists): a separate “Mark Complete
-          &amp; Notify” email for Find &amp; Claim audits, a distinct Pay Later confirmation for the
-          membership checkout (the activation flow’s Bill Me Later invoice is listed above), and a
-          Pay Later cancellation notice — the daily job cancels lapsed Pay Later submissions
-          silently. Say the word and I can add any of those.
+          Every email the system can send is listed above. The claim audit-complete notification,
+          membership Pay Later confirmation, and Pay Later cancellation notice are now wired into
+          their real flows.
         </p>
       </div>
     </div>

@@ -24,6 +24,13 @@ export const EMAIL_TEST_CATALOG: EmailTestEntry[] = [
     audience: "customer",
     group: "Find & Claim",
   },
+  {
+    templateName: "claim-audit-complete",
+    label: "Claim audit complete — notify owner",
+    when: "Sent when an admin marks a claim's AI Visibility Audit as complete and notifies the owner.",
+    audience: "customer",
+    group: "Find & Claim",
+  },
 
   // Membership payments
   {
@@ -53,6 +60,20 @@ export const EMAIL_TEST_CATALOG: EmailTestEntry[] = [
     templateName: "membership-renewal-reminder",
     label: "Membership renewal reminder",
     when: "Sent 30 days before membership_due_date by the daily maintenance job.",
+    audience: "customer",
+    group: "Membership payments",
+  },
+  {
+    templateName: "membership-pay-later",
+    label: "Membership Pay Later confirmation (Bill Me)",
+    when: "Sent immediately when a customer chooses Pay Later at membership checkout — invoice with 7-day due date.",
+    audience: "customer",
+    group: "Membership payments",
+  },
+  {
+    templateName: "pay-later-cancelled",
+    label: "Pay Later cancellation notice",
+    when: "Sent when the daily job cancels a Pay Later submission past its 7-day window without payment.",
     audience: "customer",
     group: "Membership payments",
   },

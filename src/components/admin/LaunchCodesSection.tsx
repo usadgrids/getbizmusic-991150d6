@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Rocket, Star } from "lucide-react";
+import { Rocket, Star, CheckCircle2, Bell } from "lucide-react";
 import {
   adminListLaunchCodes,
   adminUpdateLaunchCode,
   adminListClaims,
+  markClaimAuditComplete,
 } from "@/lib/launch-codes.functions";
 
 /** Launch code redemption status + the business claims queue (priority first). */
@@ -19,12 +20,13 @@ export function LaunchCodesSection() {
     queryKey: ["admin-launch-codes"],
     queryFn: () => listCodes(),
   });
-  const { data: claims = [] } = useQuery({
+  const { data: claims = [], refetch: refetchClaims } = useQuery({
     queryKey: ["admin-claims"],
     queryFn: () => listClaims(),
   });
 
   const [busy, setBusy] = useState(false);
+  const [notifyBusy, setNotifyBusy] = useState<string | null>(null);
 
   async function patch(id: string, patchData: { isActive?: boolean; redemptionLimit?: number }) {
     setBusy(true);
@@ -36,6 +38,23 @@ export function LaunchCodesSection() {
       toast.error(e instanceof Error ? e.message : "Update failed");
     } finally {
       setBusy(false);
+    }
+  }
+
+  const markComplete = useServerFn(markClaimAuditComplete);
+
+  async function handleNotify(claimId: string) {
+    const score = window.prompt("Enter the AI Visibility Score (e.g. 42/100), or leave blank:", "");
+    if (score === null) return; // cancelled
+    setNotifyBusy(claimId);
+    try {
+      await markComplete({ data: { claimId, auditScore: score || undefined } });
+      toast.success("Owner notified — audit marked complete");
+      refetchClaims();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Notification failed");
+    } finally {
+      setNotifyBusy(null);
     }
   }
 
@@ -113,6 +132,7 @@ export function LaunchCodesSection() {
               <th className="py-2 pr-3">Priority Access Code</th>
               <th className="py-2 pr-3">Price</th>
               <th className="py-2 pr-3">Submitted</th>
+              <th className="py-2 pr-3">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -151,11 +171,28 @@ export function LaunchCodesSection() {
                 <td className="py-2 pr-3 text-xs text-gray-500">
                   {new Date(c.submitted_at).toLocaleDateString()}
                 </td>
+                <td className="py-2 pr-3">
+                  {c.status === "audit_complete" ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                      <CheckCircle2 size={14} /> Audited
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={notifyBusy !== null}
+                      onClick={() => handleNotify(c.id)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#FFF8EC] px-3 py-1.5 text-xs font-semibold text-[#0F2A4A] hover:bg-[#f5e6c5] disabled:opacity-60"
+                    >
+                      <Bell size={13} />
+                      {notifyBusy === c.id ? "Sending…" : "Mark Complete & Notify"}
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
             {claims.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-4 text-sm text-gray-500">
+                <td colSpan={7} className="py-4 text-sm text-gray-500">
                   No claims yet.
                 </td>
               </tr>

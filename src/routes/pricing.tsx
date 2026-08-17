@@ -9,7 +9,7 @@ import { BizFooter } from "@/components/biz/BizFooter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createAdCheckout, createFreeReligiousSubmission, createZelleAdOrder } from "@/lib/payments.functions";
+import { createAdCheckout, createFreeReligiousSubmission, createZelleAdOrder, createPayLaterOrder } from "@/lib/payments.functions";
 import { validateRepCode } from "@/lib/reps.functions";
 import { AD_PLANS, INDUSTRIES, isReligiousIndustry, type AdPlan } from "@/lib/biz-utils";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -62,11 +62,15 @@ function PricingPage() {
     if (designParam === "0" || designParam === "false") return false;
     return true; // default to professionally designed ad
   });
-  const [payMethod, setPayMethod] = useState<"card" | "zelle">("card");
+  const [payMethod, setPayMethod] = useState<"card" | "zelle" | "pay_later">("card");
   const [ownerName, setOwnerName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
   const [zelleLoading, setZelleLoading] = useState(false);
+  const [payLaterLoading, setPayLaterLoading] = useState(false);
+  const [payLaterResult, setPayLaterResult] = useState<{
+    invoiceNumber: string; amountFormatted: string; dueDateFormatted: string; submitUrl: string;
+  } | null>(null);
   const [zelleResult, setZelleResult] = useState<{
     token: string; memoCode: string; amountFormatted: string; zellePhone: string; submitUrl: string;
   } | null>(null);
@@ -116,10 +120,11 @@ function PricingPage() {
   const totalFormatted = discounted.toFixed(2).replace(/\.00$/, "");
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
-  const zelleFieldsOk = payMethod !== "zelle" || (
-    ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7
-  );
-  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && zelleFieldsOk;
+  const needsContactFields = payMethod === "zelle" || payMethod === "pay_later";
+  const contactFieldsOk = needsContactFields
+    ? (ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7)
+    : true;
+  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && contactFieldsOk;
 
   const startCheckout = async () => {
     if (loading) return;
@@ -215,6 +220,43 @@ function PricingPage() {
     }
   };
 
+  const startPayLaterOrder = async () => {
+    if (payLaterLoading) return;
+    if (!ownerName.trim()) { toast.error("Please enter the business owner name"); return; }
+    if (!businessName.trim()) { toast.error("Please enter the business name"); return; }
+    if (!emailValid) { toast.error("Please enter a valid email"); return; }
+    if (!phone.trim() || phone.trim().length < 7) { toast.error("Please enter a valid phone number"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please check the agreement box to continue"); return; }
+    setPayLaterLoading(true);
+    try {
+      const res = await createPayLaterOrder({
+        data: {
+          plan,
+          ownerName: ownerName.trim(),
+          businessName: businessName.trim(),
+          customerEmail: email.trim(),
+          phone: phone.trim(),
+          industry,
+          agreedTerms: true,
+          agreedNoRefund: true,
+          environment: getStripeEnvironment(),
+          designAddon,
+          ...(repState.status === "valid" ? { repCode: repState.code } : {}),
+        },
+      });
+      if (!res.ok) throw new Error(res.error);
+      setPayLaterResult({
+        invoiceNumber: res.invoiceNumber,
+        amountFormatted: res.amountFormatted,
+        dueDateFormatted: res.dueDateFormatted,
+        submitUrl: res.submitUrl,
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not create Pay Later order");
+    } finally {
+      setPayLaterLoading(false);
+    }
+  };
 
   if (clientSecret) {
     return (
@@ -339,6 +381,72 @@ function PricingPage() {
 
             <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center gap-1.5">
               <Shield size={12} /> A copy of these instructions was emailed to you.
+            </p>
+          </div>
+        </main>
+        <BizFooter />
+      </div>
+    );
+  }
+
+  if (payLaterResult) {
+    return (
+      <div className="min-h-screen bg-[#0F2A4A] text-white">
+        <PaymentTestModeBanner />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setPayLaterResult(null); }}
+            className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1 mb-4"
+          >
+            <ArrowLeft size={14} /> Back to plans
+          </button>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-[#FFF8EC] border border-[#D4A24C]/60 text-[#0F2A4A] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                <FileText size={12} /> Pay Later reserved
+              </div>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F2A4A] mt-3">
+                Your spot is reserved — pay within 7 days
+              </h1>
+              <p className="text-sm text-gray-600 mt-2">
+                We emailed an invoice to <strong>{email}</strong>. Send payment by{" "}
+                <strong>{payLaterResult.dueDateFormatted}</strong> to keep your reservation.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-xl border-2 border-[#D4A24C] bg-[#FFF8EC]/60 p-5 text-center">
+              <div className="grid grid-cols-2 gap-3 text-left">
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold">Amount due</div>
+                  <div className="text-2xl font-bold text-[#0F2A4A] mt-0.5">{payLaterResult.amountFormatted}</div>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-3">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500 font-bold">Invoice #</div>
+                  <div className="text-lg font-mono font-bold text-[#0F2A4A] mt-0.5">{payLaterResult.invoiceNumber}</div>
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-[#0F2A4A]">
+                <p><strong>Zelle:</strong> 619-707-0467 (WINALL MEDIA LLC)</p>
+                <p><strong>Venmo:</strong> @RTPosadas</p>
+                <p className="text-xs text-gray-600 mt-1">Include invoice <strong>{payLaterResult.invoiceNumber}</strong> in the memo.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-[#FFF8EC] border-2 border-[#D4A24C] rounded-xl p-5 text-center">
+              <div className="text-xs uppercase tracking-wide text-[#D4A24C] font-bold">Ready to upload your ad?</div>
+              <p className="text-sm text-[#0F2A4A] mt-1">
+                You can submit your ad artwork now. It goes live once we confirm your payment.
+              </p>
+              <a
+                href={payLaterResult.submitUrl}
+                className="mt-3 inline-block bg-[#D4A24C] text-[#0F2A4A] font-bold px-6 py-2.5 rounded-md hover:bg-[#e0b266]"
+              >
+                Submit Your Ad
+              </a>
+            </div>
+
+            <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center gap-1.5">
+              <Shield size={12} /> A copy of your invoice was emailed to you.
             </p>
           </div>
         </main>
@@ -483,7 +591,7 @@ function PricingPage() {
           {!isReligious && (
             <div className="mb-5">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Payment method</div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setPayMethod("card")}
@@ -493,7 +601,7 @@ function PricingPage() {
                       : "bg-white text-[#0F2A4A] border-gray-300 hover:border-gray-400"
                   }`}
                 >
-                  <CreditCard size={16} /> Pay with Card
+                  <CreditCard size={16} /> Card
                 </button>
                 <button
                   type="button"
@@ -504,7 +612,18 @@ function PricingPage() {
                       : "bg-white text-purple-700 border-purple-300 hover:border-purple-500"
                   }`}
                 >
-                  <Send size={16} /> Pay with Zelle
+                  <Send size={16} /> Zelle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("pay_later")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-semibold border-2 transition-colors ${
+                    payMethod === "pay_later"
+                      ? "bg-[#D4A24C] text-[#0F2A4A] border-[#D4A24C]"
+                      : "bg-white text-[#0F2A4A] border-[#D4A24C]/60 hover:border-[#D4A24C]"
+                  }`}
+                >
+                  <FileText size={16} /> Bill Me
                 </button>
               </div>
               {payMethod === "zelle" && (
@@ -512,11 +631,17 @@ function PricingPage() {
                   Send Zelle to <strong>619-707-0467</strong>. Your ad goes live once we confirm payment (usually within 24 hours).
                 </p>
               )}
+              {payMethod === "pay_later" && (
+                <p className="mt-2 text-xs text-[#0F2A4A] bg-[#FFF8EC] border border-[#D4A24C]/60 rounded-md px-3 py-2">
+                  <strong>Bill Me Later:</strong> Reserve your spot now and pay within 7 days.
+                  Your reservation is automatically cancelled if unpaid after 7 days.
+                </p>
+              )}
             </div>
           )}
 
-          {/* Zelle-only contact fields */}
-          {!isReligious && payMethod === "zelle" && (
+          {/* Zelle + Pay Later contact fields */}
+          {!isReligious && (payMethod === "zelle" || payMethod === "pay_later") && (
             <div className="space-y-3 mb-4">
               <div>
                 <label className="block text-sm font-semibold text-[#0F2A4A] mb-1">
@@ -558,7 +683,7 @@ function PricingPage() {
                 />
               </div>
               <p className="text-[11px] text-gray-500">
-                We use these to confirm your Zelle payment and reach you if we have questions. You can refine them later at the ad-submission step.
+                We use these to confirm your payment and reach you if we have questions. You can refine them later at the ad-submission step.
               </p>
             </div>
           )}
@@ -754,6 +879,18 @@ function PricingPage() {
                 <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${totalFormatted}</>
               )}
             </button>
+          ) : payMethod === "pay_later" ? (
+            <button
+              onClick={startPayLaterOrder}
+              disabled={!canPay || payLaterLoading}
+              className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {payLaterLoading ? (
+                <>Reserving your spot…</>
+              ) : (
+                <><FileText size={16} /> Bill Me Later — Reserve Spot — ${totalFormatted}</>
+              )}
+            </button>
           ) : (
             <button
               onClick={startCheckout}
@@ -777,7 +914,9 @@ function PricingPage() {
               ? "You'll get a confirmation and your submission link by email."
               : payMethod === "zelle"
                 ? "We'll email your Zelle payment instructions and a private submission link."
-                : "Secure checkout. You'll get a receipt and unique submission link by email."}
+                : payMethod === "pay_later"
+                  ? "We'll email your invoice with payment details and a private submission link."
+                  : "Secure checkout. You'll get a receipt and unique submission link by email."}
           </p>
 
         </div>
