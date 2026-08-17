@@ -1,3 +1,4 @@
+import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
