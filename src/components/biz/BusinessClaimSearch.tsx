@@ -328,10 +328,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           — All Welcome
         </span>
       </div>
-      <h2 className="mt-2 text-lg font-bold text-[#0F2A4A]">Find & Claim Your Business</h2>
+      <h2 className="mt-2 text-lg font-bold text-[#0F2A4A]">
+        Is your business listed among over{" "}
+        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
+          380,000 businesses
+        </span>{" "}
+        in San Diego County?
+      </h2>
       <p className="mt-1 text-sm leading-relaxed text-gray-600">
-        Search for your business, then claim your Knowledge Graph listing so AI answer engines cite
-        you correctly. Get a{" "}
+        Type Your Business Name and{" "}
+        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
+          Claim Your AI Knowledge Graph Listing
+        </span>{" "}
+        so AI answer engines cite you correctly. Get a{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           free AI Visibility Audit
         </span>{" "}
