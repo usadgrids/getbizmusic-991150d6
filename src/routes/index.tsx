@@ -125,6 +125,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [category, setCategory] = useState<DirectoryCategory>("food");
+  const [showActivation, setShowActivation] = useState(false);
+  const navigate = useNavigate();
+
+
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0F2A4A] text-white overflow-x-clip">
