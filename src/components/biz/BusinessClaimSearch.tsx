@@ -311,7 +311,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {[
-          "Brick & Mortar",
+          "Brick & Mortar Stores",
           "Independent Agencies",
           "Mobile Businesses",
           "Business Opportunities",
