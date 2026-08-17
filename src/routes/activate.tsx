@@ -577,8 +577,8 @@ function ActivatePage() {
 
           <div>
             <div className="text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Payment method</div>
-            <div className="grid grid-cols-3 gap-2">
-              {(["stripe", "zelle", "venmo"] as const).map((m) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {(["stripe", "zelle", "venmo", "bill_later"] as const).map((m) => (
                 <button
                   key={m}
                   type="button"
@@ -587,26 +587,16 @@ function ActivatePage() {
                     method === m ? "border-[#0F2A4A] bg-[#0F2A4A] text-white" : "border-gray-300 text-gray-700 hover:border-[#0F2A4A]"
                   }`}
                 >
-                  {m === "stripe" ? "Card" : m}
+                  {m === "stripe" ? "Card" : m === "bill_later" ? "Bill Me" : m}
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => setMethod("bill_later")}
-              className={`mt-2 w-full border rounded-lg py-2.5 text-sm font-semibold ${
-                method === "bill_later"
-                  ? "border-[#D4A24C] bg-[#D4A24C] text-[#0F2A4A]"
-                  : "border-[#D4A24C] text-[#0F2A4A] hover:bg-[#FFFBF2]"
-              }`}
-            >
-              Pay Later (Bill Me)
-            </button>
             {method === "bill_later" && (
               <p className="text-[11px] text-gray-600 mt-2">
                 We'll publish your ad now and email you an invoice — pay by card, Zelle or Venmo at your convenience.
               </p>
             )}
+
           </div>
 
           <button
