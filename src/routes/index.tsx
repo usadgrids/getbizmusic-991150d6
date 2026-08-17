@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2, KeyRound } from "lucide-react";
+import { Building2, Unlock } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
 import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
