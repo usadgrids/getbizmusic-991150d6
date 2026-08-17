@@ -879,6 +879,18 @@ function PricingPage() {
                 <><Send size={16} /> Reserve Spot & Get Zelle Instructions — ${totalFormatted}</>
               )}
             </button>
+          ) : payMethod === "pay_later" ? (
+            <button
+              onClick={startPayLaterOrder}
+              disabled={!canPay || payLaterLoading}
+              className="mt-6 w-full bg-[#D4A24C] text-[#0F2A4A] font-bold py-3 rounded-md hover:bg-[#e0b266] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {payLaterLoading ? (
+                <>Reserving your spot…</>
+              ) : (
+                <><FileText size={16} /> Bill Me Later — Reserve Spot — ${totalFormatted}</>
+              )}
+            </button>
           ) : (
             <button
               onClick={startCheckout}
@@ -902,7 +914,9 @@ function PricingPage() {
               ? "You'll get a confirmation and your submission link by email."
               : payMethod === "zelle"
                 ? "We'll email your Zelle payment instructions and a private submission link."
-                : "Secure checkout. You'll get a receipt and unique submission link by email."}
+                : payMethod === "pay_later"
+                  ? "We'll email your invoice with payment details and a private submission link."
+                  : "Secure checkout. You'll get a receipt and unique submission link by email."}
           </p>
 
         </div>
