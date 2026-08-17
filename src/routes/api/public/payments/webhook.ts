@@ -1,3 +1,4 @@
+import { membershipActivatedFields } from "@/lib/membership.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
 import { sendPaidOrderNotificationToProcessing } from "@/lib/email/paid-order-notification.server";
@@ -118,7 +119,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   if (existing) {
     await supabaseAdmin
       .from("ad_payments")
-      .update({ status: "paid", paid_at: paidAtIso, amount_cents: amount, customer_email: email || existing.customer_email })
+      .update({ status: "paid", paid_at: paidAtIso, amount_cents: amount, customer_email: email || existing.customer_email, ...membershipActivatedFields(paidAtIso) })
       .eq("id", existing.id);
     submissionToken = (existing.submission_token as string) ?? null;
     recipientEmail = email || (existing.customer_email as string);
@@ -132,6 +133,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         status: "paid",
         environment: env,
         paid_at: paidAtIso,
+        payment_method: "card",
+        terms_accepted_at: session.metadata?.agreed_at ?? paidAtIso,
+        ...membershipActivatedFields(paidAtIso),
         agreed_terms: session.metadata?.agreed_terms === "true",
         agreed_no_refund: session.metadata?.agreed_no_refund === "true",
         agreed_at: session.metadata?.agreed_at ?? null,

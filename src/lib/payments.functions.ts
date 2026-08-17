@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { AD_PLANS } from "@/lib/biz-utils";
 import { DESIGN_PRICE_CENTS } from "@/lib/design.functions";
+import { membershipActivatedFields, membershipPendingFields } from "@/lib/membership.server";
 
 const ZELLE_PHONE = "619-707-0467";
 
@@ -201,6 +202,7 @@ export const createAdCheckout = createServerFn({ method: "POST" })
         commission_cents: commissionCents,
         commission_percent: commissionPercent,
         design_addon: designAddon,
+        ...membershipPendingFields("card", agreedAt),
       });
 
       if (insertError) {
@@ -281,6 +283,9 @@ export const createFreeReligiousSubmission = createServerFn({ method: "POST" })
           agreed_at: agreedAt,
           disclosure_version: DISCLOSURE_VERSION,
           ip_address: ipAddress,
+          payment_method: "card",
+          terms_accepted_at: agreedAt,
+          ...membershipActivatedFields(agreedAt),
         })
         .select("submission_token")
         .maybeSingle();
@@ -316,7 +321,7 @@ export const lookupCheckoutBySession = createServerFn({ method: "POST" })
       if (session.payment_status === "paid") {
         const { data: updated } = await supabaseAdmin
           .from("ad_payments")
-          .update({ status: "paid", paid_at: new Date().toISOString() })
+          .update((() => { const nowIso = new Date().toISOString(); return { status: "paid", paid_at: nowIso, ...membershipActivatedFields(nowIso) }; })())
           .eq("stripe_session_id", session.id)
           .select("submission_token, customer_email, plan, amount_cents")
           .maybeSingle();
@@ -538,6 +543,7 @@ export const createZelleAdOrder = createServerFn({ method: "POST" })
           discount_cents: discountCents,
           commission_cents: commissionCents,
           commission_percent: commissionPercent,
+          ...membershipPendingFields("zelle", agreedAt),
         })
         .select("submission_token")
         .maybeSingle();
@@ -665,7 +671,7 @@ export const markZelleOrderPaid = createServerFn({ method: "POST" })
     const paidAtIso = new Date().toISOString();
     const { error: updateErr } = await supabaseAdmin
       .from("ad_payments")
-      .update({ status: "paid", paid_at: paidAtIso })
+      .update({ status: "paid", paid_at: paidAtIso, ...membershipActivatedFields(paidAtIso, context.userId) })
       .eq("id", data.id);
     if (updateErr) return { ok: false, error: updateErr.message };
 
