@@ -171,11 +171,28 @@ export function LaunchCodesSection() {
                 <td className="py-2 pr-3 text-xs text-gray-500">
                   {new Date(c.submitted_at).toLocaleDateString()}
                 </td>
+                <td className="py-2 pr-3">
+                  {c.status === "audit_complete" ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                      <CheckCircle2 size={14} /> Audited
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={notifyBusy !== null}
+                      onClick={() => handleNotify(c.id)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#D4A24C] bg-[#FFF8EC] px-3 py-1.5 text-xs font-semibold text-[#0F2A4A] hover:bg-[#f5e6c5] disabled:opacity-60"
+                    >
+                      <Bell size={13} />
+                      {notifyBusy === c.id ? "Sending…" : "Mark Complete & Notify"}
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
             {claims.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-4 text-sm text-gray-500">
+                <td colSpan={7} className="py-4 text-sm text-gray-500">
                   No claims yet.
                 </td>
               </tr>
