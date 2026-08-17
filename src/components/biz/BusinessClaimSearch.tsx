@@ -427,6 +427,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             maxLength={40}
             required
             onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
+            onFocus={() => {
+              if (!launchCode.trim()) setLaunchCode("1000-FIRST");
+            }}
             placeholder="1000-FIRST"
           />
           <p className="mt-1 text-xs font-medium text-[#0F2A4A]/70">
