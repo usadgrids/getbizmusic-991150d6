@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { classifyCode } from "@/lib/code-classify.functions";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { searchBusinesses } from "@/lib/places.functions";
@@ -77,6 +78,8 @@ const inputClass =
 export function BusinessClaimSearch({ category }: { category?: DirectoryCategory }) {
   const runSearch = useServerFn(searchBusinesses);
   const runClaim = useServerFn(submitBusinessClaim);
+  const classifyFn = useServerFn(classifyCode);
+
 
   const [termsOpen, setTermsOpen] = useState(false);
   const [businessName, setBusinessName] = useState("");
@@ -160,7 +163,18 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     e.preventDefault();
     if (businessName.trim().length < 2) return toast.error("Enter your legal business name.");
     if (!/^\d{5}$/.test(zip.trim())) return toast.error("Enter a 5-digit ZIP code.");
-    if (launchCode.trim().length < 2) return toast.error("Enter your launch code.");
+    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
+    try {
+      const kind = await classifyFn({ data: { code: launchCode.trim() } });
+      if (kind.kind === "activation") {
+        return toast.error(
+          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
+        );
+      }
+    } catch {
+      /* classification is advisory only */
+    }
+
     if (Number(captchaInput) !== captcha.a + captcha.b) {
       setCaptcha(newCaptcha());
       setCaptchaInput("");
@@ -277,7 +291,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </p>
         {foundingMember && (
           <p className="mx-auto mt-4 max-w-md rounded-xl border border-[#D4A24C] bg-[#FFF8E8] px-4 py-3 text-sm font-semibold text-[#7a5410]">
-            🎉 Launch code applied — you&rsquo;re a Founding 1,000 Member. Your $49.95/year
+            🎉 Priority Access Code applied — you&rsquo;re a Founding 1,000 Member. Your $49.95/year
             membership price is locked in permanently and your claim is at the front of our queue.
           </p>
         )}
@@ -403,8 +417,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
-            Launch Code <span className="text-[#D4A24C]">*</span>
+          <label className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-[#0F2A4A]">
+            <span aria-hidden>🎟️</span>
+            Priority Access Code <span className="text-[#D4A24C]">*</span>
           </label>
           <input
             className={inputClass}
@@ -414,11 +429,16 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
             placeholder="1000-FIRST"
           />
+          <p className="mt-1 text-xs font-medium text-[#0F2A4A]/70">
+            New to GetBizMusic? This code locks in your founding-member pricing and priority
+            processing.
+          </p>
           <p className="mt-1 text-xs text-gray-500">
             🎉 Reserved for our first 1,000 San Diego County businesses. This code may be
             deactivated at any time once that milestone is reached.
           </p>
         </div>
+
         <div>
           <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
             Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>

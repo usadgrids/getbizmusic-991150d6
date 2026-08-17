@@ -7,7 +7,7 @@ export const AI_AUDIT_TERMS: string[] = [
   "Optional site build available separately. If you do not have a website, or would like GetBizMusic.com to build or replicate your existing site as a new, AI-optimized website, this is available as a separate paid service, priced and scoped independently of the AI Business Alliance Membership.",
   "The professional ad graphic is designed for your review at no cost. You may preview the design, but it may not be used, published, downloaded, or distributed in any form until it has been (a) approved by you, and (b) an active AI Business Alliance Membership has been purchased.",
   "Once approved and membership is active, you may use the finished ad graphic for any purpose you choose (your website, social media, print, etc.), and it will also be published on the GetBizMusic.com AI Business Alliance public directory as part of your membership.",
-  "AI Business Alliance Membership is available at an introductory price of $49.95/year. Pricing is subject to change at any time without notice, except where a Launch Code price-lock has been successfully applied to a qualifying membership.",
+  "AI Business Alliance Membership is available at an introductory price of $49.95/year. Pricing is subject to change at any time without notice, except where a Priority Access Code price-lock has been successfully applied to a qualifying membership.",
   "These terms may be updated at any time. Continued use of any free report, audit, or design constitutes acceptance of the then-current terms.",
 ];
 

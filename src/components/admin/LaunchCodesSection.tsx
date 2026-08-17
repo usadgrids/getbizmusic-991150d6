@@ -30,7 +30,7 @@ export function LaunchCodesSection() {
     setBusy(true);
     try {
       await updateCode({ data: { id, ...patchData } });
-      toast.success("Launch code updated");
+      toast.success("Priority Access Code updated");
       refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Update failed");
@@ -42,7 +42,7 @@ export function LaunchCodesSection() {
   return (
     <section className="mt-10 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="flex items-center gap-2 text-lg font-bold text-[#0F2A4A]">
-        <Rocket size={18} className="text-[#D4A24C]" /> Launch Code Status
+        <Rocket size={18} className="text-[#D4A24C]" /> Priority Access Code Status
       </h2>
 
       <div className="mt-4 grid gap-3">
@@ -99,7 +99,7 @@ export function LaunchCodesSection() {
             </div>
           );
         })}
-        {codes.length === 0 && <p className="text-sm text-gray-500">No launch codes yet.</p>}
+        {codes.length === 0 && <p className="text-sm text-gray-500">No Priority Access Codes yet.</p>}
       </div>
 
       <h3 className="mt-8 text-base font-bold text-[#0F2A4A]">Business Claims Queue</h3>
@@ -110,7 +110,7 @@ export function LaunchCodesSection() {
               <th className="py-2 pr-3">Business</th>
               <th className="py-2 pr-3">Owner</th>
               <th className="py-2 pr-3">Category</th>
-              <th className="py-2 pr-3">Launch Code</th>
+              <th className="py-2 pr-3">Priority Access Code</th>
               <th className="py-2 pr-3">Price</th>
               <th className="py-2 pr-3">Submitted</th>
             </tr>
