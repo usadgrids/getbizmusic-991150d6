@@ -219,8 +219,45 @@ function PricingPage() {
     }
   };
 
+  const startPayLaterOrder = async () => {
+    if (payLaterLoading) return;
+    if (!ownerName.trim()) { toast.error("Please enter the business owner name"); return; }
+    if (!businessName.trim()) { toast.error("Please enter the business name"); return; }
+    if (!emailValid) { toast.error("Please enter a valid email"); return; }
+    if (!phone.trim() || phone.trim().length < 7) { toast.error("Please enter a valid phone number"); return; }
+    if (!agreedTerms || !agreedNoRefund) { toast.error("Please check the agreement box to continue"); return; }
+    setPayLaterLoading(true);
+    try {
+      const res = await createPayLaterOrder({
+        data: {
+          plan,
+          ownerName: ownerName.trim(),
+          businessName: businessName.trim(),
+          customerEmail: email.trim(),
+          phone: phone.trim(),
+          industry,
+          agreedTerms: true,
+          agreedNoRefund: true,
+          environment: getStripeEnvironment(),
+          designAddon,
+          ...(repState.status === "valid" ? { repCode: repState.code } : {}),
+        },
+      });
+      if (!res.ok) throw new Error(res.error);
+      setPayLaterResult({
+        invoiceNumber: res.invoiceNumber,
+        amountFormatted: res.amountFormatted,
+        dueDateFormatted: res.dueDateFormatted,
+        submitUrl: res.submitUrl,
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not create Pay Later order");
+    } finally {
+      setPayLaterLoading(false);
+    }
+  };
 
-  if (clientSecret) {
+
     return (
       <div className="min-h-screen bg-[#0F2A4A] text-white">
         <PaymentTestModeBanner />
