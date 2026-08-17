@@ -26,6 +26,7 @@ export function LaunchCodesSection() {
   });
 
   const [busy, setBusy] = useState(false);
+  const [notifyBusy, setNotifyBusy] = useState<string | null>(null);
 
   async function patch(id: string, patchData: { isActive?: boolean; redemptionLimit?: number }) {
     setBusy(true);
