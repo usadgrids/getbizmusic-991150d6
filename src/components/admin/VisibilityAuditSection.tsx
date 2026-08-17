@@ -7,12 +7,19 @@ import { buildAuditReportHtml, slugify } from "@/lib/audit-report";
 import { adminListAuditTargets, adminRunVisibilityAudit } from "@/lib/ai-audit.functions";
 import { buildScoreBadgeSvg, svgDataUrl, scoreBadgePng, downloadBlob } from "@/lib/score-badge";
 
-const DEFAULT_PROMPT =
-  "Research everything you can on the internet about this business and give it an AI Optimization score audit. " +
-  "Judge how likely AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) are to find, trust and cite this business " +
-  "when someone asks an unbranded question about their product or service in their city. " +
-  "Score web presence, reviews and reputation, structured data / schema markup, content and Q&A answerability, " +
-  "local NAP consistency, and overall AI citability. Be fair and encouraging — every business has room to grow, so highlight what's already working and frame gaps as opportunities rather than failures. Most small local businesses score between 30 and 70.";
+const DEFAULT_PROMPT = `Build an AI Visibility Score Audit feature. When a business is scanned, run this pipeline in a Supabase Edge Function (not client-side, so API keys stay secure):
+
+Gather — Pull the business's info from Google Places Details API plus a scrape of their website and social profiles.
+
+Clean up — Send that raw data to Claude to organize it into clear fields: hours, services, service area, pricing signals, review sentiment, and what makes them different from competitors.
+
+Build schema — Auto-generate LocalBusiness + FAQPage JSON-LD from those fields and add it to the business's Knowledge Graph page (same pattern as the /sdcounty directory).
+
+Generate Q&A — Send the cleaned-up profile to Claude again to write 10 realistic buyer questions ('who's the best emergency plumber in National City open weekends') with answers based only on the scanned facts, formatted as FAQPage schema so AI answer engines can pull them directly.
+
+Publish — Save everything to Supabase and show it live on the business's Knowledge Graph page.
+
+Create the database tables (businesses, business_facts, qa_pairs), the admin review dashboard so I can check/edit results before they go live, and the Edge Functions for steps 1-4. Flag if the JSON-LD schema needs manual validation before publishing.`;
 
 type Audit = {
   business: string;
