@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2 } from "lucide-react";
+import { Building2, KeyRound } from "lucide-react";
 import { BizFooter } from "@/components/biz/BizFooter";
 import { BusinessClaimSearch } from "@/components/biz/BusinessClaimSearch";
+import { ActivationCodeBar } from "@/components/biz/ActivationCodeBar";
 import { getAdsByCategory } from "@/lib/ads.functions";
 import {
   DIRECTORY_CATEGORY_SLUGS,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
 import homeHero from "@/assets/SD-Business-3.png.asset.json";
+
 
 
 const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
@@ -123,6 +125,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [category, setCategory] = useState<DirectoryCategory>("food");
+  const [showActivation, setShowActivation] = useState(false);
+  const navigate = useNavigate();
+
+
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0F2A4A] text-white overflow-x-clip">
@@ -183,6 +189,37 @@ function Index() {
             <div className="mt-6 [&>section]:mt-0 [&>section]:shadow-none">
               <BusinessClaimSearch category={category} />
             </div>
+
+            {/* Secondary, lower-emphasis activation-code entry */}
+            <div className="mt-5 border-t border-white/10 pt-4 text-center">
+              {!showActivation ? (
+                <button
+                  type="button"
+                  onClick={() => setShowActivation(true)}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-[#D4A24C]"
+                >
+                  <KeyRound size={14} aria-hidden />
+                  Already have an Activation Code from us?
+                </button>
+              ) : (
+                <div className="[&>section]:mt-0">
+                  <ActivationCodeBar
+                    proof={null}
+                    onProof={(proof) => {
+                      if (proof) void navigate({ to: "/activate", search: { code: proof.code } });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowActivation(false)}
+                    className="mt-3 text-xs text-white/50 underline underline-offset-4 hover:text-white/80"
+                  >
+                    Hide
+                  </button>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </main>
