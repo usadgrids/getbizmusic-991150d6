@@ -38,7 +38,7 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Launch code: redeem atomically. Never blocks the claim — an invalid,
+    // Priority Access Code: redeem atomically. Never blocks the claim — an invalid,
     // deactivated or fully-redeemed code simply isn't applied.
     let launchApplied = false;
     let lockedPrice: number | null = null;
@@ -108,7 +108,7 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       lockedPrice,
       launchMessage:
         data.launchCode && !launchApplied
-          ? "This launch code is no longer active, but you can still submit your claim."
+          ? "This Priority Access Code is no longer active, but you can still submit your claim."
           : null,
     };
   });
