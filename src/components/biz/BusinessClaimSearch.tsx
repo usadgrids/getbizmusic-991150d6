@@ -346,15 +346,15 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </span>{" "}
         and a{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          free professionally designed ad
+          free professionally designed sample ad
         </span>{" "}
         — no cost to see what&rsquo;s possible for your business.{" "}
         <button
           type="button"
           onClick={() => setTermsOpen(true)}
-          className="text-xs text-[#B08C46] underline underline-offset-2 hover:text-[#8a6d33]"
+          className="inline-flex items-center rounded-full bg-[#0F2A4A] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#D4A24C] ring-1 ring-[#D4A24C]/60 shadow-sm hover:bg-[#163864] hover:text-white"
         >
-          (Terms & Conditions apply)
+          Terms & Conditions Apply
         </button>
       </p>
 
