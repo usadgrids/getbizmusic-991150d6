@@ -120,10 +120,11 @@ function PricingPage() {
   const totalFormatted = discounted.toFixed(2).replace(/\.00$/, "");
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
-  const zelleFieldsOk = payMethod !== "zelle" || (
-    ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7
-  );
-  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && zelleFieldsOk;
+  const needsContactFields = payMethod === "zelle" || payMethod === "pay_later";
+  const contactFieldsOk = needsContactFields
+    ? (ownerName.trim().length > 0 && businessName.trim().length > 0 && phone.trim().length >= 7)
+    : true;
+  const canPay = !!industry && emailValid && agreedTerms && agreedNoRefund && !loading && contactFieldsOk;
 
   const startCheckout = async () => {
     if (loading) return;
