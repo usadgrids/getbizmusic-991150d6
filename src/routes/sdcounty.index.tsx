@@ -2,12 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { CountyHubPage } from "@/components/biz/CountyHubPage";
 import { listAllDirectoryPlaces, listDirectoryTopics } from "@/lib/directory.functions";
-import { getAdsByCategory } from "@/lib/ads.functions";
-import {
-  DIRECTORY_CATEGORIES,
-  DIRECTORY_CATEGORY_SLUGS,
-  type DirectoryCategory,
-} from "@/lib/directory-categories";
+import { getCountyAds } from "@/lib/ads.functions";
+import { DIRECTORY_CATEGORY_SLUGS, type DirectoryCategory } from "@/lib/directory-categories";
 
 const TITLE = "San Diego County Business Directory | Get Biz Music";
 const DESCRIPTION =
@@ -17,17 +13,14 @@ export const Route = createFileRoute("/sdcounty/")({
   validateSearch: z.object({ category: z.string().optional() }),
   loaderDeps: ({ search }) => ({ category: search.category }),
   loader: async ({ context }) => {
-    const industries = DIRECTORY_CATEGORY_SLUGS.flatMap(
-      (s) => DIRECTORY_CATEGORIES[s].industries,
-    );
     await Promise.all([
       context.queryClient.ensureQueryData({
         queryKey: ["directory-places", "all"],
         queryFn: () => listAllDirectoryPlaces({}),
       }),
       context.queryClient.ensureQueryData({
-        queryKey: ["category-ads", "sdcounty"],
-        queryFn: () => getAdsByCategory({ data: { industries, seed_key: "sdcounty" } }),
+        queryKey: ["county-ads", "sdcounty"],
+        queryFn: () => getCountyAds(),
       }),
       context.queryClient.ensureQueryData({
         queryKey: ["directory-topics", "all"],
@@ -43,6 +36,7 @@ export const Route = createFileRoute("/sdcounty/")({
     ]);
     return {};
   },
+
   head: () => ({
     meta: [
       { title: TITLE },
