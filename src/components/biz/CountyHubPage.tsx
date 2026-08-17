@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2 } from "lucide-react";
-import { getAdsByCategory } from "@/lib/ads.functions";
+import { getCountyAds } from "@/lib/ads.functions";
 import { listAllDirectoryPlaces, listDirectoryTopics } from "@/lib/directory.functions";
 import { BizHero } from "@/components/biz/BizHero";
 import { BizFooter } from "@/components/biz/BizFooter";
@@ -19,7 +19,9 @@ import {
 } from "@/lib/directory-categories";
 import { toUniversalCategory } from "@/lib/business-categories";
 
-const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGORIES[s].industries);
+// Directory (Knowledge Graph) categories still drive the place list; ads are
+// no longer limited to them — see getCountyAds.
+
 
 function filterSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -37,10 +39,10 @@ export function CountyHubPage({ categoryFilter }: { categoryFilter?: string }) {
   });
   const places = placeData?.places ?? [];
 
-  const fetchAds = useServerFn(getAdsByCategory);
-  const { data: ads = [] } = useSuspenseQuery({
-    queryKey: ["category-ads", "sdcounty"],
-    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "sdcounty" } }),
+  const fetchAds = useServerFn(getCountyAds);
+  const { data: allAds = [] } = useSuspenseQuery({
+    queryKey: ["county-ads", "sdcounty"],
+    queryFn: () => fetchAds(),
   });
 
   const [active, setActive] = useState<string>(categoryFilter ?? "all");
@@ -54,10 +56,29 @@ export function CountyHubPage({ categoryFilter }: { categoryFilter?: string }) {
     [places],
   );
 
+  // Ads carry their own business category (industry) — same universal taxonomy
+  // used by claims, so activation-code ads filter/tag consistently here.
+  const adsWithCategory = useMemo(
+    () => allAds.map((ad) => ({ ad, universal: toUniversalCategory(ad.industry) })),
+    [allAds],
+  );
+
+  const ads = useMemo(
+    () =>
+      active === "all"
+        ? adsWithCategory.map((a) => a.ad)
+        : adsWithCategory.filter((a) => filterSlug(a.universal) === active).map((a) => a.ad),
+    [adsWithCategory, active],
+  );
+
   const filters = useMemo(() => {
-    const set = new Set(withCategory.map((p) => p.universal));
+    const set = new Set([
+      ...withCategory.map((p) => p.universal),
+      ...adsWithCategory.map((a) => a.universal),
+    ]);
     return Array.from(set).sort();
-  }, [withCategory]);
+  }, [withCategory, adsWithCategory]);
+
 
   const visible = useMemo(
     () =>

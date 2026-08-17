@@ -165,6 +165,29 @@ export const getAdsByCategory = createServerFn({ method: "GET" })
     return fairShuffle(withUrls, seed);
   });
 
+/**
+ * Public: every active ad for the unified San Diego County hub, regardless of
+ * Knowledge Graph category. Activation-code ads (and any other approved ad)
+ * appear here even when their industry isn't part of food/beauty.
+ */
+export const getCountyAds = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: rows, error } = await supabaseAdmin
+    .from("ads")
+    .select(
+      "id,ad_number,business_name,website_url,youtube_url,tagline,industry,ad_type,image_url,duration_seconds",
+    )
+    .eq("status", "active")
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  const withUrls = (await attachUrls((rows ?? []) as PublicAd[])) as PublicAd[];
+  const seed = `sdcounty-${new Date().toISOString().slice(0, 13)}`;
+  return fairShuffle(withUrls, seed);
+});
+
+
+
 
 // Public: fetch a single ad by its human-friendly ad_number (for share landing pages).
 export const getAdByNumber = createServerFn({ method: "GET" })
