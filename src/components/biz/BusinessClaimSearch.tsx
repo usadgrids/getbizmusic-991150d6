@@ -67,7 +67,7 @@ const BUSINESS_TYPES = [
 type BusinessType = (typeof BUSINESS_TYPES)[number]["value"];
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-[#0F2A4A] outline-none focus:border-[#D4A24C]";
+  "w-full rounded-lg border border-[#0F2A4A]/25 bg-[#F4F7FB] px-3 py-2 text-sm font-medium text-[#0F2A4A] shadow-sm outline-none transition focus:border-[#D4A24C] focus:bg-white focus:ring-2 focus:ring-[#D4A24C]/40";
 
 
 /**
@@ -405,7 +405,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
             Zip Code <span className="text-[#D4A24C]">*</span>
           </label>
           <input
@@ -419,7 +419,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
             Business Category <span className="text-[#D4A24C]">*</span>
           </label>
           <CategorySelect
@@ -429,7 +429,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-[#0F2A4A]">
+          <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
             <span aria-hidden>🎟️</span>
             Priority Access Code <span className="text-[#D4A24C]">*</span>
           </label>
@@ -455,7 +455,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
             Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>
           </label>
           <input
@@ -572,7 +572,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Legal Business Name <span className="text-[#D4A24C]">*</span>
               </label>
               <input
@@ -589,7 +589,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Trade Name / DBA <span className="text-gray-400">(optional)</span>
               </label>
               <input
@@ -605,7 +605,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               </p>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Business Type <span className="text-[#D4A24C]">*</span>
               </label>
               <div className="space-y-1.5 rounded-lg border border-gray-300 px-3 py-2">
@@ -625,7 +625,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 {addressIsPrivate
                   ? "Business Address (Private — used for verification and billing only, never displayed publicly)"
                   : "Business Address"}{" "}
@@ -647,7 +647,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </div>
             {addressIsPrivate && (
               <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+                <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                   Service Area (shown publicly) <span className="text-[#D4A24C]">*</span>
                 </label>
                 <select
@@ -681,7 +681,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             )}
 
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Business Category <span className="text-[#D4A24C]">*</span>
               </label>
               <CategorySelect
@@ -691,7 +691,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Your Name <span className="text-[#D4A24C]">*</span>
               </label>
               <input
@@ -703,7 +703,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Your Email <span className="text-[#D4A24C]">*</span>
               </label>
               <input
@@ -716,7 +716,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">Your Phone (optional)</label>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">Your Phone (optional)</label>
               <input
                 className={inputClass}
                 value={ownerPhone}
@@ -725,7 +725,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-semibold text-[#0F2A4A]">
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Anything we should know? (optional)
               </label>
               <textarea
