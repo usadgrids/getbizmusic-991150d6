@@ -191,6 +191,28 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     }
   }
 
+  if (recipientEmail) {
+    // Membership confirmation receipt (card) with the personalized Terms PDF.
+    try {
+      const { data: payRow } = await supabaseAdmin
+        .from("ad_payments")
+        .select("id")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+      if (payRow?.id) {
+        const { sendMembershipReceiptEmail } = await import("@/lib/email/membership-emails.server");
+        await sendMembershipReceiptEmail({
+          paymentId: payRow.id as string,
+          email: recipientEmail,
+          paidAtIso,
+          paymentMethodLabel: "Card",
+        });
+      }
+    } catch (e) {
+      console.error("membership receipt email failed:", e);
+    }
+  }
+
   if (recipientEmail && submissionToken) {
     await sendPaymentReceipt({
       email: recipientEmail,
