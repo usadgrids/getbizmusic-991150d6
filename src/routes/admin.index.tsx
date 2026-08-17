@@ -368,6 +368,22 @@ function AdminConsole() {
 
         <VisibilityAuditSection />
 
+        <section className="bg-white rounded-xl shadow-sm p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="font-serif text-lg font-bold text-[#0F2A4A]">Email QA — Test Sends</h3>
+            <p className="text-xs text-gray-600">
+              Send a sample copy of any system email to yourself before going live.
+            </p>
+          </div>
+          <Link
+            to="/admin/test-emails"
+            className="inline-flex items-center gap-1.5 bg-[#0F2A4A] text-white font-semibold text-sm px-4 py-2 rounded-md hover:bg-[#173d69]"
+          >
+            <Send size={14} /> Open email tester
+          </Link>
+        </section>
+
+
 
 
 
