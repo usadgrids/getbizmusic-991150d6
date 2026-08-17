@@ -52,6 +52,10 @@ function buildPayload(msg: ResendMessage) {
   }
 }
 
+const MAX_ATTEMPTS = 4
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 async function resendFetch(path: string, body: unknown) {
   const lovableKey = process.env.LOVABLE_API_KEY
   const resendKey = process.env.RESEND_API_KEY
@@ -59,24 +63,49 @@ async function resendFetch(path: string, body: unknown) {
     throw new Error('Resend credentials missing (LOVABLE_API_KEY / RESEND_API_KEY).')
   }
 
-  const res = await fetch(`${GATEWAY_URL}${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${lovableKey}`,
-      'X-Connection-Api-Key': resendKey,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
+  let lastError: Error | null = null
 
-  if (!res.ok) {
-    const errorBody = await res.text()
-    console.error(`Resend request failed [${res.status}]: ${errorBody}`)
-    throw new Error(`Resend request failed [${res.status}]: ${errorBody}`)
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(`${GATEWAY_URL}${path}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          'X-Connection-Api-Key': resendKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+
+      if (res.ok) return res.json()
+
+      const errorBody = await res.text()
+      const err = new Error(`Resend request failed [${res.status}]: ${errorBody}`)
+      // Transient: rate limiting and upstream/gateway failures. Everything else
+      // (400/401/403 validation, unverified domain, bad payload) is permanent.
+      const transient = res.status === 429 || res.status >= 500
+      if (!transient) {
+        console.error(err.message)
+        throw err
+      }
+      lastError = err
+      console.warn(`Resend transient failure (attempt ${attempt}/${MAX_ATTEMPTS}): ${err.message}`)
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e))
+      // Permanent errors thrown above already carry the status prefix.
+      if (/failed \[[43]\d\d\]/.test(err.message)) throw err
+      lastError = err
+      console.warn(`Resend network failure (attempt ${attempt}/${MAX_ATTEMPTS}): ${err.message}`)
+    }
+
+    if (attempt < MAX_ATTEMPTS) await sleep(400 * 2 ** (attempt - 1))
   }
-  return res.json()
+
+  console.error(lastError?.message)
+  throw lastError ?? new Error('Resend request failed')
 }
+
 
 /** Send a single email. Returns the Resend message id. */
 export async function sendResendEmail(msg: ResendMessage): Promise<{ id: string }> {
