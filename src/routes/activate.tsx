@@ -561,10 +561,17 @@ function ActivatePage() {
           <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
             <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 accent-[#0F2A4A]" />
             <span>
-              I confirm the details above are accurate and I agree to the GetBizMusic novelty advertising terms,
-              disclosures, and no-refund policy. GetBizMusic ads are novelty promotional listings; music streaming
-              is provided for entertainment and is not affiliated with the advertised businesses.
+              {MEMBERSHIP_CHECKBOX_TEXT}{" "}
+              <a
+                href="/terms/membership"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#0F2A4A] underline"
+              >
+                (Full Terms &amp; Conditions)
+              </a>
             </span>
+
           </label>
 
           <div>
