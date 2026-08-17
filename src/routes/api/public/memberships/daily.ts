@@ -86,7 +86,7 @@ async function runDailyMaintenance() {
     .eq("payment_verified", false)
     .lt("bill_later_due_date", new Date().toISOString())
     .in("membership_status", ["pending", "pending_verification"])
-    .select("id, customer_email");
+    .select("id, customer_email, owner_name, business_name, amount_cents, bill_later_due_date, stripe_session_id");
   if (overdueErr) result.errors.push(`pay-later: ${overdueErr.message}`);
   result.cancelled = overdue?.length ?? 0;
 
@@ -96,6 +96,36 @@ async function runDailyMaintenance() {
       .from("business_claims")
       .update({ founding_member: false, priority: false, locked_price: null })
       .eq("owner_email", (row.customer_email as string).toLowerCase());
+
+    // Send the cancellation notice email.
+    try {
+      const dueDate = row.bill_later_due_date
+        ? new Date(row.bill_later_due_date as string).toLocaleDateString("en-US", {
+            dateStyle: "long",
+            timeZone: "America/Los_Angeles",
+          })
+        : undefined;
+      const invoiceNumber = String(row.stripe_session_id ?? "").replace(/^pay-later-/, "").slice(0, 8).toUpperCase();
+      const amountFormatted = row.amount_cents
+        ? `$${(((row.amount_cents as number) ?? 0) / 100).toFixed(2)}`
+        : undefined;
+
+      await enqueueTransactionalEmailInternal({
+        templateName: "pay-later-cancelled",
+        recipientEmail: row.customer_email as string,
+        idempotencyKey: `pay-later-cancelled-${row.id}`,
+        templateData: {
+          ownerName: (row.owner_name as string) || undefined,
+          businessName: (row.business_name as string) || undefined,
+          invoiceNumber: invoiceNumber || undefined,
+          amountFormatted,
+          dueDateFormatted: dueDate,
+          renewUrl: "https://www.getbizmusic.com/pricing",
+        },
+      });
+    } catch (err) {
+      result.errors.push(`pay-later-cancel-email ${row.id}: ${String(err)}`);
+    }
   }
 
   return result;
