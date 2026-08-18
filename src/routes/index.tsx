@@ -118,7 +118,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: OG_IMAGE_URL },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:type", content: "image/png" },
       { property: "og:image:alt", content: "Make sure they can find you — 380,000+ San Diego County businesses. GetBizMusic.com AI Business Alliance" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE_URL },
