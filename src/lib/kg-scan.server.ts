@@ -464,7 +464,10 @@ export async function generateQa(
   const out = await aiJson(
     "You write realistic unbranded buyer questions and answer them using ONLY the supplied facts. " +
       "If the facts do not contain what a question needs, set answered=false, answer=null, flag='insufficient_data' and name the missing data. " +
-      "NEVER guess, estimate, or fill gaps from general knowledge. Respond with JSON only.",
+      "NEVER guess, estimate, or fill gaps from general knowledge. " +
+      `IDENTITY PIN: the subject is EXACTLY "${businessName}". When an answer names the business, use that exact string verbatim. ` +
+      "Never invent, shorten, translate, or substitute a different trade name, category label, or brand — not even one that appears inside the facts, services, or reviews. " +
+      "Respond with JSON only.",
     `Business: ${businessName}${locality ? ` (${locality})` : ""}\n\nFACTS:\n${JSON.stringify(
       {
         hours: facts.hours,
