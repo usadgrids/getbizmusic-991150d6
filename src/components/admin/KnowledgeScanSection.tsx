@@ -188,6 +188,11 @@ export function KnowledgeScanSection() {
                   <div className="text-xs text-muted-foreground">
                     {[b.city, b.state].filter(Boolean).join(", ")}
                   </div>
+                  {b.last_scanned_at ? (
+                    <div className="text-[11px] text-muted-foreground/70">
+                      scanned {new Date(b.last_scanned_at as string).toLocaleDateString()}
+                    </div>
+                  ) : null}
                 </td>
                 <td className="py-3 pr-3 font-bold">{b.score ?? "—"}</td>
                 <td className="py-3 pr-3">
@@ -266,6 +271,9 @@ export function KnowledgeScanSection() {
               <h3 className="text-lg font-bold">{business["name"] as string}</h3>
               <p className="text-xs text-muted-foreground">
                 Last scanned {business["last_scanned_at"] ? new Date(business["last_scanned_at"] as string).toLocaleString() : "—"}
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground/70">
+                Score reflects data as of this date — may shift slightly on rescan as review counts and AI-extracted fields update.
               </p>
             </div>
             <div className="flex items-center gap-3">
