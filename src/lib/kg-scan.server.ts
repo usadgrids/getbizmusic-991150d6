@@ -339,9 +339,11 @@ export function toPriceRange(signals: string | null | undefined): string | null 
   // Explicit numeric range, e.g. "$100 - $300" or "100-300 USD"
   const range = s.match(/\$?\s*(\d[\d,]*)\s*(?:-|–|to)\s*\$?\s*(\d[\d,]*)/i);
   if (range) return `$${range[1]!.replace(/,/g, "")}-$${range[2]!.replace(/,/g, "")}`;
-  // Single anchor price, e.g. "starting at $89" / "$89 service call"
-  const single = s.match(/\$\s*(\d[\d,]*)/);
-  if (single) return `$${single[1]!.replace(/,/g, "")}`;
+  // Multiple prices quoted in prose -> derive a min-max band.
+  const nums = [...s.matchAll(/\$\s*(\d[\d,]*)/g)].map((m) => Number(m[1]!.replace(/,/g, ""))).filter((n) => n > 0);
+  const uniq = [...new Set(nums)];
+  if (uniq.length > 1) return `$${Math.min(...uniq)}-$${Math.max(...uniq)}`;
+  if (uniq.length === 1) return `$${uniq[0]}`;
   // Qualitative wording -> band
   const l = s.toLowerCase();
   if (/\b(luxury|high[- ]end|premium|upscale)\b/.test(l)) return "$$$";
