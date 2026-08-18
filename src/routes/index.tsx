@@ -199,7 +199,7 @@ function Index() {
                   className="inline-flex items-center gap-2 text-sm font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-[#D4A24C]"
                 >
                   <Unlock size={14} aria-hidden />
-                  Already a GetBizMusic partner? Enter your Activation Code
+                  Already received an ADVERTISEMENT Proposal? Enter your ACTIVATION CODE here.
                 </button>
               ) : (
                 <div className="[&>section]:mt-0">
