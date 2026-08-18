@@ -122,7 +122,11 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE_URL },
     ],
-    links: [{ rel: "canonical", href: "https://getbizmusic.com/" }],
+    links: [
+      { rel: "canonical", href: "https://getbizmusic.com/" },
+      { rel: "preload", as: "image", href: "/img/home-hero.webp", fetchpriority: "high" },
+    ],
+
   }),
   component: Index,
 });
