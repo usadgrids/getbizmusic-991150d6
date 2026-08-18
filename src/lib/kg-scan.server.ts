@@ -684,7 +684,8 @@ export async function runKnowledgeScan(opts: {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const row = {
     name: places?.name ?? opts.businessName,
-    slug: slugify(`${opts.businessName}-${places?.city ?? opts.city ?? ""}`),
+    // Slug from the resolved place identity (not the raw search query) so rescans match existing rows.
+    slug: slugify(`${places?.name ?? opts.businessName}-${places?.city ?? opts.city ?? ""}`),
     address,
     city: places?.city ?? opts.city ?? null,
     state: places?.state ?? opts.state ?? null,
