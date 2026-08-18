@@ -491,6 +491,7 @@ export async function generateQa(
     )}\n\nWrite exactly 10 questions a real buyer would type or ask an AI assistant (e.g. "who's the best emergency plumber in National City open weekends"). Cover hours/availability, services, service area, pricing, quality/reviews, and what makes them different.\n\nReturn JSON exactly matching:\n{"qa":[{"question":string,"answer":string|null,"answered":boolean,"flag":"ok"|"insufficient_data","missing_data":string|null}]}`,
   );
 
+  console.error("[kg-debug] qa keys", Object.keys(out), JSON.stringify(out).slice(0, 600));
   const raw = Array.isArray(out["qa"]) ? (out["qa"] as Array<Record<string, unknown>>) : [];
   return raw.slice(0, 10).map((q) => {
     const answer = typeof q["answer"] === "string" && q["answer"].trim() ? q["answer"].trim() : null;
