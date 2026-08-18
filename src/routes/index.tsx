@@ -94,7 +94,7 @@ function AdTileBackground() {
 
 
 const OG_IMAGE_URL =
-  "https://www.getbizmusic.com/__l5e/assets-v1/4da96ba4-8a43-499e-9c4c-d8420f97bf0d/getbizmusic-og-2026.jpg";
+  "https://www.getbizmusic.com/__l5e/assets-v1/368ff5c4-24bc-42c9-8087-d1a31d1867a8/facebook_og_1200x630_highres.png";
 
 
 
