@@ -244,6 +244,9 @@ async function aiJson(system: string, user: string): Promise<Record<string, unkn
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: AI_MODEL,
+      // Deterministic extraction task: answer only from scanned facts, never invent.
+      temperature: 0,
+      top_p: 1,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
