@@ -336,16 +336,13 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         , only a small percentage are cited by ChatGPT and other AI engines. Is{" "}
         <span className="text-[#7a5410] font-semibold">YOUR</span> business one of them?
       </h2>
-      <p className="mt-1 text-sm leading-relaxed text-gray-600">
+      <p className="mt-1 text-sm leading-relaxed text-gray-600 whitespace-pre-line">
         <span className="font-semibold text-[#0F2A4A]">Make Your Business AI Citation-Ready</span>
-        <br />
-        Type your business name to{" "}
+        {"\n"}Type your business name to{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           claim your AI Knowledge Graph Listing
         </span>{" "}
-        and ensure AI answer engines cite you accurately.
-        <br />
-        Get a{" "}
+        and ensure AI answer engines cite you accurately. Get a{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           Free AI Visibility Audit + Custom Sample Ad
         </span>
