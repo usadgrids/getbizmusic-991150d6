@@ -13,7 +13,7 @@ import {
   type DirectoryCategory,
 } from "@/lib/directory-categories";
 import { DIRECTORY_CATEGORY_UI } from "@/lib/directory-category-ui";
-import homeHero from "@/assets/SD-Business-3.png.asset.json";
+
 
 
 
@@ -23,10 +23,13 @@ const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGOR
 function AdTileBackground() {
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useQuery({
-    queryKey: ["home-tile-ads"],
-    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "home-tiles" } }),
+    // Same key/args as <AdMarquee /> so the homepage makes ONE ads request
+    // instead of two competing round-trips on first paint.
+    queryKey: ["admarquee-ads"],
+    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "admarquee" } }),
     staleTime: 5 * 60 * 1000,
   });
+
 
   // Build the mosaic once per ad payload (memoised) — recomputing the shuffle
   // on every render forced all tiles to remount and made the page feel slow.
@@ -49,13 +52,14 @@ function AdTileBackground() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    // 18 tiles is enough to fill the panel backdrop while keeping image
+    // 12 decorative tiles is plenty for the backdrop and keeps image
     // decoding cheap; no two horizontally-adjacent tiles repeat.
     const imgUrl = (ad: (typeof pooled)[number]) => ad.image_url ?? ad.id;
     const out: (typeof pooled)[number][] = [];
     let lastUrl: string | null = null;
     let pool = [...shuffled];
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 12; i++) {
+
       let idx = pool.findIndex((a) => imgUrl(a) !== lastUrl);
       if (idx === -1) idx = 0;
       const ad = pool[idx];
@@ -118,7 +122,11 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE_URL },
     ],
-    links: [{ rel: "canonical", href: "https://getbizmusic.com/" }],
+    links: [
+      { rel: "canonical", href: "https://getbizmusic.com/" },
+      { rel: "preload", as: "image", href: "/img/home-hero.webp", fetchpriority: "high" },
+    ],
+
   }),
   component: Index,
 });
@@ -140,16 +148,24 @@ function Index() {
         </span>
       </div>
 
-      {/* Hero header image */}
+      {/* Hero header image — optimized 1400px webp/jpg (was a 2.2 MB PNG) */}
       <header className="relative w-full max-w-full min-w-0 overflow-hidden">
         <div className="mx-auto w-full max-w-[1400px] px-2 sm:px-4">
-          <img
-            src={homeHero.url}
-            alt="Is your San Diego County business visible on ChatGPT and other AI search engines? GetBizMusic.com"
-            className="block w-full h-auto rounded-xl"
-          />
+          <picture>
+            <source srcSet="/img/home-hero.webp" type="image/webp" />
+            <img
+              src="/img/home-hero.jpg"
+              width={1400}
+              height={738}
+              fetchPriority="high"
+              decoding="async"
+              alt="Is your San Diego County business visible on ChatGPT and other AI search engines? GetBizMusic.com"
+              className="block w-full h-auto rounded-xl"
+            />
+          </picture>
         </div>
       </header>
+
 
       {/* Centerpiece: the Find & Claim Your Business panel */}
       <main className="relative mx-auto flex w-full max-w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12 sm:py-16">

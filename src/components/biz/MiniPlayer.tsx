@@ -470,6 +470,16 @@ export function MiniPlayer() {
 
     let disposed = false;
     const win = window as WindowWithYT;
+    // Defer loading YouTube's iframe API until the page is interactive so the
+    // ~1 MB third-party bundle never competes with the homepage's first paint.
+    let startTimer = 0;
+    const whenIdle = (fn: () => void) => {
+      const ric = (win as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number })
+        .requestIdleCallback;
+      if (ric) ric(fn, { timeout: 3000 });
+      else startTimer = window.setTimeout(fn, 1200);
+    };
+
 
     const ensureYouTubeApi = () =>
       new Promise<void>((resolve) => {
@@ -484,13 +494,17 @@ export function MiniPlayer() {
           resolve();
         };
 
-        if (!document.querySelector(`script[src="${YOUTUBE_IFRAME_API_SRC}"]`)) {
-          const script = document.createElement("script");
-          script.src = YOUTUBE_IFRAME_API_SRC;
-          script.async = true;
-          document.head.appendChild(script);
-        }
+        whenIdle(() => {
+          if (disposed) return;
+          if (!document.querySelector(`script[src="${YOUTUBE_IFRAME_API_SRC}"]`)) {
+            const script = document.createElement("script");
+            script.src = YOUTUBE_IFRAME_API_SRC;
+            script.async = true;
+            document.head.appendChild(script);
+          }
+        });
       });
+
 
     ensureYouTubeApi()
       .then(() => {
@@ -629,6 +643,8 @@ export function MiniPlayer() {
 
     return () => {
       disposed = true;
+      if (startTimer) window.clearTimeout(startTimer);
+
       clearAutoplayFallback();
       clearResumeFallback();
       clearTrackRefreshTimeouts();
