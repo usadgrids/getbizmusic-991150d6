@@ -328,7 +328,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           — All Welcome
         </span>
       </div>
-      <h2 className="mt-5 text-base font-bold leading-snug text-[#0F2A4A]">
+      <h2 className="mt-5 text-[15px] leading-[1.55] sm:text-base sm:leading-snug font-bold text-[#0F2A4A] text-balance">
         Of San Diego County&rsquo;s{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           380,000+ businesses
