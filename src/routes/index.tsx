@@ -94,7 +94,7 @@ function AdTileBackground() {
 
 
 const OG_IMAGE_URL =
-  "https://www.getbizmusic.com/__l5e/assets-v1/74f08fd4-9ee2-41dc-b8b1-fbc723051789/getbizmusic-og-image.png";
+  "https://www.getbizmusic.com/__l5e/assets-v1/4da96ba4-8a43-499e-9c4c-d8420f97bf0d/getbizmusic-og-2026.jpg";
 
 
 
@@ -116,9 +116,10 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "https://getbizmusic.com/" },
       { property: "og:type", content: "website" },
       { property: "og:image", content: OG_IMAGE_URL },
-      { property: "og:image:width", content: "1254" },
-      { property: "og:image:height", content: "1254" },
-      { property: "og:image:alt", content: "Is your San Diego County business visible on ChatGPT? — GetBizMusic.com" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:alt", content: "Make sure they can find you — 380,000+ San Diego County businesses. GetBizMusic.com AI Business Alliance" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE_URL },
     ],
