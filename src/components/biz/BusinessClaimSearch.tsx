@@ -329,26 +329,27 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </span>
       </div>
       <h2 className="mt-2 text-lg font-bold text-[#0F2A4A]">
-        Is your business listed among over{" "}
+        Of San Diego County&rsquo;s{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          380,000 businesses
-        </span>{" "}
-        in San Diego County?
+          380,000+ businesses
+        </span>
+        , only a small percentage are cited by ChatGPT and other AI engines. Is{" "}
+        <span className="text-[#7a5410] font-semibold">YOUR</span> business one of them?
       </h2>
       <p className="mt-1 text-sm leading-relaxed text-gray-600">
-        Type Your Business Name and{" "}
+        <span className="font-semibold text-[#0F2A4A]">Make Your Business AI Citation-Ready</span>
+        <br />
+        Type your business name to{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          Claim Your AI Knowledge Graph Listing
+          claim your AI Knowledge Graph Listing
         </span>{" "}
-        so AI answer engines cite you correctly. Get a{" "}
+        and ensure AI answer engines cite you accurately.
+        <br />
+        Get a{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          free AI Visibility Audit
-        </span>{" "}
-        and a{" "}
-        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          free professionally designed sample ad
-        </span>{" "}
-        — no cost to see what&rsquo;s possible for your business.{" "}
+          Free AI Visibility Audit + Custom Sample Ad
+        </span>
+        . 100% free.{" "}
         <button
           type="button"
           onClick={() => setTermsOpen(true)}
