@@ -643,6 +643,8 @@ export function MiniPlayer() {
 
     return () => {
       disposed = true;
+      if (startTimer) window.clearTimeout(startTimer);
+
       clearAutoplayFallback();
       clearResumeFallback();
       clearTrackRefreshTimeouts();
