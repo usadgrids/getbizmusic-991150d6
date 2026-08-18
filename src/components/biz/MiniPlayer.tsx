@@ -494,13 +494,17 @@ export function MiniPlayer() {
           resolve();
         };
 
-        if (!document.querySelector(`script[src="${YOUTUBE_IFRAME_API_SRC}"]`)) {
-          const script = document.createElement("script");
-          script.src = YOUTUBE_IFRAME_API_SRC;
-          script.async = true;
-          document.head.appendChild(script);
-        }
+        whenIdle(() => {
+          if (disposed) return;
+          if (!document.querySelector(`script[src="${YOUTUBE_IFRAME_API_SRC}"]`)) {
+            const script = document.createElement("script");
+            script.src = YOUTUBE_IFRAME_API_SRC;
+            script.async = true;
+            document.head.appendChild(script);
+          }
+        });
       });
+
 
     ensureYouTubeApi()
       .then(() => {
