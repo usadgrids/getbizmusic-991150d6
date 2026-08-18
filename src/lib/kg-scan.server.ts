@@ -388,7 +388,7 @@ export function buildSchema(
   if (openingHours.length) localBusiness["openingHours"] = openingHours;
   else notes.push("No opening hours found.");
   if (facts.serviceArea) localBusiness["areaServed"] = facts.serviceArea;
-  const priceRange = toPriceRange(facts.pricingSignals, places);
+  const priceRange = toPriceRange(facts.pricingSignals);
   if (priceRange) localBusiness["priceRange"] = priceRange;
   else if (facts.pricingSignals) notes.push("Pricing signals found but not expressible as a schema.org priceRange — omitted.");
   if (facts.services.length) {
