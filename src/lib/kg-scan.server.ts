@@ -244,6 +244,9 @@ async function aiJson(system: string, user: string): Promise<Record<string, unkn
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: AI_MODEL,
+      // Deterministic extraction task: answer only from scanned facts, never invent.
+      temperature: 0,
+      top_p: 1,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
@@ -491,7 +494,12 @@ export async function generateQa(
   const raw = Array.isArray(out["qa"]) ? (out["qa"] as Array<Record<string, unknown>>) : [];
   return raw.slice(0, 10).map((q) => {
     const answer = typeof q["answer"] === "string" && q["answer"].trim() ? q["answer"].trim() : null;
-    const answered = q["answered"] === true && Boolean(answer) && q["flag"] !== "insufficient_data";
+    // The model sometimes labels the boolean field "answered", sometimes "boolean"/"is_answered".
+    // Treat a present answer + non-flagged item as answered rather than trusting one key name.
+    const flagged = q["flag"] === "insufficient_data";
+    const explicitFalse =
+      q["answered"] === false || q["boolean"] === false || q["is_answered"] === false;
+    const answered = Boolean(answer) && !flagged && !explicitFalse;
     return {
       question: String(q["question"] ?? "").slice(0, 300),
       answer: answered ? answer : null,
