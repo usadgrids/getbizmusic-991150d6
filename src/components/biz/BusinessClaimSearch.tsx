@@ -328,7 +328,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           — All Welcome
         </span>
       </div>
-      <h2 className="mt-2 text-base font-bold text-[#0F2A4A]">
+      <h2 className="mt-5 text-base font-bold leading-snug text-[#0F2A4A]">
         Of San Diego County&rsquo;s{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           380,000+ businesses
@@ -336,7 +336,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         , only a small percentage are cited by ChatGPT and other AI engines. Is{" "}
         <span className="text-[#7a5410] font-semibold">YOUR</span> business one of them?
       </h2>
-      <p className="mt-1 text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+      <p className="mt-4 text-sm leading-relaxed text-gray-600 whitespace-pre-line">
         <span className="font-semibold text-[#0F2A4A]">Make Your Business AI Citation-Ready</span>
         {"\n"}Type your business name to{" "}
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
@@ -348,7 +348,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </span>
         . 100% free.
       </p>
-      <div className="mt-1 flex justify-center">
+      <div className="mt-4 flex justify-center">
         <button
           type="button"
           onClick={() => setTermsOpen(true)}
