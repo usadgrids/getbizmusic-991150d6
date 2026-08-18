@@ -326,6 +326,32 @@ function toOpeningHoursSpec(value: string): string | null {
   return `${to24(m[1]!, m[2], m[3]!)}-${to24(m[4]!, m[5], m[6]!)}`;
 }
 
+/**
+ * schema.org priceRange expects a compact band ("$$", "$100-$300"), not prose.
+ * Free-text pricing signals are mapped when unambiguous, otherwise dropped.
+ */
+export function toPriceRange(signals: string | null | undefined): string | null {
+  if (!signals) return null;
+  const s = signals.trim();
+  // Already a valid band: $, $$, $$$, $$$$
+  const band = s.match(/^\${1,4}$/);
+  if (band) return s;
+  // Explicit numeric range, e.g. "$100 - $300" or "100-300 USD"
+  const range = s.match(/\$?\s*(\d[\d,]*)\s*(?:-|–|to)\s*\$?\s*(\d[\d,]*)/i);
+  if (range) return `$${range[1]!.replace(/,/g, "")}-$${range[2]!.replace(/,/g, "")}`;
+  // Multiple prices quoted in prose -> derive a min-max band.
+  const nums = [...s.matchAll(/\$\s*(\d[\d,]*)/g)].map((m) => Number(m[1]!.replace(/,/g, ""))).filter((n) => n > 0);
+  const uniq = [...new Set(nums)];
+  if (uniq.length > 1) return `$${Math.min(...uniq)}-$${Math.max(...uniq)}`;
+  if (uniq.length === 1) return `$${uniq[0]}`;
+  // Qualitative wording -> band
+  const l = s.toLowerCase();
+  if (/\b(luxury|high[- ]end|premium|upscale)\b/.test(l)) return "$$$";
+  if (/\b(budget|affordable|cheap|low[- ]cost|value)\b/.test(l)) return "$";
+  if (/\b(moderate|mid[- ]range|competitive|reasonable)\b/.test(l)) return "$$";
+  return null;
+}
+
 export type SchemaResult = {
   localBusiness: Json | null;
   faqPage: Json | null;
@@ -388,7 +414,9 @@ export function buildSchema(
   if (openingHours.length) localBusiness["openingHours"] = openingHours;
   else notes.push("No opening hours found.");
   if (facts.serviceArea) localBusiness["areaServed"] = facts.serviceArea;
-  if (facts.pricingSignals) localBusiness["priceRange"] = facts.pricingSignals.slice(0, 40);
+  const priceRange = toPriceRange(facts.pricingSignals);
+  if (priceRange) localBusiness["priceRange"] = priceRange;
+  else if (facts.pricingSignals) notes.push("Pricing signals found but not expressible as a schema.org priceRange — omitted.");
   if (facts.services.length) {
     localBusiness["makesOffer"] = facts.services.slice(0, 12).map((s) => ({
       "@type": "Offer",
@@ -438,7 +466,10 @@ export async function generateQa(
   const out = await aiJson(
     "You write realistic unbranded buyer questions and answer them using ONLY the supplied facts. " +
       "If the facts do not contain what a question needs, set answered=false, answer=null, flag='insufficient_data' and name the missing data. " +
-      "NEVER guess, estimate, or fill gaps from general knowledge. Respond with JSON only.",
+      "NEVER guess, estimate, or fill gaps from general knowledge. " +
+      `IDENTITY PIN: the subject is EXACTLY "${businessName}". When an answer names the business, use that exact string verbatim. ` +
+      "Never invent, shorten, translate, or substitute a different trade name, category label, or brand — not even one that appears inside the facts, services, or reviews. " +
+      "Respond with JSON only.",
     `Business: ${businessName}${locality ? ` (${locality})` : ""}\n\nFACTS:\n${JSON.stringify(
       {
         hours: facts.hours,
@@ -653,7 +684,8 @@ export async function runKnowledgeScan(opts: {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const row = {
     name: places?.name ?? opts.businessName,
-    slug: slugify(`${opts.businessName}-${places?.city ?? opts.city ?? ""}`),
+    // Slug from the resolved place identity (not the raw search query) so rescans match existing rows.
+    slug: slugify(`${places?.name ?? opts.businessName}-${places?.city ?? opts.city ?? ""}`),
     address,
     city: places?.city ?? opts.city ?? null,
     state: places?.state ?? opts.state ?? null,
@@ -687,13 +719,25 @@ export async function runKnowledgeScan(opts: {
     const { error } = await supabaseAdmin.from("kg_businesses").update(row).eq("id", businessId);
     if (error) throw new Error(`Save failed: ${error.message}`);
   } else {
-    const { data, error } = await supabaseAdmin
+    // Re-scanning by name must update the existing record, not create a duplicate slug.
+    const { data: existing } = await supabaseAdmin
       .from("kg_businesses")
-      .insert(row)
       .select("id")
-      .single();
-    if (error) throw new Error(`Save failed: ${error.message}`);
-    businessId = data.id as string;
+      .eq("slug", row.slug)
+      .maybeSingle();
+    if (existing?.id) {
+      businessId = existing.id as string;
+      const { error } = await supabaseAdmin.from("kg_businesses").update(row).eq("id", businessId);
+      if (error) throw new Error(`Save failed: ${error.message}`);
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from("kg_businesses")
+        .insert(row)
+        .select("id")
+        .single();
+      if (error) throw new Error(`Save failed: ${error.message}`);
+      businessId = data.id as string;
+    }
   }
 
   await supabaseAdmin.from("business_facts").upsert(
