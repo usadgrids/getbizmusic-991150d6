@@ -144,16 +144,24 @@ function Index() {
         </span>
       </div>
 
-      {/* Hero header image */}
+      {/* Hero header image — optimized 1400px webp/jpg (was a 2.2 MB PNG) */}
       <header className="relative w-full max-w-full min-w-0 overflow-hidden">
         <div className="mx-auto w-full max-w-[1400px] px-2 sm:px-4">
-          <img
-            src={homeHero.url}
-            alt="Is your San Diego County business visible on ChatGPT and other AI search engines? GetBizMusic.com"
-            className="block w-full h-auto rounded-xl"
-          />
+          <picture>
+            <source srcSet="/img/home-hero.webp" type="image/webp" />
+            <img
+              src="/img/home-hero.jpg"
+              width={1400}
+              height={738}
+              fetchPriority="high"
+              decoding="async"
+              alt="Is your San Diego County business visible on ChatGPT and other AI search engines? GetBizMusic.com"
+              className="block w-full h-auto rounded-xl"
+            />
+          </picture>
         </div>
       </header>
+
 
       {/* Centerpiece: the Find & Claim Your Business panel */}
       <main className="relative mx-auto flex w-full max-w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12 sm:py-16">
