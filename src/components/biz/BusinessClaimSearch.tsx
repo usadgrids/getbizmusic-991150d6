@@ -355,7 +355,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           onClick={() => setTermsOpen(true)}
           className="inline-flex items-center rounded-full bg-[#0F2A4A] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#D4A24C] ring-1 ring-[#D4A24C]/60 shadow-sm hover:bg-[#163864] hover:text-white"
         >
-          Terms & Conditions Apply
+          TERMS & CONDITIONS APPLY
         </button>
       </p>
 
