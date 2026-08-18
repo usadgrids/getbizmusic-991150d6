@@ -326,6 +326,30 @@ function toOpeningHoursSpec(value: string): string | null {
   return `${to24(m[1]!, m[2], m[3]!)}-${to24(m[4]!, m[5], m[6]!)}`;
 }
 
+/**
+ * schema.org priceRange expects a compact band ("$$", "$100-$300"), not prose.
+ * Free-text pricing signals are mapped when unambiguous, otherwise dropped.
+ */
+export function toPriceRange(signals: string | null | undefined): string | null {
+  if (!signals) return null;
+  const s = signals.trim();
+  // Already a valid band: $, $$, $$$, $$$$
+  const band = s.match(/^\${1,4}$/);
+  if (band) return s;
+  // Explicit numeric range, e.g. "$100 - $300" or "100-300 USD"
+  const range = s.match(/\$?\s*(\d[\d,]*)\s*(?:-|–|to)\s*\$?\s*(\d[\d,]*)/i);
+  if (range) return `$${range[1]!.replace(/,/g, "")}-$${range[2]!.replace(/,/g, "")}`;
+  // Single anchor price, e.g. "starting at $89" / "$89 service call"
+  const single = s.match(/\$\s*(\d[\d,]*)/);
+  if (single) return `$${single[1]!.replace(/,/g, "")}`;
+  // Qualitative wording -> band
+  const l = s.toLowerCase();
+  if (/\b(luxury|high[- ]end|premium|upscale)\b/.test(l)) return "$$$";
+  if (/\b(budget|affordable|cheap|low[- ]cost|value)\b/.test(l)) return "$";
+  if (/\b(moderate|mid[- ]range|competitive|reasonable)\b/.test(l)) return "$$";
+  return null;
+}
+
 export type SchemaResult = {
   localBusiness: Json | null;
   faqPage: Json | null;
