@@ -23,10 +23,13 @@ const ALL_INDUSTRIES = DIRECTORY_CATEGORY_SLUGS.flatMap((s) => DIRECTORY_CATEGOR
 function AdTileBackground() {
   const fetchAds = useServerFn(getAdsByCategory);
   const { data: ads = [] } = useQuery({
-    queryKey: ["home-tile-ads"],
-    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "home-tiles" } }),
+    // Same key/args as <AdMarquee /> so the homepage makes ONE ads request
+    // instead of two competing round-trips on first paint.
+    queryKey: ["admarquee-ads"],
+    queryFn: () => fetchAds({ data: { industries: ALL_INDUSTRIES, seed_key: "admarquee" } }),
     staleTime: 5 * 60 * 1000,
   });
+
 
   // Build the mosaic once per ad payload (memoised) — recomputing the shuffle
   // on every render forced all tiles to remount and made the page feel slow.
