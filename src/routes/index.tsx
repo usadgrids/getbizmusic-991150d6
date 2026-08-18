@@ -52,13 +52,14 @@ function AdTileBackground() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    // 18 tiles is enough to fill the panel backdrop while keeping image
+    // 12 decorative tiles is plenty for the backdrop and keeps image
     // decoding cheap; no two horizontally-adjacent tiles repeat.
     const imgUrl = (ad: (typeof pooled)[number]) => ad.image_url ?? ad.id;
     const out: (typeof pooled)[number][] = [];
     let lastUrl: string | null = null;
     let pool = [...shuffled];
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 12; i++) {
+
       let idx = pool.findIndex((a) => imgUrl(a) !== lastUrl);
       if (idx === -1) idx = 0;
       const ad = pool[idx];
