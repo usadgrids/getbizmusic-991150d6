@@ -716,13 +716,25 @@ export async function runKnowledgeScan(opts: {
     const { error } = await supabaseAdmin.from("kg_businesses").update(row).eq("id", businessId);
     if (error) throw new Error(`Save failed: ${error.message}`);
   } else {
-    const { data, error } = await supabaseAdmin
+    // Re-scanning by name must update the existing record, not create a duplicate slug.
+    const { data: existing } = await supabaseAdmin
       .from("kg_businesses")
-      .insert(row)
       .select("id")
-      .single();
-    if (error) throw new Error(`Save failed: ${error.message}`);
-    businessId = data.id as string;
+      .eq("slug", row.slug)
+      .maybeSingle();
+    if (existing?.id) {
+      businessId = existing.id as string;
+      const { error } = await supabaseAdmin.from("kg_businesses").update(row).eq("id", businessId);
+      if (error) throw new Error(`Save failed: ${error.message}`);
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from("kg_businesses")
+        .insert(row)
+        .select("id")
+        .single();
+      if (error) throw new Error(`Save failed: ${error.message}`);
+      businessId = data.id as string;
+    }
   }
 
   await supabaseAdmin.from("business_facts").upsert(
