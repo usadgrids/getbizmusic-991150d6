@@ -346,7 +346,9 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
           Free AI Visibility Audit + Custom Sample Ad
         </span>
-        . 100% free.{" "}
+        . 100% free.
+      </p>
+      <div className="mt-1 flex justify-center">
         <button
           type="button"
           onClick={() => setTermsOpen(true)}
@@ -354,7 +356,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         >
           TERMS & CONDITIONS APPLY
         </button>
-      </p>
+      </div>
 
       {termsOpen && (
         <div
