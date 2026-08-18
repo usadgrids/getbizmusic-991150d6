@@ -94,7 +94,7 @@ function AdTileBackground() {
 
 
 const OG_IMAGE_URL =
-  "https://www.getbizmusic.com/__l5e/assets-v1/4da96ba4-8a43-499e-9c4c-d8420f97bf0d/getbizmusic-og-2026.jpg";
+  "https://www.getbizmusic.com/__l5e/assets-v1/368ff5c4-24bc-42c9-8087-d1a31d1867a8/facebook_og_1200x630_highres.png";
 
 
 
@@ -118,7 +118,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: OG_IMAGE_URL },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:type", content: "image/png" },
       { property: "og:image:alt", content: "Make sure they can find you — 380,000+ San Diego County businesses. GetBizMusic.com AI Business Alliance" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE_URL },
