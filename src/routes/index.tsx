@@ -135,8 +135,8 @@ function Index() {
       {/* Brand anchor — visible, not a clickable nav item */}
       <div className="flex items-center justify-center gap-2 pt-6 pb-3 text-[#D4A24C]">
         <Building2 size={20} className="text-[#D4A24C]" aria-hidden />
-        <span className="font-['Sora'] text-sm font-bold tracking-[0.25em] uppercase">
-          Get Biz Music
+        <span className="font-['Sora'] text-sm font-bold tracking-[0.2em] uppercase">
+          Get Biz Music — AI Business Alliance
         </span>
       </div>
 
