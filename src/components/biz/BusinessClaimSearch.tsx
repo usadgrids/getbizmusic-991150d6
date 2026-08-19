@@ -424,7 +424,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             maxLength={5}
             required
             onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
-            placeholder="92101"
+            placeholder="92101 ( San Diego County, CA only )"
           />
         </div>
         <div>
