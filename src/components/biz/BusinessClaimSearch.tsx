@@ -806,17 +806,32 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
           <div className="mt-4 rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-wide text-[#7a5410]">
-              What happens next
+              What Happens Next
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[#7a5410]">
-              We&rsquo;ll prepare your free AI Visibility Audit and/or ad design within 3–5 business
-              days. You&rsquo;ll get to review and approve your ad design completely free — no cost,
-              no obligation. Your AI Visibility Audit and professional ad design normally run{" "}
-              <span className="font-semibold text-gray-400 line-through">$149.95</span>{" "}
-              <span className="font-semibold text-[#0F2A4A]">— but as one of our by-invitation local
-              businesses, you get full AI Business Alliance Membership, including publishing and AI
-              Answer Engine optimization, for just $49.95/year.</span> Pricing subject to change
-              without notice.
+              View your audit results and ad design before you spend a dime.
+            </p>
+            <ul className="mt-2 space-y-2 text-sm leading-relaxed text-[#7a5410]">
+              <li>
+                <span className="font-bold text-[#0F2A4A]">Zero Risk Up Front:</span> We&rsquo;ll
+                build your AI Visibility Audit and custom Business Graphic Ad within 3–5 business
+                days. Review everything first—no money due today, and no pressure to buy.
+              </li>
+              <li>
+                <span className="font-bold text-[#0F2A4A]">Pay Only When Satisfied:</span> If you
+                love your audit and ad design and wish to activate your membership, pay $49.95 (or
+                choose to be billed later).
+              </li>
+              <li>
+                <span className="font-bold text-[#0F2A4A]">Unbeatable Value:</span> Get full AI
+                Answer Engine optimization and publishing (normally{" "}
+                <span className="font-semibold text-gray-400 line-through">$149.95</span>) for just{" "}
+                <span className="font-semibold text-[#0F2A4A]">$49.95/year</span>. No automatic
+                recurring subscriptions.
+              </li>
+            </ul>
+            <p className="mt-2 text-xs text-[#7a5410]/80">
+              Pricing subject to change without notice.
             </p>
           </div>
 
