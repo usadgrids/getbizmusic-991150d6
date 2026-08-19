@@ -74,6 +74,17 @@ export async function assertAdminUser(userId: string) {
 
 // ---------------- Step 1: Gather ----------------
 
+/**
+ * Bounding box covering San Diego County. Mirrors the rectangle used by the
+ * claim/search flow (places.server.ts) so the Gather step cannot pull in a
+ * same-named business from outside the county (e.g. a national chain's L.A.
+ * or Orange County location).
+ */
+const SD_COUNTY_BOUNDS = {
+  low: { latitude: 32.5121, longitude: -117.6062 },
+  high: { latitude: 33.5051, longitude: -116.0806 },
+};
+
 export async function fetchPlaceDetails(
   businessName: string,
   locality: string,
@@ -108,6 +119,8 @@ export async function fetchPlaceDetails(
     body: JSON.stringify({
       textQuery: `${businessName} ${locality}`.trim(),
       maxResultCount: 1,
+      // Hard geographic guard: only match places inside San Diego County.
+      locationRestriction: { rectangle: SD_COUNTY_BOUNDS },
     }),
   });
 
