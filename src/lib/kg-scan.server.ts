@@ -817,5 +817,7 @@ export async function runKnowledgeScan(opts: {
     score,
     sources: [...new Set(sources.map((s) => s.url))].slice(0, 12),
     needsManualValidation,
+    nameMatch,
+
   };
 }
