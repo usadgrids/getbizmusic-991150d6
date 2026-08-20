@@ -1,4 +1,6 @@
 import type { Json } from "@/integrations/supabase/types";
+import { compareBusinessNames, type NameMatch } from "@/lib/name-match";
+
 
 // Server-only AI Visibility Knowledge Graph pipeline.
 // 1 Gather (Google Places + Firecrawl) -> 2 Normalize (AI) -> 3 Schema (JSON-LD)
