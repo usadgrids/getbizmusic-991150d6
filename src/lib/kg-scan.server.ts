@@ -1,5 +1,5 @@
 import type { Json } from "@/integrations/supabase/types";
-import { compareBusinessNames, type NameMatch } from "@/lib/name-match";
+import { compareBusinessNames, NAME_MATCH_THRESHOLD, type NameMatch } from "@/lib/name-match";
 
 
 // Server-only AI Visibility Knowledge Graph pipeline.
