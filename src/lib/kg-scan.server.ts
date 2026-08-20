@@ -1,4 +1,6 @@
 import type { Json } from "@/integrations/supabase/types";
+import { compareBusinessNames, NAME_MATCH_THRESHOLD, type NameMatch } from "@/lib/name-match";
+
 
 // Server-only AI Visibility Knowledge Graph pipeline.
 // 1 Gather (Google Places + Firecrawl) -> 2 Normalize (AI) -> 3 Schema (JSON-LD)
@@ -644,7 +646,9 @@ export type ScanResult = {
   score: ScoreBreakdown;
   sources: string[];
   needsManualValidation: boolean;
+  nameMatch: NameMatch | null;
 };
+
 
 function slugify(s: string) {
   return s
@@ -699,7 +703,19 @@ export async function runKnowledgeScan(opts: {
   // 5 Score
   const score = computeScore({ facts, places, website, address, phone, schema, qa });
 
-  const needsManualValidation = !schema.localValid || !schema.faqValid || schema.notes.length > 0;
+  // Name-similarity guard: locationRestriction forces Google to return an
+  // in-county result, which can be a fuzzy substitute for an out-of-county
+  // business. Flag mismatches instead of silently accepting them.
+  const nameMatch = places?.name ? compareBusinessNames(opts.businessName, places.name) : null;
+  if (nameMatch && !nameMatch.matched) {
+    schema.notes.push(
+      `Name mismatch: searched "${nameMatch.searched}" but Places returned "${nameMatch.returned}" (similarity ${nameMatch.score}, threshold ${NAME_MATCH_THRESHOLD}). Verify this is the right business before publishing.`,
+    );
+  }
+
+  const needsManualValidation =
+    !schema.localValid || !schema.faqValid || schema.notes.length > 0 || (nameMatch ? !nameMatch.matched : false);
+
 
   // 6 Publish (saved as draft for admin review)
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -801,5 +817,7 @@ export async function runKnowledgeScan(opts: {
     score,
     sources: [...new Set(sources.map((s) => s.url))].slice(0, 12),
     needsManualValidation,
+    nameMatch,
+
   };
 }
