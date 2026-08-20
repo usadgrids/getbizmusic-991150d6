@@ -644,7 +644,9 @@ export type ScanResult = {
   score: ScoreBreakdown;
   sources: string[];
   needsManualValidation: boolean;
+  nameMatch: NameMatch | null;
 };
+
 
 function slugify(s: string) {
   return s
