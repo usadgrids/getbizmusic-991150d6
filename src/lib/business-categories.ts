@@ -102,6 +102,7 @@ export const UNIVERSAL_CATEGORY_GROUPS: UniversalCategoryGroup[] = [
       { value: "grocery_convenience", label: "Grocery & Convenience Stores" },
       { value: "furniture_home_goods", label: "Furniture & Home Goods" },
       { value: "electronics_stores", label: "Electronics Stores" },
+      { value: "water_refilling_stations", label: "Water Refilling Stations" },
     ],
   },
   {
