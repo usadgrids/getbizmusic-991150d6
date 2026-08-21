@@ -188,8 +188,8 @@ function QuickPayPage() {
                     alt="Zelle QR code for WINALL MEDIA, LLC — 619-707-0467"
                     className="mx-auto mt-3 w-48 rounded-lg"
                   />
-                  <p className="mt-2 text-sm font-semibold">@RTPosadas</p>
-                  <p className="text-xs text-[#0F2A4A]/60">WINALL MEDIA, LLC · 619-707-0467</p>
+                  <p className="mt-3 font-[Sora] text-2xl font-extrabold text-[#6D28D9]">(619) 707-0467</p>
+                  <p className="mt-1 text-xs text-[#0F2A4A]/60">WINALL MEDIA, LLC · @RTPosadas</p>
                 </div>
                 <div className="rounded-2xl border border-[#D4A24C]/30 bg-white p-5 text-center text-[#0F2A4A]">
                   <h2 className="font-[Sora] text-lg font-bold">Venmo</h2>
