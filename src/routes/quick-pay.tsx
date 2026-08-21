@@ -241,3 +241,25 @@ function Field({
     </label>
   );
 }
+
+function CardLogos() {
+  const cards = [
+    { label: "VISA", bg: "#1A1F71", fg: "#ffffff", accent: "#F7B600" },
+    { label: "MC", bg: "#EB001B", fg: "#ffffff", accent: "#F79E1B" },
+    { label: "AMEX", bg: "#1F72CD", fg: "#ffffff", accent: "#00A0DF" },
+    { label: "DISC", bg: "#000000", fg: "#ffffff", accent: "#FF6000" },
+  ];
+  return (
+    <div className="flex items-center gap-2">
+      {cards.map((c) => (
+        <span
+          key={c.label}
+          className="inline-flex h-6 items-center rounded-md px-2 font-[Sora] text-[10px] font-extrabold tracking-[0.08em]"
+          style={{ backgroundColor: c.bg, color: c.fg, boxShadow: `inset 0 0 0 1px ${c.accent}55` }}
+        >
+          {c.label}
+        </span>
+      ))}
+    </div>
+  );
+}
