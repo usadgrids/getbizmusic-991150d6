@@ -197,8 +197,8 @@ function QuickPayPage() {
                   <div className="mx-auto mt-3 w-48 rounded-lg bg-white p-2">
                     <QRCodeSVG value="https://venmo.com/u/RTPosadas" size={176} level="M" />
                   </div>
-                  <p className="mt-2 text-sm font-semibold">@RTPosadas</p>
-                  <p className="text-xs text-[#0F2A4A]/60">Scan or search @RTPosadas in Venmo</p>
+                  <p className="mt-3 font-[Sora] text-2xl font-extrabold text-[#1D4ED8]">@RTPosadas</p>
+                  <p className="mt-1 text-xs text-[#0F2A4A]/60">Scan or search @RTPosadas in Venmo</p>
                 </div>
               </div>
               <p className="mt-4 text-center text-xs text-white/60">
