@@ -165,6 +165,10 @@ function QuickPayPage() {
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
                 Pay Now {AMOUNT_LABEL}
               </button>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#0F2A4A]/60">We accept</span>
+                <CardLogos />
+              </div>
               <p className="mt-3 flex items-center justify-center gap-2 text-center text-xs text-[#0F2A4A]/60">
                 <ShieldCheck size={14} /> Secure card payment. One-time charge — no subscription.
               </p>
