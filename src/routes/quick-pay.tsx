@@ -165,6 +165,10 @@ function QuickPayPage() {
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
                 Pay Now {AMOUNT_LABEL}
               </button>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#0F2A4A]/60">We accept</span>
+                <CardLogos />
+              </div>
               <p className="mt-3 flex items-center justify-center gap-2 text-center text-xs text-[#0F2A4A]/60">
                 <ShieldCheck size={14} /> Secure card payment. One-time charge — no subscription.
               </p>
@@ -184,8 +188,8 @@ function QuickPayPage() {
                     alt="Zelle QR code for WINALL MEDIA, LLC — 619-707-0467"
                     className="mx-auto mt-3 w-48 rounded-lg"
                   />
-                  <p className="mt-2 text-sm font-semibold">@RTPosadas</p>
-                  <p className="text-xs text-[#0F2A4A]/60">WINALL MEDIA, LLC · 619-707-0467</p>
+                  <p className="mt-3 font-[Sora] text-2xl font-extrabold text-[#6D28D9]">(619) 707-0467</p>
+                  <p className="mt-1 text-xs text-[#0F2A4A]/60">WINALL MEDIA, LLC · @RTPosadas</p>
                 </div>
                 <div className="rounded-2xl border border-[#D4A24C]/30 bg-white p-5 text-center text-[#0F2A4A]">
                   <h2 className="font-[Sora] text-lg font-bold">Venmo</h2>
@@ -193,8 +197,8 @@ function QuickPayPage() {
                   <div className="mx-auto mt-3 w-48 rounded-lg bg-white p-2">
                     <QRCodeSVG value="https://venmo.com/u/RTPosadas" size={176} level="M" />
                   </div>
-                  <p className="mt-2 text-sm font-semibold">@RTPosadas</p>
-                  <p className="text-xs text-[#0F2A4A]/60">Scan or search @RTPosadas in Venmo</p>
+                  <p className="mt-3 font-[Sora] text-2xl font-extrabold text-[#1D4ED8]">@RTPosadas</p>
+                  <p className="mt-1 text-xs text-[#0F2A4A]/60">Scan or search @RTPosadas in Venmo</p>
                 </div>
               </div>
               <p className="mt-4 text-center text-xs text-white/60">
@@ -235,5 +239,27 @@ function Field({
         className="w-full rounded-xl border border-[#0F2A4A]/25 bg-[#F4F7FB] px-4 py-3 text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/35 focus:border-[#D4A24C] focus:ring-2 focus:ring-[#D4A24C]/40"
       />
     </label>
+  );
+}
+
+function CardLogos() {
+  const cards = [
+    { label: "VISA", bg: "#1A1F71", fg: "#ffffff", accent: "#F7B600" },
+    { label: "MC", bg: "#EB001B", fg: "#ffffff", accent: "#F79E1B" },
+    { label: "AMEX", bg: "#1F72CD", fg: "#ffffff", accent: "#00A0DF" },
+    { label: "DISC", bg: "#000000", fg: "#ffffff", accent: "#FF6000" },
+  ];
+  return (
+    <div className="flex items-center gap-2">
+      {cards.map((c) => (
+        <span
+          key={c.label}
+          className="inline-flex h-6 items-center rounded-md px-2 font-[Sora] text-[10px] font-extrabold tracking-[0.08em]"
+          style={{ backgroundColor: c.bg, color: c.fg, boxShadow: `inset 0 0 0 1px ${c.accent}55` }}
+        >
+          {c.label}
+        </span>
+      ))}
+    </div>
   );
 }
