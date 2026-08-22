@@ -133,7 +133,7 @@ function QuickPayPage() {
               to="/"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 font-semibold text-[#0F2A4A]"
             >
-              Back to Home
+              <Music size={18} /> Visit Our Advertiser Supported Music Streaming Page
             </Link>
           </div>
         ) : clientSecret ? (
