@@ -101,7 +101,7 @@ export const sendQuickPayReceipt = createServerFn({ method: "POST" })
           ownerName: md["owner_name"] || undefined,
           businessName: md["business_name"] || undefined,
           amountFormatted: `$${((session.amount_total ?? QUICK_PAY_CENTS) / 100).toFixed(2)}`,
-          orderNumber: session.id,
+          orderNumber: `GBM-${session.id.replace(/[^a-zA-Z0-9]/g, "").slice(-8).toUpperCase()}`,
           paymentDate:
             now.toLocaleString("en-US", {
               dateStyle: "long",
