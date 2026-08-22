@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { QRCodeSVG } from "qrcode.react";
 import { ArrowLeft, CheckCircle2, CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createQuickPayCheckout } from "@/lib/quickpay.functions";
+import { createQuickPayCheckout, sendQuickPayReceipt } from "@/lib/quickpay.functions";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { BizFooter } from "@/components/biz/BizFooter";
 import homeHero from "@/assets/SD-Business-3.png.asset.json";
@@ -14,6 +14,10 @@ import zelleQr from "@/assets/zelle-qr.jpeg.asset.json";
 
 const searchSchema = z.object({
   session_id: z.string().trim().max(200).optional(),
+  business: z.string().trim().max(160).optional(),
+  owner: z.string().trim().max(160).optional(),
+  email: z.string().trim().max(255).optional(),
+  phone: z.string().trim().max(32).optional(),
 });
 
 export const Route = createFileRoute("/quick-pay")({
@@ -41,13 +45,29 @@ export const Route = createFileRoute("/quick-pay")({
 const AMOUNT_LABEL = "$49.95";
 
 function QuickPayPage() {
-  const { session_id: sessionId } = Route.useSearch();
-  const [businessName, setBusinessName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const {
+    session_id: sessionId,
+    business,
+    owner,
+    email: emailParam,
+    phone: phoneParam,
+  } = Route.useSearch();
+  const [businessName, setBusinessName] = useState(business ?? "");
+  const [ownerName, setOwnerName] = useState(owner ?? "");
+  const [email, setEmail] = useState(emailParam ?? "");
+  const [phone, setPhone] = useState(phoneParam ?? "");
   const [loading, setLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  // Send the membership receipt once, when Stripe returns the visitor here.
+  const receiptSent = useRef(false);
+  useEffect(() => {
+    if (!sessionId || receiptSent.current) return;
+    receiptSent.current = true;
+    void sendQuickPayReceipt({
+      data: { sessionId, environment: getStripeEnvironment() },
+    }).catch(() => undefined);
+  }, [sessionId]);
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const canPay =
@@ -105,8 +125,9 @@ function QuickPayPage() {
             <CheckCircle2 className="mx-auto mb-3 text-[#D4A24C]" size={40} />
             <h1 className="font-[Sora] text-2xl font-bold">Payment received — thank you!</h1>
             <p className="mt-2 text-white/75">
-              Your GetBizMusic.com AI Business Alliance one-year membership is confirmed. A receipt was
-              emailed to you.
+              Your GetBizMusic.com AI Business Alliance one-year membership is confirmed. A receipt
+              has been emailed to you. Your advertisement / AI citation-ready listing will be ready
+              in 3–5 business days for your final approval.
             </p>
             <Link
               to="/"
