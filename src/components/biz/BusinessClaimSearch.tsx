@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
+import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
 import { classifyCode } from "@/lib/code-classify.functions";
 import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,6 +80,7 @@ const inputClass =
 export function BusinessClaimSearch({ category }: { category?: DirectoryCategory }) {
   const runSearch = useServerFn(searchBusinesses);
   const runClaim = useServerFn(submitBusinessClaim);
+  const navigate = useNavigate();
   const classifyFn = useServerFn(classifyCode);
 
 
@@ -126,6 +129,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [notes, setNotes] = useState("");
   const [wantsAiAudit, setWantsAiAudit] = useState(true);
   const [wantsAdDesign, setWantsAdDesign] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -224,6 +228,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       return toast.error("Enter your business address.");
     if (addressIsPrivate && !serviceAreaLabel)
       return toast.error("Choose the service area shown publicly.");
+    if (!termsAccepted)
+      return toast.error("Please accept the membership Terms & Conditions to continue.");
 
     setSubmitting(true);
     try {
@@ -261,7 +267,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         setLaunchMessage(null);
         setFoundingMember(Boolean(res.launchApplied));
       }
-      setDone(true);
+      // Pay-first flow: hand the visitor straight to checkout with their
+      // details pre-filled instead of showing a "we got your claim" screen.
+      void navigate({
+        to: "/quick-pay",
+        search: {
+          business: claimTarget.name || businessName.trim(),
+          owner: ownerName.trim(),
+          email: ownerEmail.trim(),
+          phone: ownerPhone.trim() || undefined,
+        },
+      });
     } catch {
       toast.error("Submission failed. Please try again.");
     } finally {
