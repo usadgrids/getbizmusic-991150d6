@@ -20,6 +20,7 @@ import { template as membershipPendingVerificationTemplate } from './membership-
 import { template as membershipPayLaterTemplate } from './membership-pay-later'
 import { template as payLaterCancelledTemplate } from './pay-later-cancelled'
 import { template as claimAuditCompleteTemplate } from './claim-audit-complete'
+import { template as quickpayReceiptTemplate } from './quickpay-receipt'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -55,4 +56,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'membership-pay-later': membershipPayLaterTemplate,
   'pay-later-cancelled': payLaterCancelledTemplate,
   'claim-audit-complete': claimAuditCompleteTemplate,
+  'quickpay-receipt': quickpayReceiptTemplate,
 }
