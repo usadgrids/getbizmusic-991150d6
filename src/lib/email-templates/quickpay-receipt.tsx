@@ -107,7 +107,7 @@ export const template = {
     ownerName: 'Ralph',
     businessName: 'Apex Auto Care',
     amountFormatted: '$49.95',
-    orderNumber: 'cs_test_a1b2c3',
+    orderNumber: 'GBM-7U9QQTFE',
     paymentDate: 'August 22, 2026 at 8:05 PM PT',
     membershipDue: 'August 22, 2027',
   },

@@ -83,24 +83,9 @@ export const submitBusinessClaim = createServerFn({ method: "POST" })
       return { ok: false as const, error: "We couldn't save your claim. Please try again." };
     }
 
-    try {
-      const { enqueueTransactionalEmailInternal } = await import("@/lib/email/enqueue.server");
-      await enqueueTransactionalEmailInternal({
-        templateName: "business-claim-confirmation",
-        recipientEmail: data.ownerEmail,
-        templateData: {
-          ownerName: data.ownerName,
-          businessName: data.tradeName || data.businessName,
-          legalBusinessName: data.businessName,
-          businessCategory: data.businessCategory,
-          address: data.address,
-          wantsAiAudit: data.wantsAiAudit,
-          wantsAdDesign: data.wantsAdDesign,
-        },
-      });
-    } catch (err) {
-      console.error("claim confirmation email failed", err);
-    }
+    // Claim confirmation email intentionally not sent — the checkout receipt covers it.
+
+
 
     return {
       ok: true as const,
