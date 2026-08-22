@@ -5,10 +5,10 @@ Replace the "review first, pay later" ending of the Find & Claim form on `/` wit
 ## What changes on the form
 
 1. Replace the "What Happens Next" gold box with a **Membership & Terms** box:
-   - $49.95 one-time annual membership — no recurring charges, no auto-renew.
-   - If you wish to renew, you'll get an email reminder 30 days before your annual expiration.
-   - **No refunds:** once your business is optimized and published to AI answer engines, the service has been rendered and cannot be un-optimized.
-   - Full AI Answer Engine optimization and publishing (normally $149.95) for $49.95/year. Pricing subject to change without notice.
+  - $49.95 one-time annual membership — no recurring charges, no auto-renew.
+  - If you wish to renew, you'll get an email reminder 30 days before your annual expiration.
+  - **No refunds:** once your business is optimized and published to AI answer engines, the service has been rendered and cannot be un-optimized.
+  - Full AI Answer Engine optimization and publishing (normally $149.95) for $49.95/year. Pricing subject to change without notice.
 2. Add a **required terms checkbox** using the existing shared checkout consent copy, with a link to the full Terms & Conditions page (`/terms/membership`) that opens in a new tab.
 3. Replace the "Submit My Claim" button with **PAY NOW $49.95** (gold, same styling). It stays disabled until the terms box is ticked.
 
@@ -27,4 +27,6 @@ The no-refund clause already exists in the shared membership terms; it will be r
 - `src/components/biz/BusinessClaimSearch.tsx`: new `termsAccepted` state, revised gold box, renamed button, and a `navigate({ to: "/quick-pay", search: {...} })` after a successful claim.
 - `src/routes/quick-pay.tsx`: extend `searchSchema` with optional `business`, `owner`, `email`, `phone`; seed the four `useState` initial values from those params so the form arrives pre-filled and the Pay Now button is immediately enabled.
 - `src/lib/membership-terms.ts`: adjust the no-refund clause wording (service rendered / cannot be un-optimized).
-- Reuse `MEMBERSHIP_CHECKBOX_TEXT` for the consent label rather than writing new copy.
+- Reuse `MEMBERSHIP_CHECKBOX_TEXT` for the consent label rather than writing new copy.  
+  
+Send email receipt of order and let them know their ADVERTISEMENT/AI CITATION-READY will be ready in 3-5 days for their final approval. In the meantime view our ADVERTISER Supported Music Streaming Website at https://www.getbizmusic.com/sdcounty
