@@ -13,7 +13,7 @@ export const MEMBERSHIP_TERMS: { heading: string; body: string }[] = [
   },
   {
     heading: "No-refund policy.",
-    body: "All AI Business Alliance Membership fees are non-refundable once payment is processed. Optimization work begins immediately upon payment: once your business information has been structured, schema-marked, and published to AI answer engines, the service has been rendered and cannot be un-optimized or reversed. This applies including in cases where a member chooses to cancel before their membership term ends, does not use the services provided, or is dissatisfied with results. This policy is disclosed here, prior to purchase, in accordance with California Civil Code Section 1723, which requires sellers with a no-refund policy to conspicuously display that policy before a purchase is completed.",
+    body: "All AI Business Alliance Membership fees are non-refundable once payment is processed. Optimization work begins immediately upon payment: once your business information has been structured, schema-marked, and published to AI answer engines, the service has been rendered and cannot be un-optimized or reversed. This applies in cases where a member chooses to cancel before their membership term ends, does not use the services provided, or is dissatisfied with results. This policy is disclosed here, prior to purchase, in accordance with California Civil Code Section 1723, which requires sellers with a no-refund policy to conspicuously display that policy before a purchase is completed.",
   },
   {
     heading: "Membership term & renewal.",
