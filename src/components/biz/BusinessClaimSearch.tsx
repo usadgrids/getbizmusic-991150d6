@@ -806,28 +806,27 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
           <div className="mt-4 rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-wide text-[#7a5410]">
-              What Happens Next
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-[#7a5410]">
-              View your audit results and ad design before you spend a dime.
+              Membership &amp; Terms
             </p>
             <ul className="mt-2 space-y-2 text-sm leading-relaxed text-[#7a5410]">
               <li>
-                <span className="font-bold text-[#0F2A4A]">Zero Risk Up Front:</span> We&rsquo;ll
-                build your AI Visibility Audit and custom Business Graphic Ad within 3–5 business
-                days. Review everything first—no money due today, and no pressure to buy.
+                <span className="font-bold text-[#0F2A4A]">$49.95 — One Time Annual:</span> No
+                recurring charges and no subscription. Your membership does not auto-renew.
               </li>
               <li>
-                <span className="font-bold text-[#0F2A4A]">Pay Only When Satisfied:</span> If you
-                love your audit and ad design and wish to activate your membership, pay $49.95 (or
-                choose to be billed later).
+                <span className="font-bold text-[#0F2A4A]">Manual Renewal:</span> If you wish to
+                renew, you&rsquo;ll receive an email reminder 30 days before your annual expiration.
               </li>
               <li>
-                <span className="font-bold text-[#0F2A4A]">Unbeatable Value:</span> Get full AI
-                Answer Engine optimization and publishing (normally{" "}
+                <span className="font-bold text-[#0F2A4A]">No Refunds:</span> Once we optimize and
+                publish your business to AI answer engines, the service has been rendered and cannot
+                be un-optimized — all fees are non-refundable.
+              </li>
+              <li>
+                <span className="font-bold text-[#0F2A4A]">Unbeatable Value:</span> Full AI Answer
+                Engine optimization and publishing (normally{" "}
                 <span className="font-semibold text-gray-400 line-through">$149.95</span>) for just{" "}
-                <span className="font-semibold text-[#0F2A4A]">$49.95/year</span>. No automatic
-                recurring subscriptions.
+                <span className="font-semibold text-[#0F2A4A]">$49.95/year</span>.
               </li>
             </ul>
             <p className="mt-2 text-xs text-[#7a5410]/80">
@@ -835,14 +834,35 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </p>
           </div>
 
+          <label className="mt-4 flex items-start gap-2 text-sm text-[#0F2A4A]">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+            />
+            <span>
+              {MEMBERSHIP_CHECKBOX_TEXT}{" "}
+              <a
+                href="/terms/membership"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline decoration-[#D4A24C] decoration-2 underline-offset-2"
+              >
+                (Full Terms &amp; Conditions)
+              </a>
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={submitting}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold text-[#0F2A4A] transition hover:bg-[#e0b566] disabled:opacity-60"
+            disabled={submitting || !termsAccepted}
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold uppercase tracking-wide text-[#0F2A4A] transition hover:bg-[#e0b566] disabled:opacity-60"
           >
             {submitting && <Loader2 className="animate-spin" size={16} />}
-            Submit My Claim
+            Pay Now $49.95
           </button>
+
         </form>
       )}
     </section>
