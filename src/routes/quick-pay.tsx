@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { QRCodeSVG } from "qrcode.react";
-import { ArrowLeft, CheckCircle2, CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CreditCard, Loader2, Music, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createQuickPayCheckout, sendQuickPayReceipt } from "@/lib/quickpay.functions";
