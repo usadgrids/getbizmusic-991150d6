@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { QRCodeSVG } from "qrcode.react";
-import { ArrowLeft, CheckCircle2, CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, CreditCard, Loader2, Music, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createQuickPayCheckout, sendQuickPayReceipt } from "@/lib/quickpay.functions";
@@ -133,7 +133,7 @@ function QuickPayPage() {
               to="/"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 font-semibold text-[#0F2A4A]"
             >
-              Back to Home
+              <Music size={18} /> Visit Our Advertiser Supported Music Streaming Page
             </Link>
           </div>
         ) : clientSecret ? (
