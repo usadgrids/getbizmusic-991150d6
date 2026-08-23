@@ -104,6 +104,10 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [results, setResults] = useState<PlaceResult[] | null>(null);
+  // Results dialog + the inline "enter it manually" panel inside it.
+  const [modalOpen, setModalOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+
   // Once a search has been submitted, disable the marquee hover overlay so it
   // stops bothering users who are already reviewing results.
   const [searched, setSearched] = useState(false);
