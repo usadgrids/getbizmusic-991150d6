@@ -69,6 +69,11 @@ function QuickPayPage() {
     }).catch(() => undefined);
   }, [sessionId]);
 
+  // Arriving from the home intake form with everything filled in — go straight
+  // to card checkout instead of making the visitor re-confirm the same details.
+  const autoStarted = useRef(false);
+
+
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
   const canPay =
     businessName.trim().length > 0 &&
