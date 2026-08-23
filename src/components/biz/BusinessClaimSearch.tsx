@@ -154,10 +154,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
-  // Seeded after mount so SSR and client markup match (Math.random differs).
-  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
-  useEffect(() => setCaptcha(newCaptcha()), []);
-  const [captchaInput, setCaptchaInput] = useState("");
   const [launchCode, setLaunchCode] = useState("");
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
   const [foundingMember, setFoundingMember] = useState(false);
@@ -175,35 +171,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
   const [claimTarget, setClaimTarget] = useState<PlaceResult | null>(null);
   // When true, the claim form was reached via "add yours" (no matching Place),
-  // so the address field is editable and pre-filled only with the business name.
+  // so the business name field is editable.
   const [manualClaim, setManualClaim] = useState(false);
-  // Gate: the "what you get" step shows before the full claim fields.
-  const [benefitsAcked, setBenefitsAcked] = useState(false);
-  // Public-facing DBA name; optional. When set it is what visitors see.
-  const [tradeName, setTradeName] = useState("");
   const [businessType, setBusinessType] = useState<BusinessType>("physical");
   const addressIsPrivate = businessType !== "physical";
-  const [serviceAreaChoice, setServiceAreaChoice] = useState("Serves San Diego County");
-  const [serviceAreaCustom, setServiceAreaCustom] = useState("");
-  const serviceAreaLabel = !addressIsPrivate
-    ? null
-    : serviceAreaChoice === "city"
-      ? serviceAreaCustom.trim()
-        ? `Serves ${serviceAreaCustom.trim()}`
-        : ""
-      : serviceAreaChoice === "custom"
-        ? serviceAreaCustom.trim()
-        : serviceAreaChoice;
+  const serviceAreaLabel = addressIsPrivate ? "Serves San Diego County" : null;
 
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
-  const [notes, setNotes] = useState("");
-  const [wantsAiAudit, setWantsAiAudit] = useState(true);
-  const [wantsAdDesign, setWantsAdDesign] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done] = useState(false);
+
 
   // Legal Business Name input — auto-focused after a user views a sample ad so
   // they drop straight into the claim flow with a "Start Here" cue.
