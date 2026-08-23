@@ -213,10 +213,21 @@ function Index() {
                 <button
                   type="button"
                   onClick={() => setShowActivation(true)}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-[#D4A24C]"
+                  className="mx-auto flex w-full max-w-2xl flex-col items-center gap-2 rounded-2xl border-2 border-[#D4A24C] bg-gradient-to-br from-[#0F2A4A] via-[#153a66] to-[#0F2A4A] px-6 py-6 text-center shadow-lg transition hover:scale-[1.02] hover:border-[#F4C430] sm:px-10 sm:py-8"
                 >
-                  <Unlock size={14} aria-hidden />
-                  Already received an ADVERTISEMENT Proposal? Enter your ACTIVATION CODE here.
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#D4A24C]/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#F4C430]">
+                    <Unlock size={14} aria-hidden />
+                    Activate Your Ad
+                  </span>
+                  <span className="text-lg font-bold text-white sm:text-2xl">
+                    Already received an ADVERTISEMENT Proposal?
+                  </span>
+                  <span className="text-sm text-white/80 sm:text-base">
+                    Enter your ACTIVATION CODE here to preview your ready-made ad.
+                  </span>
+                  <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-[#0F2A4A]">
+                    Enter Activation Code
+                  </span>
                 </button>
               ) : (
                 <div className="[&>section]:mt-0">
