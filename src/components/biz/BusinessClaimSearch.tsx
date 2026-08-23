@@ -429,7 +429,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         Free · Takes 10 seconds
       </p>
       <h2 className="mt-1.5 text-center text-[19px] font-bold leading-snug text-[#0F2A4A] sm:text-[22px]">
-        This search is completely free — takes 10 seconds, no card required. If your business is listed, you&rsquo;ll see the membership benefits available to you.
+        This search is completely free — takes 10 seconds, no card required. If your business is found, you&rsquo;ll see the membership benefits available to you.
       </h2>
 
       <div className="mt-4 flex justify-center">
