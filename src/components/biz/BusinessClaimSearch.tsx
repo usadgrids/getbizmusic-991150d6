@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
@@ -67,12 +67,6 @@ type PlaceResult = {
   postalCode?: string;
 };
 
-
-function newCaptcha() {
-  const a = 1 + Math.floor(Math.random() * 8);
-  const b = 1 + Math.floor(Math.random() * 8);
-  return { a, b };
-}
 
 const BENEFITS = [
   {
@@ -154,10 +148,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
-  // Seeded after mount so SSR and client markup match (Math.random differs).
-  const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
-  useEffect(() => setCaptcha(newCaptcha()), []);
-  const [captchaInput, setCaptchaInput] = useState("");
   const [launchCode, setLaunchCode] = useState("");
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
   const [foundingMember, setFoundingMember] = useState(false);
@@ -175,35 +165,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
   const [claimTarget, setClaimTarget] = useState<PlaceResult | null>(null);
   // When true, the claim form was reached via "add yours" (no matching Place),
-  // so the address field is editable and pre-filled only with the business name.
+  // so the business name field is editable.
   const [manualClaim, setManualClaim] = useState(false);
-  // Gate: the "what you get" step shows before the full claim fields.
-  const [benefitsAcked, setBenefitsAcked] = useState(false);
-  // Public-facing DBA name; optional. When set it is what visitors see.
-  const [tradeName, setTradeName] = useState("");
   const [businessType, setBusinessType] = useState<BusinessType>("physical");
   const addressIsPrivate = businessType !== "physical";
-  const [serviceAreaChoice, setServiceAreaChoice] = useState("Serves San Diego County");
-  const [serviceAreaCustom, setServiceAreaCustom] = useState("");
-  const serviceAreaLabel = !addressIsPrivate
-    ? null
-    : serviceAreaChoice === "city"
-      ? serviceAreaCustom.trim()
-        ? `Serves ${serviceAreaCustom.trim()}`
-        : ""
-      : serviceAreaChoice === "custom"
-        ? serviceAreaCustom.trim()
-        : serviceAreaChoice;
+  const serviceAreaLabel = addressIsPrivate ? "Serves San Diego County" : null;
 
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
-  const [notes, setNotes] = useState("");
-  const [wantsAiAudit, setWantsAiAudit] = useState(true);
-  const [wantsAdDesign, setWantsAdDesign] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done] = useState(false);
+
 
   // Legal Business Name input — auto-focused after a user views a sample ad so
   // they drop straight into the claim flow with a "Start Here" cue.
@@ -228,14 +202,12 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       phone: undefined,
     });
     setManualClaim(true);
-    setBenefitsAcked(false);
     setModalOpen(false);
   }
 
   function pickResult(r: PlaceResult) {
     setClaimTarget(r);
     setManualClaim(false);
-    setBenefitsAcked(false);
     setSelectedCategory(categoryFromGoogleTypes(r.types));
     if (r.postalCode) setZip(r.postalCode);
     setModalOpen(false);
@@ -244,7 +216,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   function searchAgain() {
     setClaimTarget(null);
     setManualClaim(false);
-    setBenefitsAcked(false);
     setResults(null);
     setModalOpen(true);
   }
@@ -261,7 +232,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
-    setBenefitsAcked(false);
     try {
       const res = await runSearch({ data: { businessName: businessName.trim() } });
       if (!res.served) {
@@ -286,23 +256,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail.trim())) return toast.error("Enter a valid email.");
     if (claimTarget.address.trim().length < 5)
       return toast.error("Enter your business address.");
-    if (addressIsPrivate && !serviceAreaLabel)
-      return toast.error("Choose the service area shown publicly.");
-    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
-    try {
-      const kind = await classifyFn({ data: { code: launchCode.trim() } });
-      if (kind.kind === "activation") {
-        return toast.error(
-          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
-        );
+    if (ownerPhone.trim().length < 7)
+      return toast.error("Enter your business cell phone number.");
+    if (launchCode.trim().length >= 2) {
+      try {
+        const kind = await classifyFn({ data: { code: launchCode.trim() } });
+        if (kind.kind === "activation") {
+          return toast.error(
+            "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
+          );
+        }
+      } catch {
+        /* classification is advisory only */
       }
-    } catch {
-      /* classification is advisory only */
-    }
-    if (Number(captchaInput) !== captcha.a + captcha.b) {
-      setCaptcha(newCaptcha());
-      setCaptchaInput("");
-      return toast.error("Captcha answer was incorrect.");
     }
     if (!termsAccepted)
       return toast.error("Please accept the membership Terms & Conditions to continue.");
@@ -313,7 +279,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       const res = await runClaim({
         data: {
           businessName: claimTarget.name || businessName.trim(),
-          tradeName: tradeName.trim() || undefined,
           businessCategory: selectedCategory,
           address: claimTarget.address.trim(),
           businessType,
@@ -326,9 +291,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           ownerName: ownerName.trim(),
           ownerEmail: ownerEmail.trim(),
           ownerPhone: ownerPhone.trim() || undefined,
-          wantsAiAudit,
-          wantsAdDesign,
-          notes: notes.trim() || undefined,
+          wantsAiAudit: true,
+          wantsAdDesign: true,
           sourceCategoryPage: category ? `/${category}` : "/sdcounty",
           launchCode: launchCode.trim() || undefined,
         },
@@ -493,11 +457,11 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             aria-hidden
             className="gbm-sonar-ring gbm-sonar-ring-2 pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
           />
-          <div className="relative flex flex-col gap-2 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:flex-row sm:items-center">
+          <div className="relative flex h-[52px] items-center gap-1.5 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] pl-4 pr-1.5 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:pl-6 sm:pr-2">
             <input
               id="gbm-business-search"
               ref={businessNameRef}
-              className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
+              className="h-full w-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40 sm:text-base"
               value={businessName}
               maxLength={120}
               required
@@ -508,12 +472,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             <button
               type="submit"
               disabled={searching}
-              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:w-auto"
+              aria-label="Search"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#FF6B4A] px-4 text-[13px] font-bold uppercase tracking-[0.1em] text-white shadow-sm transition hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:h-11 sm:px-6 sm:text-sm"
             >
               {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-              Search
+              <span>Search</span>
             </button>
           </div>
+
         </div>
         <p className="mt-2 text-center text-xs text-gray-500">
           We&rsquo;ll check Google&rsquo;s business database for San Diego County matches.
@@ -707,7 +673,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
 
       {claimTarget && (
-        <div className="mt-6 border-t border-gray-200 pt-5">
+        <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
           {/* Selected-business confirmation card */}
           <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#1B7A8C]/25 bg-[#F2F9FA] px-4 py-3">
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1B7A8C] text-white">
@@ -730,129 +696,47 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </button>
           </div>
 
-          {/* "What you get" step */}
-          {!benefitsAcked && (
-            <div className="mt-6">
-              <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#1B7A8C]">
-                Here&rsquo;s what happens next
-              </p>
-              <h3 className="mt-1.5 text-center font-['Fraunces','Georgia',serif] text-[22px] font-bold leading-snug text-[#0F2A4A] sm:text-[26px]">
-                Complete your claim below to unlock:
-              </h3>
-              <p className="mx-auto mt-2 max-w-md text-center text-sm text-gray-600">
-                Everything included with your San Diego County AI Business Alliance membership.
-              </p>
-
-              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
-                {BENEFITS.map((b, i) => (
-                  <div
-                    key={b.title}
-                    className="gbm-fade-up rounded-2xl border p-3.5 transition hover:-translate-y-0.5 hover:shadow-md"
-                    style={{
-                      backgroundColor: b.bg,
-                      borderColor: `${b.color}33`,
-                      animationDelay: `${i * 70}ms`,
-                    }}
-                  >
-                    <span
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white"
-                      style={{ backgroundColor: b.color }}
-                    >
-                      <b.Icon size={16} aria-hidden />
-                    </span>
-                    <p className="mt-2.5 text-sm font-bold leading-snug text-[#0F2A4A]">{b.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#0F2A4A]/70">{b.body}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setBenefitsAcked(true)}
-                  className="inline-flex items-center justify-center rounded-full bg-[#0F2A4A] px-8 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
+          {/* What's included — inline, no extra click */}
+          <div className="mt-5 grid grid-cols-2 gap-2.5 lg:grid-cols-3">
+            {BENEFITS.map((b, i) => (
+              <div
+                key={b.title}
+                className="gbm-fade-up rounded-xl border p-3"
+                style={{
+                  backgroundColor: b.bg,
+                  borderColor: `${b.color}33`,
+                  animationDelay: `${i * 70}ms`,
+                }}
+              >
+                <span
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-white"
+                  style={{ backgroundColor: b.color }}
                 >
-                  Continue
-                </button>
-                <p className="mt-2 text-xs text-gray-500">
-                  Membership is $49.95/year · founding-member pricing with your Priority Access Code.
-                </p>
+                  <b.Icon size={14} aria-hidden />
+                </span>
+                <p className="mt-2 text-[13px] font-bold leading-snug text-[#0F2A4A]">{b.title}</p>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {claimTarget && benefitsAcked && (
-        <form onSubmit={onClaimSubmit} className="mt-5">
-          <h3 className="text-base font-bold text-[#0F2A4A]">
-            {manualClaim ? "Add your business" : "Claim this listing"}
-          </h3>
-
-
-
-
-
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Legal Business Name <span className="text-[#D4A24C]">*</span>
-              </label>
-              <input
-                className={inputClass}
-                value={claimTarget.name}
-                readOnly={!manualClaim}
-                maxLength={120}
-                required
-                onChange={
-                  manualClaim
-                    ? (e) => setClaimTarget({ ...claimTarget, name: e.target.value })
-                    : undefined
-                }
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Trade Name / DBA <span className="text-gray-400">(optional)</span>
-              </label>
-              <input
-                className={inputClass}
-                value={tradeName}
-                maxLength={120}
-                onChange={(e) => setTradeName(e.target.value)}
-                placeholder="e.g. Maria's Kitchen"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Only fill this in if you operate under a different name than your legal business
-                name. If provided, this is the name shown publicly on your listing.
-              </p>
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Business Type <span className="text-[#D4A24C]">*</span>
-              </label>
-              <div className="space-y-1.5 rounded-lg border border-gray-300 px-3 py-2">
-                {BUSINESS_TYPES.map((t) => (
-                  <label key={t.value} className="flex items-start gap-2 text-xs text-[#0F2A4A]">
-                    <input
-                      type="radio"
-                      className="mt-0.5"
-                      name="business-type"
-                      value={t.value}
-                      checked={businessType === t.value}
-                      onChange={() => setBusinessType(t.value)}
-                    />
-                    <span>{t.label}</span>
-                  </label>
-                ))}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {manualClaim && (
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
+                  Business Name <span className="text-[#D4A24C]">*</span>
+                </label>
+                <input
+                  className={inputClass}
+                  value={claimTarget.name}
+                  maxLength={120}
+                  required
+                  onChange={(e) => setClaimTarget({ ...claimTarget, name: e.target.value })}
+                />
               </div>
-            </div>
+            )}
             <div className="sm:col-span-2">
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                {addressIsPrivate
-                  ? "Business Address (Private — used for verification and billing only, never displayed publicly)"
-                  : "Business Address"}{" "}
-                <span className="text-[#D4A24C]">*</span>
+                Business Address <span className="text-[#D4A24C]">*</span>
               </label>
               <input
                 className={inputClass}
@@ -862,47 +746,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 placeholder="Street address, city, state, ZIP"
                 onChange={(e) => setClaimTarget({ ...claimTarget, address: e.target.value })}
               />
-              <p className="mt-1 text-xs text-gray-500">
-                {addressIsPrivate
-                  ? "Your address stays private. Your service area below is what shows publicly."
-                  : "This address will be displayed publicly on your listing."}
-              </p>
+              <label className="mt-2 flex items-start gap-2 text-xs text-[#0F2A4A]">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={addressIsPrivate}
+                  onChange={(e) => setBusinessType(e.target.checked ? "home_based" : "physical")}
+                />
+                <span>
+                  Home-based or mobile — keep my address private and show{" "}
+                  <strong>Serves San Diego County</strong> publicly.
+                </span>
+              </label>
             </div>
-            {addressIsPrivate && (
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                  Service Area (shown publicly) <span className="text-[#D4A24C]">*</span>
-                </label>
-                <select
-                  className={inputClass}
-                  value={serviceAreaChoice}
-                  onChange={(e) => setServiceAreaChoice(e.target.value)}
-                >
-                  <option value="city">Serves a specific city</option>
-                  <option value="Serves San Diego County">Serves San Diego County</option>
-                  <option value="Serves Southern California">Serves Southern California</option>
-                  <option value="Serves the entire State of California">
-                    Serves the entire State of California
-                  </option>
-                  <option value="custom">Custom</option>
-                </select>
-                {(serviceAreaChoice === "city" || serviceAreaChoice === "custom") && (
-                  <input
-                    className={`${inputClass} mt-2`}
-                    value={serviceAreaCustom}
-                    maxLength={120}
-                    required
-                    placeholder={
-                      serviceAreaChoice === "city"
-                        ? "City name (e.g. Chula Vista)"
-                        : "Describe your service area"
-                    }
-                    onChange={(e) => setServiceAreaCustom(e.target.value)}
-                  />
-                )}
-              </div>
-            )}
-
             <div className="sm:col-span-2">
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
                 Business Category <span className="text-[#D4A24C]">*</span>
@@ -915,19 +771,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             </div>
             <div>
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Your Name <span className="text-[#D4A24C]">*</span>
+                Business Owner Name <span className="text-[#D4A24C]">*</span>
               </label>
               <input
                 className={inputClass}
                 value={ownerName}
                 maxLength={120}
                 required
+                autoComplete="name"
                 onChange={(e) => setOwnerName(e.target.value)}
               />
             </div>
             <div>
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Your Email <span className="text-[#D4A24C]">*</span>
+                Business Email <span className="text-[#D4A24C]">*</span>
               </label>
               <input
                 className={inputClass}
@@ -935,27 +792,23 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 value={ownerEmail}
                 maxLength={255}
                 required
+                autoComplete="email"
                 onChange={(e) => setOwnerEmail(e.target.value)}
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">Your Phone (optional)</label>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
+                Business Cell Phone Number <span className="text-[#D4A24C]">*</span>
+              </label>
               <input
                 className={inputClass}
+                type="tel"
                 value={ownerPhone}
                 maxLength={40}
+                required
+                autoComplete="tel"
+                placeholder="(619) 555-0123"
                 onChange={(e) => setOwnerPhone(e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-                Anything we should know? (optional)
-              </label>
-              <textarea
-                className={`${inputClass} min-h-20`}
-                value={notes}
-                maxLength={1000}
-                onChange={(e) => setNotes(e.target.value)}
               />
             </div>
             <div>
@@ -963,7 +816,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 htmlFor="gbm-priority-code"
                 className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
               >
-                Priority Access Code <span className="text-[#D4A24C]">*</span>
+                Priority Access Code <span className="text-gray-400">(optional)</span>
               </label>
               <input
                 id="gbm-priority-code"
@@ -977,61 +830,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 <p className="mt-1 text-xs font-medium text-[#7a5410]">{launchMessage}</p>
               )}
             </div>
-            <div>
-              <label
-                htmlFor="gbm-captcha"
-                className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
-              >
-                Human check: what is {captcha.a} + {captcha.b}?{" "}
-                <span className="text-[#D4A24C]">*</span>
-              </label>
-              <input
-                id="gbm-captcha"
-                className={inputClass}
-                value={captchaInput}
-                inputMode="numeric"
-                maxLength={4}
-                onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
-              />
-            </div>
-          </div>
-
-
-          <div className="mt-4 space-y-3">
-            <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={wantsAiAudit}
-                onChange={(e) => setWantsAiAudit(e.target.checked)}
-              />
-              <span>
-                <span className="font-semibold">
-                  (Recommended) Get my FREE AI Visibility Audit Report for{" "}
-                  {claimTarget.name || businessName.trim() || "my business"}
-                </span>
-                <span className="mt-0.5 block text-xs text-gray-600">
-                  See exactly how AI answer engines currently see (or don&rsquo;t see) your business.
-                </span>
-              </span>
-            </label>
-            <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={wantsAdDesign}
-                onChange={(e) => setWantsAdDesign(e.target.checked)}
-              />
-              <span>
-                <span className="font-semibold">
-                  Get my FREE Professional Ad Design for{" "}
-                  {claimTarget.name || businessName.trim() || "my business"}
-                </span>
-                <span className="mt-0.5 block text-xs text-gray-600">
-                  A custom graphic ad, designed for you to preview and approve — no obligation.
-                </span>
-              </span>
-            </label>
           </div>
 
           <div className="mt-4 rounded-xl border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3">
@@ -1052,16 +850,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 publish your business to AI answer engines, the service has been rendered and cannot
                 be un-optimized — all fees are non-refundable.
               </li>
-              <li>
-                <span className="font-bold text-[#0F2A4A]">Unbeatable Value:</span> Full AI Answer
-                Engine optimization and publishing (normally{" "}
-                <span className="font-semibold text-gray-400 line-through">$149.95</span>) for just{" "}
-                <span className="font-semibold text-[#0F2A4A]">$49.95/year</span>.
-              </li>
             </ul>
-            <p className="mt-2 text-xs text-[#7a5410]/80">
-              Pricing subject to change without notice.
-            </p>
+            <p className="mt-2 text-xs text-[#7a5410]/80">Pricing subject to change without notice.</p>
           </div>
 
           <label className="mt-4 flex items-start gap-2 text-sm text-[#0F2A4A]">
@@ -1087,14 +877,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           <button
             type="submit"
             disabled={submitting || !termsAccepted}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3 text-sm font-bold uppercase tracking-wide text-[#0F2A4A] transition hover:bg-[#e0b566] disabled:opacity-60"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#0F2A4A] transition hover:bg-[#e0b566] disabled:opacity-60 sm:w-auto"
           >
             {submitting && <Loader2 className="animate-spin" size={16} />}
-            Pay Now $49.95
+            Continue to Payment — $49.95
           </button>
-
         </form>
       )}
+
     </section>
   );
 }
