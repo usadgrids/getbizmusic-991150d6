@@ -128,6 +128,65 @@ export const UNIVERSAL_CATEGORY_GROUPS: UniversalCategoryGroup[] = [
     ],
   },
   {
+    label: "Religious & Community Organizations",
+    options: [
+      { value: "churches", label: "Churches" },
+      { value: "ministries", label: "Ministries" },
+      { value: "para_church_orgs", label: "Para-Church Organizations" },
+      { value: "religious_services_org", label: "Religious Services" },
+      { value: "temples_synagogues_mosques", label: "Temples, Synagogues & Mosques" },
+      { value: "religious_schools", label: "Religious Schools" },
+      { value: "faith_based_nonprofits", label: "Faith-Based Nonprofits" },
+    ],
+  },
+  {
+    label: "Agriculture & Manufacturing",
+    options: [
+      { value: "farms_ranches", label: "Farms & Ranches" },
+      { value: "nurseries_garden_centers", label: "Nurseries & Garden Centers" },
+      { value: "agricultural_services", label: "Agricultural Services" },
+      { value: "manufacturers", label: "Manufacturers" },
+      { value: "wholesale_distributors", label: "Wholesale Distributors" },
+      { value: "import_export", label: "Import/Export" },
+    ],
+  },
+  {
+    label: "Transportation, Storage & Logistics",
+    options: [
+      { value: "trucking_freight", label: "Trucking & Freight" },
+      { value: "moving_services", label: "Moving Services" },
+      { value: "courier_delivery", label: "Courier & Delivery" },
+      { value: "self_storage", label: "Self-Storage Facilities" },
+      { value: "warehousing", label: "Warehousing" },
+    ],
+  },
+  {
+    label: "Care & Community Services",
+    options: [
+      { value: "daycare_preschools", label: "Daycare & Preschools" },
+      { value: "senior_care_assisted_living", label: "Senior Care & Assisted Living" },
+      { value: "in_home_care", label: "In-Home Care Services" },
+      { value: "funeral_memorial", label: "Funeral & Memorial Services" },
+    ],
+  },
+  {
+    label: "Other Local Services",
+    options: [
+      { value: "locksmiths", label: "Locksmiths" },
+      { value: "appliance_repair", label: "Appliance Repair" },
+      { value: "device_repair", label: "Computer & Device Repair" },
+      { value: "print_signage", label: "Print & Signage" },
+      { value: "security_services_local", label: "Security Services" },
+      { value: "solar_renewable", label: "Solar & Renewable Energy" },
+      { value: "travel_agencies", label: "Travel Agencies" },
+      { value: "rideshare_charter", label: "Rideshare & Charter Services" },
+      { value: "sporting_goods_recreation", label: "Sporting Goods & Recreation" },
+      { value: "veteran_services", label: "Veteran Services" },
+      { value: "government_contractors", label: "Government Contractors" },
+    ],
+  },
+  {
+
     label: "Business Type",
     options: [
       { value: "home_based_business", label: "Home-Based Business" },
