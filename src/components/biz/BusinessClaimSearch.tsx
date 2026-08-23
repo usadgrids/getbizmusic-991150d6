@@ -493,11 +493,11 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             aria-hidden
             className="gbm-sonar-ring gbm-sonar-ring-2 pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
           />
-          <div className="relative flex flex-col gap-2 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:flex-row sm:items-center">
+          <div className="relative flex h-[52px] items-center gap-1.5 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] pl-4 pr-1.5 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:pl-6 sm:pr-2">
             <input
               id="gbm-business-search"
               ref={businessNameRef}
-              className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
+              className="h-full w-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40 sm:text-base"
               value={businessName}
               maxLength={120}
               required
@@ -508,12 +508,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             <button
               type="submit"
               disabled={searching}
-              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:w-auto"
+              aria-label="Search"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#FF6B4A] px-4 text-[13px] font-bold uppercase tracking-[0.1em] text-white shadow-sm transition hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:h-11 sm:px-6 sm:text-sm"
             >
               {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-              Search
+              <span className="hidden xs:inline sm:inline">Search</span>
             </button>
           </div>
+
         </div>
         <p className="mt-2 text-center text-xs text-gray-500">
           We&rsquo;ll check Google&rsquo;s business database for San Diego County matches.
