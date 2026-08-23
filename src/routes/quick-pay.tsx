@@ -109,6 +109,15 @@ function QuickPayPage() {
     }
   };
 
+  useEffect(() => {
+    if (sessionId || autoStarted.current) return;
+    if (!business || !owner || !emailParam || !(phoneParam && phoneParam.trim().length >= 7)) return;
+    autoStarted.current = true;
+    void payNow();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, business, owner, emailParam, phoneParam]);
+
+
   return (
     <div className="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-[#0F2A4A] text-white">
       <PaymentTestModeBanner />
