@@ -3,7 +3,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
 import { classifyCode } from "@/lib/code-classify.functions";
-import { Loader2, Search, CheckCircle2, Building2 } from "lucide-react";
+import { Loader2, Search, CheckCircle2, Building2, X } from "lucide-react";
+import { categoryFromGoogleTypes, googleTypeBadge } from "@/lib/google-type-map";
+
 import { toast } from "sonner";
 import { searchBusinesses } from "@/lib/places.functions";
 import { submitBusinessClaim } from "@/lib/claims.functions";
