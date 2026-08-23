@@ -209,7 +209,7 @@ export function AdLandingView({
             </h2>
             <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
               Get your {ad.city_name ?? "local"} business featured in the rotation
-              above and reach local listeners for just $12/year. Limited-time intro
+              above and reach local listeners for just $49.95/year. Limited-time intro
               offer.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

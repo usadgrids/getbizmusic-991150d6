@@ -37,11 +37,11 @@ export const Route = createFileRoute("/$city/")({
     const city = loaderData?.city;
     const label = city ? `${city.name}, ${city.state}` : "";
     const title = city
-      ? `Get Biz Music - ${label} — $12/yr Intro Offer`
-      : "Get Biz Music — $12/yr Intro Offer";
+      ? `Get Biz Music - ${label} — $49.95/yr`
+      : "Get Biz Music — $49.95/yr";
     const description = city
-      ? `Advertise your ${label} business — restaurants, lawyers, salons, auto, and more. Limited-time intro: $12/year (about $1/month) for a full year of exposure.`
-      : "Local business advertising with music streaming — $12/year intro offer.";
+      ? `Advertise your ${label} business — restaurants, lawyers, salons, auto, and more. Limited-time intro: $49.95/year for a full year of exposure.`
+      : "Local business advertising with music streaming — $49.95/year.";
     return {
       meta: [
         { title },
@@ -90,7 +90,7 @@ function CityHome() {
             </h2>
             <p className="text-sm text-white/80 max-w-2xl mx-auto mb-4">
               Get your {city.name} business featured in the rotation above and reach local
-              listeners for just $12/year. Limited-time intro offer.
+              listeners for just $49.95/year. Limited-time intro offer.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link

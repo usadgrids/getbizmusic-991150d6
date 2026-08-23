@@ -6,6 +6,10 @@ export type PlaceResult = {
   address: string;
   website?: string;
   phone?: string;
+  /** Raw Google place types (e.g. ["restaurant","food"]). */
+  types?: string[];
+  /** Postal code parsed from the place's address components. */
+  postalCode?: string;
 };
 
 export type PlaceSearchResponse =
@@ -20,11 +24,11 @@ const SD_COUNTY_BOUNDS = {
 
 export async function searchSanDiegoBusinesses(
   businessName: string,
-  zip: string,
+  zip?: string,
   category?: string,
 ): Promise<PlaceSearchResponse> {
-  // Validate ZIP BEFORE spending an API call.
-  if (!isSanDiegoCountyZip(zip)) {
+  // Validate ZIP BEFORE spending an API call (only when one was supplied).
+  if (zip && !isSanDiegoCountyZip(zip)) {
     return { served: false, message: OUT_OF_AREA_MESSAGE, results: [] };
   }
 
@@ -43,10 +47,10 @@ export async function searchSanDiegoBusinesses(
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
       "X-Goog-FieldMask":
-        "places.id,places.displayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber",
+        "places.id,places.displayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.types,places.addressComponents",
     },
     body: JSON.stringify({
-      textQuery: `${businessName}${categoryHint} ${zip}`,
+      textQuery: `${businessName}${categoryHint}${zip ? ` ${zip}` : " San Diego County CA"}`,
       maxResultCount: 10,
       locationRestriction: { rectangle: SD_COUNTY_BOUNDS },
     }),
@@ -65,6 +69,8 @@ export async function searchSanDiegoBusinesses(
       formattedAddress?: string;
       websiteUri?: string;
       nationalPhoneNumber?: string;
+      types?: string[];
+      addressComponents?: Array<{ longText?: string; types?: string[] }>;
     }>;
   };
 
@@ -74,6 +80,10 @@ export async function searchSanDiegoBusinesses(
     address: p.formattedAddress ?? "",
     website: p.websiteUri,
     phone: p.nationalPhoneNumber,
+    types: p.types ?? [],
+    postalCode:
+      p.addressComponents?.find((c) => c.types?.includes("postal_code"))?.longText ??
+      p.formattedAddress?.match(/\b(\d{5})(?:-\d{4})?\b/)?.[1],
   }));
 
   return {

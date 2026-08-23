@@ -29,7 +29,7 @@ export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Prop
       <div className="relative mx-auto w-full max-w-[1400px]">
         <Link
           to="/pricing"
-          aria-label={label ? `Get Listed in ${label} — From $12/yr` : "Get Listed — From $12/yr"}
+          aria-label={label ? `Get Listed in ${label} — From $49.95/yr` : "Get Listed — From $49.95/yr"}
           className="block"
         >
           <img
@@ -37,8 +37,8 @@ export function BizHero({ cityName, state, imageUrl, imageAlt, hideImage }: Prop
             alt={
               imageAlt ??
               (label
-                ? `Get Biz Music ${label} — Local B2B Business Network with Music Streaming. Get listed from $12/year.`
-                : "Get Biz Music — Local B2B Business Network with Music Streaming. Get listed from $12/year.")
+                ? `Get Biz Music ${label} — Local B2B Business Network with Music Streaming. Get listed from $49.95/year.`
+                : "Get Biz Music — Local B2B Business Network with Music Streaming. Get listed from $49.95/year.")
             }
             className="block w-full h-auto"
           />
