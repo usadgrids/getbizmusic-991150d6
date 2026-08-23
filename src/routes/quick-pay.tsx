@@ -69,9 +69,8 @@ function QuickPayPage() {
     }).catch(() => undefined);
   }, [sessionId]);
 
-  // Arriving from the home intake form with everything filled in — go straight
-  // to card checkout instead of making the visitor re-confirm the same details.
-  const autoStarted = useRef(false);
+  // Note: we intentionally do NOT auto-start Stripe checkout when the form
+  // arrives pre-filled — visitors should see the Zelle and Venmo options too.
 
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email);
@@ -109,13 +108,6 @@ function QuickPayPage() {
     }
   };
 
-  useEffect(() => {
-    if (sessionId || autoStarted.current) return;
-    if (!business || !owner || !emailParam || !(phoneParam && phoneParam.trim().length >= 7)) return;
-    autoStarted.current = true;
-    void payNow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId, business, owner, emailParam, phoneParam]);
 
 
   return (
