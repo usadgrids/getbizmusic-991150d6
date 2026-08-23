@@ -416,111 +416,51 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         </div>
       )}
 
-      <form onSubmit={onSearch} className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <div className="mb-1 flex items-center gap-2">
-            <label className="block text-xs font-semibold text-[#0F2A4A]">
-              Legal Business Name <span className="text-[#D4A24C]">*</span>
-            </label>
-            {showStartHere && (
-              <span className="gbm-start-here-badge inline-flex items-center gap-1 rounded-full bg-[#D4A24C] px-2.5 py-0.5 text-[11px] font-bold text-[#0F2A4A] shadow-sm">
-                Start Here
-                <span aria-hidden>↓</span>
-              </span>
-            )}
+      {/* Single pill search bar — the only field before results */}
+      <form onSubmit={onSearch} className="mt-5">
+        {showStartHere && (
+          <div className="mb-2 flex justify-center">
+            <span className="gbm-start-here-badge inline-flex items-center gap-1 rounded-full bg-[#D4A24C] px-2.5 py-0.5 text-[11px] font-bold text-[#0F2A4A] shadow-sm">
+              Start Here
+              <span aria-hidden>↓</span>
+            </span>
           </div>
+        )}
+        <label htmlFor="gbm-business-search" className="sr-only">
+          Business name
+        </label>
+        <div className="flex flex-col gap-2 rounded-[999px] border border-[#0F2A4A]/20 bg-white p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#D4A24C] focus-within:shadow-[0_18px_40px_-14px_rgba(15,42,74,0.55)] sm:flex-row sm:items-center">
           <input
+            id="gbm-business-search"
             ref={businessNameRef}
-            className={inputClass}
+            className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
             value={businessName}
             maxLength={120}
             required
+            autoComplete="organization"
             onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="e.g. Maria's Kitchen LLC"
+            placeholder="Enter your business name"
           />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-            Zip Code <span className="text-[#D4A24C]">*</span>
-          </label>
-          <input
-            className={inputClass}
-            value={zip}
-            inputMode="numeric"
-            maxLength={5}
-            required
-            onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
-            placeholder="92101 ( San Diego County, CA only )"
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-            Business Category <span className="text-[#D4A24C]">*</span>
-          </label>
-          <CategorySelect
-            className={inputClass}
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-            <span aria-hidden>🎟️</span>
-            Priority Access Code <span className="text-[#D4A24C]">*</span>
-          </label>
-          <input
-            className={inputClass}
-            value={launchCode}
-            maxLength={40}
-            required
-            onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
-            onFocus={() => {
-              if (!launchCode.trim()) setLaunchCode("1000-FIRST");
-            }}
-            placeholder="1000-FIRST"
-          />
-          <p className="mt-1 text-xs font-medium text-[#0F2A4A]/70">
-            New to GetBizMusic? This code locks in your founding-member pricing and priority
-            processing.
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            🎉 Reserved for our first 1,000 San Diego County businesses. This code may be
-            deactivated at any time once that milestone is reached.
-          </p>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
-            Quick check: {captcha.a} + {captcha.b} = ? <span className="text-[#D4A24C]">*</span>
-          </label>
-          <input
-            className={inputClass}
-            value={captchaInput}
-            inputMode="numeric"
-            maxLength={3}
-            required
-            onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
-            placeholder="Answer"
-          />
-        </div>
-        <div className="flex items-end">
           <button
             type="submit"
             disabled={searching}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0F2A4A] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#153a66] disabled:opacity-60"
+            className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#0F2A4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-[#D4A24C] transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C] disabled:opacity-60 sm:w-auto"
           >
             {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
             Search
           </button>
         </div>
+        <p className="mt-2 text-center text-xs text-gray-500">
+          We&rsquo;ll check Google&rsquo;s business database for San Diego County matches.
+        </p>
       </form>
 
-      {/* Reassurance strip — no payment friction until they opt in */}
+      {/* Reassurance strip */}
       <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-[#D4A24C]/25 bg-[#FBF7EE] px-4 py-2.5 text-center">
         {[
           { icon: "💳", text: "No credit card required" },
           { icon: "👤", text: "No account needed" },
-          { icon: "🔁", text: "No recurring charges" },
+          { icon: "🎁", text: "100% free" },
         ].map((item) => (
           <span
             key={item.text}
@@ -530,95 +470,175 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
             {item.text}
           </span>
         ))}
-        <span className="hidden sm:inline-block h-3 w-px bg-[#D4A24C]/30" aria-hidden />
-        <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#7a5410]">
-          You only pay if you choose to become a member
-        </span>
       </div>
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
       <AdMarquee disabled={searched} onHoverDismiss={triggerStartHere} />
 
-      {message && (
-        <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
-          {message}
-        </p>
-      )}
-
-      {results && results.length > 1 && (
-        <p className="mt-4 rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
-          We found multiple locations for your business. Please choose your primary location to
-          start — you can always update or add more later!
-        </p>
-      )}
-
-      {results && results.length === 1 && (
-        <p className="mt-4 text-sm font-semibold text-[#0F2A4A]">Is this your business?</p>
-      )}
-
-      {results && results.length > 0 && (
-        <ul className="mt-3 grid gap-2">
-          {results.map((r) => (
-            <li
-              key={r.placeId || r.name}
-              className={`grid min-w-0 gap-3 rounded-lg border px-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${
-                claimTarget?.placeId === r.placeId ? "border-[#D4A24C] bg-[#fdf7ec]" : "border-gray-200"
-              }`}
-            >
+      {/* Results dialog */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0F2A4A]/60 backdrop-blur-sm p-0 sm:items-center sm:p-4"
+          role="presentation"
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search results"
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-[100dvh] w-full flex-col overflow-hidden rounded-none bg-white shadow-2xl sm:h-auto sm:max-h-[85vh] sm:max-w-xl sm:rounded-[28px]"
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-5 py-4">
               <div className="min-w-0">
-                <p className="flex items-center gap-2 text-sm font-semibold text-[#0F2A4A]">
-                  <Building2 size={14} className="shrink-0 text-[#D4A24C]" />
-                  {r.name}
+                <h3 className="text-base font-bold text-[#0F2A4A]">Is your business one of these?</h3>
+                <p className="mt-0.5 truncate text-xs text-gray-500">
+                  Results for &ldquo;{businessName.trim()}&rdquo; in San Diego County
                 </p>
-                <p className="mt-0.5 text-xs text-gray-600">{r.address}</p>
-                {r.phone && <p className="mt-0.5 text-xs text-gray-500">{r.phone}</p>}
-                {r.website && <p className="truncate text-xs text-gray-500">{r.website}</p>}
               </div>
               <button
                 type="button"
-                onClick={() => pickResult(r)}
-                className="w-full rounded-full bg-[#D4A24C] px-4 py-1.5 text-xs font-bold text-[#0F2A4A] hover:bg-[#e0b566] sm:w-auto sm:shrink-0"
+                aria-label="Close search results"
+                onClick={() => setModalOpen(false)}
+                className="rounded-full p-1.5 text-[#0F2A4A]/60 transition hover:bg-gray-100 hover:text-[#0F2A4A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
               >
-                {results.length > 1 ? "This is my primary location" : "Yes, this is my business"}
+                <X size={18} />
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
 
-      {results && results.length === 0 && (
-        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-          <p className="text-sm font-semibold text-[#0F2A4A]">
-            We couldn&rsquo;t find a business by that name in San Diego County. Want to add yours?
-          </p>
-          <button
-            type="button"
-            onClick={startManualClaim}
-            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] hover:bg-[#e0b566]"
-          >
-            <Building2 size={16} />
-            Add my business
-          </button>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {searching && (
+                <ul className="grid gap-2" aria-live="polite" aria-busy="true">
+                  {[0, 1, 2].map((i) => (
+                    <li key={i} className="animate-pulse rounded-xl border border-gray-200 px-4 py-4">
+                      <div className="h-3.5 w-2/3 rounded bg-gray-200" />
+                      <div className="mt-2 h-3 w-5/6 rounded bg-gray-100" />
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {!searching && message && (
+                <p className="rounded-lg border border-[#D4A24C]/50 bg-[#FFF8E8] px-4 py-3 text-sm font-medium text-[#7a5410]">
+                  {message}
+                </p>
+              )}
+
+              {!searching && results && results.length > 0 && (
+                <ul className="grid gap-2">
+                  {results.map((r) => {
+                    const badge = googleTypeBadge(r.types);
+                    return (
+                      <li key={r.placeId || r.name}>
+                        <button
+                          type="button"
+                          onClick={() => pickResult(r)}
+                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-left transition hover:border-[#D4A24C] hover:bg-[#FFFBF2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
+                        >
+                          <span className="flex items-center gap-2 text-sm font-semibold text-[#0F2A4A]">
+                            <Building2 size={14} className="shrink-0 text-[#D4A24C]" />
+                            {r.name}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-gray-600">{r.address}</span>
+                          {badge && (
+                            <span className="mt-1.5 inline-flex items-center rounded-full bg-[#FFF8E8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[#7a5410] ring-1 ring-[#D4A24C]/40">
+                              {badge}
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {!searching && results && results.length === 0 && !message && (
+                <p className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm font-semibold text-[#0F2A4A]">
+                  We couldn&rsquo;t find a match for &ldquo;{businessName.trim()}&rdquo; in San Diego
+                  County. Enter your business manually below.
+                </p>
+              )}
+
+              {/* Always-available manual path */}
+              {!searching && (
+                <div className="mt-4 border-t border-dashed border-gray-200 pt-4">
+                  {!manualOpen && results && results.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setManualOpen(true)}
+                      className="text-sm font-semibold text-[#0F2A4A] underline decoration-[#D4A24C] decoration-2 underline-offset-4 hover:text-[#7a5410] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
+                    >
+                      Don&rsquo;t see your business? Enter it manually
+                    </button>
+                  )}
+
+                  {(manualOpen || (results && results.length === 0)) && (
+                    <div className="grid gap-3">
+                      <div>
+                        <label
+                          htmlFor="gbm-manual-name"
+                          className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
+                        >
+                          Legal Business Name <span className="text-[#D4A24C]">*</span>
+                        </label>
+                        <input
+                          id="gbm-manual-name"
+                          className={inputClass}
+                          value={businessName}
+                          maxLength={120}
+                          onChange={(e) => setBusinessName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="gbm-manual-zip"
+                          className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
+                        >
+                          Zip Code <span className="text-[#D4A24C]">*</span>
+                        </label>
+                        <input
+                          id="gbm-manual-zip"
+                          className={inputClass}
+                          value={zip}
+                          inputMode="numeric"
+                          maxLength={5}
+                          onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                          placeholder="92101 ( San Diego County, CA only )"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]">
+                          Business Category <span className="text-[#D4A24C]">*</span>
+                        </label>
+                        <CategorySelect
+                          className={inputClass}
+                          value={selectedCategory}
+                          onChange={setSelectedCategory}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (businessName.trim().length < 2)
+                            return toast.error("Enter your legal business name.");
+                          if (!/^\d{5}$/.test(zip.trim()))
+                            return toast.error("Enter a 5-digit ZIP code.");
+                          startManualClaim();
+                        }}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4A24C] px-6 py-2.5 text-sm font-bold text-[#0F2A4A] transition hover:bg-[#e0b566] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A]"
+                      >
+                        <Building2 size={16} />
+                        Continue
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
-      {results && results.length > 0 && !claimTarget && (
-        <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-5 text-center">
-          <p className="text-sm font-semibold text-[#0F2A4A]">Don&rsquo;t see your business here?</p>
-          <p className="mt-1 text-xs text-gray-600">
-            If none of these match, you can add your business manually and we&rsquo;ll build your
-            listing from scratch.
-          </p>
-          <button
-            type="button"
-            onClick={startManualClaim}
-            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-[#0F2A4A] bg-white px-6 py-2.5 text-sm font-bold text-[#0F2A4A] hover:bg-[#0F2A4A] hover:text-white"
-          >
-            <Building2 size={16} />
-            None of these are my business — Add it manually
-          </button>
-        </div>
-      )}
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
