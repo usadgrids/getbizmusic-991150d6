@@ -746,35 +746,40 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               }}
             />
             <div className="relative">
-              {/* Header bar */}
-              <div className="flex flex-col items-center gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:gap-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D4A24C] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0F2A4A]">
-                  <ShieldCheck size={13} aria-hidden /> Verified Partner
-                </span>
-                <div className="min-w-0 flex-1 text-center sm:text-left">
-                  <p className="font-['Sora'] text-xl font-extrabold uppercase tracking-wide text-white sm:text-2xl">
-                    {claimTarget.name || businessName.trim() || "Your business"}
-                  </p>
-                  <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4A24C]">
-                    Your Business Growth Partner
-                  </p>
-                  <p className="mt-1.5 text-sm font-medium text-white/85">
-                    <span className="text-white/60">{claimTarget.address || "San Diego County, CA"}</span>
-                    <span className="text-white/40">: </span>
-                    Get all these membership benefits and more for just{" "}
-                    <span className="font-bold text-[#D4A24C]">$49.95/year</span>.
-                  </p>
-                  <p className="mt-1 text-[11px] text-white/55">
-                    No auto-renewal, no surprise charges — we&rsquo;ll email you 30 days before your
-                    term ends.
-                  </p>
+              {/* Header bar — stylized centered layout */}
+              <div className="flex flex-col items-center border-b border-white/10 pb-5 text-center">
+                {/* Verified Partner badge flanked by gold lines */}
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#D4A24C]" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4A24C] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#D4A24C]">
+                    <ShieldCheck size={13} aria-hidden /> Verified Partner
+                  </span>
+                  <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#D4A24C]" />
                 </div>
+                {/* Business name */}
+                <p className="mt-3 font-['Sora'] text-2xl font-extrabold uppercase tracking-wide text-white sm:text-3xl">
+                  {claimTarget.name || businessName.trim() || "Your business"}
+                </p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D4A24C]">
+                  Your Business Growth Partner
+                </p>
+                {/* Address with pin icon */}
+                <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-white/80">
+                  <MapPin size={14} className="text-[#D4A24C]" aria-hidden />
+                  {claimTarget.address || "San Diego County, CA, USA"}
+                </p>
+                {/* Offer line */}
+                <p className="mt-2 text-sm font-medium text-white/85">
+                  Get all these membership benefits and more for just{" "}
+                  <span className="font-bold text-[#D4A24C]">$49.95/year</span>.
+                </p>
+                {/* Not you? box */}
                 <button
                   type="button"
                   onClick={searchAgain}
-                  className="shrink-0 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D4A24C] underline underline-offset-4 hover:text-white"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[#D4A24C] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D4A24C] transition hover:bg-[#D4A24C] hover:text-[#0F2A4A]"
                 >
-                  Not you? Search again &rsaquo;
+                  <Search size={13} aria-hidden /> Not you? Search again &rsaquo;
                 </button>
               </div>
 
