@@ -232,6 +232,9 @@ function QuickPayPage() {
                 Zelle/Venmo memo: your business name. Email your payment confirmation to
                 processing@getbizmusic.com so we can activate your membership.
               </p>
+              <p className="mt-3 text-center text-sm font-semibold text-[#D4A24C]">
+                Please include your Business Name and cell phone number in the payment description so we can locate your payment and activate your membership.
+              </p>
             </div>
           </>
         )}
