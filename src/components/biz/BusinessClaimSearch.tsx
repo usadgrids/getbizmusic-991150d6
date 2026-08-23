@@ -531,7 +531,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         {[
           { Icon: CreditCard, text: "No credit card required" },
           { Icon: UserX, text: "No account needed" },
-          { Icon: Gift, text: "100% free" },
+          { Icon: Gift, text: "ZERO RISK" },
         ].map(({ Icon, text }) => (
           <span
             key={text}
@@ -769,9 +769,11 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                   {claimTarget.address || "San Diego County, CA, USA"}
                 </p>
                 {/* Offer line */}
-                <p className="mt-2 text-sm font-medium text-white/85">
+                <p className="mt-3 text-center text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl md:text-4xl">
                   Get all these membership benefits and more for just{" "}
-                  <span className="font-bold text-[#D4A24C]">$49.95/year</span>.
+                  <span className="bg-gradient-to-r from-[#FFE100] to-[#D4A24C] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(255,225,0,0.45)]">
+                    $49.95/year
+                  </span>
                 </p>
                 {/* Not you? box */}
                 <button
