@@ -416,26 +416,37 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         <label htmlFor="gbm-business-search" className="sr-only">
           Business name
         </label>
-        <div className="flex flex-col gap-2 rounded-[999px] border border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#D4A24C] focus-within:bg-white focus-within:shadow-[0_18px_40px_-14px_rgba(15,42,74,0.55)] sm:flex-row sm:items-center">
-          <input
-            id="gbm-business-search"
-            ref={businessNameRef}
-            className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
-            value={businessName}
-            maxLength={120}
-            required
-            autoComplete="organization"
-            onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="Enter your business name"
+        <div className="relative">
+          {/* Ambient sonar rings — decorative only */}
+          <span
+            aria-hidden
+            className="gbm-sonar-ring pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
           />
-          <button
-            type="submit"
-            disabled={searching}
-            className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#0F2A4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-[#D4A24C] transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C] disabled:opacity-60 sm:w-auto"
-          >
-            {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-            Search
-          </button>
+          <span
+            aria-hidden
+            className="gbm-sonar-ring gbm-sonar-ring-2 pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
+          />
+          <div className="relative flex flex-col gap-2 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:flex-row sm:items-center">
+            <input
+              id="gbm-business-search"
+              ref={businessNameRef}
+              className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
+              value={businessName}
+              maxLength={120}
+              required
+              autoComplete="organization"
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Enter your business name"
+            />
+            <button
+              type="submit"
+              disabled={searching}
+              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:w-auto"
+            >
+              {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+              Search
+            </button>
+          </div>
         </div>
         <p className="mt-2 text-center text-xs text-gray-500">
           We&rsquo;ll check Google&rsquo;s business database for San Diego County matches.
@@ -445,19 +456,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       {/* Reassurance strip */}
       <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-[#D4A24C]/25 bg-[#FBF7EE] px-4 py-2.5 text-center">
         {[
-          { icon: "💳", text: "No credit card required" },
-          { icon: "👤", text: "No account needed" },
-          { icon: "🎁", text: "100% free" },
-        ].map((item) => (
+          { Icon: CreditCard, text: "No credit card required" },
+          { Icon: UserX, text: "No account needed" },
+          { Icon: Gift, text: "100% free" },
+        ].map(({ Icon, text }) => (
           <span
-            key={item.text}
+            key={text}
             className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0F2A4A]/80"
           >
-            <span aria-hidden>{item.icon}</span>
-            {item.text}
+            <Icon size={13} aria-hidden className="text-[#1B7A8C]" />
+            {text}
           </span>
         ))}
       </div>
+
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
       <AdMarquee disabled={searched} onHoverDismiss={triggerStartHere} />
