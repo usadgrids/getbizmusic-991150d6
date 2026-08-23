@@ -29,7 +29,9 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — Get Biz Music" },
-      { name: "description", content: "Choose your annual ad plan: $24/year for 7-second rotation or $48/year for 10-second feature. Rep codes give 50% off." },
+      { name: "description", content: "$49.95/year membership (founding-member pricing with Priority Access Code). Annual ad plans and rep-code discounts available." },
+      { name: "twitter:title", content: "Pricing — Get Biz Music" },
+      { name: "twitter:description", content: "$49.95/year membership (founding-member pricing with Priority Access Code)." },
     ],
   }),
   validateSearch: (search) => pricingSearchSchema.parse(search),

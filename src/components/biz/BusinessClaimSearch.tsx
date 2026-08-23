@@ -3,7 +3,22 @@ import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
 import { classifyCode } from "@/lib/code-classify.functions";
-import { Loader2, Search, CheckCircle2, Building2, X } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  CheckCircle2,
+  Building2,
+  X,
+  CreditCard,
+  UserX,
+  Gift,
+  Palette,
+  Link2,
+  Tag,
+  Star,
+  MapPin,
+  Check,
+} from "lucide-react";
 import { categoryFromGoogleTypes, googleTypeBadge } from "@/lib/google-type-map";
 
 import { toast } from "sonner";
@@ -59,7 +74,53 @@ function newCaptcha() {
   return { a, b };
 }
 
+const BENEFITS = [
+  {
+    bg: "#FDEBE4",
+    color: "#E0704A",
+    Icon: Search,
+    title: "AI Visibility Audit",
+    body: "See exactly how AI engines currently read your business.",
+  },
+  {
+    bg: "#E9F2ED",
+    color: "#2E8B63",
+    Icon: Palette,
+    title: "Free Professional Ad Design",
+    body: "A custom ad, designed and ready to run.",
+  },
+  {
+    bg: "#EAEFF8",
+    color: "#4A61B0",
+    Icon: Link2,
+    title: "Unique Knowledge Graph URL",
+    body: "Your own citable business page built for AI answer engines.",
+  },
+  {
+    bg: "#FBF1DE",
+    color: "#B8862F",
+    Icon: Tag,
+    title: "Structured AI-Readable Listing",
+    body: "Business facts formatted the way AI engines parse them.",
+  },
+  {
+    bg: "#F3E9F3",
+    color: "#8A4E96",
+    Icon: Star,
+    title: "Founding-Member Pricing Locked In",
+    body: "$49.95/year, locked for as long as you stay a member.",
+  },
+  {
+    bg: "#E6F3F3",
+    color: "#1B7A8C",
+    Icon: MapPin,
+    title: "San Diego County Directory Placement",
+    body: "Listed alongside other verified local businesses.",
+  },
+] as const;
+
 const BUSINESS_TYPES = [
+
   { value: "physical", label: "Physical storefront/office — public address" },
   {
     value: "home_based",
@@ -116,6 +177,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   // When true, the claim form was reached via "add yours" (no matching Place),
   // so the address field is editable and pre-filled only with the business name.
   const [manualClaim, setManualClaim] = useState(false);
+  // Gate: the "what you get" step shows before the full claim fields.
+  const [benefitsAcked, setBenefitsAcked] = useState(false);
   // Public-facing DBA name; optional. When set it is what visitors see.
   const [tradeName, setTradeName] = useState("");
   const [businessType, setBusinessType] = useState<BusinessType>("physical");
@@ -165,12 +228,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       phone: undefined,
     });
     setManualClaim(true);
+    setBenefitsAcked(false);
     setModalOpen(false);
   }
 
   function pickResult(r: PlaceResult) {
     setClaimTarget(r);
     setManualClaim(false);
+    setBenefitsAcked(false);
     setSelectedCategory(categoryFromGoogleTypes(r.types));
     if (r.postalCode) setZip(r.postalCode);
     setModalOpen(false);
@@ -179,6 +244,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   function searchAgain() {
     setClaimTarget(null);
     setManualClaim(false);
+    setBenefitsAcked(false);
     setResults(null);
     setModalOpen(true);
   }
@@ -195,6 +261,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
+    setBenefitsAcked(false);
     try {
       const res = await runSearch({ data: { businessName: businessName.trim() } });
       if (!res.served) {
@@ -354,26 +421,13 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           — All Welcome
         </span>
       </div>
-      <h2 className="mt-5 text-[15px] leading-[1.6] sm:text-base sm:leading-snug font-bold text-[#0F2A4A] [&_span.rounded]:box-decoration-clone [&_span.rounded]:py-[2px]">
-        Of San Diego County&rsquo;s{" "}
-        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          380,000+ businesses
-        </span>
-        , only a small percentage are cited by ChatGPT and other AI engines. Is{" "}
-        <span className="text-[#7a5410] font-semibold">YOUR</span> business one of them?
-      </h2>
-      <p className="mt-4 text-[13.5px] leading-[1.75] sm:text-sm sm:leading-relaxed text-gray-600 whitespace-pre-line [&_span.rounded]:box-decoration-clone [&_span.rounded]:py-[2px]">
-        <span className="font-semibold text-[#0F2A4A]">Make Your Business AI Citation-Ready</span>
-        {"\n"}Type your business name to{" "}
-        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          claim your AI Knowledge Graph Listing
-        </span>{" "}
-        and ensure AI answer engines cite you accurately. Get a{" "}
-        <span className="rounded bg-[#FFF8E8] px-1 font-semibold text-[#7a5410] ring-1 ring-[#D4A24C]/40">
-          Free AI Visibility Audit + Custom Sample Ad
-        </span>
-        . 100% free.
+      <p className="mt-5 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF6B4A]">
+        Free · Takes 10 seconds
       </p>
+      <h2 className="mt-1.5 text-center text-[19px] font-bold leading-snug text-[#0F2A4A] sm:text-[22px]">
+        Find your business in San Diego County&rsquo;s AI Business Alliance
+      </h2>
+
       <div className="mt-4 flex justify-center">
         <button
           type="button"
@@ -429,26 +483,37 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         <label htmlFor="gbm-business-search" className="sr-only">
           Business name
         </label>
-        <div className="flex flex-col gap-2 rounded-[999px] border border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#D4A24C] focus-within:bg-white focus-within:shadow-[0_18px_40px_-14px_rgba(15,42,74,0.55)] sm:flex-row sm:items-center">
-          <input
-            id="gbm-business-search"
-            ref={businessNameRef}
-            className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
-            value={businessName}
-            maxLength={120}
-            required
-            autoComplete="organization"
-            onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="Enter your business name"
+        <div className="relative">
+          {/* Ambient sonar rings — decorative only */}
+          <span
+            aria-hidden
+            className="gbm-sonar-ring pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
           />
-          <button
-            type="submit"
-            disabled={searching}
-            className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#0F2A4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-[#D4A24C] transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C] disabled:opacity-60 sm:w-auto"
-          >
-            {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-            Search
-          </button>
+          <span
+            aria-hidden
+            className="gbm-sonar-ring gbm-sonar-ring-2 pointer-events-none absolute inset-0 rounded-[999px] border-[1.5px] border-[#1B7A8C]"
+          />
+          <div className="relative flex flex-col gap-2 rounded-[999px] border-[1.5px] border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#1B7A8C] focus-within:bg-white focus-within:shadow-[0_18px_44px_-14px_rgba(27,122,140,0.55)] focus-within:ring-4 focus-within:ring-[#1B7A8C]/15 sm:h-[60px] sm:flex-row sm:items-center">
+            <input
+              id="gbm-business-search"
+              ref={businessNameRef}
+              className="min-h-[48px] w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-medium text-[#0F2A4A] outline-none placeholder:text-[#0F2A4A]/40"
+              value={businessName}
+              maxLength={120}
+              required
+              autoComplete="organization"
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Enter your business name"
+            />
+            <button
+              type="submit"
+              disabled={searching}
+              className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:w-auto"
+            >
+              {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+              Search
+            </button>
+          </div>
         </div>
         <p className="mt-2 text-center text-xs text-gray-500">
           We&rsquo;ll check Google&rsquo;s business database for San Diego County matches.
@@ -458,19 +523,20 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       {/* Reassurance strip */}
       <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-[#D4A24C]/25 bg-[#FBF7EE] px-4 py-2.5 text-center">
         {[
-          { icon: "💳", text: "No credit card required" },
-          { icon: "👤", text: "No account needed" },
-          { icon: "🎁", text: "100% free" },
-        ].map((item) => (
+          { Icon: CreditCard, text: "No credit card required" },
+          { Icon: UserX, text: "No account needed" },
+          { Icon: Gift, text: "100% free" },
+        ].map(({ Icon, text }) => (
           <span
-            key={item.text}
+            key={text}
             className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0F2A4A]/80"
           >
-            <span aria-hidden>{item.icon}</span>
-            {item.text}
+            <Icon size={13} aria-hidden className="text-[#1B7A8C]" />
+            {text}
           </span>
         ))}
       </div>
+
 
       {/* Crawling sample-ad marquee — hover an image for the free design offer */}
       <AdMarquee disabled={searched} onHoverDismiss={triggerStartHere} />
@@ -641,25 +707,89 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
 
       {claimTarget && (
-        <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-bold text-[#0F2A4A]">
-              {manualClaim ? "Add your business" : "Claim this listing"}
-            </h3>
+        <div className="mt-6 border-t border-gray-200 pt-5">
+          {/* Selected-business confirmation card */}
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#1B7A8C]/25 bg-[#F2F9FA] px-4 py-3">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1B7A8C] text-white">
+              <Check size={18} aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-[#0F2A4A]">
+                {claimTarget.name || businessName.trim() || "Your business"}
+              </p>
+              <p className="truncate text-xs text-gray-600">
+                {claimTarget.address || "San Diego County, CA"}
+              </p>
+            </div>
             <button
               type="button"
               onClick={searchAgain}
-              className="text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#7a5410]"
+              className="shrink-0 text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#1B7A8C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B7A8C]"
             >
               Not you? Search again
             </button>
           </div>
-          {!manualClaim && (
-            <p className="mt-1 text-xs text-gray-600">
-              <CheckCircle2 size={12} className="mr-1 inline text-emerald-600" />
-              {claimTarget.name} — {claimTarget.address}
-            </p>
+
+          {/* "What you get" step */}
+          {!benefitsAcked && (
+            <div className="mt-6">
+              <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#1B7A8C]">
+                Here&rsquo;s what happens next
+              </p>
+              <h3 className="mt-1.5 text-center font-['Fraunces','Georgia',serif] text-[22px] font-bold leading-snug text-[#0F2A4A] sm:text-[26px]">
+                Complete your claim below to unlock:
+              </h3>
+              <p className="mx-auto mt-2 max-w-md text-center text-sm text-gray-600">
+                Everything included with your San Diego County AI Business Alliance membership.
+              </p>
+
+              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
+                {BENEFITS.map((b, i) => (
+                  <div
+                    key={b.title}
+                    className="gbm-fade-up rounded-2xl border p-3.5 transition hover:-translate-y-0.5 hover:shadow-md"
+                    style={{
+                      backgroundColor: b.bg,
+                      borderColor: `${b.color}33`,
+                      animationDelay: `${i * 70}ms`,
+                    }}
+                  >
+                    <span
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white"
+                      style={{ backgroundColor: b.color }}
+                    >
+                      <b.Icon size={16} aria-hidden />
+                    </span>
+                    <p className="mt-2.5 text-sm font-bold leading-snug text-[#0F2A4A]">{b.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#0F2A4A]/70">{b.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => setBenefitsAcked(true)}
+                  className="inline-flex items-center justify-center rounded-full bg-[#0F2A4A] px-8 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
+                >
+                  Continue
+                </button>
+                <p className="mt-2 text-xs text-gray-500">
+                  Membership is $49.95/year · founding-member pricing with your Priority Access Code.
+                </p>
+              </div>
+            </div>
           )}
+        </div>
+      )}
+
+      {claimTarget && benefitsAcked && (
+        <form onSubmit={onClaimSubmit} className="mt-5">
+          <h3 className="text-base font-bold text-[#0F2A4A]">
+            {manualClaim ? "Add your business" : "Claim this listing"}
+          </h3>
+
+
 
 
 
