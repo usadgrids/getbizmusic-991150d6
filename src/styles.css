@@ -336,3 +336,35 @@
 .overflow-x-scroll {
   touch-action: auto;
 }
+
+/* --- Find & Claim: sonar ping rings around the search bar --- */
+@keyframes gbm-sonar {
+  0% { transform: scale(1); opacity: 0.35; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+
+.gbm-sonar-ring {
+  animation: gbm-sonar 2.8s ease-out infinite;
+}
+
+.gbm-sonar-ring-2 {
+  animation-delay: 1.4s;
+}
+
+/* --- Find & Claim: staggered benefit-card entrance --- */
+@keyframes gbm-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gbm-fade-up {
+  animation: gbm-fade-up 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gbm-sonar-ring,
+  .gbm-fade-up {
+    animation: none;
+  }
+  .gbm-fade-up { opacity: 1; transform: none; }
+}
