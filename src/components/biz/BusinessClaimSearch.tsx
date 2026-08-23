@@ -74,7 +74,53 @@ function newCaptcha() {
   return { a, b };
 }
 
+const BENEFITS = [
+  {
+    bg: "#FDEBE4",
+    color: "#E0704A",
+    Icon: Search,
+    title: "AI Visibility Audit",
+    body: "See exactly how AI engines currently read your business.",
+  },
+  {
+    bg: "#E9F2ED",
+    color: "#2E8B63",
+    Icon: Palette,
+    title: "Free Professional Ad Design",
+    body: "A custom ad, designed and ready to run.",
+  },
+  {
+    bg: "#EAEFF8",
+    color: "#4A61B0",
+    Icon: Link2,
+    title: "Unique Knowledge Graph URL",
+    body: "Your own citable business page built for AI answer engines.",
+  },
+  {
+    bg: "#FBF1DE",
+    color: "#B8862F",
+    Icon: Tag,
+    title: "Structured AI-Readable Listing",
+    body: "Business facts formatted the way AI engines parse them.",
+  },
+  {
+    bg: "#F3E9F3",
+    color: "#8A4E96",
+    Icon: Star,
+    title: "Founding-Member Pricing Locked In",
+    body: "$49.95/year, locked for as long as you stay a member.",
+  },
+  {
+    bg: "#E6F3F3",
+    color: "#1B7A8C",
+    Icon: MapPin,
+    title: "San Diego County Directory Placement",
+    body: "Listed alongside other verified local businesses.",
+  },
+] as const;
+
 const BUSINESS_TYPES = [
+
   { value: "physical", label: "Physical storefront/office — public address" },
   {
     value: "home_based",
