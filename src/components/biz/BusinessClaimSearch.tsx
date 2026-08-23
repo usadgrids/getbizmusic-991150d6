@@ -429,7 +429,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
         <label htmlFor="gbm-business-search" className="sr-only">
           Business name
         </label>
-        <div className="flex flex-col gap-2 rounded-[999px] border border-[#0F2A4A]/20 bg-white p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#D4A24C] focus-within:shadow-[0_18px_40px_-14px_rgba(15,42,74,0.55)] sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2 rounded-[999px] border border-[#0F2A4A]/20 bg-[#E8F1FB] p-2 shadow-[0_10px_28px_-14px_rgba(15,42,74,0.45)] transition focus-within:border-[#D4A24C] focus-within:bg-white focus-within:shadow-[0_18px_40px_-14px_rgba(15,42,74,0.55)] sm:flex-row sm:items-center">
           <input
             id="gbm-business-search"
             ref={businessNameRef}
