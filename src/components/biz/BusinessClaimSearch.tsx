@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
@@ -140,6 +140,13 @@ const BUSINESS_TYPES = [
 
 type BusinessType = (typeof BUSINESS_TYPES)[number]["value"];
 
+const PREP_STEPS = [
+  "Scanning San Diego County businesses…",
+  "Matching against Google's verified database…",
+  "Building your AI Visibility profile…",
+  "Preparing your membership benefits…",
+] as const;
+
 const inputClass =
   "w-full rounded-lg border border-[#0F2A4A]/25 bg-[#F4F7FB] px-3 py-2 text-sm font-medium text-[#0F2A4A] shadow-sm outline-none transition focus:border-[#D4A24C] focus:bg-white focus:ring-2 focus:ring-[#D4A24C]/40";
 
@@ -165,6 +172,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [foundingMember, setFoundingMember] = useState(false);
 
   const [searching, setSearching] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [prepStep, setPrepStep] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [results, setResults] = useState<PlaceResult[] | null>(null);
   // Results dialog + the inline "enter it manually" panel inside it.
@@ -190,6 +199,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [submitting, setSubmitting] = useState(false);
   const [done] = useState(false);
 
+  // Cycle "preparing" status messages while the search animation runs.
+  useEffect(() => {
+    if (!preparing) return;
+    const id = window.setInterval(() => {
+      setPrepStep((s) => (s + 1 < PREP_STEPS.length ? s + 1 : s));
+    }, 650);
+    return () => window.clearInterval(id);
+  }, [preparing]);
 
   // Legal Business Name input — auto-focused after a user views a sample ad so
   // they drop straight into the claim flow with a "Start Here" cue.
@@ -244,8 +261,16 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
+    setPreparing(true);
+    setPrepStep(0);
+    // Hold the "preparing" animation for a few seconds so visitors are primed
+    // for the benefits page, regardless of how fast the Places API responds.
+    const minDelay = new Promise<void>((r) => setTimeout(r, 2600));
     try {
-      const res = await runSearch({ data: { businessName: businessName.trim() } });
+      const [res] = await Promise.all([
+        runSearch({ data: { businessName: businessName.trim() } }),
+        minDelay,
+      ]);
       if (!res.served) {
         setMessage(res.message);
         setResults([]);
@@ -257,6 +282,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       toast.error("Search failed. Please try again.");
       setResults([]);
     } finally {
+      setPreparing(false);
       setSearching(false);
     }
   }
@@ -554,14 +580,34 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {searching && (
-                <ul className="grid gap-2" aria-live="polite" aria-busy="true">
-                  {[0, 1, 2].map((i) => (
-                    <li key={i} className="animate-pulse rounded-xl border border-gray-200 px-4 py-4">
-                      <div className="h-3.5 w-2/3 rounded bg-gray-200" />
-                      <div className="mt-2 h-3 w-5/6 rounded bg-gray-100" />
-                    </li>
-                  ))}
-                </ul>
+                <div
+                  className="flex flex-col items-center gap-4 py-8 text-center"
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <div className="relative h-12 w-12">
+                    <span
+                      aria-hidden
+                      className="gbm-sonar-ring pointer-events-none absolute inset-0 rounded-full border-2 border-[#1B7A8C]"
+                    />
+                    <span
+                      aria-hidden
+                      className="gbm-sonar-ring gbm-sonar-ring-2 pointer-events-none absolute inset-0 rounded-full border-2 border-[#D4A24C]"
+                    />
+                    <Loader2 className="absolute inset-0 m-auto animate-spin text-[#0F2A4A]" size={22} />
+                  </div>
+                  <p className="font-['Sora'] text-sm font-bold text-[#0F2A4A]">
+                    {PREP_STEPS[prepStep]}
+                  </p>
+                  <ul className="grid w-full gap-2">
+                    {[0, 1, 2].map((i) => (
+                      <li key={i} className="animate-pulse rounded-xl border border-gray-200 px-4 py-4">
+                        <div className="h-3.5 w-2/3 rounded bg-gray-200" />
+                        <div className="mt-2 h-3 w-5/6 rounded bg-gray-100" />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               {!searching && message && (
@@ -688,19 +734,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          {/* Membership benefits header */}
-          <div className="mb-4 text-center">
-            <h3 className="font-['Sora'] text-lg font-bold text-[#0F2A4A] sm:text-xl">
-              Get all these membership benefits and more for just{" "}
-              <span className="text-[#D4A24C]">$49.95/year</span>.
-            </h3>
-            <p className="mt-1.5 text-sm text-[#0F2A4A]/70">
-              No auto-renewal, no surprise charges — we&rsquo;ll email you 30 days before your term
-              ends so you can choose to continue as a member of the AI Business Alliance.
-            </p>
-          </div>
           {/* Verified-partner benefits showcase — dark panel matching new graphic */}
-          <div className="relative overflow-hidden rounded-2xl bg-[#0F2A4A] p-4 sm:p-6">
+          <div className="gbm-claim-enter relative overflow-hidden rounded-2xl bg-[#0F2A4A] p-4 sm:p-6">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -717,14 +752,21 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                   <ShieldCheck size={13} aria-hidden /> Verified Partner
                 </span>
                 <div className="min-w-0 flex-1 text-center sm:text-left">
-                  <p className="truncate text-base font-bold text-white sm:text-lg">
+                  <p className="font-['Sora'] text-xl font-extrabold uppercase tracking-wide text-white sm:text-2xl">
                     {claimTarget.name || businessName.trim() || "Your business"}
                   </p>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4A24C]">
+                  <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4A24C]">
                     Your Business Growth Partner
                   </p>
-                  <p className="truncate text-[11px] text-white/60">
-                    {claimTarget.address || "San Diego County, CA"}
+                  <p className="mt-1.5 text-sm font-medium text-white/85">
+                    <span className="text-white/60">{claimTarget.address || "San Diego County, CA"}</span>
+                    <span className="text-white/40">: </span>
+                    Get all these membership benefits and more for just{" "}
+                    <span className="font-bold text-[#D4A24C]">$49.95/year</span>.
+                  </p>
+                  <p className="mt-1 text-[11px] text-white/55">
+                    No auto-renewal, no surprise charges — we&rsquo;ll email you 30 days before your
+                    term ends.
                   </p>
                 </div>
                 <button
