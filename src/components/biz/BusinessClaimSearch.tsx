@@ -642,9 +642,26 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          <h3 className="text-base font-bold text-[#0F2A4A]">
-            {manualClaim ? "Add your business" : "Claim this listing"}
-          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-base font-bold text-[#0F2A4A]">
+              {manualClaim ? "Add your business" : "Claim this listing"}
+            </h3>
+            <button
+              type="button"
+              onClick={searchAgain}
+              className="text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#7a5410]"
+            >
+              Not you? Search again
+            </button>
+          </div>
+          {!manualClaim && (
+            <p className="mt-1 text-xs text-gray-600">
+              <CheckCircle2 size={12} className="mr-1 inline text-emerald-600" />
+              {claimTarget.name} — {claimTarget.address}
+            </p>
+          )}
+
+
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
