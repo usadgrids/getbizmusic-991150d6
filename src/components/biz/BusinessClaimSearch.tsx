@@ -177,6 +177,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   // When true, the claim form was reached via "add yours" (no matching Place),
   // so the address field is editable and pre-filled only with the business name.
   const [manualClaim, setManualClaim] = useState(false);
+  // Gate: the "what you get" step shows before the full claim fields.
+  const [benefitsAcked, setBenefitsAcked] = useState(false);
   // Public-facing DBA name; optional. When set it is what visitors see.
   const [tradeName, setTradeName] = useState("");
   const [businessType, setBusinessType] = useState<BusinessType>("physical");
@@ -226,12 +228,14 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       phone: undefined,
     });
     setManualClaim(true);
+    setBenefitsAcked(false);
     setModalOpen(false);
   }
 
   function pickResult(r: PlaceResult) {
     setClaimTarget(r);
     setManualClaim(false);
+    setBenefitsAcked(false);
     setSelectedCategory(categoryFromGoogleTypes(r.types));
     if (r.postalCode) setZip(r.postalCode);
     setModalOpen(false);
@@ -240,6 +244,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   function searchAgain() {
     setClaimTarget(null);
     setManualClaim(false);
+    setBenefitsAcked(false);
     setResults(null);
     setModalOpen(true);
   }
@@ -256,6 +261,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
+    setBenefitsAcked(false);
     try {
       const res = await runSearch({ data: { businessName: businessName.trim() } });
       if (!res.served) {
