@@ -655,25 +655,89 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
 
       {claimTarget && (
-        <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-bold text-[#0F2A4A]">
-              {manualClaim ? "Add your business" : "Claim this listing"}
-            </h3>
+        <div className="mt-6 border-t border-gray-200 pt-5">
+          {/* Selected-business confirmation card */}
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#1B7A8C]/25 bg-[#F2F9FA] px-4 py-3">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1B7A8C] text-white">
+              <Check size={18} aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-[#0F2A4A]">
+                {claimTarget.name || businessName.trim() || "Your business"}
+              </p>
+              <p className="truncate text-xs text-gray-600">
+                {claimTarget.address || "San Diego County, CA"}
+              </p>
+            </div>
             <button
               type="button"
               onClick={searchAgain}
-              className="text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#7a5410]"
+              className="shrink-0 text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#1B7A8C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B7A8C]"
             >
               Not you? Search again
             </button>
           </div>
-          {!manualClaim && (
-            <p className="mt-1 text-xs text-gray-600">
-              <CheckCircle2 size={12} className="mr-1 inline text-emerald-600" />
-              {claimTarget.name} — {claimTarget.address}
-            </p>
+
+          {/* "What you get" step */}
+          {!benefitsAcked && (
+            <div className="mt-6">
+              <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#1B7A8C]">
+                Here&rsquo;s what happens next
+              </p>
+              <h3 className="mt-1.5 text-center font-['Fraunces','Georgia',serif] text-[22px] font-bold leading-snug text-[#0F2A4A] sm:text-[26px]">
+                Complete your claim below to unlock:
+              </h3>
+              <p className="mx-auto mt-2 max-w-md text-center text-sm text-gray-600">
+                Everything included with your San Diego County AI Business Alliance membership.
+              </p>
+
+              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
+                {BENEFITS.map((b, i) => (
+                  <div
+                    key={b.title}
+                    className="gbm-fade-up rounded-2xl border p-3.5 transition hover:-translate-y-0.5 hover:shadow-md"
+                    style={{
+                      backgroundColor: b.bg,
+                      borderColor: `${b.color}33`,
+                      animationDelay: `${i * 70}ms`,
+                    }}
+                  >
+                    <span
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white"
+                      style={{ backgroundColor: b.color }}
+                    >
+                      <b.Icon size={16} aria-hidden />
+                    </span>
+                    <p className="mt-2.5 text-sm font-bold leading-snug text-[#0F2A4A]">{b.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#0F2A4A]/70">{b.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => setBenefitsAcked(true)}
+                  className="inline-flex items-center justify-center rounded-full bg-[#0F2A4A] px-8 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#153a66] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4A24C]"
+                >
+                  Continue
+                </button>
+                <p className="mt-2 text-xs text-gray-500">
+                  Membership is $49.95/year · founding-member pricing with your Priority Access Code.
+                </p>
+              </div>
+            </div>
           )}
+        </div>
+      )}
+
+      {claimTarget && benefitsAcked && (
+        <form onSubmit={onClaimSubmit} className="mt-5">
+          <h3 className="text-base font-bold text-[#0F2A4A]">
+            {manualClaim ? "Add your business" : "Claim this listing"}
+          </h3>
+
+
 
 
 
