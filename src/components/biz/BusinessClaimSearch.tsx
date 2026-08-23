@@ -512,7 +512,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#FF6B4A] px-4 text-[13px] font-bold uppercase tracking-[0.1em] text-white shadow-sm transition hover:bg-[#e85735] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2A4A] disabled:opacity-60 sm:h-11 sm:px-6 sm:text-sm"
             >
               {searching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-              <span className="hidden xs:inline sm:inline">Search</span>
+              <span>Search</span>
             </button>
           </div>
 
