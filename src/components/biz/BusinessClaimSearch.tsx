@@ -68,12 +68,6 @@ type PlaceResult = {
 };
 
 
-function newCaptcha() {
-  const a = 1 + Math.floor(Math.random() * 8);
-  const b = 1 + Math.floor(Math.random() * 8);
-  return { a, b };
-}
-
 const BENEFITS = [
   {
     bg: "#FDEBE4",
@@ -208,14 +202,12 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       phone: undefined,
     });
     setManualClaim(true);
-    setBenefitsAcked(false);
     setModalOpen(false);
   }
 
   function pickResult(r: PlaceResult) {
     setClaimTarget(r);
     setManualClaim(false);
-    setBenefitsAcked(false);
     setSelectedCategory(categoryFromGoogleTypes(r.types));
     if (r.postalCode) setZip(r.postalCode);
     setModalOpen(false);
@@ -224,7 +216,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   function searchAgain() {
     setClaimTarget(null);
     setManualClaim(false);
-    setBenefitsAcked(false);
     setResults(null);
     setModalOpen(true);
   }
@@ -241,7 +232,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
-    setBenefitsAcked(false);
     try {
       const res = await runSearch({ data: { businessName: businessName.trim() } });
       if (!res.served) {
@@ -266,23 +256,19 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail.trim())) return toast.error("Enter a valid email.");
     if (claimTarget.address.trim().length < 5)
       return toast.error("Enter your business address.");
-    if (addressIsPrivate && !serviceAreaLabel)
-      return toast.error("Choose the service area shown publicly.");
-    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
-    try {
-      const kind = await classifyFn({ data: { code: launchCode.trim() } });
-      if (kind.kind === "activation") {
-        return toast.error(
-          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
-        );
+    if (ownerPhone.trim().length < 7)
+      return toast.error("Enter your business cell phone number.");
+    if (launchCode.trim().length >= 2) {
+      try {
+        const kind = await classifyFn({ data: { code: launchCode.trim() } });
+        if (kind.kind === "activation") {
+          return toast.error(
+            "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
+          );
+        }
+      } catch {
+        /* classification is advisory only */
       }
-    } catch {
-      /* classification is advisory only */
-    }
-    if (Number(captchaInput) !== captcha.a + captcha.b) {
-      setCaptcha(newCaptcha());
-      setCaptchaInput("");
-      return toast.error("Captcha answer was incorrect.");
     }
     if (!termsAccepted)
       return toast.error("Please accept the membership Terms & Conditions to continue.");
@@ -293,7 +279,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       const res = await runClaim({
         data: {
           businessName: claimTarget.name || businessName.trim(),
-          tradeName: tradeName.trim() || undefined,
           businessCategory: selectedCategory,
           address: claimTarget.address.trim(),
           businessType,
@@ -306,9 +291,8 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           ownerName: ownerName.trim(),
           ownerEmail: ownerEmail.trim(),
           ownerPhone: ownerPhone.trim() || undefined,
-          wantsAiAudit,
-          wantsAdDesign,
-          notes: notes.trim() || undefined,
+          wantsAiAudit: true,
+          wantsAdDesign: true,
           sourceCategoryPage: category ? `/${category}` : "/sdcounty",
           launchCode: launchCode.trim() || undefined,
         },
