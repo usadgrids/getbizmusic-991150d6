@@ -206,9 +206,6 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     }
   }
 
-
-  }
-
   async function onClaimSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!claimTarget) return;
@@ -218,8 +215,25 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       return toast.error("Enter your business address.");
     if (addressIsPrivate && !serviceAreaLabel)
       return toast.error("Choose the service area shown publicly.");
+    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
+    try {
+      const kind = await classifyFn({ data: { code: launchCode.trim() } });
+      if (kind.kind === "activation") {
+        return toast.error(
+          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
+        );
+      }
+    } catch {
+      /* classification is advisory only */
+    }
+    if (Number(captchaInput) !== captcha.a + captcha.b) {
+      setCaptcha(newCaptcha());
+      setCaptchaInput("");
+      return toast.error("Captcha answer was incorrect.");
+    }
     if (!termsAccepted)
       return toast.error("Please accept the membership Terms & Conditions to continue.");
+
 
     setSubmitting(true);
     try {
