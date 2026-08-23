@@ -828,7 +828,44 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
+            <div>
+              <label
+                htmlFor="gbm-priority-code"
+                className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
+              >
+                Priority Access Code <span className="text-[#D4A24C]">*</span>
+              </label>
+              <input
+                id="gbm-priority-code"
+                className={inputClass}
+                value={launchCode}
+                maxLength={60}
+                onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
+                placeholder="From your invitation"
+              />
+              {launchMessage && (
+                <p className="mt-1 text-xs font-medium text-[#7a5410]">{launchMessage}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="gbm-captcha"
+                className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[#0F2A4A]"
+              >
+                Human check: what is {captcha.a} + {captcha.b}?{" "}
+                <span className="text-[#D4A24C]">*</span>
+              </label>
+              <input
+                id="gbm-captcha"
+                className={inputClass}
+                value={captchaInput}
+                inputMode="numeric"
+                maxLength={4}
+                onChange={(e) => setCaptchaInput(e.target.value.replace(/\D/g, ""))}
+              />
+            </div>
           </div>
+
 
           <div className="mt-4 space-y-3">
             <label className="flex items-start gap-2 text-sm text-[#0F2A4A]">
