@@ -18,6 +18,10 @@ import {
   Star,
   MapPin,
   Check,
+  ShieldCheck,
+  Award,
+  Users,
+  Lock,
 } from "lucide-react";
 import { categoryFromGoogleTypes, googleTypeBadge } from "@/lib/google-type-map";
 
@@ -70,46 +74,52 @@ type PlaceResult = {
 
 const BENEFITS = [
   {
-    bg: "#FDEBE4",
     color: "#E0704A",
     Icon: Search,
     title: "AI Visibility Audit",
-    body: "See exactly how AI engines currently read your business.",
+    desc: "Discover how visible your business is across AI search engines like ChatGPT, Gemini & Perplexity.",
+    value: "$149.95 Value — Free",
+    cta: "Claim your free AI audit",
   },
   {
-    bg: "#E9F2ED",
     color: "#2E8B63",
     Icon: Palette,
     title: "Free Professional Ad Design",
-    body: "A custom ad, designed and ready to run.",
+    desc: "Get a stunning, conversion-focused ad designed by our creative experts.",
+    value: "$299 Value — Free",
+    cta: "Get your free ad design",
   },
   {
-    bg: "#EAEFF8",
     color: "#4A61B0",
     Icon: Link2,
     title: "Unique Knowledge Graph URL",
-    body: "Your own citable business page built for AI answer engines.",
+    desc: "Boost your AI visibility with a powerful Knowledge Graph optimized for AI engines.",
+    value: "$199 Value — Included",
+    cta: "Get your knowledge graph",
   },
   {
-    bg: "#FBF1DE",
     color: "#B8862F",
     Icon: Tag,
     title: "Structured AI-Readable Listing",
-    body: "Business facts formatted the way AI engines parse them.",
+    desc: "We create AI-readable, schema-rich listings the way AI engines parse them.",
+    value: "Schema-Rich — Included",
+    cta: "Get AI-ready listing",
   },
   {
-    bg: "#F3E9F3",
     color: "#8A4E96",
     Icon: Star,
     title: "Founding-Member Pricing Locked In",
-    body: "$49.95/year, locked for as long as you stay a member.",
+    desc: "Lock in exclusive founding-member pricing — $49.95/year, locked for life.",
+    value: "$49.95/Yr — Locked In",
+    cta: "Lock in your VIP pricing",
   },
   {
-    bg: "#E6F3F3",
     color: "#1B7A8C",
     Icon: MapPin,
     title: "San Diego County Directory Placement",
-    body: "Listed alongside other verified local businesses.",
+    desc: "Get listed in our premium directory alongside other verified local businesses.",
+    value: "Premium — Included",
+    cta: "Get directory placement",
   },
 ] as const;
 
@@ -674,49 +684,99 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
-          {/* Selected-business confirmation card */}
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#1B7A8C]/25 bg-[#F2F9FA] px-4 py-3">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1B7A8C] text-white">
-              <Check size={18} aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-[#0F2A4A]">
-                {claimTarget.name || businessName.trim() || "Your business"}
-              </p>
-              <p className="truncate text-xs text-gray-600">
-                {claimTarget.address || "San Diego County, CA"}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={searchAgain}
-              className="shrink-0 text-xs font-semibold text-[#0F2A4A]/70 underline underline-offset-4 hover:text-[#1B7A8C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B7A8C]"
-            >
-              Not you? Search again
-            </button>
-          </div>
-
-          {/* What's included — inline, no extra click */}
-          <div className="mt-5 grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-            {BENEFITS.map((b, i) => (
-              <div
-                key={b.title}
-                className="gbm-fade-up rounded-xl border p-3"
-                style={{
-                  backgroundColor: b.bg,
-                  borderColor: `${b.color}33`,
-                  animationDelay: `${i * 70}ms`,
-                }}
-              >
-                <span
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-white"
-                  style={{ backgroundColor: b.color }}
-                >
-                  <b.Icon size={14} aria-hidden />
+          {/* Verified-partner benefits showcase — dark panel matching new graphic */}
+          <div className="relative overflow-hidden rounded-2xl bg-[#0F2A4A] p-4 sm:p-6">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.07]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(212,162,76,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(212,162,76,0.7) 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+              }}
+            />
+            <div className="relative">
+              {/* Header bar */}
+              <div className="flex flex-col items-center gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:gap-4">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D4A24C] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0F2A4A]">
+                  <ShieldCheck size={13} aria-hidden /> Verified Partner
                 </span>
-                <p className="mt-2 text-[13px] font-bold leading-snug text-[#0F2A4A]">{b.title}</p>
+                <div className="min-w-0 flex-1 text-center sm:text-left">
+                  <p className="truncate text-base font-bold text-white sm:text-lg">
+                    {claimTarget.name || businessName.trim() || "Your business"}
+                  </p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D4A24C]">
+                    Your Business Growth Partner
+                  </p>
+                  <p className="truncate text-[11px] text-white/60">
+                    {claimTarget.address || "San Diego County, CA"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={searchAgain}
+                  className="shrink-0 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D4A24C] underline underline-offset-4 hover:text-white"
+                >
+                  Not you? Search again &rsaquo;
+                </button>
               </div>
-            ))}
+
+              {/* Benefit cards */}
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {BENEFITS.map((b, i) => (
+                  <div
+                    key={b.title}
+                    className="gbm-fade-up flex flex-col rounded-xl border border-white/10 bg-white/[0.04] p-3.5"
+                    style={{ animationDelay: `${i * 70}ms` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white"
+                        style={{ backgroundColor: b.color }}
+                      >
+                        <b.Icon size={15} aria-hidden />
+                      </span>
+                      <p
+                        className="text-[12px] font-extrabold uppercase leading-tight tracking-[0.03em]"
+                        style={{ color: b.color }}
+                      >
+                        {b.title}
+                      </p>
+                    </div>
+                    <p className="mt-2 text-[12px] leading-snug text-white/80">{b.desc}</p>
+                    <span
+                      className="mt-2.5 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em]"
+                      style={{ backgroundColor: `${b.color}22`, color: b.color }}
+                    >
+                      {b.value}
+                    </span>
+                    <span
+                      className="mt-2.5 inline-flex w-full items-center justify-center gap-1 rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.06em] text-white"
+                      style={{ backgroundColor: b.color }}
+                    >
+                      {b.cta} &rsaquo;
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer trust badges */}
+              <div className="mt-4 grid grid-cols-2 gap-2.5 border-t border-white/10 pt-4 sm:grid-cols-4">
+                {[
+                  { Icon: ShieldCheck, label: "Trusted across San Diego County" },
+                  { Icon: Award, label: "5-star service" },
+                  { Icon: Users, label: "Local experts for your success" },
+                  { Icon: Lock, label: "No hidden fees · No obligation" },
+                ].map((f) => (
+                  <div key={f.label} className="flex items-center gap-2">
+                    <f.Icon size={16} className="shrink-0 text-[#D4A24C]" aria-hidden />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-white/75">
+                      {f.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
