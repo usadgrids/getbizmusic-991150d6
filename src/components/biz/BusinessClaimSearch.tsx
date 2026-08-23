@@ -46,7 +46,10 @@ type PlaceResult = {
   address: string;
   website?: string;
   phone?: string;
+  types?: string[];
+  postalCode?: string;
 };
+
 
 function newCaptcha() {
   const a = 1 + Math.floor(Math.random() * 8);
