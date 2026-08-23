@@ -684,6 +684,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
 
       {claimTarget && (
         <form onSubmit={onClaimSubmit} className="mt-6 border-t border-gray-200 pt-5">
+          {/* Membership benefits header */}
+          <div className="mb-4 text-center">
+            <h3 className="font-['Sora'] text-lg font-bold text-[#0F2A4A] sm:text-xl">
+              Get all these membership benefits and more for just{" "}
+              <span className="text-[#D4A24C]">$49.95/year</span>.
+            </h3>
+            <p className="mt-1.5 text-sm text-[#0F2A4A]/70">
+              No auto-renewal, no surprise charges — we&rsquo;ll email you 30 days before your term
+              ends so you can choose to continue as a member of the AI Business Alliance.
+            </p>
+          </div>
           {/* Verified-partner benefits showcase — dark panel matching new graphic */}
           <div className="relative overflow-hidden rounded-2xl bg-[#0F2A4A] p-4 sm:p-6">
             <div
