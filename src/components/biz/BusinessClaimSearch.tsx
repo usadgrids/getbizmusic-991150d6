@@ -36,6 +36,8 @@ import {
 import { AI_AUDIT_TERMS, AI_AUDIT_TERMS_TITLE } from "@/lib/ai-audit-terms";
 import type { DirectoryCategory } from "@/lib/directory-categories";
 
+const DEFAULT_PRIORITY_CODE = "FIRST-1000";
+
 /** Grouped <optgroup> dropdown shared by the found-on-Google and manual flows. */
 function CategorySelect({
   value,
@@ -158,7 +160,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   const [businessName, setBusinessName] = useState("");
   const [zip, setZip] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_BUSINESS_CATEGORY);
-  const [launchCode, setLaunchCode] = useState("");
+  const [launchCode, setLaunchCode] = useState("FIRST-1000");
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
   const [foundingMember, setFoundingMember] = useState(false);
 
@@ -262,15 +264,17 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
   async function onClaimSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!claimTarget) return;
+    const priorityCode = launchCode.trim() || DEFAULT_PRIORITY_CODE;
+    if (!launchCode.trim()) setLaunchCode(DEFAULT_PRIORITY_CODE);
     if (ownerName.trim().length < 2) return toast.error("Enter your name.");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ownerEmail.trim())) return toast.error("Enter a valid email.");
     if (claimTarget.address.trim().length < 5)
       return toast.error("Enter your business address.");
     if (ownerPhone.trim().length < 7)
       return toast.error("Enter your business cell phone number.");
-    if (launchCode.trim().length >= 2) {
+    if (priorityCode.length >= 2) {
       try {
-        const kind = await classifyFn({ data: { code: launchCode.trim() } });
+        const kind = await classifyFn({ data: { code: priorityCode } });
         if (kind.kind === "activation") {
           return toast.error(
             "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
@@ -304,7 +308,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
           wantsAiAudit: true,
           wantsAdDesign: true,
           sourceCategoryPage: category ? `/${category}` : "/sdcounty",
-          launchCode: launchCode.trim() || undefined,
+          launchCode: priorityCode,
         },
       });
       if (!res.ok) {
@@ -895,7 +899,10 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 value={launchCode}
                 maxLength={60}
                 onChange={(e) => setLaunchCode(e.target.value.toUpperCase())}
-                placeholder="From your invitation"
+                onFocus={() => {
+                  if (!launchCode.trim()) setLaunchCode(DEFAULT_PRIORITY_CODE);
+                }}
+                placeholder={DEFAULT_PRIORITY_CODE}
               />
               {launchMessage && (
                 <p className="mt-1 text-xs font-medium text-[#7a5410]">{launchMessage}</p>
