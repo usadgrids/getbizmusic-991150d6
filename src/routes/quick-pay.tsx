@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
@@ -135,12 +135,12 @@ function QuickPayPage() {
               has been emailed to you. Your advertisement / AI citation-ready listing will be ready
               in 3–5 business days for your final approval.
             </p>
-            <Link
-              to="/"
+            <a
+              href="https://www.getbizmusic.com/sdcounty"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#D4A24C] px-6 py-3 font-semibold text-[#0F2A4A]"
             >
               <Music size={18} /> Visit Our Advertiser Supported Music Streaming Page
-            </Link>
+            </a>
           </div>
         ) : clientSecret ? (
           <>
