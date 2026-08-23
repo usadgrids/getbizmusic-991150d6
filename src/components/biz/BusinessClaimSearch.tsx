@@ -788,7 +788,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
                 {BENEFITS.map((b, i) => (
                   <div
                     key={b.title}
-                    className="gbm-fade-up flex flex-col rounded-xl border border-white/10 bg-white/[0.04] p-3.5"
+                    className="gbm-fade-up flex flex-col rounded-xl border border-white/10 bg-white/[0.04] p-5"
                     style={{ animationDelay: `${i * 70}ms` }}
                   >
                     <div className="flex items-center gap-2">
