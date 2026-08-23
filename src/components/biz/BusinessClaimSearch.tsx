@@ -154,72 +154,59 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
     setClaimTarget({
       placeId: "",
       name: businessName.trim(),
-      address: "",
+      address: zip.trim() ? `San Diego County, CA ${zip.trim()}` : "",
       website: undefined,
       phone: undefined,
     });
     setManualClaim(true);
+    setModalOpen(false);
   }
 
   function pickResult(r: PlaceResult) {
     setClaimTarget(r);
     setManualClaim(false);
+    setSelectedCategory(categoryFromGoogleTypes(r.types));
+    if (r.postalCode) setZip(r.postalCode);
+    setModalOpen(false);
+  }
+
+  function searchAgain() {
+    setClaimTarget(null);
+    setManualClaim(false);
+    setResults(null);
+    setModalOpen(true);
   }
 
   async function onSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (businessName.trim().length < 2) return toast.error("Enter your legal business name.");
-    if (!/^\d{5}$/.test(zip.trim())) return toast.error("Enter a 5-digit ZIP code.");
-    if (launchCode.trim().length < 2) return toast.error("Enter your Priority Access Code.");
-    try {
-      const kind = await classifyFn({ data: { code: launchCode.trim() } });
-      if (kind.kind === "activation") {
-        return toast.error(
-          "That looks like an Activation Code — try entering it in the “Already a GetBizMusic partner?” section below instead.",
-        );
-      }
-    } catch {
-      /* classification is advisory only */
-    }
-
-    if (Number(captchaInput) !== captcha.a + captcha.b) {
-      setCaptcha(newCaptcha());
-      setCaptchaInput("");
-      return toast.error("Captcha answer was incorrect.");
-    }
+    if (businessName.trim().length < 2) return toast.error("Enter your business name.");
 
     setSearching(true);
     setSearched(true);
+    setModalOpen(true);
+    setManualOpen(false);
     setMessage(null);
     setResults(null);
     setClaimTarget(null);
     setManualClaim(false);
     try {
-      const res = await runSearch({
-        data: {
-          businessName: businessName.trim(),
-          zip: zip.trim(),
-          category: selectedCategory,
-          captchaAnswer: Number(captchaInput),
-          captchaExpected: captcha.a + captcha.b,
-        },
-      });
+      const res = await runSearch({ data: { businessName: businessName.trim() } });
       if (!res.served) {
         setMessage(res.message);
-        setResults(null);
+        setResults([]);
       } else {
-        // Don't surface the generic "no matching businesses" string as a banner —
-        // the dedicated empty-state UI below handles the no-results case.
         setMessage(null);
-        setResults(res.results);
+        setResults(res.results.slice(0, 5));
       }
     } catch {
       toast.error("Search failed. Please try again.");
+      setResults([]);
     } finally {
-      setCaptcha(newCaptcha());
-      setCaptchaInput("");
       setSearching(false);
     }
+  }
+
+
   }
 
   async function onClaimSubmit(e: React.FormEvent) {
