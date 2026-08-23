@@ -3,7 +3,22 @@ import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { MEMBERSHIP_CHECKBOX_TEXT } from "@/lib/membership-terms";
 import { classifyCode } from "@/lib/code-classify.functions";
-import { Loader2, Search, CheckCircle2, Building2, X } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  CheckCircle2,
+  Building2,
+  X,
+  CreditCard,
+  UserX,
+  Gift,
+  Palette,
+  Link2,
+  Tag,
+  Star,
+  MapPin,
+  Check,
+} from "lucide-react";
 import { categoryFromGoogleTypes, googleTypeBadge } from "@/lib/google-type-map";
 
 import { toast } from "sonner";
