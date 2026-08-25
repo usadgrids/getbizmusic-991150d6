@@ -804,36 +804,58 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               </div>
 
               {/* Benefit cards */}
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {BENEFITS.map((b, i) => (
                   <div
                     key={b.title}
-                    className="gbm-fade-up flex flex-col rounded-xl border border-white/10 bg-white/[0.04] p-5"
-                    style={{ animationDelay: `${i * 70}ms` }}
+                    className="gbm-fade-up relative flex flex-col rounded-xl border border-[#0F2A4A]/10 p-4 shadow-sm"
+                    style={{ backgroundColor: b.bg, animationDelay: `${i * 70}ms` }}
                   >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white"
-                        style={{ backgroundColor: b.color }}
-                      >
-                        <b.Icon size={15} aria-hidden />
-                      </span>
-                      <p
-                        className="text-[12px] font-extrabold uppercase leading-tight tracking-[0.03em]"
-                        style={{ color: b.color }}
-                      >
-                        {b.title}
-                      </p>
-                    </div>
-                    <p className="mt-2 text-[12px] leading-snug text-white/80">{b.desc}</p>
+                    {/* Colored circular icon */}
                     <span
-                      className="mt-2.5 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em]"
-                      style={{ backgroundColor: `${b.color}22`, color: b.color }}
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow"
+                      style={{ backgroundColor: b.color }}
                     >
-                      {b.value}
+                      <b.Icon size={17} aria-hidden />
                     </span>
+                    {/* Title */}
+                    <p
+                      className="mt-2.5 text-[12.5px] font-extrabold uppercase leading-tight tracking-[0.02em]"
+                      style={{ color: b.color }}
+                    >
+                      {b.title}
+                    </p>
+                    {/* Value badge — black box, gold border */}
+                    <span className="mt-2 inline-flex w-fit flex-col items-center rounded-md border border-[#D4A24C] bg-black px-2 py-1 text-center leading-none">
+                      <span className="text-[7.5px] font-bold tracking-[0.12em] text-[#D4A24C]">
+                        {b.valueTop}
+                      </span>
+                      <span className="mt-0.5 text-sm font-black tracking-wide text-[#FFE100]">
+                        {b.valueBottom}
+                      </span>
+                    </span>
+                    {/* Description */}
+                    <p className="mt-2 text-[11.5px] leading-snug text-[#0F2A4A]/80">{b.desc}</p>
+                    {/* Bullets */}
+                    <ul className="mt-2 space-y-1">
+                      {b.bullets.map((bul) => (
+                        <li
+                          key={bul}
+                          className="flex items-start gap-1.5 text-[11px] font-medium text-[#0F2A4A]/85"
+                        >
+                          <Check
+                            size={12}
+                            className="mt-[1px] shrink-0"
+                            style={{ color: b.color }}
+                            aria-hidden
+                          />
+                          {bul}
+                        </li>
+                      ))}
+                    </ul>
+                    {/* CTA button */}
                     <span
-                      className="mt-2.5 inline-flex w-full items-center justify-center gap-1 rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.06em] text-white"
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full px-3 py-2 text-[10.5px] font-bold uppercase tracking-[0.06em] text-white shadow-sm"
                       style={{ backgroundColor: b.color }}
                     >
                       {b.cta} &rsaquo;
@@ -843,18 +865,23 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
               </div>
 
               {/* Footer trust badges */}
-              <div className="mt-4 grid grid-cols-2 gap-2.5 border-t border-white/10 pt-4 sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-2 gap-2.5 border-t border-[#D4A24C]/40 pt-4 sm:grid-cols-4">
                 {[
-                  { Icon: ShieldCheck, label: "Trusted across San Diego County" },
-                  { Icon: Award, label: "5-star service" },
-                  { Icon: Users, label: "Local experts for your success" },
-                  { Icon: Lock, label: "No hidden fees · No obligation" },
+                  { Icon: ShieldCheck, top: "Trusted across San Diego County", sub: "Growth • Visibility • Results" },
+                  { Icon: Award, top: "5-star service", sub: "Rated by local members" },
+                  { Icon: Users, top: "Local experts for your success", sub: "Dedicated support team" },
+                  { Icon: Lock, top: "No hidden fees · No obligation", sub: "Just results" },
                 ].map((f) => (
-                  <div key={f.label} className="flex items-center gap-2">
-                    <f.Icon size={16} className="shrink-0 text-[#D4A24C]" aria-hidden />
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-white/75">
-                      {f.label}
-                    </span>
+                  <div key={f.top} className="flex items-center gap-2">
+                    <f.Icon size={18} className="shrink-0 text-[#D4A24C]" aria-hidden />
+                    <div className="leading-tight">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-white">
+                        {f.top}
+                      </p>
+                      <p className="text-[9px] font-medium uppercase tracking-[0.04em] text-white/60">
+                        {f.sub}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
