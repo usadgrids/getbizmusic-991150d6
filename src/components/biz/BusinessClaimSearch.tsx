@@ -424,7 +424,7 @@ export function BusinessClaimSearch({ category }: { category?: DirectoryCategory
       aria-label="Claim your business listing"
       className="mx-auto mt-8 w-full max-w-3xl min-w-0 overflow-hidden rounded-2xl bg-white px-4 py-6 shadow-sm sm:px-8"
     >
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
         {[
           "Brick & Mortar Stores",
           "Independent Agencies",
