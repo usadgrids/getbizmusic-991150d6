@@ -14,29 +14,54 @@ export type City = {
 
 export type CityWithCount = City & { ad_count: number };
 
-export const getActiveCities = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: cities, error } = await supabaseAdmin
-    .from("cities")
-    .select("id,slug,name,state,is_active,sort_order,hero_tagline,hero_background_url")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
-  if (error) throw new Error(error.message);
+/**
+ * Short-lived server-side cache. The city list changes rarely but is read on
+ * nearly every page load, so a 90s window removes almost all repeat queries.
+ */
+let citiesCache: { at: number; data: CityWithCount[] } | null = null;
+const CITIES_CACHE_MS = 90_000;
 
-  const nowIso = new Date().toISOString();
-  const results: CityWithCount[] = [];
-  for (const c of (cities ?? []) as City[]) {
-    const { count } = await supabaseAdmin
-      .from("ads")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "active")
-      .eq("city_id", c.id)
-      .gt("expires_at", nowIso);
-    results.push({ ...c, ad_count: count ?? 0 });
+export const getActiveCities = createServerFn({ method: "GET" }).handler(async () => {
+  if (citiesCache && Date.now() - citiesCache.at < CITIES_CACHE_MS) {
+    return citiesCache.data;
   }
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const nowIso = new Date().toISOString();
+
+  // Two round trips total (cities + all live ads), instead of one count query
+  // per city. Counting in memory keeps the exact same return shape.
+  const [{ data: cities, error }, { data: liveAds, error: adsError }] = await Promise.all([
+    supabaseAdmin
+      .from("cities")
+      .select("id,slug,name,state,is_active,sort_order,hero_tagline,hero_background_url")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+    supabaseAdmin
+      .from("ads")
+      .select("city_id")
+      .eq("status", "active")
+      .gt("expires_at", nowIso),
+  ]);
+  if (error) throw new Error(error.message);
+  if (adsError) throw new Error(adsError.message);
+
+  const counts = new Map<string, number>();
+  for (const row of (liveAds ?? []) as Array<{ city_id: string | null }>) {
+    if (!row.city_id) continue;
+    counts.set(row.city_id, (counts.get(row.city_id) ?? 0) + 1);
+  }
+
+  const results: CityWithCount[] = ((cities ?? []) as City[]).map((c) => ({
+    ...c,
+    ad_count: counts.get(c.id) ?? 0,
+  }));
+
+  citiesCache = { at: Date.now(), data: results };
   return results;
 });
+
 
 export const getCityBySlug = createServerFn({ method: "GET" })
   .inputValidator((d) => z.object({ slug: z.string().min(1).max(120) }).parse(d))
